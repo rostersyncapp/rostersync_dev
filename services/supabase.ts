@@ -12,7 +12,7 @@ export const getEnvVar = (key: string) => {
       // @ts-ignore
       return import.meta.env[key] || import.meta.env[`VITE_${key}`];
     }
-  } catch (e) {}
+  } catch (e) { }
   return undefined;
 };
 
@@ -20,7 +20,7 @@ const supabaseUrl = getEnvVar('SUPABASE_URL');
 const supabaseAnonKey = getEnvVar('SUPABASE_ANON_KEY');
 
 export const isSupabaseConfigured = !!(
-  supabaseUrl && 
+  supabaseUrl &&
   supabaseUrl !== 'https://placeholder-project.supabase.co' &&
   supabaseAnonKey &&
   supabaseAnonKey !== 'placeholder-anon-key'
@@ -30,6 +30,17 @@ const finalUrl = isSupabaseConfigured ? supabaseUrl! : 'https://placeholder-proj
 const finalKey = isSupabaseConfigured ? supabaseAnonKey! : 'placeholder-anon-key';
 
 export const supabase = createClient(finalUrl, finalKey);
+
+/**
+ * Updates the Supabase client with a Clerk JWT
+ */
+export const setSupabaseToken = async (token: string | null) => {
+  if (token) {
+    (supabase as any).rest.headers['Authorization'] = `Bearer ${token}`;
+  } else {
+    delete (supabase as any).rest.headers['Authorization'];
+  }
+};
 
 export interface SiteConfig {
   site_name: string;
@@ -53,7 +64,7 @@ export const fileToDataUrl = (file: File): Promise<string> => {
  */
 export async function getSiteConfig(): Promise<SiteConfig> {
   if (!isSupabaseConfigured) return { site_name: 'rosterSync', logo_url: null };
-  
+
   const { data, error } = await supabase
     .from('site_config')
     .select('site_name, logo_url')
@@ -63,7 +74,7 @@ export async function getSiteConfig(): Promise<SiteConfig> {
   if (error || !data) {
     return { site_name: 'rosterSync', logo_url: null };
   }
-  
+
   return data;
 }
 
@@ -72,7 +83,7 @@ export async function getSiteConfig(): Promise<SiteConfig> {
  */
 export async function updateSiteConfig(updates: Partial<SiteConfig>) {
   if (!isSupabaseConfigured) return;
-  
+
   const { error } = await supabase
     .from('site_config')
     .update({ ...updates, updated_at: new Date().toISOString() })
@@ -106,7 +117,7 @@ export async function uploadOrgLogo(userId: string, file: File): Promise<string>
  * Records AI usage metrics
  */
 export async function recordUsage(
-  userId: string, 
+  userId: string,
   metrics: {
     operationType: string;
     modelName: string;

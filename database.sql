@@ -12,9 +12,15 @@ INSERT INTO public.site_config (id, site_name, logo_url)
 VALUES ('default', 'RosterSync', NULL)
 ON CONFLICT (id) DO NOTHING;
 
--- 1. User Profiles (Extends auth.users)
+-- Clerk Auth Helper
+CREATE OR REPLACE FUNCTION public.requesting_user_id()
+RETURNS TEXT AS $$
+    SELECT NULLIF(current_setting('request.jwt.claims', true)::json->>'sub', '')::text;
+$$ LANGUAGE SQL STABLE;
+
+-- 1. User Profiles (Using Clerk IDs)
 CREATE TABLE IF NOT EXISTS public.profiles (
-  id UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
+  id TEXT PRIMARY KEY,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
   full_name TEXT,
   organization_name TEXT,
@@ -25,7 +31,7 @@ CREATE TABLE IF NOT EXISTS public.profiles (
 -- 1.5 Projects (Folders)
 CREATE TABLE IF NOT EXISTS public.projects (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  user_id TEXT NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
   name TEXT NOT NULL,
   description TEXT,
@@ -36,7 +42,7 @@ CREATE TABLE IF NOT EXISTS public.projects (
 -- 2. Rosters (Stored Athlete Data)
 CREATE TABLE IF NOT EXISTS public.rosters (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  user_id TEXT NOT NULL,
   project_id UUID REFERENCES public.projects(id) ON DELETE SET NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
   team_name TEXT NOT NULL,
@@ -52,7 +58,7 @@ CREATE TABLE IF NOT EXISTS public.rosters (
 -- 3. AI Usage Tracking (Credits)
 CREATE TABLE IF NOT EXISTS public.user_usage (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  user_id TEXT NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
   operation_type TEXT NOT NULL,
   model_name TEXT NOT NULL,
@@ -65,7 +71,7 @@ CREATE TABLE IF NOT EXISTS public.user_usage (
 -- 3.5 Activity Logs
 CREATE TABLE IF NOT EXISTS public.activity_logs (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  user_id TEXT NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
   action_type TEXT NOT NULL,
   description TEXT
@@ -85,7 +91,7 @@ CREATE TABLE IF NOT EXISTS public.demo (
 CREATE TABLE IF NOT EXISTS public.support (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
-  user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+  user_id TEXT,
   name TEXT NOT NULL,
   email TEXT NOT NULL,
   message TEXT NOT NULL
@@ -117,51 +123,31 @@ ALTER TABLE public.release_notes ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow public read of site config" ON public.site_config FOR SELECT TO public USING (true);
 CREATE POLICY "Allow authenticated update of site config" ON public.site_config FOR UPDATE TO authenticated USING (true);
 
-CREATE POLICY "Users can view own profile" ON public.profiles FOR SELECT TO authenticated USING (auth.uid() = id);
-CREATE POLICY "Users can update own profile" ON public.profiles FOR UPDATE TO authenticated USING (auth.uid() = id);
-CREATE POLICY "Users can insert own profile" ON public.profiles FOR INSERT TO authenticated WITH CHECK (auth.uid() = id);
+CREATE POLICY "Users can view own profile" ON public.profiles FOR SELECT TO authenticated USING (id = public.requesting_user_id());
+CREATE POLICY "Users can update own profile" ON public.profiles FOR UPDATE TO authenticated USING (id = public.requesting_user_id());
+CREATE POLICY "Users can insert own profile" ON public.profiles FOR INSERT TO authenticated WITH CHECK (id = public.requesting_user_id());
 
-CREATE POLICY "Users can view own projects" ON public.projects FOR SELECT TO authenticated USING (auth.uid() = user_id);
-CREATE POLICY "Users can insert own projects" ON public.projects FOR INSERT TO authenticated WITH CHECK (auth.uid() = user_id);
-CREATE POLICY "Users can update own projects" ON public.projects FOR UPDATE TO authenticated USING (auth.uid() = user_id);
-CREATE POLICY "Users can delete own projects" ON public.projects FOR DELETE TO authenticated USING (auth.uid() = user_id);
+CREATE POLICY "Users can view own projects" ON public.projects FOR SELECT TO authenticated USING (user_id = public.requesting_user_id());
+CREATE POLICY "Users can insert own projects" ON public.projects FOR INSERT TO authenticated WITH CHECK (user_id = public.requesting_user_id());
+CREATE POLICY "Users can update own projects" ON public.projects FOR UPDATE TO authenticated USING (user_id = public.requesting_user_id());
+CREATE POLICY "Users can delete own projects" ON public.projects FOR DELETE TO authenticated USING (user_id = public.requesting_user_id());
 
-CREATE POLICY "Users can view own rosters" ON public.rosters FOR SELECT TO authenticated USING (auth.uid() = user_id);
-CREATE POLICY "Users can insert own rosters" ON public.rosters FOR INSERT TO authenticated WITH CHECK (auth.uid() = user_id);
-CREATE POLICY "Users can update own rosters" ON public.rosters FOR UPDATE TO authenticated USING (auth.uid() = user_id);
-CREATE POLICY "Users can delete own rosters" ON public.rosters FOR DELETE TO authenticated USING (auth.uid() = user_id);
+CREATE POLICY "Users can view own rosters" ON public.rosters FOR SELECT TO authenticated USING (user_id = public.requesting_user_id());
+CREATE POLICY "Users can insert own rosters" ON public.rosters FOR INSERT TO authenticated WITH CHECK (user_id = public.requesting_user_id());
+CREATE POLICY "Users can update own rosters" ON public.rosters FOR UPDATE TO authenticated USING (user_id = public.requesting_user_id());
+CREATE POLICY "Users can delete own rosters" ON public.rosters FOR DELETE TO authenticated USING (user_id = public.requesting_user_id());
 
-CREATE POLICY "Users can view own usage" ON public.user_usage FOR SELECT TO authenticated USING (auth.uid() = user_id);
-CREATE POLICY "Allow authenticated inserts for usage" ON public.user_usage FOR INSERT TO authenticated WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can view own usage" ON public.user_usage FOR SELECT TO authenticated USING (user_id = public.requesting_user_id());
+CREATE POLICY "Allow authenticated inserts for usage" ON public.user_usage FOR INSERT TO authenticated WITH CHECK (user_id = public.requesting_user_id());
 
-CREATE POLICY "Users can view own activity logs" ON public.activity_logs FOR SELECT TO authenticated USING (auth.uid() = user_id);
-CREATE POLICY "Allow authenticated inserts for activity logs" ON public.activity_logs FOR INSERT TO authenticated WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can view own activity logs" ON public.activity_logs FOR SELECT TO authenticated USING (user_id = public.requesting_user_id());
+CREATE POLICY "Allow authenticated inserts for activity logs" ON public.activity_logs FOR INSERT TO authenticated WITH CHECK (user_id = public.requesting_user_id());
 
 CREATE POLICY "Allow public demo inserts" ON public.demo FOR INSERT TO public WITH CHECK (true);
 CREATE POLICY "Allow public support inserts" ON public.support FOR INSERT TO public WITH CHECK (true);
-CREATE POLICY "Users can view own support" ON public.support FOR SELECT TO authenticated USING (auth.uid() = user_id);
+CREATE POLICY "Users can view own support" ON public.support FOR SELECT TO authenticated USING (user_id = public.requesting_user_id());
 
 CREATE POLICY "Allow public read of release notes" ON public.release_notes FOR SELECT TO public USING (true);
-
--- 13. AUTOMATED PROFILE TRIGGER
-CREATE OR REPLACE FUNCTION public.handle_new_user()
-RETURNS trigger AS $$
-BEGIN
-  INSERT INTO public.profiles (id, full_name, organization_name, subscription_tier)
-  VALUES (
-    new.id,
-    new.raw_user_meta_data->>'full_name',
-    new.raw_user_meta_data->>'organization_name',
-    'BASIC'
-  );
-  RETURN new;
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
-
-DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
-CREATE TRIGGER on_auth_user_created
-  AFTER INSERT ON auth.users
-  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
 -- 14. Initial Seed Data
 INSERT INTO public.release_notes (version, title, release_date, is_latest, features)

@@ -23,8 +23,8 @@ const detectAndShimApiKey = () => {
       const key = metaEnv.API_KEY || metaEnv.VITE_API_KEY || metaEnv.NEXT_PUBLIC_API_KEY;
       if (key) _window.process.env.API_KEY = key;
     }
-  } catch (e) {}
-  
+  } catch (e) { }
+
   // 2. Try common Vercel/Next.js client-side patterns if not already set
   if (!_window.process.env.API_KEY) {
     _window.process.env.API_KEY = _window.NEXT_PUBLIC_API_KEY || _window.VITE_API_KEY;
@@ -80,7 +80,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
                 {this.state.error.toString()}
               </div>
             )}
-            <button 
+            <button
               onClick={() => window.location.reload()}
               className="mt-8 px-8 py-3 bg-[#5B5FFF] text-white rounded-xl font-bold shadow-lg shadow-[#5B5FFF]/20 hover:scale-105 active:scale-95 transition-all cursor-pointer"
             >
@@ -95,16 +95,31 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   }
 }
 
+import { ClerkProvider } from '@clerk/clerk-react';
+
 const rootElement = document.getElementById('root');
 if (!rootElement) {
   throw new Error("Could not find root element to mount to");
 }
 
-const root = createRoot(rootElement);
+const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+
+if (!PUBLISHABLE_KEY) {
+  throw new Error("Missing Clerk Publishable Key (VITE_CLERK_PUBLISHABLE_KEY)");
+}
+
+// Global variable to store the root to prevent duplicate initialization during HMR
+if (!(window as any)._reactRoot) {
+  (window as any)._reactRoot = createRoot(rootElement);
+}
+
+const root = (window as any)._reactRoot;
 root.render(
   <React.StrictMode>
-    <ErrorBoundary>
-      <App />
-    </ErrorBoundary>
+    <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignOutUrl="/">
+      <ErrorBoundary>
+        <App />
+      </ErrorBoundary>
+    </ClerkProvider>
   </React.StrictMode>
 );

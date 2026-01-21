@@ -7,22 +7,24 @@ import Auth from './components/Auth.tsx';
 import LandingPage from './components/LandingPage.tsx';
 import { Roster, Profile, Project } from './types.ts';
 import { processRosterRawText, ProcessedRoster } from './services/gemini.ts';
-import { supabase, isSupabaseConfigured, getMonthlyUsage, getSiteConfig, SiteConfig, logActivity } from './services/supabase.ts';
+import { supabase, isSupabaseConfigured, getMonthlyUsage, getSiteConfig, SiteConfig, logActivity, setSupabaseToken } from './services/supabase.ts';
+import { useUser, useAuth, useClerk, SignedIn, SignedOut, SignInButton, SignUpButton, UserButton } from '@clerk/clerk-react';
+import { dark } from '@clerk/themes';
 import { PRICING_TIERS, getTierLimit, BRAND_CONFIG } from './constants.tsx';
-import { 
-  LayoutDashboard, 
-  Cpu, 
-  Settings as SettingsIcon, 
-  LogOut, 
-  Disc, 
-  Sun, 
-  Moon, 
-  Loader2, 
-  ScrollText, 
-  X, 
-  Sparkles, 
-  Zap, 
-  Globe, 
+import {
+  LayoutDashboard,
+  Cpu,
+  Settings as SettingsIcon,
+  LogOut,
+  Disc,
+  Sun,
+  Moon,
+  Loader2,
+  ScrollText,
+  X,
+  Sparkles,
+  Zap,
+  Globe,
   ShieldCheck,
   HelpCircle,
   Mail,
@@ -54,12 +56,12 @@ const ICON_MAP: Record<string, any> = {
 
 // BrandLogo component that uses Database Branding
 const BrandLogo: React.FC<{ siteConfig?: SiteConfig; size?: 'sm' | 'md' }> = ({ siteConfig, size = 'md' }) => {
-  const containerClasses = size === 'md' 
-    ? "w-8 h-8 rounded-xl shrink-0" 
+  const containerClasses = size === 'md'
+    ? "w-8 h-8 rounded-xl shrink-0"
     : "w-6 h-6 rounded-lg shrink-0";
-  
+
   const logoSrc = siteConfig?.logo_url;
-  
+
   return (
     <div className={`${containerClasses} primary-gradient flex items-center justify-center text-white shadow-lg shadow-[#5B5FFF]/20 overflow-hidden`}>
       {logoSrc ? (
@@ -78,20 +80,20 @@ const getRecursiveRosterCount = (projectId: string, projects: Project[], rosters
   return directRosters + subRosters;
 };
 
-const FolderInput: React.FC<{ 
-  parentId?: string; 
-  newProjectName: string; 
-  setNewProjectName: (val: string) => void; 
-  handleCreateProject: (parentId?: string) => void; 
-  setCreatingFolderInId: (id: string | 'root' | null) => void; 
-  isSavingProject: boolean; 
+const FolderInput: React.FC<{
+  parentId?: string;
+  newProjectName: string;
+  setNewProjectName: (val: string) => void;
+  handleCreateProject: (parentId?: string) => void;
+  setCreatingFolderInId: (id: string | 'root' | null) => void;
+  isSavingProject: boolean;
 }> = ({ parentId, newProjectName, setNewProjectName, handleCreateProject, setCreatingFolderInId, isSavingProject }) => (
   <div className="px-2 pb-2 animate-in slide-in-from-top-2 duration-300">
     <div className="relative group">
       <input autoFocus type="text" placeholder="Folder Name..." value={newProjectName} onChange={(e) => setNewProjectName(e.target.value)} onKeyDown={(e) => {
-          if (e.key === 'Enter') handleCreateProject(parentId);
-          if (e.key === 'Escape') setCreatingFolderInId(null);
-        }} disabled={isSavingProject} className="w-full p-2 pr-8 bg-white dark:bg-gray-800 border border-[#5B5FFF]/30 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#5B5FFF]/10 dark:text-white disabled:opacity-50" />
+        if (e.key === 'Enter') handleCreateProject(parentId);
+        if (e.key === 'Escape') setCreatingFolderInId(null);
+      }} disabled={isSavingProject} className="w-full p-2 pr-8 bg-white dark:bg-gray-800 border border-[#5B5FFF]/30 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#5B5FFF]/10 dark:text-white disabled:opacity-50" />
       <div className="absolute right-1 top-1/2 -translate-y-1/2 flex items-center gap-1">
         {isSavingProject ? <Loader2 size={12} className="animate-spin text-gray-400" /> : <button onClick={() => handleCreateProject(parentId)} className="p-1.5 hover:bg-[#5B5FFF]/10 rounded text-[#5B5FFF] transition-colors cursor-pointer"><Check size={12} /></button>}
       </div>
@@ -99,24 +101,24 @@ const FolderInput: React.FC<{
   </div>
 );
 
-const FolderItem: React.FC<{ 
-  folder: Project; 
-  level: number; 
-  projects: Project[]; 
-  activeProjectId: string | null; 
-  rosters: Roster[]; 
-  expandedFolderIds: string[]; 
-  toggleExpand: (id: string) => void; 
-  setView: (view: 'dashboard' | 'engine' | 'settings') => void; 
-  setActiveProjectId: (id: string | null) => void; 
-  setSelectedRosterId: (id: string | null) => void; 
-  setCreatingFolderInId: (id: string | 'root' | null) => void; 
-  setNewProjectName: (val: string) => void; 
-  handleDeleteProject: (id: string) => void; 
-  creatingFolderInId: string | 'root' | null; 
-  newProjectName: string; 
-  handleCreateProject: (parentId?: string) => void; 
-  isSavingProject: boolean; 
+const FolderItem: React.FC<{
+  folder: Project;
+  level: number;
+  projects: Project[];
+  activeProjectId: string | null;
+  rosters: Roster[];
+  expandedFolderIds: string[];
+  toggleExpand: (id: string) => void;
+  setView: (view: 'dashboard' | 'engine' | 'settings') => void;
+  setActiveProjectId: (id: string | null) => void;
+  setSelectedRosterId: (id: string | null) => void;
+  setCreatingFolderInId: (id: string | 'root' | null) => void;
+  setNewProjectName: (val: string) => void;
+  handleDeleteProject: (id: string) => void;
+  creatingFolderInId: string | 'root' | null;
+  newProjectName: string;
+  handleCreateProject: (parentId?: string) => void;
+  isSavingProject: boolean;
 }> = ({ folder, level, projects, activeProjectId, rosters, expandedFolderIds, toggleExpand, setView, setActiveProjectId, setSelectedRosterId, setCreatingFolderInId, setNewProjectName, handleDeleteProject, creatingFolderInId, newProjectName, handleCreateProject, isSavingProject }) => {
   const hasChildren = projects.some(p => p.parentId === folder.id);
   const isOpen = expandedFolderIds.includes(folder.id);
@@ -128,8 +130,8 @@ const FolderItem: React.FC<{
         <button onClick={() => { setView('dashboard'); setActiveProjectId(folder.id); setSelectedRosterId(null); }} className={`flex-1 flex items-center px-2 py-1.5 rounded-xl text-[13px] font-bold transition-all ${activeProjectId === folder.id ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF]' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800'}`}>
           <div className="flex items-center gap-2 min-w-0 flex-1">
             {hasChildren ? (
-              <button 
-                onClick={(e) => { e.stopPropagation(); toggleExpand(folder.id); }} 
+              <button
+                onClick={(e) => { e.stopPropagation(); toggleExpand(folder.id); }}
                 className="p-0.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors shrink-0"
               >
                 <ChevronDown size={12} className={`transition-transform ${!isOpen ? '-rotate-90' : ''}`} />
@@ -137,7 +139,7 @@ const FolderItem: React.FC<{
             ) : (
               <div className="w-4 shrink-0" />
             )}
-            <FolderOpen size={16} className={`shrink-0 ${activeProjectId === folder.id ? 'text-[#5B5FFF]' : 'text-gray-400'}`} /> 
+            <FolderOpen size={16} className={`shrink-0 ${activeProjectId === folder.id ? 'text-[#5B5FFF]' : 'text-gray-400'}`} />
             <div className="flex items-baseline gap-1 truncate">
               <span className="hidden lg:block truncate">{folder.name}</span>
               {totalRosterCount > 0 && (
@@ -160,15 +162,18 @@ const FolderItem: React.FC<{
 };
 
 const App: React.FC = () => {
+  const { isLoaded: clerkLoaded, user } = useUser();
+  const { getToken, signOut } = useAuth();
+  const { openSignIn } = useClerk();
+
   const [isInitializing, setIsInitializing] = useState(true);
   const [showLanding, setShowLanding] = useState(true);
-  const [authModal, setAuthModal] = useState<'signin' | 'signup' | 'update_password' | null>(null);
-  const [session, setSession] = useState<any>(null);
+  const [authModal, setAuthModal] = useState<'signin' | 'signup' | null>(null);
   const [view, setView] = useState<'dashboard' | 'engine' | 'settings'>('dashboard');
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
   const [expandedFolderIds, setExpandedFolderIds] = useState<string[]>([]);
   const [siteConfig, setSiteConfig] = useState<SiteConfig>({ site_name: 'rosterSync', logo_url: null });
-  
+
   const [darkMode, setDarkMode] = useState(() => {
     const saved = localStorage.getItem('rs-theme');
     if (saved) return saved === 'dark';
@@ -202,6 +207,27 @@ const App: React.FC = () => {
   }, [darkMode]);
 
   useEffect(() => {
+    const syncToken = async () => {
+      if (user) {
+        try {
+          const token = await getToken({ template: 'supabase' });
+          await setSupabaseToken(token);
+          setShowLanding(false);
+          fetchData(user);
+        } catch (err) {
+          console.error("Error syncing token with Supabase:", err);
+        }
+      } else if (clerkLoaded) {
+        setSupabaseToken(null);
+        setShowLanding(true);
+        setRosters([]);
+        setProjects([]);
+      }
+    };
+    syncToken();
+  }, [user, clerkLoaded]);
+
+  useEffect(() => {
     const initApp = async () => {
       const config = await getSiteConfig();
       setSiteConfig(config);
@@ -209,70 +235,64 @@ const App: React.FC = () => {
       if (isSupabaseConfigured) {
         const { data } = await supabase.from('release_notes').select('*').order('created_at', { ascending: false });
         if (data) setReleaseNotes(data);
-
-        const { data: { session: currentSession } } = await supabase.auth.getSession();
-        setSession(currentSession);
-        if (currentSession) {
-          setShowLanding(false);
-          fetchData(currentSession);
-        }
       }
       setIsInitializing(false);
     };
 
     initApp();
-
-    if (isSupabaseConfigured) {
-      const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-        setSession(session);
-        if (event === 'PASSWORD_RECOVERY') {
-          setShowLanding(false);
-          setAuthModal('update_password');
-        } else if (event === 'SIGNED_IN' && session) {
-          await logActivity(session.user.id, 'LOGIN', 'User signed into production workspace.');
-          setShowLanding(false);
-          setAuthModal(null);
-          fetchData(session);
-        } else if (event === 'SIGNED_OUT') {
-          setShowLanding(true);
-          setRosters([]);
-          setProjects([]);
-        } else if (session) {
-          setShowLanding(false);
-          fetchData(session);
-        }
-      });
-      return () => subscription.unsubscribe();
-    }
   }, []);
 
-  const fetchData = async (currentSession: any) => {
+  const fetchData = async (currentUser: any) => {
     setLoadingData(true);
-    const userId = currentSession.user.id;
+    const userId = currentUser.id;
     try {
-      const { data: profileData } = await supabase.from('profiles').select('*').eq('id', userId).single();
+      let profileData = null;
+      const { data: existingProfile, error: fetchError } = await supabase.from('profiles').select('*').eq('id', userId).single();
+
+      if (fetchError && fetchError.code === 'PGRST116') {
+        const { data: newProfile, error: createError } = await supabase.from('profiles').insert({
+          id: userId,
+          full_name: currentUser.fullName || 'User',
+          organization_name: 'My Workspace',
+          subscription_tier: 'BASIC'
+        }).select().single();
+
+        if (createError) console.error("Error creating profile:", createError);
+        profileData = newProfile;
+      } else {
+        profileData = existingProfile;
+      }
+
       const usageCount = await getMonthlyUsage(userId);
       if (profileData) {
-        setProfile({ id: profileData.id, fullName: profileData.full_name || 'User', email: currentSession.user.email, subscriptionTier: profileData.subscription_tier, organizationName: profileData.organization_name || 'Workspace', orgLogoUrl: profileData.org_logo_url, creditsUsed: usageCount });
+        setProfile({
+          id: profileData.id,
+          fullName: profileData.full_name || currentUser.fullName || 'User',
+          email: currentUser.primaryEmailAddress?.emailAddress || 'User',
+          subscriptionTier: profileData.subscription_tier,
+          organizationName: profileData.organization_name || 'Workspace',
+          orgLogoUrl: profileData.org_logo_url,
+          creditsUsed: usageCount
+        });
       }
       const { data: projectData } = await supabase.from('projects').select('*').order('created_at', { ascending: false });
       if (projectData) setProjects(projectData.map((p: any) => ({ id: p.id, userId: p.user_id, name: p.name || 'Untitled Folder', parentId: p.parent_id, description: p.description, createdAt: p.created_at, color: p.color })));
       const { data: rosterData } = await supabase.from('rosters').select('*').order('created_at', { ascending: false });
       if (rosterData) {
-        setRosters(rosterData.map((r: any) => ({ 
-          id: r.id, 
-          userId: r.user_id, 
-          projectId: r.project_id, 
-          teamName: r.team_name || 'Unknown Team', 
-          sport: r.sport || 'General', 
-          seasonYear: r.season_year || '', 
-          isNocMode: r.is_noc_mode || false, 
-          athleteCount: r.athlete_count || 0, 
-          rosterData: r.roster_data || [], 
-          versionDescription: r.version_description || '', 
-          createdAt: r.created_at, 
-          teamMetadata: r.team_metadata || {}, 
-          isSynced: true 
+        setRosters(rosterData.map((r: any) => ({
+          id: r.id,
+          userId: r.user_id,
+          projectId: r.project_id,
+          teamName: r.team_name || 'Unknown Team',
+          sport: r.sport || 'General',
+          seasonYear: r.season_year || '',
+          isNocMode: r.is_noc_mode || false,
+          athleteCount: r.athlete_count || 0,
+          rosterData: r.roster_data || [],
+          versionDescription: r.version_description || '',
+          createdAt: r.created_at,
+          teamMetadata: r.team_metadata || {},
+          isSynced: true
         })));
       }
     } catch (err) {
@@ -285,16 +305,16 @@ const App: React.FC = () => {
   const handleCreateProject = async (parentId?: string) => {
     if (!newProjectName.trim() || isSavingProject) return;
     setIsSavingProject(true);
-    if (!session || !isSupabaseConfigured) {
-       const guestProj: Project = { id: Math.random().toString(), userId: 'guest', name: newProjectName, parentId: parentId, createdAt: new Date().toISOString() };
-       setProjects(prev => [guestProj, ...prev]);
-       setNewProjectName('');
-       setCreatingFolderInId(null);
-       setIsSavingProject(false);
-       return;
+    if (!user || !isSupabaseConfigured) {
+      const guestProj: Project = { id: Math.random().toString(), userId: 'guest', name: newProjectName, parentId: parentId, createdAt: new Date().toISOString() };
+      setProjects(prev => [guestProj, ...prev]);
+      setNewProjectName('');
+      setCreatingFolderInId(null);
+      setIsSavingProject(false);
+      return;
     }
     try {
-      const { data, error } = await supabase.from('projects').insert({ user_id: session.user.id, name: newProjectName, parent_id: parentId }).select().single();
+      const { data, error } = await supabase.from('projects').insert({ user_id: user.id, name: newProjectName, parent_id: parentId }).select().single();
       if (error) throw error;
       if (data) {
         setProjects(prev => [{ id: data.id, userId: data.user_id, name: data.name, parentId: data.parent_id, description: data.description, createdAt: data.created_at, color: data.color }, ...prev]);
@@ -311,27 +331,25 @@ const App: React.FC = () => {
   const handleDeleteProject = async (projectId: string) => {
     const project = projects.find(p => p.id === projectId);
     if (!project || !window.confirm(`Delete folder "${project.name}"?`)) return;
-    if (session && isSupabaseConfigured) await supabase.from('projects').delete().eq('id', projectId);
+    if (user && isSupabaseConfigured) await supabase.from('projects').delete().eq('id', projectId);
     setProjects(prev => prev.filter(p => p.id !== projectId));
   };
 
   const toggleExpand = (id: string) => setExpandedFolderIds(prev => prev.includes(id) ? prev.filter(fid => fid !== id) : [...prev, id]);
 
   const handleLogout = async () => {
-    if (session) {
-      // Must await the log activity before signing out so the token is still valid for RLS
-      await logActivity(session.user.id, 'LOGOUT', 'User signed out of production workspace.');
+    if (user) {
+      await logActivity(user.id, 'LOGOUT', 'User signed out of production workspace.');
     }
-    if (isSupabaseConfigured) await supabase.auth.signOut();
+    await signOut();
     setShowLanding(true);
-    setSession(null);
   };
 
   const handleStartProcessing = async (text: string, isNocMode: boolean = false, seasonYear: string = '', findBranding: boolean = false) => {
     const limit = getTierLimit(profile.subscriptionTier);
     if (profile.creditsUsed >= limit) { alert(`Limit Reached! ${profile.creditsUsed}/${limit}`); return; }
     setIsProcessing(true);
-    setView('engine'); 
+    setView('engine');
     try {
       const result = await processRosterRawText(text, profile.subscriptionTier, isNocMode, seasonYear, findBranding);
       setPendingRoster(result);
@@ -344,21 +362,21 @@ const App: React.FC = () => {
   };
 
   const handleSaveRoster = async (newRoster: Roster) => {
-    if (session && isSupabaseConfigured) {
-      const { data } = await supabase.from('rosters').insert({ 
-        user_id: session.user.id, 
-        project_id: newRoster.projectId, 
-        team_name: newRoster.teamName, 
-        sport: newRoster.sport, 
-        season_year: newRoster.seasonYear, 
-        is_noc_mode: newRoster.isNocMode, 
-        athlete_count: newRoster.athleteCount, 
-        roster_data: newRoster.rosterData, 
-        team_metadata: newRoster.teamMetadata, 
-        version_description: newRoster.versionDescription || '' 
+    if (user && isSupabaseConfigured) {
+      const { data } = await supabase.from('rosters').insert({
+        user_id: user.id,
+        project_id: newRoster.projectId,
+        team_name: newRoster.teamName,
+        sport: newRoster.sport,
+        season_year: newRoster.seasonYear,
+        is_noc_mode: newRoster.isNocMode,
+        athlete_count: newRoster.athleteCount,
+        roster_data: newRoster.rosterData,
+        team_metadata: newRoster.teamMetadata,
+        version_description: newRoster.versionDescription || ''
       }).select().single();
       if (data) {
-        await logActivity(session.user.id, 'ROSTER_SAVE', `Saved new roster assembly for ${newRoster.teamName}.`);
+        await logActivity(user.id, 'ROSTER_SAVE', `Saved new roster assembly for ${newRoster.teamName}.`);
         setRosters(prev => [{ ...newRoster, id: data.id, createdAt: data.created_at, isSynced: true }, ...prev]);
       }
     } else {
@@ -374,7 +392,7 @@ const App: React.FC = () => {
     try {
       if (isSupabaseConfigured) {
         const { error } = await supabase.from('support').insert([{
-          user_id: session?.user?.id || null,
+          user_id: user?.id || null,
           name: supportForm.name,
           email: supportForm.email,
           message: supportForm.message
@@ -394,10 +412,10 @@ const App: React.FC = () => {
 
   if (isInitializing || loadingData) {
     return (
-       <div className="min-h-screen bg-[#FAFAFA] dark:bg-gray-950 flex flex-col items-center justify-center gap-6 text-center px-4">
-         <Loader2 className="animate-spin text-[#5B5FFF]" size={40} />
-         <p className="text-xs font-bold text-gray-400 uppercase tracking-[0.2em] animate-pulse">Initializing Production Sync</p>
-       </div>
+      <div className="min-h-screen bg-[#FAFAFA] dark:bg-gray-950 flex flex-col items-center justify-center gap-6 text-center px-4">
+        <Loader2 className="animate-spin text-[#5B5FFF]" size={40} />
+        <p className="text-xs font-bold text-gray-400 uppercase tracking-[0.2em] animate-pulse">Initializing Production Sync</p>
+      </div>
     );
   }
 
@@ -408,7 +426,7 @@ const App: React.FC = () => {
         {authModal && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in zoom-in duration-200">
             <div className="relative w-full max-w-sm" onClick={(e) => e.stopPropagation()}>
-              <Auth initialView={authModal} onClose={() => setAuthModal(null)} onGuestLogin={() => setShowLanding(false)} />
+              <Auth initialView={authModal} onClose={() => setAuthModal(null)} onGuestLogin={() => setShowLanding(false)} darkMode={darkMode} />
             </div>
           </div>
         )}
@@ -418,6 +436,26 @@ const App: React.FC = () => {
 
   return (
     <div className={`flex min-h-screen bg-[#FAFAFA] dark:bg-gray-950 font-sans text-[#1A1A1A] dark:text-gray-100 transition-colors duration-300`}>
+      {/* Clerk Auth Header */}
+      <header className="fixed top-0 right-0 p-4 flex items-center gap-4 z-50">
+        <SignedOut>
+          <div className="flex gap-4">
+            <SignInButton mode="modal">
+              <button className="px-4 py-2 text-sm font-bold text-gray-600 dark:text-gray-400 hover:text-[#5B5FFF] transition-all cursor-pointer">
+                Sign In
+              </button>
+            </SignInButton>
+            <SignUpButton mode="modal">
+              <button className="bg-[#5B5FFF] text-white rounded-full font-bold text-sm h-10 px-6 shadow-lg shadow-[#5B5FFF]/20 hover:scale-105 transition-all cursor-pointer">
+                Sign Up
+              </button>
+            </SignUpButton>
+          </div>
+        </SignedOut>
+        <SignedIn>
+          <UserButton appearance={{ baseTheme: darkMode ? dark : undefined }} />
+        </SignedIn>
+      </header>
       <aside className="w-16 lg:w-60 border-r border-gray-200 dark:border-gray-800 flex flex-col fixed h-full bg-white dark:bg-gray-900 z-20 transition-all duration-300 shadow-sm">
         <div className="h-16 flex items-center justify-between px-4 lg:px-5 border-b border-gray-100 dark:border-gray-800 shrink-0">
           <div className="flex items-center gap-3 text-gray-900 dark:text-white cursor-pointer" onClick={() => { setView('dashboard'); setActiveProjectId(null); setSelectedRosterId(null); }}>
@@ -472,31 +510,31 @@ const App: React.FC = () => {
             }
             if (roster && roster.projectId) {
               const updated = { ...roster, projectId: undefined };
-              if (session && isSupabaseConfigured) {
+              if (user && isSupabaseConfigured) {
                 await supabase.from('rosters').update({ project_id: null }).eq('id', id);
               }
               setRosters(prev => prev.map(r => r.id === id ? updated : r));
             } else {
-              if (session && isSupabaseConfigured) {
+              if (user && isSupabaseConfigured) {
                 await supabase.from('rosters').delete().eq('id', id);
               }
               setRosters(prev => prev.filter(r => r.id !== id));
             }
           }} onUpdateRoster={async (r) => {
             await logActivity(profile.id, 'ROSTER_UPDATE', `Updated metadata for ${r.teamName}.`);
-            
+
             // Persist the changes to the database
-            if (session && isSupabaseConfigured) {
+            if (user && isSupabaseConfigured) {
               const { error } = await supabase
                 .from('rosters')
-                .update({ 
-                  team_name: r.teamName, 
-                  sport: r.sport, 
+                .update({
+                  team_name: r.teamName,
+                  sport: r.sport,
                   season_year: r.seasonYear,
                   project_id: r.projectId
                 })
                 .eq('id', r.id);
-              
+
               if (error) {
                 console.error("Failed to sync updated metadata to cloud:", error);
                 alert("Cloud Sync Failed: Your metadata edits could not be saved to the database. Please try again.");
@@ -529,15 +567,15 @@ const App: React.FC = () => {
             <form onSubmit={handleSupportSubmit} className="space-y-4">
               <div className="space-y-1">
                 <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1 font-mono">Your Name</label>
-                <input type="text" required value={supportForm.name} onChange={(e) => setSupportForm({...supportForm, name: e.target.value})} className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border-none rounded-xl outline-none focus:ring-2 focus:ring-[#5B5FFF]/20 text-sm text-gray-900 dark:text-white" />
+                <input type="text" required value={supportForm.name} onChange={(e) => setSupportForm({ ...supportForm, name: e.target.value })} className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border-none rounded-xl outline-none focus:ring-2 focus:ring-[#5B5FFF]/20 text-sm text-gray-900 dark:text-white" />
               </div>
               <div className="space-y-1">
                 <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1 font-mono">Work Email</label>
-                <input type="email" required value={supportForm.email} onChange={(e) => setSupportForm({...supportForm, email: e.target.value})} className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border-none rounded-xl outline-none focus:ring-2 focus:ring-[#5B5FFF]/20 text-sm text-gray-900 dark:text-white" />
+                <input type="email" required value={supportForm.email} onChange={(e) => setSupportForm({ ...supportForm, email: e.target.value })} className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border-none rounded-xl outline-none focus:ring-2 focus:ring-[#5B5FFF]/20 text-sm text-gray-900 dark:text-white" />
               </div>
               <div className="space-y-1">
                 <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1 font-mono">Message</label>
-                <textarea required rows={4} value={supportForm.message} onChange={(e) => setSupportForm({...supportForm, message: e.target.value})} className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border-none rounded-xl outline-none focus:ring-2 focus:ring-[#5B5FFF]/20 text-sm text-gray-900 dark:text-white resize-none" />
+                <textarea required rows={4} value={supportForm.message} onChange={(e) => setSupportForm({ ...supportForm, message: e.target.value })} className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border-none rounded-xl outline-none focus:ring-2 focus:ring-[#5B5FFF]/20 text-sm text-gray-900 dark:text-white resize-none" />
               </div>
               {supportStatus === 'success' ? (
                 <div className="p-4 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 rounded-xl text-center font-bold text-sm flex items-center justify-center gap-2">
@@ -557,14 +595,14 @@ const App: React.FC = () => {
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-300">
           <div className="relative w-full max-w-2xl bg-white dark:bg-gray-900 rounded-[32px] shadow-2xl animate-in zoom-in duration-300 overflow-hidden flex flex-col max-h-[85vh]">
             <div className="p-8 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between shrink-0">
-               <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-[#5B5FFF]/10 text-[#5B5FFF] flex items-center justify-center"><ScrollText size={24} /></div>
-                  <div>
-                    <h2 className="text-2xl font-extrabold text-gray-900 dark:text-white tracking-tight">Production Log</h2>
-                    <p className="text-sm text-gray-500 font-medium">System enhancements.</p>
-                  </div>
-               </div>
-               <button onClick={() => setShowChangelog(false)} className="p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-all"><X size={24} /></button>
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-[#5B5FFF]/10 text-[#5B5FFF] flex items-center justify-center"><ScrollText size={24} /></div>
+                <div>
+                  <h2 className="text-2xl font-extrabold text-gray-900 dark:text-white tracking-tight">Production Log</h2>
+                  <p className="text-sm text-gray-500 font-medium">System enhancements.</p>
+                </div>
+              </div>
+              <button onClick={() => setShowChangelog(false)} className="p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-all"><X size={24} /></button>
             </div>
             <div className="flex-1 overflow-y-auto p-8 custom-scrollbar space-y-10">
               {releaseNotes.map((note) => (
@@ -579,16 +617,16 @@ const App: React.FC = () => {
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {(note.features || []).map((feat: any, idx: number) => {
-                       const Icon = ICON_MAP[feat.icon] || Sparkles;
-                       return (
+                      const Icon = ICON_MAP[feat.icon] || Sparkles;
+                      return (
                         <div key={idx} className="p-4 rounded-2xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700">
-                           <div className="flex items-center gap-2 mb-2">
-                              <Icon size={16} className="text-[#5B5FFF]" />
-                              <span className="text-[10px] font-black uppercase tracking-widest text-[#5B5FFF]">{feat.label}</span>
-                           </div>
-                           <p className="text-sm font-medium text-gray-600 dark:text-gray-300 leading-snug">{feat.text}</p>
+                          <div className="flex items-center gap-2 mb-2">
+                            <Icon size={16} className="text-[#5B5FFF]" />
+                            <span className="text-[10px] font-black uppercase tracking-widest text-[#5B5FFF]">{feat.label}</span>
+                          </div>
+                          <p className="text-sm font-medium text-gray-600 dark:text-gray-300 leading-snug">{feat.text}</p>
                         </div>
-                       );
+                      );
                     })}
                   </div>
                 </div>
