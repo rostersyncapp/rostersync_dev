@@ -13,7 +13,7 @@ interface AuthProps {
 }
 
 const Auth: React.FC<AuthProps> = ({ initialView = 'signin', onClose, onGuestLogin, darkMode = false }) => {
-  const [view, setView] = useState<'signin' | 'signup'>(initialView === 'signup' ? 'signup' : 'signin');
+  const [view] = useState<'signin' | 'signup'>(initialView === 'signup' ? 'signup' : 'signin');
 
   // 1. GUEST MODE VIEW (Backend not configured)
   if (!isSupabaseConfigured) {
@@ -107,12 +107,6 @@ const Auth: React.FC<AuthProps> = ({ initialView = 'signin', onClose, onGuestLog
           </div>
         )}
 
-        <button
-          onClick={() => setView(view === 'signin' ? 'signup' : 'signin')}
-          className="mt-6 text-xs font-bold text-gray-400 hover:text-[#5B5FFF] uppercase tracking-widest font-mono transition-colors"
-        >
-          {view === 'signin' ? "Don't have an account? Sign Up" : "Already have an account? Sign In"}
-        </button>
       </div>
     </div>
   );
