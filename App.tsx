@@ -40,7 +40,8 @@ import {
   Headphones,
   Clock,
   History,
-  ChevronDown
+  ChevronDown,
+  AlertCircle
 } from 'lucide-react';
 
 const ICON_MAP: Record<string, any> = {
@@ -167,6 +168,7 @@ const App: React.FC = () => {
   const { openSignIn } = useClerk();
 
   const [isInitializing, setIsInitializing] = useState(true);
+  const [initializationError, setInitializationError] = useState<string | null>(null);
   const [showLanding, setShowLanding] = useState(true);
   const [authModal, setAuthModal] = useState<'signin' | 'signup' | null>(null);
   const [view, setView] = useState<'dashboard' | 'engine' | 'settings'>('dashboard');
@@ -210,16 +212,21 @@ const App: React.FC = () => {
     const syncToken = async () => {
       if (user) {
         try {
+          // getToken with template 'supabase' requires the JWT template to exist in Clerk dashboard
           const token = await getToken({ template: 'supabase' });
+          if (!token) throw new Error("Could not retrieve Supabase token from Clerk.");
           await setSupabaseToken(token);
           setShowLanding(false);
+          setInitializationError(null);
           fetchData(user);
-        } catch (err) {
+        } catch (err: any) {
           console.error("Error syncing token with Supabase:", err);
+          setInitializationError(err.message || "Failed to synchronize authentication.");
         }
       } else if (clerkLoaded) {
         setSupabaseToken(null);
         setShowLanding(true);
+        setInitializationError(null);
         setRosters([]);
         setProjects([]);
       }
@@ -410,11 +417,42 @@ const App: React.FC = () => {
     }
   };
 
-  if (isInitializing || loadingData) {
+  if (isInitializing || loadingData || initializationError) {
     return (
       <div className="min-h-screen bg-[#FAFAFA] dark:bg-gray-950 flex flex-col items-center justify-center gap-6 text-center px-4">
-        <Loader2 className="animate-spin text-[#5B5FFF]" size={40} />
-        <p className="text-xs font-bold text-gray-400 uppercase tracking-[0.2em] animate-pulse">Initializing Production Sync</p>
+        {initializationError ? (
+          <>
+            <div className="w-16 h-16 rounded-2xl bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-500 mb-2">
+              <AlertCircle size={32} />
+            </div>
+            <h2 className="text-xl font-black text-gray-900 dark:text-white tracking-tight">Sync Failure</h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400 max-w-sm leading-relaxed">
+              {initializationError.includes('template')
+                ? "Your Clerk dashboard is missing the 'supabase' JWT template. Please create it to continue."
+                : initializationError}
+            </p>
+            <button
+              onClick={() => {
+                setInitializationError(null);
+                window.location.reload();
+              }}
+              className="mt-4 px-6 py-2 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded-xl font-bold text-sm hover:bg-gray-200 dark:hover:bg-gray-700 transition-all cursor-pointer"
+            >
+              Retry Sync
+            </button>
+            <button
+              onClick={() => signOut()}
+              className="mt-2 text-xs font-bold text-[#5B5FFF] hover:underline uppercase tracking-widest cursor-pointer"
+            >
+              Sign Out & Return Home
+            </button>
+          </>
+        ) : (
+          <>
+            <Loader2 className="animate-spin text-[#5B5FFF]" size={40} />
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-[0.2em] animate-pulse">Initializing Production Sync</p>
+          </>
+        )}
       </div>
     );
   }
