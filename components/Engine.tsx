@@ -1,0 +1,317 @@
+import React, { useState, useEffect } from 'react';
+import { Athlete, SubscriptionTier, Roster, ExportFormat, Project } from '../types.ts';
+import { ProcessedRoster } from '../services/gemini.ts';
+import { generateExport, downloadFile } from '../services/export.ts';
+import { 
+  Upload, 
+  Cpu, 
+  CheckCircle2, 
+  ChevronRight, 
+  AlertCircle, 
+  Table, 
+  Download, 
+  Save, 
+  Loader2, 
+  X, 
+  Sparkles, 
+  Edit2, 
+  UserMinus, 
+  Calendar, 
+  Users, 
+  Globe, 
+  ExternalLink, 
+  Palette, 
+  Flag, 
+  Zap,
+  FolderOpen,
+  Image,
+  Type as TypeIcon,
+  Hash,
+  Trophy,
+  Search,
+  Check
+} from 'lucide-react';
+
+interface Props {
+  userTier: SubscriptionTier;
+  projects: Project[];
+  creditsUsed: number;
+  maxCredits: number;
+  onSave: (roster: Roster) => void;
+  onStartProcessing: (text: string, isNocMode: boolean, seasonYear: string, findBranding: boolean) => void;
+  isProcessing: boolean;
+  pendingRoster: ProcessedRoster | null;
+  onClearPending: () => void;
+  initialText?: string;
+}
+
+export const Engine: React.FC<Props> = ({ 
+  userTier, 
+  projects,
+  creditsUsed,
+  maxCredits,
+  onSave, 
+  onStartProcessing, 
+  isProcessing, 
+  pendingRoster, 
+  onClearPending,
+  initialText = ''
+}) => {
+  const [step, setStep] = useState(1);
+  const [rawInput, setRawInput] = useState(initialText);
+  const [selectedProjectId, setSelectedProjectId] = useState<string>('');
+  const [isNocMode, setIsNocMode] = useState(false);
+  
+  // Metadata States
+  const [teamName, setTeamName] = useState('');
+  const [sport, setSport] = useState('');
+  const [seasonYear, setSeasonYear] = useState(new Date().getFullYear().toString());
+  const [abbreviation, setAbbreviation] = useState('');
+  const [primaryColor, setPrimaryColor] = useState('#5B5FFF');
+  const [secondaryColor, setSecondaryColor] = useState('#1A1A1A');
+  const [logoUrl, setLogoUrl] = useState('');
+  
+  const [isEditingMetadata, setIsEditingMetadata] = useState(false);
+  const [processedAthletes, setProcessedAthletes] = useState<Athlete[]>([]);
+
+  const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    if (pendingRoster) {
+      setStep(2);
+      setTeamName(pendingRoster.teamName);
+      setSport(pendingRoster.sport);
+      setSeasonYear(pendingRoster.seasonYear);
+      setAbbreviation(pendingRoster.teamMetadata?.abbreviation || 'UNK');
+      setPrimaryColor(pendingRoster.teamMetadata?.primaryColor || '#5B5FFF');
+      setSecondaryColor(pendingRoster.teamMetadata?.secondaryColor || '#1A1A1A');
+      setLogoUrl(pendingRoster.teamMetadata?.logoUrl || '');
+      setProcessedAthletes(pendingRoster.athletes);
+      setIsNocMode(pendingRoster.isNocMode || false);
+    } else if (isProcessing) {
+      setStep(1);
+    }
+  }, [pendingRoster, isProcessing]);
+
+  const handleProcess = () => {
+    if (!rawInput || isProcessing) return;
+    onStartProcessing(rawInput, isNocMode, seasonYear, true);
+  };
+
+  const handleSaveToLibrary = () => {
+    setIsSaving(true);
+    const newRoster: Roster = {
+      id: Math.random().toString(36).substr(2, 9),
+      userId: '1',
+      projectId: selectedProjectId || undefined,
+      teamName,
+      sport,
+      seasonYear,
+      isNocMode,
+      athleteCount: processedAthletes.length,
+      rosterData: processedAthletes,
+      versionDescription: `[${seasonYear}] ${teamName} - ${processedAthletes.length} Athletes`,
+      createdAt: new Date().toISOString(),
+      teamMetadata: {
+        primaryColor,
+        secondaryColor,
+        abbreviation,
+        conference: pendingRoster?.teamMetadata?.conference || 'General',
+        logoUrl,
+        countryCode: pendingRoster?.teamMetadata?.countryCode
+      }
+    };
+    
+    setTimeout(() => {
+      onSave(newRoster);
+      setIsSaving(false);
+    }, 800);
+  };
+
+  const hasCredits = creditsUsed < maxCredits;
+
+  return (
+    <div className="max-w-6xl mx-auto">
+      <div className="relative mb-12">
+        <div className="absolute top-1/2 left-0 w-full h-px bg-gray-100 dark:bg-gray-800 -translate-y-1/2 -z-10"></div>
+        <div className="grid grid-cols-3">
+          {[
+            { num: 1, label: 'Upload' },
+            { num: 2, label: 'Review' },
+            { num: 3, label: 'Export' }
+          ].map((s, idx) => (
+            <div key={s.num} className={`bg-[#FAFAFA] dark:bg-gray-950 px-6 w-fit ${idx === 0 ? 'justify-self-start' : idx === 1 ? 'justify-self-center' : 'justify-self-end'}`}>
+              <div className={`flex items-center gap-4 ${step >= s.num ? 'text-[#5B5FFF]' : 'text-gray-400 dark:text-gray-600'}`}>
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold border-2 transition-all ${step >= s.num ? 'border-[#5B5FFF] bg-[#5B5FFF] text-white shadow-lg shadow-[#5B5FFF]/20' : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900'}`}>
+                  {step > s.num ? <CheckCircle2 size={20} /> : <span className="text-sm">{s.num}</span>}
+                </div>
+                <span className="text-sm font-black uppercase tracking-[0.2em]">{s.label}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {step === 1 && (
+        <div className="space-y-10 animate-in fade-in duration-500">
+          <div className="bg-white dark:bg-gray-900 p-10 rounded-[40px] border border-gray-100 dark:border-gray-800 shadow-sm relative overflow-hidden">
+            <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-6">
+              <h2 className="text-3xl font-extrabold flex items-center gap-4 tracking-tight text-gray-900 dark:text-white shrink-0"><Upload size={32} className="text-[#5B5FFF]" /> Input Raw Data</h2>
+              <div className="flex flex-wrap items-center gap-4">
+                 <div className="flex items-center gap-3 px-4 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl">
+                   <Calendar size={18} className="text-gray-400" />
+                   <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest font-mono">Season:</label>
+                   <input 
+                     type="text" 
+                     value={seasonYear} 
+                     onChange={(e) => setSeasonYear(e.target.value)}
+                     className="bg-transparent border-none outline-none text-base font-bold text-[#5B5FFF] w-24"
+                     placeholder="2025"
+                   />
+                 </div>
+
+                 <div className={`px-5 py-3 rounded-2xl flex items-center gap-3 border ${hasCredits ? 'bg-[#5B5FFF]/5 border-[#5B5FFF]/20 text-[#5B5FFF]' : 'bg-red-50 border-red-200 text-red-600'}`}>
+                   <Zap size={18} className={hasCredits ? "fill-[#5B5FFF]" : "fill-red-600"} />
+                   <span className="text-sm font-bold tracking-tight uppercase">{maxCredits - creditsUsed} Credits</span>
+                 </div>
+              </div>
+            </div>
+            <textarea className={`w-full h-96 px-6 py-6 bg-gray-50 dark:bg-gray-800 border-none rounded-[28px] outline-none transition-all text-base leading-relaxed font-mono text-gray-900 dark:text-gray-200 placeholder:text-gray-400 dark:placeholder:text-gray-600 ${isProcessing ? 'opacity-50 pointer-events-none' : 'focus:ring-2 focus:ring-[#5B5FFF]/20'}`} placeholder={isNocMode ? "Paste Olympic Delegation or Event Data here..." : "<paste raw roster text here>"} value={rawInput} onChange={(e) => setRawInput(e.target.value)} />
+          </div>
+          <div className="flex items-center justify-end">
+            <button onClick={handleProcess} disabled={isProcessing || !rawInput || !hasCredits} className={`px-10 py-5 rounded-[24px] font-bold flex items-center gap-4 shadow-xl transition-all text-base uppercase tracking-widest ${hasCredits ? 'primary-gradient text-white shadow-[#5B5FFF]/20' : 'bg-gray-200 text-gray-400 cursor-not-allowed shadow-none'}`}>
+              {isProcessing ? <Loader2 className="animate-spin" size={24} /> : <Cpu size={24} />} {isProcessing ? 'Processing...' : 'Run Engine'}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {step === 2 && (
+        <div className="space-y-10 animate-in slide-in-from-right-4 duration-500 pb-24">
+          <div className="bg-white dark:bg-gray-900 rounded-[48px] border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
+            <div className="p-10 border-b border-gray-100 dark:border-gray-800 flex flex-col md:flex-row md:items-start justify-between bg-gray-50/30 dark:bg-gray-800/30 gap-10">
+              <div className="flex-1 flex flex-col md:flex-row gap-6">
+                <div className="w-24 h-24 rounded-3xl text-white flex items-center justify-center shadow-lg shrink-0 overflow-hidden relative group bg-white border border-gray-100 dark:border-gray-700">
+                  {logoUrl ? (
+                    <img src={logoUrl} alt={teamName} className="w-full h-full object-contain p-3" onError={() => setLogoUrl('')} />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-white font-mono font-black text-3xl" style={{ backgroundColor: primaryColor }}>
+                      {abbreviation || '??'}
+                    </div>
+                  )}
+                  <button onClick={() => setIsEditingMetadata(!isEditingMetadata)} className="absolute inset-0 bg-black/40 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                    <Edit2 size={24} />
+                  </button>
+                </div>
+                
+                <div className="flex-1">
+                  <div className="flex items-center gap-4 flex-wrap">
+                    <h2 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white">{teamName}</h2>
+                    <span className="px-4 py-1.5 bg-[#5B5FFF]/10 text-[#5B5FFF] rounded-xl text-xs font-black uppercase tracking-[0.2em]">{sport}</span>
+                  </div>
+                  <div className="flex items-center gap-5 mt-3 text-gray-500 dark:text-gray-400 text-base font-medium">
+                    <span className="flex items-center gap-2 font-bold text-gray-900 dark:text-white"><Calendar size={20} /> {seasonYear}</span>
+                    <span className="flex items-center gap-2"><Users size={20} /> {processedAthletes.length} Athletes</span>
+                  </div>
+                  <div className="flex items-center gap-4 mt-4">
+                    <button onClick={() => setIsEditingMetadata(!isEditingMetadata)} className="text-sm font-bold text-[#5B5FFF] hover:underline flex items-center gap-2">
+                      <Palette size={18} /> Branding Controls
+                    </button>
+                    {pendingRoster?.verificationSources && pendingRoster.verificationSources.length > 0 && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest font-mono">Verified by AI Search:</span>
+                        <div className="flex gap-1.5">
+                          {pendingRoster.verificationSources.slice(0, 2).map((src, i) => (
+                            <a key={i} href={src.uri} target="_blank" rel="noopener noreferrer" className="p-1.5 bg-gray-100 dark:bg-gray-800 rounded-lg text-gray-400 hover:text-[#5B5FFF] transition-colors" title={src.title}>
+                              <ExternalLink size={14} />
+                            </a>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-5 min-w-[280px]">
+                 <div className="space-y-2.5">
+                    <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest font-mono">Assign Project</label>
+                    <div className="relative">
+                       <FolderOpen className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                       <select 
+                         value={selectedProjectId} 
+                         onChange={(e) => setSelectedProjectId(e.target.value)}
+                         className="pl-12 pr-6 py-3.5 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-[20px] text-sm font-bold outline-none focus:ring-2 focus:ring-[#5B5FFF]/20 text-gray-900 dark:text-white cursor-pointer w-full"
+                       >
+                         <option value="">Unassigned (Library)</option>
+                         {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                       </select>
+                    </div>
+                 </div>
+
+                 <button onClick={handleSaveToLibrary} disabled={isSaving} className="w-full flex items-center justify-center gap-3 px-8 py-4.5 rounded-[24px] primary-gradient text-white font-bold text-base hover:shadow-lg shadow-[#5B5FFF]/20 transition-all uppercase tracking-widest">
+                   {isSaving ? <Loader2 size={20} className="animate-spin" /> : <Save size={20} />} Save to Cloud
+                 </button>
+              </div>
+            </div>
+
+            {isEditingMetadata && (
+              <div className="p-10 bg-gray-50/50 dark:bg-gray-800/50 border-b border-gray-100 dark:border-gray-700 animate-in slide-in-from-top-4 duration-300">
+                <div className="flex items-center justify-between mb-8">
+                  <h3 className="text-[11px] font-black uppercase tracking-[0.25em] text-gray-400 font-mono">Metadata Overrides</h3>
+                  <button onClick={() => setIsEditingMetadata(false)} className="text-gray-400 hover:text-gray-600"><X size={24} /></button>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                  <div className="space-y-3">
+                    <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest font-mono flex items-center gap-2"><TypeIcon size={14}/> Team Name</label>
+                    <input type="text" value={teamName} onChange={(e) => setTeamName(e.target.value)} className="w-full px-5 py-3 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-700 rounded-2xl text-base font-semibold outline-none focus:ring-2 focus:ring-[#5B5FFF]/20" />
+                  </div>
+                  <div className="space-y-3">
+                    <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest font-mono flex items-center gap-2"><Calendar size={14}/> Season</label>
+                    <input type="text" value={seasonYear} onChange={(e) => setSeasonYear(e.target.value)} className="w-full px-5 py-3 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-700 rounded-2xl text-base font-bold outline-none focus:ring-2 focus:ring-[#5B5FFF]/20" />
+                  </div>
+                  <div className="space-y-3">
+                    <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest font-mono flex items-center gap-2"><Palette size={14}/> Colors</label>
+                    <div className="flex gap-3">
+                       <input type="color" value={primaryColor} onChange={(e) => setPrimaryColor(e.target.value)} className="w-full h-12 rounded-2xl border-none cursor-pointer bg-transparent" />
+                       <input type="color" value={secondaryColor} onChange={(e) => setSecondaryColor(e.target.value)} className="w-full h-12 rounded-2xl border-none cursor-pointer bg-transparent" />
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest font-mono flex items-center gap-2"><Image size={14}/> Logo URL</label>
+                    <input type="text" value={logoUrl} onChange={(e) => setLogoUrl(e.target.value)} className="w-full px-5 py-3 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-700 rounded-2xl text-xs font-medium outline-none focus:ring-2 focus:ring-[#5B5FFF]/20" placeholder="URL..." />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="overflow-x-auto max-h-[50vh]">
+              <table className="w-full text-left">
+                <thead className="sticky top-0 z-10">
+                  <tr className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-md">
+                    <th className="px-10 py-5 text-[11px] font-bold text-gray-400 uppercase tracking-[0.2em] border-b border-gray-100 dark:border-gray-800">Athlete Name</th>
+                    <th className="px-10 py-5 text-[11px] font-bold text-gray-400 uppercase tracking-[0.2em] text-center border-b border-gray-100 dark:border-gray-800">{isNocMode ? 'Bib' : 'Jersey'}</th>
+                    <th className="px-10 py-5 text-[11px] font-bold text-gray-400 uppercase tracking-[0.2em] text-center border-b border-gray-100 dark:border-gray-800">{isNocMode ? 'Event/Discipline' : 'Position'}</th>
+                    <th className="px-10 py-5 text-[11px] font-bold text-gray-400 uppercase tracking-[0.2em] text-center border-b border-gray-100 dark:border-gray-800">Hardware Safe</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                  {processedAthletes.map((a, idx) => (
+                    <tr key={a.id || idx} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors">
+                      <td className="px-10 py-5 text-base font-semibold text-gray-900 dark:text-white">{a.fullName}</td>
+                      <td className="px-10 py-5 text-center"><span className="inline-block w-12 py-1.5 rounded-xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-sm font-bold">#{a.jerseyNumber}</span></td>
+                      <td className="px-10 py-5 text-center"><span className="inline-block px-4 py-1.5 rounded-xl bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 text-[11px] font-bold uppercase">#{a.position}</span></td>
+                      <td className="px-10 py-5 text-center"><span className="bg-emerald-50 dark:bg-emerald-900/30 px-4 py-1.5 rounded-xl text-[11px] font-bold text-emerald-700 dark:text-emerald-400 tracking-wider font-mono">{a.displayNameSafe}</span></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default Engine;

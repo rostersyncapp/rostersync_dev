@@ -1,0 +1,172 @@
+
+import { createClient } from '@supabase/supabase-js';
+
+// Robust environment variable retrieval
+export const getEnvVar = (key: string) => {
+  if (typeof process !== 'undefined' && process.env && process.env[key]) {
+    return process.env[key];
+  }
+  try {
+    // @ts-ignore
+    if (typeof import.meta !== 'undefined' && import.meta.env) {
+      // @ts-ignore
+      return import.meta.env[key] || import.meta.env[`VITE_${key}`];
+    }
+  } catch (e) {}
+  return undefined;
+};
+
+const supabaseUrl = getEnvVar('SUPABASE_URL');
+const supabaseAnonKey = getEnvVar('SUPABASE_ANON_KEY');
+
+export const isSupabaseConfigured = !!(
+  supabaseUrl && 
+  supabaseUrl !== 'https://placeholder-project.supabase.co' &&
+  supabaseAnonKey &&
+  supabaseAnonKey !== 'placeholder-anon-key'
+);
+
+const finalUrl = isSupabaseConfigured ? supabaseUrl! : 'https://placeholder-project.supabase.co';
+const finalKey = isSupabaseConfigured ? supabaseAnonKey! : 'placeholder-anon-key';
+
+export const supabase = createClient(finalUrl, finalKey);
+
+export interface SiteConfig {
+  site_name: string;
+  logo_url: string | null;
+}
+
+/**
+ * Converts a File object to a Base64 Data URL string
+ */
+export const fileToDataUrl = (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+};
+
+/**
+ * Fetches global site branding configuration
+ */
+export async function getSiteConfig(): Promise<SiteConfig> {
+  if (!isSupabaseConfigured) return { site_name: 'rosterSync', logo_url: null };
+  
+  const { data, error } = await supabase
+    .from('site_config')
+    .select('site_name, logo_url')
+    .eq('id', 'default')
+    .single();
+
+  if (error || !data) {
+    return { site_name: 'rosterSync', logo_url: null };
+  }
+  
+  return data;
+}
+
+/**
+ * Updates global site branding configuration
+ */
+export async function updateSiteConfig(updates: Partial<SiteConfig>) {
+  if (!isSupabaseConfigured) return;
+  
+  const { error } = await supabase
+    .from('site_config')
+    .update({ ...updates, updated_at: new Date().toISOString() })
+    .eq('id', 'default');
+
+  if (error) throw error;
+}
+
+/**
+ * Uploads an image to Supabase Storage (branding bucket)
+ * Used for user workspace logos
+ */
+export async function uploadOrgLogo(userId: string, file: File): Promise<string> {
+  if (!isSupabaseConfigured) throw new Error("Supabase is not configured.");
+
+  const fileExt = file.name.split('.').pop();
+  const fileName = `${userId}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+  const filePath = `logos/${fileName}`;
+
+  const { error: uploadError } = await supabase.storage
+    .from('branding')
+    .upload(filePath, file);
+
+  if (uploadError) throw uploadError;
+
+  const { data } = supabase.storage.from('branding').getPublicUrl(filePath);
+  return data.publicUrl;
+}
+
+/**
+ * Records AI usage metrics
+ */
+export async function recordUsage(
+  userId: string, 
+  metrics: {
+    operationType: string;
+    modelName: string;
+    inputTokens: number;
+    outputTokens: number;
+    searchQueries: number;
+    total_cost_usd: number;
+  }
+) {
+  if (!isSupabaseConfigured) return;
+
+  await supabase.from('user_usage').insert({
+    user_id: userId,
+    operation_type: metrics.operationType,
+    model_name: metrics.modelName,
+    input_tokens: metrics.inputTokens,
+    output_tokens: metrics.outputTokens,
+    search_queries: metrics.searchQueries,
+    total_cost_usd: metrics.total_cost_usd
+  });
+}
+
+/**
+ * Gets monthly usage
+ */
+export async function getMonthlyUsage(userId: string): Promise<number> {
+  if (!isSupabaseConfigured) return 0;
+  const now = new Date();
+  const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+  const { count } = await supabase
+    .from('user_usage')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', userId)
+    .eq('operation_type', 'ROSTER_IMPORT')
+    .gte('created_at', firstDay);
+  return count || 0;
+}
+
+/**
+ * Log specific user activities
+ */
+export async function logActivity(userId: string, actionType: string, description?: string) {
+  if (!isSupabaseConfigured) return;
+  await supabase.from('activity_logs').insert({
+    user_id: userId,
+    action_type: actionType,
+    description: description
+  });
+}
+
+/**
+ * Fetch recent activity logs
+ */
+export async function getActivityLogs(userId: string) {
+  if (!isSupabaseConfigured) return [];
+  const { data } = await supabase
+    .from('activity_logs')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+    .limit(30);
+  return data || [];
+}
