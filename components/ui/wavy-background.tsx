@@ -97,7 +97,7 @@ export const WavyBackground = ({
         return () => {
             cancelAnimationFrame(animationId);
         };
-    }, []);
+    }, [backgroundFill, waveOpacity, colors, blur, speed, waveWidth]);
 
     const [isSafari, setIsSafari] = useState(false);
     useEffect(() => {

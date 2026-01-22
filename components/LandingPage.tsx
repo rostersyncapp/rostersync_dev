@@ -184,6 +184,7 @@ const FAQS = [
   { q: "Can I export for Ross Xpression or Vizrt?", a: "Yes. Our Network tier includes direct exports for Ross DataLinq (XML/CSV) and Vizrt DataCenter, including automatic accent removal and case normalization." }
 ];
 
+
 const FEATURES = [
   { icon: <Wand2 size={20} />, title: "AI Normalization", desc: "Instantly parses messy text from PDF scrapes, websites, and emails with 99.9% accuracy." },
   { icon: <ShieldCheck size={20} />, title: "Broadcast Safe", desc: "Automatically strips accents and sanitizes special characters for character generator compatibility." },
@@ -267,7 +268,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
       </nav>
 
       {/* Hero Section */}
-      <section className="pt-28 pb-12 px-6 text-center">
+      <section className="relative z-10 pt-28 pb-0 px-6 text-center">
         <div className="max-w-4xl mx-auto space-y-6 animate-in fade-in zoom-in duration-1000">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#5B5FFF]/5 border border-[#5B5FFF]/10 text-[#5B5FFF] text-[10px] font-black uppercase tracking-widest mb-2">
             <Sparkles size={12} /> New: Gemini 3 Integration
@@ -291,11 +292,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
       </section>
 
       {/* Wavy Background Section */}
-      <section className="relative w-full h-[500px] overflow-hidden -mt-8 mb-16">
+      <section className="relative w-full h-[500px] overflow-hidden -mt-32 mb-16">
         <WavyBackground
           className="max-w-4xl mx-auto pb-40"
           backgroundFill={darkMode ? "#111827" : "#FAFAFA"}
-          colors={darkMode ? undefined : ["#38bdf8", "#818cf8", "#c084fc", "#e879f9", "#22d3ee"]}
           waveOpacity={darkMode ? 0.5 : 0.3}
           containerClassName="h-full"
         >
