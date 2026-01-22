@@ -1,16 +1,16 @@
 import React, { useState, forwardRef, useRef, useEffect, useId } from 'react';
 import { supabase, isSupabaseConfigured, SiteConfig } from '../services/supabase.ts';
 import { PRICING_TIERS, BRAND_CONFIG } from '../constants.tsx';
-import { 
-  CheckCircle2, 
-  ArrowRight, 
-  Sparkles, 
-  Plus, 
-  Minus, 
-  X, 
-  Send, 
-  Loader2, 
-  Sun, 
+import {
+  CheckCircle2,
+  ArrowRight,
+  Sparkles,
+  Plus,
+  Minus,
+  X,
+  Send,
+  Loader2,
+  Sun,
   Moon,
   Wand2,
   ShieldCheck,
@@ -28,6 +28,7 @@ import {
   Box,
   Share2
 } from 'lucide-react';
+import { WavyBackground } from './ui/wavy-background';
 
 // --- Utility for Tailwind classes ---
 const cn = (...classes: any[]) => classes.filter(Boolean).join(' ');
@@ -99,7 +100,7 @@ const AnimatedBeam: React.FC<AnimatedBeamProps> = ({
 
     const resizeObserver = new ResizeObserver(updatePath);
     if (containerRef.current) resizeObserver.observe(containerRef.current);
-    
+
     updatePath();
     const timeoutId = setTimeout(updatePath, 150);
 
@@ -126,7 +127,7 @@ const AnimatedBeam: React.FC<AnimatedBeamProps> = ({
         strokeWidth="2"
         strokeLinecap="round"
       />
-      
+
       {/* Animated Laser Beam */}
       {isActive && (
         <React.Fragment key={`${id}-${activeStep}`}>
@@ -215,10 +216,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
   const [activeStep, setActiveStep] = useState(0);
 
   useEffect(() => {
-    const stepDuration = 1000; 
+    const stepDuration = 1000;
     const interval = setInterval(() => {
       setActiveStep((prev) => (prev + 1) % 6);
-    }, stepDuration); 
+    }, stepDuration);
     return () => clearInterval(interval);
   }, [activeStep]);
 
@@ -287,6 +288,18 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
             </button>
           </div>
         </div>
+      </section>
+
+      {/* Wavy Background Section */}
+      <section className="relative w-full h-[500px] overflow-hidden -mt-8 mb-16">
+        <WavyBackground
+          className="max-w-4xl mx-auto pb-40"
+          backgroundFill={darkMode ? "#111827" : "#FAFAFA"}
+          colors={darkMode ? undefined : ["#38bdf8", "#818cf8", "#c084fc", "#e879f9", "#22d3ee"]}
+          waveOpacity={darkMode ? 0.5 : 0.3}
+          containerClassName="h-full"
+        >
+        </WavyBackground>
       </section>
 
       {/* Animated Beam Distribution Section */}
@@ -446,7 +459,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
                     </div>
                   ))}
                 </div>
-                <button 
+                <button
                   onClick={onSignUp}
                   className={`w-full py-3 rounded-xl font-bold text-sm transition-all ${tier.id === 'PRO' ? 'primary-gradient text-white shadow-lg' : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white hover:bg-gray-200'}`}
                 >
@@ -471,11 +484,11 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
               return (
                 <div key={i} className={cn(
                   "rounded-xl border transition-all duration-300 overflow-hidden",
-                  isOpen 
-                    ? "border-[#5B5FFF]/30 bg-white dark:bg-gray-800 shadow-md" 
+                  isOpen
+                    ? "border-[#5B5FFF]/30 bg-white dark:bg-gray-800 shadow-md"
                     : "border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-800"
                 )}>
-                  <button 
+                  <button
                     onClick={() => setOpenFaqIndex(isOpen ? null : i)}
                     className={cn(
                       "w-full px-5 py-4 flex items-center justify-between text-left transition-colors",
@@ -505,10 +518,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
       <footer className="py-8 px-6 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-3">
-             <BrandLogo siteConfig={siteConfig} />
-             <span className="font-extrabold text-base tracking-tight font-mono text-gray-900 dark:text-white">{siteConfig.site_name}</span>
+            <BrandLogo siteConfig={siteConfig} />
+            <span className="font-extrabold text-base tracking-tight font-mono text-gray-900 dark:text-white">{siteConfig.site_name}</span>
           </div>
-          
+
           <div className="flex items-center gap-6 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
             <a href="#" className="hover:text-[#5B5FFF]">Privacy</a>
             <a href="#" className="hover:text-[#5B5FFF]">Terms</a>
@@ -528,7 +541,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
       {showDemoModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-300">
           <div className="relative w-full max-w-sm bg-white dark:bg-gray-900 rounded-[28px] p-6 shadow-2xl animate-in zoom-in duration-300" onClick={(e) => e.stopPropagation()}>
-             <button onClick={() => setShowDemoModal(false)} className="absolute top-5 right-5 p-1.5 text-gray-400 hover:bg-gray-100 rounded-full"><X size={18} /></button>
+            <button onClick={() => setShowDemoModal(false)} className="absolute top-5 right-5 p-1.5 text-gray-400 hover:bg-gray-100 rounded-full"><X size={18} /></button>
             <div className="text-center mb-6">
               <div className="w-12 h-12 rounded-xl bg-[#5B5FFF]/10 text-[#5B5FFF] flex items-center justify-center mx-auto mb-3">
                 <Calendar size={24} />
@@ -537,23 +550,23 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">See how RosterSync fits your stack.</p>
             </div>
             <form onSubmit={handleDemoSubmit} className="space-y-3">
-                <div className="space-y-1">
-                  <label className="text-[9px] font-bold text-gray-400 uppercase tracking-widest ml-1">Full Name</label>
-                  <input type="text" required value={demoForm.name} onChange={(e) => setDemoForm({...demoForm, name: e.target.value})} className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border-none rounded-xl text-sm font-medium text-gray-900 dark:text-white" />
+              <div className="space-y-1">
+                <label className="text-[9px] font-bold text-gray-400 uppercase tracking-widest ml-1">Full Name</label>
+                <input type="text" required value={demoForm.name} onChange={(e) => setDemoForm({ ...demoForm, name: e.target.value })} className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border-none rounded-xl text-sm font-medium text-gray-900 dark:text-white" />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[9px] font-bold text-gray-400 uppercase tracking-widest ml-1">Work Email</label>
+                <input type="email" required value={demoForm.email} onChange={(e) => setDemoForm({ ...demoForm, email: e.target.value })} className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border-none rounded-xl text-sm font-medium text-gray-900 dark:text-white" />
+              </div>
+              {demoStatus === 'success' ? (
+                <div className="p-3 bg-emerald-50 text-emerald-600 rounded-xl text-center font-bold text-xs flex items-center justify-center gap-2">
+                  <CheckCircle2 size={16} /> Request Received!
                 </div>
-                <div className="space-y-1">
-                  <label className="text-[9px] font-bold text-gray-400 uppercase tracking-widest ml-1">Work Email</label>
-                  <input type="email" required value={demoForm.email} onChange={(e) => setDemoForm({...demoForm, email: e.target.value})} className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border-none rounded-xl text-sm font-medium text-gray-900 dark:text-white" />
-                </div>
-                {demoStatus === 'success' ? (
-                  <div className="p-3 bg-emerald-50 text-emerald-600 rounded-xl text-center font-bold text-xs flex items-center justify-center gap-2">
-                    <CheckCircle2 size={16} /> Request Received!
-                  </div>
-                ) : (
-                  <button type="submit" disabled={demoStatus === 'sending'} className="w-full py-3.5 rounded-xl primary-gradient text-white font-bold shadow-lg flex items-center justify-center gap-2 text-sm">
-                    {demoStatus === 'sending' ? <Loader2 className="animate-spin" size={16} /> : <><Send size={16} /> Request Demo Access</>}
-                  </button>
-                )}
+              ) : (
+                <button type="submit" disabled={demoStatus === 'sending'} className="w-full py-3.5 rounded-xl primary-gradient text-white font-bold shadow-lg flex items-center justify-center gap-2 text-sm">
+                  {demoStatus === 'sending' ? <Loader2 className="animate-spin" size={16} /> : <><Send size={16} /> Request Demo Access</>}
+                </button>
+              )}
             </form>
           </div>
         </div>
