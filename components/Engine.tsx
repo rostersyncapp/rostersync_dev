@@ -176,7 +176,7 @@ export const Engine: React.FC<Props> = ({
                  </div>
               </div>
             </div>
-            <textarea className={`w-full h-96 px-6 py-6 bg-gray-50 dark:bg-gray-800 border-none rounded-[28px] outline-none transition-all text-base leading-relaxed font-mono text-gray-900 dark:text-gray-200 placeholder:text-gray-400 dark:placeholder:text-gray-600 ${isProcessing ? 'opacity-50 pointer-events-none' : 'focus:ring-2 focus:ring-[#5B5FFF]/20'}`} placeholder={isNocMode ? "Paste Olympic Delegation or Event Data here..." : "<paste raw roster text here>"} value={rawInput} onChange={(e) => setRawInput(e.target.value)} />
+            <textarea className={`w-full h-96 px-6 py-6 bg-gray-50 dark:bg-gray-800 border-none rounded-[28px] outline-none transition-all text-base leading-relaxed font-mono text-gray-900 dark:text-gray-200 placeholder:text-gray-400 dark:placeholder:text-gray-600 ${isProcessing ? 'opacity-50 pointer-events-none' : 'focus:ring-2 focus:ring-[#5B5FFF]/20'}`} placeholder={isNocMode ? "Paste Olympic Delegation or Event Data here...\n<add season>" : "<paste raw text here>\n<add season>"} value={rawInput} onChange={(e) => setRawInput(e.target.value)} />
           </div>
           <div className="flex items-center justify-end">
             <button onClick={handleProcess} disabled={isProcessing || !rawInput || !hasCredits} className={`px-10 py-5 rounded-[24px] font-bold flex items-center gap-4 shadow-xl transition-all text-base uppercase tracking-widest ${hasCredits ? 'primary-gradient text-white shadow-[#5B5FFF]/20' : 'bg-gray-200 text-gray-400 cursor-not-allowed shadow-none'}`}>

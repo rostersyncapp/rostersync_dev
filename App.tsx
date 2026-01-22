@@ -118,7 +118,8 @@ const FolderItem: React.FC<{
   newProjectName: string;
   handleCreateProject: (parentId?: string) => void;
   isSavingProject: boolean;
-}> = ({ folder, level, projects, activeProjectId, rosters, expandedFolderIds, toggleExpand, setView, setActiveProjectId, setSelectedRosterId, setCreatingFolderInId, setNewProjectName, handleDeleteProject, creatingFolderInId, newProjectName, handleCreateProject, isSavingProject }) => {
+  setConfirmDeleteProject: (project: Project | null) => void;
+}> = ({ folder, level, projects, activeProjectId, rosters, expandedFolderIds, toggleExpand, setView, setActiveProjectId, setSelectedRosterId, setCreatingFolderInId, setNewProjectName, handleDeleteProject, creatingFolderInId, newProjectName, handleCreateProject, isSavingProject, setConfirmDeleteProject }) => {
   const hasChildren = projects.some(p => p.parentId === folder.id);
   const isOpen = expandedFolderIds.includes(folder.id);
   const totalRosterCount = getRecursiveRosterCount(folder.id, projects, rosters);
@@ -145,17 +146,18 @@ const FolderItem: React.FC<{
                 <span className="text-[9px] font-mono opacity-40 translate-y-[-1px] shrink-0 font-black">
                   {totalRosterCount}
                 </span>
-              )}
-            </div>
+      )}
+
+    </div>
           </div>
         </button>
         <div className="flex items-center opacity-0 group-hover:opacity-100 transition-all shrink-0">
           <button onClick={() => { setCreatingFolderInId(folder.id); setNewProjectName(''); if (!isOpen) toggleExpand(folder.id); }} className="p-1.5 text-gray-300 hover:text-[#5B5FFF] hover:bg-[#5B5FFF]/5 rounded-lg transition-all cursor-pointer hidden lg:block" title="Add Sub-folder"><Plus size={14} /></button>
-          <button onClick={() => handleDeleteProject(folder.id)} className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all cursor-pointer hidden lg:block" title="Delete Folder"><Trash2 size={14} /></button>
+          <button onClick={() => setConfirmDeleteProject(folder)} className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all cursor-pointer hidden lg:block" title="Delete Folder"><Trash2 size={14} /></button>
         </div>
       </div>
       {creatingFolderInId === folder.id && <div style={{ paddingLeft: `${(level + 1) * 16}px` }}><FolderInput parentId={folder.id} newProjectName={newProjectName} setNewProjectName={setNewProjectName} handleCreateProject={handleCreateProject} setCreatingFolderInId={setCreatingFolderInId} isSavingProject={isSavingProject} /></div>}
-      {isOpen && projects.filter(p => p.parentId === folder.id).map(child => <FolderItem key={child.id} folder={child} level={level + 1} projects={projects} activeProjectId={activeProjectId} rosters={rosters} expandedFolderIds={expandedFolderIds} toggleExpand={toggleExpand} setView={setView} setActiveProjectId={setActiveProjectId} setSelectedRosterId={setSelectedRosterId} setCreatingFolderInId={setCreatingFolderInId} setNewProjectName={setNewProjectName} handleDeleteProject={handleDeleteProject} creatingFolderInId={creatingFolderInId} newProjectName={newProjectName} handleCreateProject={handleCreateProject} isSavingProject={isSavingProject} />)}
+      {isOpen && projects.filter(p => p.parentId === folder.id).map(child => <FolderItem key={child.id} folder={child} level={level + 1} projects={projects} activeProjectId={activeProjectId} rosters={rosters} expandedFolderIds={expandedFolderIds} toggleExpand={toggleExpand} setView={setView} setActiveProjectId={setActiveProjectId} setSelectedRosterId={setSelectedRosterId} setCreatingFolderInId={setCreatingFolderInId} setNewProjectName={setNewProjectName} handleDeleteProject={handleDeleteProject} creatingFolderInId={creatingFolderInId} newProjectName={newProjectName} handleCreateProject={handleCreateProject} isSavingProject={isSavingProject} setConfirmDeleteProject={setConfirmDeleteProject} />)}
     </div>
   );
 };
@@ -193,6 +195,7 @@ const App: React.FC = () => {
   const [profile, setProfile] = useState<Profile>({ id: 'guest_user', fullName: 'Guest User', email: 'guest@rostersync.io', subscriptionTier: 'BASIC', organizationName: 'Demo Studio', creditsUsed: 0 });
   const [isProcessing, setIsProcessing] = useState(false);
   const [pendingRoster, setPendingRoster] = useState<ProcessedRoster | null>(null);
+  const [confirmDeleteProject, setConfirmDeleteProject] = useState<Project | null>(null);
 
   useEffect(() => {
     if (darkMode) {
@@ -208,7 +211,7 @@ const App: React.FC = () => {
     const syncToken = async () => {
       if (user) {
         try {
-          const token = await getToken({ template: 'supabase' });
+          const token = await getToken({ template: 'supabase', forceRefresh: true } as any);
           await setSupabaseToken(token);
           setShowLanding(false);
           fetchData(user);
@@ -327,10 +330,9 @@ const App: React.FC = () => {
   };
 
   const handleDeleteProject = async (projectId: string) => {
-    const project = projects.find(p => p.id === projectId);
-    if (!project || !window.confirm(`Delete folder "${project.name}"?`)) return;
     if (user && isSupabaseConfigured) await supabase.from('projects').delete().eq('id', projectId);
     setProjects(prev => prev.filter(p => p.id !== projectId));
+    setConfirmDeleteProject(null);
   };
 
   const toggleExpand = (id: string) => setExpandedFolderIds(prev => prev.includes(id) ? prev.filter(fid => fid !== id) : [...prev, id]);
@@ -427,26 +429,6 @@ const App: React.FC = () => {
 
   return (
     <div className={`flex min-h-screen bg-[#FAFAFA] dark:bg-gray-950 font-sans text-[#1A1A1A] dark:text-gray-100 transition-colors duration-300`}>
-      {/* Clerk Auth Header */}
-      <header className="fixed top-0 right-0 p-4 flex items-center gap-4 z-50">
-        <SignedOut>
-          <div className="flex gap-4">
-            <SignInButton mode="modal">
-              <button className="px-4 py-2 text-sm font-bold text-gray-600 dark:text-gray-400 hover:text-[#5B5FFF] transition-all cursor-pointer">
-                Sign In
-              </button>
-            </SignInButton>
-            <SignUpButton mode="modal">
-              <button className="bg-[#5B5FFF] text-white rounded-full font-bold text-sm h-10 px-6 shadow-lg shadow-[#5B5FFF]/20 hover:scale-105 transition-all cursor-pointer">
-                Sign Up
-              </button>
-            </SignUpButton>
-          </div>
-        </SignedOut>
-        <SignedIn>
-          <UserButton appearance={{ baseTheme: darkMode ? dark : undefined, elements: { userButtonPopoverCard: { pointerEvents: "initial" } } }} />
-        </SignedIn>
-      </header>
       <aside className="w-16 lg:w-60 border-r border-gray-200 dark:border-gray-800 flex flex-col fixed h-full bg-white dark:bg-gray-900 z-20 transition-all duration-300 shadow-sm">
         <div className="h-16 flex items-center justify-between px-4 lg:px-5 border-b border-gray-100 dark:border-gray-800 shrink-0">
           <div className="flex items-center gap-3 text-gray-900 dark:text-white cursor-pointer" onClick={() => { setView('dashboard'); setActiveProjectId(null); setSelectedRosterId(null); }}>
@@ -477,7 +459,7 @@ const App: React.FC = () => {
             </div>
             <div className="space-y-0.5 px-0.5">
               {creatingFolderInId === 'root' && <FolderInput newProjectName={newProjectName} setNewProjectName={setNewProjectName} handleCreateProject={handleCreateProject} setCreatingFolderInId={setCreatingFolderInId} isSavingProject={isSavingProject} />}
-              {projects.filter(p => !p.parentId).map(p => <FolderItem key={p.id} folder={p} level={0} projects={projects} activeProjectId={activeProjectId} rosters={rosters} expandedFolderIds={expandedFolderIds} toggleExpand={toggleExpand} setView={setView} setActiveProjectId={setActiveProjectId} setSelectedRosterId={setSelectedRosterId} setCreatingFolderInId={setCreatingFolderInId} setNewProjectName={setNewProjectName} handleDeleteProject={handleDeleteProject} creatingFolderInId={creatingFolderInId} newProjectName={newProjectName} handleCreateProject={handleCreateProject} isSavingProject={isSavingProject} />)}
+              {projects.filter(p => !p.parentId).map(p => <FolderItem key={p.id} folder={p} level={0} projects={projects} activeProjectId={activeProjectId} rosters={rosters} expandedFolderIds={expandedFolderIds} toggleExpand={toggleExpand} setView={setView} setActiveProjectId={setActiveProjectId} setSelectedRosterId={setSelectedRosterId} setCreatingFolderInId={setCreatingFolderInId} setNewProjectName={setNewProjectName} handleDeleteProject={handleDeleteProject} creatingFolderInId={creatingFolderInId} newProjectName={newProjectName} handleCreateProject={handleCreateProject} isSavingProject={isSavingProject} setConfirmDeleteProject={setConfirmDeleteProject} />)}
             </div>
           </div>
         </div>
@@ -488,7 +470,20 @@ const App: React.FC = () => {
             <HelpCircle size={20} />
             <span className="hidden lg:block text-[14px]">Support</span>
           </button>
-          <button onClick={handleLogout} className="w-full flex items-center gap-3 p-2 rounded-xl text-gray-400 hover:bg-red-50 hover:text-red-500 transition-all font-medium"><LogOut size={20} /><span className="hidden lg:block text-[14px]">Sign Out</span></button>
+          <SignedOut>
+            <SignInButton mode="modal">
+              <button className="w-full flex items-center gap-3 p-2 rounded-xl text-gray-500 hover:bg-gray-100 font-medium">
+                <LogOut size={20} />
+                <span className="hidden lg:block text-[14px]">Sign In</span>
+              </button>
+            </SignInButton>
+          </SignedOut>
+          <SignedIn>
+            <div className="flex items-center gap-3 p-2 rounded-xl text-gray-500 hover:bg-gray-100 font-medium">
+              <UserButton appearance={{ baseTheme: darkMode ? dark : undefined, elements: { userButtonPopoverCard: { pointerEvents: "initial" } } }} />
+              <span className="hidden lg:block text-[14px] truncate max-w-[120px]">{user?.fullName || user?.primaryEmailAddress?.emailAddress || 'User'}</span>
+            </div>
+          </SignedIn>
         </div>
       </aside>
 
@@ -622,6 +617,28 @@ const App: React.FC = () => {
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {confirmDeleteProject && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-300">
+          <div className="relative w-full max-w-sm bg-white dark:bg-gray-900 rounded-[32px] p-8 shadow-2xl animate-in zoom-in duration-300">
+            <div className="text-center mb-8">
+              <div className="w-16 h-16 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-500 flex items-center justify-center mx-auto mb-4">
+                <Trash2 size={32} />
+              </div>
+              <h2 className="text-xl font-extrabold text-gray-900 dark:text-white">Delete Folder?</h2>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-2 font-medium">Are you sure you want to delete "{confirmDeleteProject.name}"? This action cannot be undone.</p>
+            </div>
+            <div className="flex gap-3">
+              <button onClick={() => setConfirmDeleteProject(null)} className="flex-1 py-4 rounded-2xl bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white font-bold text-sm hover:bg-gray-200 dark:hover:bg-gray-700 transition-all">
+                Cancel
+              </button>
+              <button onClick={() => handleDeleteProject(confirmDeleteProject.id)} className="flex-1 py-4 rounded-2xl bg-red-500 text-white font-bold text-sm hover:bg-red-600 transition-all shadow-lg shadow-red-500/20">
+                Delete
+              </button>
             </div>
           </div>
         </div>
