@@ -7,7 +7,7 @@ import LandingPage from './components/LandingPage.tsx';
 import { Roster, Profile, Project } from './types.ts';
 import { processRosterRawText, ProcessedRoster } from './services/gemini.ts';
 import { supabase, isSupabaseConfigured, getMonthlyUsage, getSiteConfig, SiteConfig, logActivity, setSupabaseToken } from './services/supabase.ts';
-import { useUser, useAuth, useClerk, SignedIn, SignedOut, SignInButton, SignUpButton, UserButton } from '@clerk/clerk-react';
+import { useUser, useAuth, useClerk, SignedIn, SignedOut, SignInButton, SignUpButton, UserButton, UserProfile } from '@clerk/clerk-react';
 import { dark } from '@clerk/themes';
 import { PRICING_TIERS, getTierLimit, BRAND_CONFIG } from './constants.tsx';
 import {
@@ -77,6 +77,74 @@ const getRecursiveRosterCount = (projectId: string, projects: Project[], rosters
   const childProjects = projects.filter(p => p.parentId === projectId);
   const subRosters = childProjects.reduce((acc, child) => acc + getRecursiveRosterCount(child.id, projects, rosters), 0);
   return directRosters + subRosters;
+};
+
+const UserMenu: React.FC<{ user: any; darkMode: boolean; onSignOut: () => void; onOpenProfile: () => void }> = ({ user, darkMode, onSignOut, onOpenProfile }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const { signOut } = useClerk();
+
+  const handleSignOut = async () => {
+    setIsOpen(false);
+    await onSignOut();
+  };
+
+  const handleOpenProfile = () => {
+    setIsOpen(false);
+    onOpenProfile();
+  };
+
+  return (
+    <div className="relative">
+      <button 
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full flex items-center gap-3 p-2 rounded-xl text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 font-medium transition-colors"
+      >
+        <div className="w-5 h-5 shrink-0 flex items-center justify-center overflow-hidden rounded-lg">
+          {user?.imageUrl ? (
+            <img src={user.imageUrl} alt="User" className="w-full h-full object-cover" />
+          ) : (
+            <div className="w-full h-full primary-gradient flex items-center justify-center text-white text-xs font-bold">
+              {user?.firstName?.[0] || 'U'}
+            </div>
+          )}
+        </div>
+        <span className="hidden lg:block text-[14px] truncate max-w-[120px]">
+          {user?.fullName || user?.primaryEmailAddress?.emailAddress || 'User'}
+        </span>
+        <ChevronDown size={14} className={`hidden lg:block transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+      </button>
+
+      {isOpen && (
+        <>
+          <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
+          <div className="absolute bottom-full left-0 right-0 mb-2 bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-gray-100 dark:border-gray-800 overflow-hidden z-50 animate-in slide-in-from-bottom-2 duration-200">
+            <div className="p-3 border-b border-gray-100 dark:border-gray-800">
+              <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
+                {user?.fullName || 'User'}
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                {user?.primaryEmailAddress?.emailAddress || ''}
+              </p>
+            </div>
+            <button 
+              onClick={handleOpenProfile}
+              className="w-full flex items-center gap-3 p-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+            >
+              <SettingsIcon size={16} />
+              <span>Account Settings</span>
+            </button>
+            <button
+              onClick={handleSignOut}
+              className="w-full flex items-center gap-3 p-3 text-sm text-red-600 dark:text-red-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+            >
+              <LogOut size={16} />
+              <span>Sign Out</span>
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  );
 };
 
 const FolderInput: React.FC<{
@@ -196,6 +264,7 @@ const App: React.FC = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [pendingRoster, setPendingRoster] = useState<ProcessedRoster | null>(null);
   const [confirmDeleteProject, setConfirmDeleteProject] = useState<Project | null>(null);
+  const [showUserProfile, setShowUserProfile] = useState(false);
 
   useEffect(() => {
     if (darkMode) {
@@ -214,6 +283,7 @@ const App: React.FC = () => {
           const token = await getToken({ template: 'supabase', forceRefresh: true } as any);
           await setSupabaseToken(token);
           setShowLanding(false);
+          await logActivity(user.id, 'LOGIN', 'Signed in to production workspace.');
           fetchData(user);
         } catch (err) {
           console.error("Error syncing token with Supabase:", err);
@@ -227,6 +297,24 @@ const App: React.FC = () => {
     };
     syncToken();
   }, [user, clerkLoaded]);
+
+  useEffect(() => {
+    const handleTokenExpired = async () => {
+      console.log('Token expired event received, refreshing...');
+      if (user) {
+        try {
+          const token = await getToken({ template: 'supabase', forceRefresh: true } as any);
+          await setSupabaseToken(token);
+          console.log('Token refreshed successfully');
+        } catch (err) {
+          console.error('Error refreshing token:', err);
+        }
+      }
+    };
+    
+    window.addEventListener('clerk-token-expired', handleTokenExpired);
+    return () => window.removeEventListener('clerk-token-expired', handleTokenExpired);
+  }, [user]);
 
   useEffect(() => {
     const initApp = async () => {
@@ -330,7 +418,13 @@ const App: React.FC = () => {
   };
 
   const handleDeleteProject = async (projectId: string) => {
-    if (user && isSupabaseConfigured) await supabase.from('projects').delete().eq('id', projectId);
+    const project = projects.find(p => p.id === projectId);
+    if (user && isSupabaseConfigured) {
+      await supabase.from('projects').delete().eq('id', projectId);
+      if (project) {
+        await logActivity(profile.id, 'PROJECT_FOLDER_DELETE', `Deleted folder "${project.name}".`);
+      }
+    }
     setProjects(prev => prev.filter(p => p.id !== projectId));
     setConfirmDeleteProject(null);
   };
@@ -376,7 +470,6 @@ const App: React.FC = () => {
         version_description: newRoster.versionDescription || ''
       }).select().single();
       if (data) {
-        await logActivity(user.id, 'ROSTER_SAVE', `Saved new roster assembly for ${newRoster.teamName}.`);
         setRosters(prev => [{ ...newRoster, id: data.id, createdAt: data.created_at, isSynced: true }, ...prev]);
       }
     } else {
@@ -479,10 +572,18 @@ const App: React.FC = () => {
             </SignInButton>
           </SignedOut>
           <SignedIn>
-            <div className="flex items-center gap-3 p-2 rounded-xl text-gray-500 hover:bg-gray-100 font-medium">
-              <UserButton appearance={{ baseTheme: darkMode ? dark : undefined, elements: { userButtonPopoverCard: { pointerEvents: "initial" } } }} />
-              <span className="hidden lg:block text-[14px] truncate max-w-[120px]">{user?.fullName || user?.primaryEmailAddress?.emailAddress || 'User'}</span>
-            </div>
+            <UserMenu 
+              user={user} 
+              darkMode={darkMode}
+              onSignOut={async () => {
+                if (user) {
+                  await logActivity(user.id, 'LOGOUT', 'User signed out of production workspace.');
+                }
+                await signOut();
+                setShowLanding(true);
+              }}
+              onOpenProfile={() => setShowUserProfile(true)}
+            />
           </SignedIn>
         </div>
       </aside>
@@ -531,9 +632,10 @@ const App: React.FC = () => {
             // Update local state
             setRosters(prev => prev.map(old => old.id === r.id ? r : old));
           }} userTier={profile.subscriptionTier} creditsUsed={profile.creditsUsed} selectedRosterId={selectedRosterId} onSelectRoster={setSelectedRosterId} onSelectProject={setActiveProjectId} onCreateSubfolder={(pid) => { setCreatingFolderInId(pid || 'root'); setNewProjectName(''); }} />}
-          {view === 'engine' && <Engine userTier={profile.subscriptionTier} projects={projects} creditsUsed={profile.creditsUsed} maxCredits={getTierLimit(profile.subscriptionTier)} onSave={handleSaveRoster} onStartProcessing={handleStartProcessing} isProcessing={isProcessing} pendingRoster={pendingRoster} onClearPending={() => setPendingRoster(null)} />}
+          {view === 'engine' && <Engine userTier={profile.subscriptionTier} projects={projects} creditsUsed={profile.creditsUsed} maxCredits={getTierLimit(profile.subscriptionTier)} onSave={handleSaveRoster} onStartProcessing={handleStartProcessing} isProcessing={isProcessing} pendingRoster={pendingRoster} onClearPending={() => setPendingRoster(null)} onDeletePlayer={async (athleteName) => {
+            await logActivity(profile.id, 'PLAYER_DELETE', `Removed player ${athleteName} from roster.`);
+          }} />}
           {view === 'settings' && <Settings profile={profile} rosters={rosters} onUpdate={async (updates) => {
-            await logActivity(profile.id, 'WORKSPACE_UPDATE', 'Updated workspace/profile settings.');
             setProfile(prev => ({ ...prev, ...updates }));
           }} />}
         </div>
@@ -622,23 +724,28 @@ const App: React.FC = () => {
         </div>
       )}
 
-      {confirmDeleteProject && (
+      {showUserProfile && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-300">
-          <div className="relative w-full max-w-sm bg-white dark:bg-gray-900 rounded-[32px] p-8 shadow-2xl animate-in zoom-in duration-300">
-            <div className="text-center mb-8">
-              <div className="w-16 h-16 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-500 flex items-center justify-center mx-auto mb-4">
-                <Trash2 size={32} />
-              </div>
-              <h2 className="text-xl font-extrabold text-gray-900 dark:text-white">Delete Folder?</h2>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-2 font-medium">Are you sure you want to delete "{confirmDeleteProject.name}"? This action cannot be undone.</p>
+          <div className="relative w-full max-w-4xl bg-white dark:bg-gray-900 rounded-[32px] shadow-2xl animate-in zoom-in duration-300 overflow-hidden max-h-[90vh]">
+            <div className="flex items-center justify-between p-6 border-b border-gray-100 dark:border-gray-800">
+              <h2 className="text-xl font-extrabold text-gray-900 dark:text-white">Account Settings</h2>
+              <button onClick={() => setShowUserProfile(false)} className="p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-all">
+                <X size={24} />
+              </button>
             </div>
-            <div className="flex gap-3">
-              <button onClick={() => setConfirmDeleteProject(null)} className="flex-1 py-4 rounded-2xl bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white font-bold text-sm hover:bg-gray-200 dark:hover:bg-gray-700 transition-all">
-                Cancel
-              </button>
-              <button onClick={() => handleDeleteProject(confirmDeleteProject.id)} className="flex-1 py-4 rounded-2xl bg-red-500 text-white font-bold text-sm hover:bg-red-600 transition-all shadow-lg shadow-red-500/20">
-                Delete
-              </button>
+            <div className="flex-1 overflow-y-auto max-h-[calc(90vh-80px)]">
+              <UserProfile 
+                appearance={{
+                  baseTheme: darkMode ? dark : undefined,
+                  elements: {
+                    rootBox: 'w-full',
+                    card: 'shadow-none bg-transparent',
+                    header: 'hidden',
+                    pageScrollBox: 'p-0',
+                    componentContainer: 'border-0 shadow-none'
+                  }
+                }}
+              />
             </div>
           </div>
         </div>

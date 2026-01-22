@@ -5,6 +5,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RosterSync | Production-Ready Athlete Data</title>
+    
+    <!-- Clerk configuration for Safari -->
+    <meta name="clerk:publishable_key" content="%VITE_CLERK_PUBLISHABLE_KEY%">
+    <meta name="clerk:proxy_url" content="">
+    
+    <!-- Safari Web App -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="RosterSync">
     <!-- 100% privacy-first analytics -->
     <script async src="https://scripts.simpleanalyticscdn.com/latest.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -92,8 +102,6 @@
 </head>
 <body>
     <div id="root"></div>
-    <!-- Explicitly load the entry point module -->
-    <script type="module" src="index.tsx"></script>
-<script type="module" src="/index.tsx"></script>
+    <script type="module" src="/index.tsx"></script>
 </body>
 </html>

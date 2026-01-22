@@ -79,6 +79,8 @@ const AnimatedBeam: React.FC<AnimatedBeamProps> = ({
 }) => {
   const id = useId();
   const [path, setPath] = useState("");
+  const rafRef = useRef<number | null>(null);
+  const lastUpdateRef = useRef<number>(0);
 
   useEffect(() => {
     const updatePath = () => {
@@ -99,16 +101,29 @@ const AnimatedBeam: React.FC<AnimatedBeamProps> = ({
       setPath(`M ${x1} ${y1} Q ${cx} ${cy} ${x2} ${y2}`);
     };
 
-    const resizeObserver = new ResizeObserver(updatePath);
+    const throttledUpdate = () => {
+      const now = Date.now();
+      if (now - lastUpdateRef.current < 16) return;
+      lastUpdateRef.current = now;
+      updatePath();
+    };
+
+    const resizeObserver = new ResizeObserver(throttledUpdate);
     if (containerRef.current) resizeObserver.observe(containerRef.current);
 
-    updatePath();
-    const timeoutId = setTimeout(updatePath, 150);
+    const onScroll = () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      rafRef.current = requestAnimationFrame(throttledUpdate);
+    };
 
-    window.addEventListener("scroll", updatePath);
+    throttledUpdate();
+    const timeoutId = setTimeout(throttledUpdate, 150);
+
+    window.addEventListener("scroll", onScroll, { passive: true });
     return () => {
       resizeObserver.disconnect();
-      window.removeEventListener("scroll", updatePath);
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      window.removeEventListener("scroll", onScroll);
       clearTimeout(timeoutId);
     };
   }, [fromRef, toRef, containerRef, curvature]);
@@ -121,7 +136,6 @@ const AnimatedBeam: React.FC<AnimatedBeamProps> = ({
       xmlns="http://www.w3.org/2000/svg"
       className="pointer-events-none absolute left-0 top-0 size-full z-10 overflow-visible"
     >
-      {/* Static background path */}
       <path
         d={path}
         stroke={pathColor}
@@ -129,7 +143,6 @@ const AnimatedBeam: React.FC<AnimatedBeamProps> = ({
         strokeLinecap="round"
       />
 
-      {/* Animated Laser Beam */}
       {isActive && (
         <React.Fragment key={`${id}-${activeStep}`}>
           <defs>
@@ -366,10 +379,63 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
 
             <div className="lg:w-1/2 w-full animate-in slide-in-from-right duration-1000">
               <div
-                className="relative flex h-[420px] w-full items-center justify-center overflow-hidden rounded-[40px] border border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/40 p-8 shadow-inner"
+                className="relative flex h-[320px] md:h-[420px] w-full items-center justify-center overflow-hidden rounded-[24px] md:rounded-[40px] border border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/40 p-4 md:p-8 shadow-inner"
                 ref={beamContainerRef}
               >
-                <div className="flex size-full max-w-md flex-row items-stretch justify-between gap-6">
+                <div className="flex md:hidden size-full max-w-sm flex-row items-stretch justify-between gap-3">
+                  {/* INPUT COLUMN - Mobile */}
+                  <div className="flex flex-col justify-center items-center">
+                    <Circle ref={inputRef} className="size-10">
+                      <FileText className="text-blue-500" size={18} />
+                    </Circle>
+                    <div className="mt-1 text-center text-[8px] font-black text-gray-400 uppercase tracking-widest">Raw</div>
+                  </div>
+
+                  {/* ENGINE - Mobile */}
+                  <div className="flex flex-col justify-center items-center">
+                    <Circle ref={engineRef} className="size-12 border-[#5B5FFF]/30 bg-[#5B5FFF]/5 p-1.5">
+                      <Cpu className="text-[#5B5FFF]" size={16} />
+                    </Circle>
+                    <div className="mt-1 text-center text-[8px] font-black text-[#5B5FFF] uppercase tracking-widest">Engine</div>
+                  </div>
+
+                  {/* OUTPUTS - Mobile (horizontal) */}
+                  <div className="flex flex-col justify-center gap-2">
+                    <div className="flex items-center gap-1.5">
+                      <Circle ref={out1Ref} className="size-8 p-1">
+                        <MonitorPlay className="text-blue-600" size={12} />
+                      </Circle>
+                      <span className="text-[7px] font-black text-gray-400 uppercase tracking-tighter">Ross</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <Circle ref={out2Ref} className="size-8 p-1">
+                        <Database className="text-purple-500" size={12} />
+                      </Circle>
+                      <span className="text-[7px] font-black text-gray-400 uppercase tracking-tighter">Vizrt</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <Circle ref={out3Ref} className="size-8 p-1">
+                        <FileCode className="text-blue-400" size={12} />
+                      </Circle>
+                      <span className="text-[7px] font-black text-gray-400 uppercase tracking-tighter">Prem</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <Circle ref={out4Ref} className="size-8 p-1">
+                        <Layers className="text-amber-500" size={12} />
+                      </Circle>
+                      <span className="text-[7px] font-black text-gray-400 uppercase tracking-tighter">MAM</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <Circle ref={out5Ref} className="size-8 p-1">
+                        <Box className="text-emerald-500" size={12} />
+                      </Circle>
+                      <span className="text-[7px] font-black text-gray-400 uppercase tracking-tighter">ODF</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Desktop Layout */}
+                <div className="hidden md:flex size-full max-w-md flex-row items-stretch justify-between gap-6">
                   {/* INPUT COLUMN */}
                   <div className="flex flex-col justify-center items-center">
                     <Circle ref={inputRef}>
@@ -392,42 +458,44 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
                       <Circle ref={out1Ref} className="size-10 p-2">
                         <MonitorPlay className="text-blue-600" size={18} />
                       </Circle>
-                      <span className="mt-1 text-[7px] font-black text-gray-400 uppercase tracking-tighter">Ross XP</span>
+                      <span className="mt-1 text-[8px] md:text-[9px] font-black text-gray-400 uppercase tracking-tighter">Ross XP</span>
                     </div>
                     <div className="flex flex-col items-center">
                       <Circle ref={out2Ref} className="size-10 p-2">
                         <Database className="text-purple-500" size={18} />
                       </Circle>
-                      <span className="mt-1 text-[7px] font-black text-gray-400 uppercase tracking-tighter">Vizrt</span>
+                      <span className="mt-1 text-[8px] md:text-[9px] font-black text-gray-400 uppercase tracking-tighter">Vizrt</span>
                     </div>
                     <div className="flex flex-col items-center">
                       <Circle ref={out3Ref} className="size-10 p-2">
                         <FileCode className="text-blue-400" size={18} />
                       </Circle>
-                      <span className="mt-1 text-[7px] font-black text-gray-400 uppercase tracking-tighter">Premiere</span>
+                      <span className="mt-1 text-[8px] md:text-[9px] font-black text-gray-400 uppercase tracking-tighter">Premiere</span>
                     </div>
                     <div className="flex flex-col items-center">
                       <Circle ref={out4Ref} className="size-10 p-2">
                         <Layers className="text-amber-500" size={18} />
                       </Circle>
-                      <span className="mt-1 text-[7px] font-black text-gray-400 uppercase tracking-tighter">MAM/DAM</span>
+                      <span className="mt-1 text-[8px] md:text-[9px] font-black text-gray-400 uppercase tracking-tighter">MAM/DAM</span>
                     </div>
                     <div className="flex flex-col items-center">
                       <Circle ref={out5Ref} className="size-10 p-2">
                         <Box className="text-emerald-500" size={18} />
                       </Circle>
-                      <span className="mt-1 text-[7px] font-black text-gray-400 uppercase tracking-tighter">ODF XML</span>
+                      <span className="mt-1 text-[8px] md:text-[9px] font-black text-gray-400 uppercase tracking-tighter">ODF XML</span>
                     </div>
                   </div>
                 </div>
 
-                {/* --- Laser Beams --- */}
-                <AnimatedBeam containerRef={beamContainerRef} fromRef={inputRef} toRef={engineRef} duration={0.6} isActive={activeStep === 0} activeStep={activeStep} />
-                <AnimatedBeam containerRef={beamContainerRef} fromRef={engineRef} toRef={out1Ref} duration={0.5} curvature={-50} gradientColor="#2563EB" isActive={activeStep === 1} activeStep={activeStep} />
-                <AnimatedBeam containerRef={beamContainerRef} fromRef={engineRef} toRef={out2Ref} duration={0.5} curvature={-25} gradientColor="#A855F7" isActive={activeStep === 2} activeStep={activeStep} />
-                <AnimatedBeam containerRef={beamContainerRef} fromRef={engineRef} toRef={out3Ref} duration={0.5} curvature={0} gradientColor="#60A5FA" isActive={activeStep === 3} activeStep={activeStep} />
-                <AnimatedBeam containerRef={beamContainerRef} fromRef={engineRef} toRef={out4Ref} duration={0.5} curvature={25} gradientColor="#F59E0B" isActive={activeStep === 4} activeStep={activeStep} />
-                <AnimatedBeam containerRef={beamContainerRef} fromRef={engineRef} toRef={out5Ref} duration={0.5} curvature={50} gradientColor="#10B981" isActive={activeStep === 5} activeStep={activeStep} />
+                {/* --- Laser Beams (Desktop only) --- */}
+                <div className="hidden md:block">
+                  <AnimatedBeam containerRef={beamContainerRef} fromRef={inputRef} toRef={engineRef} duration={0.6} isActive={activeStep === 0} activeStep={activeStep} />
+                  <AnimatedBeam containerRef={beamContainerRef} fromRef={engineRef} toRef={out1Ref} duration={0.5} curvature={-50} gradientColor="#2563EB" isActive={activeStep === 1} activeStep={activeStep} />
+                  <AnimatedBeam containerRef={beamContainerRef} fromRef={engineRef} toRef={out2Ref} duration={0.5} curvature={-25} gradientColor="#A855F7" isActive={activeStep === 2} activeStep={activeStep} />
+                  <AnimatedBeam containerRef={beamContainerRef} fromRef={engineRef} toRef={out3Ref} duration={0.5} curvature={0} gradientColor="#60A5FA" isActive={activeStep === 3} activeStep={activeStep} />
+                  <AnimatedBeam containerRef={beamContainerRef} fromRef={engineRef} toRef={out4Ref} duration={0.5} curvature={25} gradientColor="#F59E0B" isActive={activeStep === 4} activeStep={activeStep} />
+                  <AnimatedBeam containerRef={beamContainerRef} fromRef={engineRef} toRef={out5Ref} duration={0.5} curvature={50} gradientColor="#10B981" isActive={activeStep === 5} activeStep={activeStep} />
+                </div>
               </div>
             </div>
           </div>

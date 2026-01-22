@@ -116,7 +116,12 @@ if (!(window as any)._reactRoot) {
 const root = (window as any)._reactRoot;
 root.render(
   <React.StrictMode>
-    <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignOutUrl="/">
+    <ClerkProvider 
+      publishableKey={PUBLISHABLE_KEY}
+      afterSignOutUrl="/"
+      navigate={(to) => window.location.href = to}
+      tokenCache={localStorage.getItem('clerk-token-cache')}
+    >
       <ErrorBoundary>
         <App />
       </ErrorBoundary>

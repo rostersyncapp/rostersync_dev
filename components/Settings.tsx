@@ -2,7 +2,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Profile, SubscriptionTier, Roster } from '../types.ts';
 import { PRICING_TIERS } from '../constants.tsx';
-import { uploadOrgLogo, getActivityLogs } from '../services/supabase.ts';
+import { uploadOrgLogo, getActivityLogs, setSupabaseToken, ActivityType } from '../services/supabase.ts';
+import { useUser, useAuth } from '@clerk/clerk-react';
 import { 
   Building2, 
   CreditCard, 
@@ -24,7 +25,11 @@ import {
   Download,
   Trash2,
   Edit,
-  Globe
+  Globe,
+  RefreshCw,
+  UserX,
+  FolderX,
+  Activity
 } from 'lucide-react';
 
 interface Props {
@@ -33,17 +38,29 @@ interface Props {
   onUpdate: (updates: Partial<Profile>) => void;
 }
 
-const ACTION_ICONS: Record<string, React.ReactNode> = {
-  LOGIN: <LogIn size={14} className="text-blue-500" />,
-  LOGOUT: <LogOut size={14} className="text-gray-400" />,
-  ROSTER_SAVE: <Save size={14} className="text-emerald-500" />,
-  ROSTER_DELETE: <Trash2 size={14} className="text-red-500" />,
-  ROSTER_EXPORT: <Download size={14} className="text-purple-500" />,
-  ROSTER_UPDATE: <Edit size={14} className="text-blue-500" />,
-  WORKSPACE_UPDATE: <Building2 size={14} className="text-indigo-500" />
+const ACTIVITY_ICONS: Record<ActivityType, React.ReactNode> = {
+  LOGIN: <LogIn size={16} className="text-green-500" />,
+  LOGOUT: <LogOut size={16} className="text-gray-500" />,
+  ROSTER_DELETE: <Trash2 size={16} className="text-red-500" />,
+  PLAYER_DELETE: <UserX size={16} className="text-orange-500" />,
+  PROJECT_FOLDER_DELETE: <FolderX size={16} className="text-pink-500" />,
+  ROSTER_UPDATE: <Edit size={16} className="text-blue-500" />
+};
+
+const formatTimeAgo = (dateString: string) => {
+  const date = new Date(dateString);
+  const now = new Date();
+  const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+  
+  if (seconds < 60) return 'Just now';
+  if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+  if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+  return date.toLocaleDateString();
 };
 
 const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
+  const { user } = useUser();
+  const { getToken } = useAuth();
   const [orgName, setOrgName] = useState(profile.organizationName);
   const [fullName, setFullName] = useState(profile.fullName || '');
   const [orgLogoUrl, setOrgLogoUrl] = useState(profile.orgLogoUrl || '');
@@ -68,7 +85,38 @@ const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
 
   const fetchActivities = async () => {
     setIsLoadingActivities(true);
-    const logs = await getActivityLogs(profile.id);
+    
+    // Force refresh the Clerk token before fetching activities
+    try {
+      if (user) {
+        console.log('Refreshing Supabase token...');
+        const token = await getToken({ template: 'supabase', forceRefresh: true } as any);
+        if (token) {
+          await setSupabaseToken(token);
+          console.log('Token refreshed successfully');
+        }
+      }
+    } catch (tokenError) {
+      console.error('Failed to refresh token:', tokenError);
+    }
+    
+    // First attempt with current client - use user.id directly for consistency
+    const currentUserId = user?.id || profile.id;
+    let logs = await getActivityLogs(currentUserId);
+    console.log('First query activities fetched:', logs);
+    
+    // If empty, retry with fresh token/client (handles re-auth timing issues)
+    if (logs.length === 0 && user) {
+      console.log('Initial query returned empty, refreshing token and retrying...');
+      const token = await getToken({ template: 'supabase', forceRefresh: true } as any);
+      if (token) {
+        await setSupabaseToken(token);
+        await new Promise(resolve => setTimeout(resolve, 200));
+        logs = await getActivityLogs(user.id);
+        console.log('Retry activities fetched:', logs);
+      }
+    }
+    
     setActivities(logs);
     setIsLoadingActivities(false);
   };
@@ -292,26 +340,26 @@ const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
                        <Clock size={40} className="mx-auto text-gray-300 mb-4" />
                        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">No Recent Activity</p>
                     </div>
-                  ) : (
-                    <div className="space-y-3">
-                       {activities.map((log) => (
-                         <div key={log.id} className="flex items-start gap-4 p-4 bg-gray-50/50 dark:bg-gray-800/30 rounded-2xl border border-transparent hover:border-gray-100 dark:hover:border-gray-700 transition-all group">
-                            <div className="mt-1 w-8 h-8 rounded-lg bg-white dark:bg-gray-800 flex items-center justify-center shadow-sm shrink-0">
-                               {ACTION_ICONS[log.action_type] || <CheckCircle2 size={14} className="text-gray-400" />}
-                            </div>
-                            <div className="flex-1">
-                               <div className="flex items-center justify-between gap-2">
-                                  <span className="text-sm font-bold text-gray-900 dark:text-white">{log.action_type.replace(/_/g, ' ')}</span>
-                                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-tight font-mono whitespace-nowrap">
-                                     {new Date(log.created_at).toLocaleDateString()} {new Date(log.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                  </span>
-                               </div>
-                               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 font-medium leading-relaxed">{log.description}</p>
-                            </div>
-                         </div>
-                       ))}
-                    </div>
-                  )}
+                   ) : (
+                     <div className="space-y-3 max-h-[400px] overflow-y-auto custom-scrollbar pr-2">
+                        {activities.map((log) => (
+                          <div key={log.id} className="flex items-start gap-4 p-4 bg-gray-50/50 dark:bg-gray-800/30 rounded-2xl border border-transparent hover:border-gray-100 dark:hover:border-gray-700 transition-all group">
+                             <div className="mt-0.5 w-9 h-9 rounded-lg bg-white dark:bg-gray-800 flex items-center justify-center shadow-sm shrink-0">
+                                {ACTIVITY_ICONS[log.action_type as ActivityType] || <Activity size={16} className="text-gray-400" />}
+                             </div>
+                             <div className="flex-1 min-w-0">
+                                <div className="flex items-center justify-between gap-2">
+                                   <span className="text-sm font-bold text-gray-900 dark:text-white">{log.action_type.replace(/_/g, ' ')}</span>
+                                   <span className="text-xs font-bold text-gray-400 uppercase tracking-tight font-mono whitespace-nowrap">
+                                      {formatTimeAgo(log.created_at)}
+                                   </span>
+                                </div>
+                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 font-medium leading-relaxed truncate">{log.description}</p>
+                             </div>
+                          </div>
+                        ))}
+                     </div>
+                   )}
                </div>
             </div>
           )}
