@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import { Dashboard } from './components/Dashboard.tsx';
 import Engine from './components/Engine.tsx';
 import Settings from './components/Settings.tsx';
-import Auth from './components/Auth.tsx';
 import LandingPage from './components/LandingPage.tsx';
 import { Roster, Profile, Project } from './types.ts';
 import { processRosterRawText, ProcessedRoster } from './services/gemini.ts';
@@ -164,11 +163,10 @@ const FolderItem: React.FC<{
 const App: React.FC = () => {
   const { isLoaded: clerkLoaded, user } = useUser();
   const { getToken, signOut } = useAuth();
-  const { openSignIn } = useClerk();
+  const { openSignIn, openSignUp } = useClerk();
 
   const [isInitializing, setIsInitializing] = useState(true);
   const [showLanding, setShowLanding] = useState(true);
-  const [authModal, setAuthModal] = useState<'signin' | 'signup' | null>(null);
   const [view, setView] = useState<'dashboard' | 'engine' | 'settings'>('dashboard');
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
   const [expandedFolderIds, setExpandedFolderIds] = useState<string[]>([]);
@@ -422,14 +420,7 @@ const App: React.FC = () => {
   if (showLanding) {
     return (
       <>
-        <LandingPage onSignIn={() => setAuthModal('signin')} onSignUp={() => setAuthModal('signup')} darkMode={darkMode} toggleDarkMode={() => setDarkMode(!darkMode)} siteConfig={siteConfig} />
-        {authModal && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in zoom-in duration-200">
-            <div className="relative w-full max-w-sm" onClick={(e) => e.stopPropagation()}>
-              <Auth initialView={authModal} onClose={() => setAuthModal(null)} onGuestLogin={() => setShowLanding(false)} darkMode={darkMode} />
-            </div>
-          </div>
-        )}
+        <LandingPage onSignIn={() => openSignIn()} onSignUp={() => openSignUp()} darkMode={darkMode} toggleDarkMode={() => setDarkMode(!darkMode)} siteConfig={siteConfig} />
       </>
     );
   }
@@ -453,7 +444,7 @@ const App: React.FC = () => {
           </div>
         </SignedOut>
         <SignedIn>
-          <UserButton appearance={{ baseTheme: darkMode ? dark : undefined }} />
+          <UserButton appearance={{ baseTheme: darkMode ? dark : undefined, elements: { userButtonPopoverCard: { pointerEvents: "initial" } } }} />
         </SignedIn>
       </header>
       <aside className="w-16 lg:w-60 border-r border-gray-200 dark:border-gray-800 flex flex-col fixed h-full bg-white dark:bg-gray-900 z-20 transition-all duration-300 shadow-sm">

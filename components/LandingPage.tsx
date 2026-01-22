@@ -28,6 +28,7 @@ import {
   Box,
   Share2
 } from 'lucide-react';
+import { useClerk, SignInButton, SignUpButton } from '@clerk/clerk-react';
 import { WavyBackground } from './ui/wavy-background';
 
 // --- Utility for Tailwind classes ---
@@ -246,60 +247,85 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
     } catch (err) { setDemoStatus('error'); }
   };
 
+  const CLERK_DOMAIN = 'https://winning-doe-44.accounts.dev';
+  const clerk = useClerk();
+
+  // Initialize with robust fallback for Safari/ITP blocking
+  const [signInUrl, setSignInUrl] = useState(`${CLERK_DOMAIN}/sign-in?redirect_url=${encodeURIComponent(window.location.origin)}/`);
+  const [signUpUrl, setSignUpUrl] = useState(`${CLERK_DOMAIN}/sign-up?redirect_url=${encodeURIComponent(window.location.origin)}/`);
+
+  useEffect(() => {
+    if (clerk?.loaded) {
+      setSignInUrl(clerk.buildSignInUrl());
+      setSignUpUrl(clerk.buildSignUpUrl());
+    }
+  }, [clerk?.loaded]);
+
   return (
-    <div className="min-h-screen w-full bg-[#FAFAFA] dark:bg-gray-900 font-sans text-[#1A1A1A] dark:text-gray-100 transition-colors duration-300">
-      {/* Navigation */}
-      <nav className="fixed top-0 left-0 w-full z-50 border-b border-gray-100 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md">
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-              <BrandLogo siteConfig={siteConfig} />
-              <span className="font-extrabold text-base tracking-tight font-mono text-gray-900 dark:text-white">{siteConfig.site_name}</span>
+    <div className={`min-h-screen font-sans selection:bg-[#5B5FFF]/30 ${darkMode ? 'dark' : ''} bg-[#FAFAFA] dark:bg-[#111827] text-gray-900 dark:text-gray-100 transition-colors duration-300`}>
+      {/* Background Layer - Moved to root to avoid Safari Stacking Context issues */}
+      <div className="absolute top-0 left-0 w-full h-[800px] z-0 pointer-events-none overflow-hidden">
+        <WavyBackground
+          className="w-full h-full pb-0"
+          backgroundFill={darkMode ? "#111827" : "#FAFAFA"}
+          waveOpacity={darkMode ? 0.5 : 0.3}
+          containerClassName="h-full"
+          speed="slow"
+          waveWidth={50}
+          colors={['#5B5FFF', '#5BC5FF', '#8B5CF6']}
+        />
+      </div>
+
+      <nav className="fixed top-0 w-full px-4 md:px-8 py-6 z-50 transition-all duration-300 bg-white/50 dark:bg-[#111827]/50 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-800/50">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-2 relative z-50">
+            <div className="w-8 h-8 rounded-xl primary-gradient text-white flex items-center justify-center shadow-lg shadow-[#5B5FFF]/20">
+              {siteConfig?.logo_url ? <img src={siteConfig.logo_url} alt="Logo" className="w-full h-full object-cover rounded-xl" /> : <Box size={18} />}
             </div>
-            <button onClick={toggleDarkMode} className="p-1.5 rounded-lg text-gray-400 hover:text-[#5B5FFF] transition-colors">
-              {darkMode ? <Sun size={16} /> : <Moon size={16} />}
-            </button>
+            <span className="text-lg font-black tracking-tight text-gray-900 dark:text-white">{siteConfig?.site_name || 'rosterSync'}</span>
           </div>
-          <div className="flex items-center gap-4">
-            <button onClick={onSignIn} className="hidden md:block text-xs font-bold text-gray-500 hover:text-[#5B5FFF] transition-colors">Sign In</button>
-            <button onClick={onSignUp} className="px-4 py-2 rounded-xl bg-[#1A1A1A] dark:bg-white text-white dark:text-[#1A1A1A] font-bold text-xs shadow-md hover:scale-105 active:scale-95 transition-all">Get Started</button>
+          <div className="flex items-center gap-4 relative z-50">
+            <button
+              onClick={toggleDarkMode}
+              className="p-2 text-gray-400 hover:text-[#5B5FFF] transition-colors rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
+            >
+              {darkMode ? <Sun size={20} /> : <Moon size={20} />}
+            </button>
+            <a href={signInUrl} className="hidden md:block text-xs font-bold text-gray-500 hover:text-[#5B5FFF] transition-colors cursor-pointer relative z-50">
+              Sign In
+            </a>
+            <a href={signUpUrl} className="relative z-50 px-4 py-2 rounded-xl bg-[#1A1A1A] dark:bg-white text-white dark:text-[#1A1A1A] font-bold text-xs shadow-md hover:scale-105 active:scale-95 transition-all cursor-pointer">
+              Get Started
+            </a>
           </div>
         </div>
       </nav>
 
       {/* Hero Section */}
-      <section className="relative z-10 pt-28 pb-0 px-6 text-center">
-        <div className="max-w-4xl mx-auto space-y-6 animate-in fade-in zoom-in duration-1000">
+      <section className="relative pt-32 pb-64 md:pb-80 px-4 overflow-hidden z-10">
+        <div className="max-w-7xl mx-auto text-center relative z-20">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#5B5FFF]/5 border border-[#5B5FFF]/10 text-[#5B5FFF] text-[10px] font-black uppercase tracking-widest mb-2">
             <Sparkles size={12} /> New: Gemini 3 Integration
           </div>
           <h1 className="text-4xl md:text-6xl font-extrabold tracking-tighter leading-[1.2] text-gray-900 dark:text-white">
             Athlete Rosters. <br />
-            <span className="text-transparent bg-clip-text accent-gradient inline-block py-1">Simplified for Production.</span>
+            <span className="bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-purple-600 text-transparent bg-clip-text inline-block py-1">Simplified for Production.</span>
           </h1>
+
           <p className="text-lg md:text-xl text-gray-500 dark:text-gray-400 max-w-2xl mx-auto font-medium leading-relaxed">
             Middleware transforming messy athlete data into production-ready metadata for MAM, DAM, and Broadcast systems.
           </p>
-          <div className="pt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
-            <button onClick={onSignUp} className="w-full sm:w-auto px-6 py-3.5 rounded-2xl primary-gradient text-white font-bold text-base shadow-lg shadow-[#5B5FFF]/20 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2">
-              Start Free Trial <ArrowRight size={18} />
-            </button>
-            <button onClick={() => setShowDemoModal(true)} className="w-full sm:w-auto px-6 py-3.5 rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-300 font-bold text-base hover:bg-gray-50 dark:hover:bg-gray-800 transition-all">
+          <div className="pt-6 flex flex-col sm:flex-row items-center justify-center gap-3 relative z-50">
+            <SignUpButton mode="redirect">
+              <span className="relative z-50 w-full sm:w-auto px-6 py-3.5 rounded-2xl primary-gradient text-white font-bold text-base shadow-lg shadow-[#5B5FFF]/20 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer">
+                Start Free Trial <ArrowRight size={18} />
+              </span>
+            </SignUpButton>
+            <button onClick={() => setShowDemoModal(true)} className="relative z-50 w-full sm:w-auto px-6 py-3.5 rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-300 font-bold text-base hover:bg-gray-50 dark:hover:bg-gray-800 transition-all">
               Book Demo
             </button>
           </div>
         </div>
-      </section>
-
-      {/* Wavy Background Section */}
-      <section className="relative w-full h-[500px] overflow-hidden -mt-32 mb-16">
-        <WavyBackground
-          className="max-w-4xl mx-auto pb-40"
-          backgroundFill={darkMode ? "#111827" : "#FAFAFA"}
-          waveOpacity={darkMode ? 0.5 : 0.3}
-          containerClassName="h-full"
-        >
-        </WavyBackground>
       </section>
 
       {/* Animated Beam Distribution Section */}
@@ -459,12 +485,13 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
                     </div>
                   ))}
                 </div>
-                <button
-                  onClick={onSignUp}
-                  className={`w-full py-3 rounded-xl font-bold text-sm transition-all ${tier.id === 'PRO' ? 'primary-gradient text-white shadow-lg' : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white hover:bg-gray-200'}`}
-                >
-                  Choose {tier.name}
-                </button>
+                <SignUpButton mode="redirect">
+                  <span
+                    className={`relative z-50 block w-full py-3 rounded-xl font-bold text-sm transition-all text-center cursor-pointer ${tier.id === 'PRO' ? 'primary-gradient text-white shadow-lg' : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white hover:bg-gray-200'}`}
+                  >
+                    Choose {tier.name}
+                  </span>
+                </SignUpButton>
               </div>
             ))}
           </div>

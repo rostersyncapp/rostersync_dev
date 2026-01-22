@@ -26,7 +26,7 @@ export const WavyBackground = ({
     waveOpacity?: number;
     [key: string]: any;
 }) => {
-    const noise = createNoise3D();
+    const noise = React.useMemo(() => createNoise3D(), []);
     let w: number,
         h: number,
         nt: number,
@@ -48,17 +48,39 @@ export const WavyBackground = ({
 
     const init = () => {
         canvas = canvasRef.current;
+        if (!canvas) return; // Guard against null canvas
         ctx = canvas.getContext("2d");
-        w = ctx.canvas.width = canvas.parentElement.offsetWidth;
-        h = ctx.canvas.height = canvas.parentElement.offsetHeight;
-        ctx.filter = `blur(${blur}px)`;
+
+        // High DPI Support
+        const dpr = window.devicePixelRatio || 1;
+        const rect = canvas.parentElement.getBoundingClientRect();
+
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+
+        // Scale context to match
+        ctx.scale(dpr, dpr);
+
+        // Set logical values for calculation
+        w = rect.width;
+        h = rect.height;
+
+        // Reset filter - We use CSS filter instead for performance
+        ctx.filter = "none";
+
         nt = 0;
+
         window.onresize = function () {
-            w = ctx.canvas.width = canvas.parentElement.offsetWidth;
-            h = ctx.canvas.height = canvas.parentElement.offsetHeight;
-            ctx.filter = `blur(${blur}px)`;
+            // Re-calculate on resize
+            const dpr = window.devicePixelRatio || 1;
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.scale(dpr, dpr);
+            w = rect.width;
+            h = rect.height;
+            ctx.filter = "none";
         };
-        render();
     };
 
     const waveColors = colors ?? [
@@ -68,8 +90,16 @@ export const WavyBackground = ({
         "#e879f9",
         "#22d3ee",
     ];
-    const drawWave = (n: number) => {
-        nt += getSpeed();
+    const drawWave = (n: number, timestamp: number) => {
+        // Use timestamp for smooth animation independent of frame rate
+        // speed value roughly maps to frequency
+        // Adjusted speed to match 60fps feel: 0.001 per frame @ 60fps ~= 0.00006 per ms
+        // User requested slow down by half -> 0.001 / 0.0005. Reduced by 10% -> 0.00045. Reduced by 20% -> 0.00036. Reduced by another 20% -> 0.000288
+        const time = timestamp * (speed === "fast" ? 0.001 : 0.000288);
+
+        // Reset nt based on time
+        nt = time;
+
         for (i = 0; i < n; i++) {
             ctx.beginPath();
             ctx.lineWidth = waveWidth || 50;
@@ -84,44 +114,45 @@ export const WavyBackground = ({
     };
 
     let animationId: number;
-    const render = () => {
+    const render = (timestamp: number) => {
+        if (!ctx) return;
+
+        // Solid background to prevent flashing/transparency issues
+        ctx.globalAlpha = 1.0;
         ctx.fillStyle = backgroundFill || "black";
-        ctx.globalAlpha = waveOpacity || 0.5;
         ctx.fillRect(0, 0, w, h);
-        drawWave(5);
+
+        // Draw waves with specified opacity
+        ctx.globalAlpha = waveOpacity || 0.5;
+        drawWave(5, timestamp);
         animationId = requestAnimationFrame(render);
     };
 
     useEffect(() => {
         init();
+        // Start animation loop
+        animationId = requestAnimationFrame(render);
         return () => {
             cancelAnimationFrame(animationId);
+            window.onresize = null; // Cleanup resize listener
         };
     }, [backgroundFill, waveOpacity, colors, blur, speed, waveWidth]);
-
-    const [isSafari, setIsSafari] = useState(false);
-    useEffect(() => {
-        // I'm sorry but i have got to support it on safari.
-        setIsSafari(
-            typeof window !== "undefined" &&
-            navigator.userAgent.includes("Safari") &&
-            !navigator.userAgent.includes("Chrome")
-        );
-    }, []);
 
     return (
         <div
             className={cn(
-                "h-full flex flex-col items-center justify-center",
+                "h-full flex flex-col items-center justify-center pointer-events-none",
                 containerClassName
             )}
         >
             <canvas
-                className="absolute inset-0 z-0"
+                className="absolute inset-0 !z-[-1] !pointer-events-none"
                 ref={canvasRef}
                 id="canvas"
                 style={{
-                    ...(isSafari ? { filter: `blur(${blur}px)` } : {}),
+                    filter: `blur(${blur}px)`, // Use CSS filter everywhere
+                    width: '100%',
+                    height: '100%'
                 }}
             ></canvas>
             <div className={cn("relative z-10", className)} {...props}>
