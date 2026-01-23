@@ -328,13 +328,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
           <p className="text-lg md:text-xl text-gray-500 dark:text-gray-400 max-w-2xl mx-auto font-medium leading-relaxed">
             Middleware transforming messy athlete data into production-ready metadata for MAM, DAM, and Broadcast systems.
           </p>
-          <div className="pt-6 flex flex-col sm:flex-row items-center justify-center gap-3 relative z-50">
-            <SignUpButton mode="redirect">
-              <span className="relative z-50 w-full sm:w-auto px-6 py-3.5 rounded-2xl primary-gradient text-white font-bold text-base shadow-lg shadow-[#5B5FFF]/20 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer">
-                Start Free Trial <ArrowRight size={18} />
-              </span>
-            </SignUpButton>
-            <button onClick={() => setShowDemoModal(true)} className="relative z-50 w-full sm:w-auto px-6 py-3.5 rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-300 font-bold text-base hover:bg-gray-50 dark:hover:bg-gray-800 transition-all">
+          <div className="pt-6 flex justify-center relative z-50">
+            <button onClick={() => setShowDemoModal(true)} className="px-6 py-3.5 rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-300 font-bold text-base hover:bg-gray-50 dark:hover:bg-gray-800 transition-all">
               Book Demo
             </button>
           </div>

@@ -1,18 +1,13 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Profile, SubscriptionTier, Roster } from '../types.ts';
 import { PRICING_TIERS } from '../constants.tsx';
-import { uploadOrgLogo, getActivityLogs, setSupabaseToken, ActivityType } from '../services/supabase.ts';
+import { getActivityLogs, setSupabaseToken, ActivityType } from '../services/supabase.ts';
 import { useUser, useAuth } from '@clerk/clerk-react';
 import { 
-  Building2, 
-  CreditCard, 
-  Save,
+  CreditCard,
   Loader2,
   BarChart4,
-  Palette,
-  Upload,
-  User,
   ChevronRight,
   CheckCircle2,
   Zap,
@@ -21,15 +16,11 @@ import {
   Clock,
   LogIn,
   LogOut,
-  Database,
-  Download,
   Trash2,
   Edit,
-  Globe,
-  RefreshCw,
+  Activity,
   UserX,
-  FolderX,
-  Activity
+  FolderX
 } from 'lucide-react';
 
 interface Props {
@@ -61,21 +52,9 @@ const formatTimeAgo = (dateString: string) => {
 const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
   const { user } = useUser();
   const { getToken } = useAuth();
-  const [orgName, setOrgName] = useState(profile.organizationName);
-  const [fullName, setFullName] = useState(profile.fullName || '');
-  const [orgLogoUrl, setOrgLogoUrl] = useState(profile.orgLogoUrl || '');
-  const [isSaving, setIsSaving] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
-  const [activeTab, setActiveTab] = useState<'org' | 'subscription' | 'roi' | 'activity'>('org');
+  const [activeTab, setActiveTab] = useState<'subscription' | 'roi' | 'activity'>('subscription');
   const [activities, setActivities] = useState<any[]>([]);
   const [isLoadingActivities, setIsLoadingActivities] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    setOrgName(profile.organizationName);
-    setFullName(profile.fullName || '');
-    setOrgLogoUrl(profile.orgLogoUrl || '');
-  }, [profile]);
 
   useEffect(() => {
     if (activeTab === 'activity') {
@@ -121,30 +100,6 @@ const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
     setIsLoadingActivities(false);
   };
 
-  const handleSaveOrg = () => {
-    setIsSaving(true);
-    setTimeout(() => {
-      onUpdate({ organizationName: orgName, fullName: fullName, orgLogoUrl: orgLogoUrl });
-      setIsSaving(false);
-      alert("Workspace settings saved.");
-    }, 600);
-  };
-
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setIsUploading(true);
-    try {
-      const publicUrl = await uploadOrgLogo(profile.id, file);
-      setOrgLogoUrl(publicUrl);
-      onUpdate({ ...profile, orgLogoUrl: publicUrl });
-      alert("Workspace logo uploaded successfully.");
-    } catch (err: any) {
-      alert("Upload failed: " + err.message);
-    } finally { setIsUploading(false); }
-  };
-
   // ROI Stats
   const totalRosters = rosters.length;
   const totalAthletes = rosters.reduce((acc, r) => acc + r.athleteCount, 0);
@@ -156,78 +111,31 @@ const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
   const usagePercent = Math.min(100, Math.round((profile.creditsUsed / usageLimit) * 100));
 
   return (
-    <div className="animate-in fade-in duration-500 max-w-7xl mx-auto">
+    <div className="max-w-7xl mx-auto">
       <div className="mb-10">
         <h1 className="text-4xl font-extrabold tracking-tight mb-3 text-gray-900 dark:text-white">Settings</h1>
         <p className="text-base text-gray-500 dark:text-gray-400 font-medium">Manage your organization's metadata and preferences.</p>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-10">
+        <div className="flex flex-col md:flex-row gap-10">
           <aside className="w-full md:w-64 space-y-1.5 shrink-0">
-          <button onClick={() => setActiveTab('org')} className={`w-full flex items-center justify-between px-5 py-3.5 rounded-2xl text-base font-bold transition-all ${activeTab === 'org' ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF]' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
-            <div className="flex items-center gap-4"><Building2 size={20} /> Organization</div>
-            {activeTab === 'org' && <ChevronRight size={18} />}
-          </button>
-          <button onClick={() => setActiveTab('subscription')} className={`w-full flex items-center justify-between px-5 py-3.5 rounded-2xl text-base font-bold transition-all ${activeTab === 'subscription' ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF]' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
-            <div className="flex items-center gap-4"><CreditCard size={20} /> Subscription</div>
-            {activeTab === 'subscription' && <ChevronRight size={18} />}
-          </button>
-          <button onClick={() => setActiveTab('activity')} className={`w-full flex items-center justify-between px-5 py-3.5 rounded-2xl text-base font-bold transition-all ${activeTab === 'activity' ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF]' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
-            <div className="flex items-center gap-4"><History size={20} /> Activity Log</div>
-            {activeTab === 'activity' && <ChevronRight size={18} />}
-          </button>
-          <button onClick={() => setActiveTab('roi')} className={`w-full flex items-center justify-between px-5 py-3.5 rounded-2xl text-base font-bold transition-all ${activeTab === 'roi' ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF]' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
-            <div className="flex items-center gap-4"><BarChart4 size={20} /> Performance ROI</div>
-            {activeTab === 'roi' && <ChevronRight size={18} />}
-          </button>
-        </aside>
+            <button onClick={() => setActiveTab('subscription')} className={`w-full flex items-center justify-between px-5 py-3.5 rounded-2xl text-base font-bold transition-all ${activeTab === 'subscription' ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF]' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
+              <div className="flex items-center gap-4"><CreditCard size={20} /> Subscription</div>
+              {activeTab === 'subscription' && <ChevronRight size={18} />}
+            </button>
+            <button onClick={() => setActiveTab('activity')} className={`w-full flex items-center justify-between px-5 py-3.5 rounded-2xl text-base font-bold transition-all ${activeTab === 'activity' ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF]' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
+              <div className="flex items-center gap-4"><History size={20} /> Activity Log</div>
+              {activeTab === 'activity' && <ChevronRight size={18} />}
+            </button>
+            <button onClick={() => setActiveTab('roi')} className={`w-full flex items-center justify-between px-5 py-3.5 rounded-2xl text-base font-bold transition-all ${activeTab === 'roi' ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF]' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
+              <div className="flex items-center gap-4"><BarChart4 size={20} /> Performance ROI</div>
+              {activeTab === 'roi' && <ChevronRight size={18} />}
+            </button>
+          </aside>
 
         <div className="flex-1 space-y-10">
-          {activeTab === 'org' && (
-            <div className="space-y-10 animate-in slide-in-from-bottom-4 duration-500">
-              <div className="bg-white dark:bg-gray-900 rounded-[40px] border border-gray-100 dark:border-gray-800 p-10 shadow-sm">
-                <h3 className="text-2xl font-extrabold mb-8 flex items-center gap-4 text-gray-900 dark:text-white"><Building2 size={24} className="text-[#5B5FFF]" /> Workspace Identity</h3>
-                <div className="space-y-6 max-w-lg mb-12">
-                  <div className="space-y-2.5">
-                    <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest font-mono">Full Name</label>
-                    <div className="relative">
-                      <User className="absolute left-4.5 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-                      <input type="text" className="w-full pl-12 pr-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl outline-none focus:ring-2 focus:ring-[#5B5FFF]/20 transition-all text-lg text-gray-900 dark:text-white" value={fullName} onChange={(e) => setFullName(e.target.value)} />
-                    </div>
-                  </div>
-                  <div className="space-y-2.5">
-                    <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest font-mono">Workspace Name</label>
-                    <input type="text" className="w-full px-5 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl outline-none focus:ring-2 focus:ring-[#5B5FFF]/20 transition-all text-lg text-gray-900 dark:text-white" value={orgName} onChange={(e) => setOrgName(e.target.value)} />
-                  </div>
-                </div>
-                <div className="mt-12 pt-12 border-t border-gray-100 dark:border-gray-800">
-                  <h3 className="text-2xl font-extrabold mb-8 flex items-center gap-4 text-gray-900 dark:text-white"><Palette size={24} className="text-[#5B5FFF]" /> Workspace Logo</h3>
-                  <div className="flex flex-col md:flex-row gap-10 items-start">
-                    <div className="relative group">
-                      <div className="w-32 h-32 rounded-[32px] primary-gradient flex items-center justify-center text-white shadow-lg overflow-hidden border-4 border-white dark:border-gray-800">
-                        {isUploading ? <Loader2 size={32} className="animate-spin" /> : orgLogoUrl ? <img src={orgLogoUrl} alt="Org Logo" className="w-full h-full object-cover" /> : <Building2 size={48} />}
-                      </div>
-                      <button onClick={() => fileInputRef.current?.click()} className="absolute -bottom-3 -right-3 p-3 bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 text-[#5B5FFF] hover:scale-110 transition-transform"><Upload size={22} /></button>
-                      <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileUpload} />
-                    </div>
-                    <div className="flex-1 space-y-5">
-                       <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest font-mono">Logo URL Override</label>
-                       <input type="text" className="w-full px-5 py-4 bg-gray-50 dark:bg-gray-800 rounded-2xl outline-none text-sm font-mono border border-transparent focus:border-gray-200 dark:focus:border-gray-700" value={orgLogoUrl} onChange={(e) => setOrgLogoUrl(e.target.value)} />
-                       <p className="text-sm text-gray-400 font-medium italic">High-definition source recommended (512px+).</p>
-                    </div>
-                  </div>
-                </div>
-                <div className="mt-12 pt-8 border-t border-gray-50 dark:border-gray-800">
-                  <button onClick={handleSaveOrg} disabled={isSaving || isUploading} className="flex items-center gap-4 px-10 py-4.5 rounded-[24px] primary-gradient text-white font-bold text-base hover:shadow-lg disabled:opacity-50 transition-all uppercase tracking-widest">
-                    {isSaving ? <Loader2 size={20} className="animate-spin" /> : <Save size={20} />} Save Workspace
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-
           {activeTab === 'subscription' && (
-            <div className="space-y-10 animate-in slide-in-from-bottom-4 duration-500">
+            <div className="space-y-10">
               {/* Usage Card */}
               <div className="bg-white dark:bg-gray-900 rounded-[40px] border border-gray-100 dark:border-gray-800 p-10 shadow-sm">
                 <div className="flex items-center justify-between mb-10">
@@ -319,7 +227,7 @@ const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
           )}
 
           {activeTab === 'activity' && (
-            <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500">
+            <div className="space-y-8">
                <div className="bg-white dark:bg-gray-900 rounded-[40px] border border-gray-100 dark:border-gray-800 p-10 shadow-sm min-h-[400px]">
                   <div className="flex items-center justify-between mb-8">
                      <h3 className="text-2xl font-extrabold flex items-center gap-4 text-gray-900 dark:text-white">
@@ -365,7 +273,7 @@ const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
           )}
 
           {activeTab === 'roi' && (
-            <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500">
+            <div className="space-y-8">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                  <div className="bg-white dark:bg-gray-900 p-8 rounded-[36px] border border-gray-100 dark:border-gray-800 shadow-sm">
                    <div className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2 font-mono">Net Savings</div>
