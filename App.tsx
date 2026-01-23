@@ -39,7 +39,8 @@ import {
   Headphones,
   Clock,
   History,
-  ChevronDown
+  ChevronDown,
+  AlertCircle
 } from 'lucide-react';
 
 const ICON_MAP: Record<string, any> = {
@@ -296,8 +297,9 @@ const App: React.FC = () => {
           await setSupabaseToken(token);
           await logActivity(user.id, 'LOGIN', 'Signed in to production workspace.');
           fetchData(user);
-        } catch (err) {
+        } catch (err: any) {
           console.error("Error syncing token with Supabase:", err);
+          setInitializationError(err.message || "Failed to synchronize authentication.");
         }
       } else if (clerkLoaded) {
         setSupabaseToken(null);
@@ -345,9 +347,10 @@ const App: React.FC = () => {
     const userId = currentUser.id;
     try {
       let profileData = null;
-      const { data: existingProfile, error: fetchError } = await supabase.from('profiles').select('*').eq('id', userId).single();
+      // Use maybeSingle() to avoid 406 errors if headers are wonky, or just checking if data exists
+      const { data: existingProfile, error: fetchError } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle();
 
-      if (fetchError && fetchError.code === 'PGRST116') {
+      if (!existingProfile) {
         const { data: newProfile, error: createError } = await supabase.from('profiles').insert({
           id: userId,
           full_name: currentUser.fullName || 'User',
@@ -355,7 +358,10 @@ const App: React.FC = () => {
           subscription_tier: 'BASIC'
         }).select().single();
 
-        if (createError) console.error("Error creating profile:", createError);
+        if (createError) {
+          console.error("Error creating profile:", createError);
+          setInitializationError(`Profile Creation Failed: ${createError.message} (Code: ${createError.code}) - Try refreshing.`);
+        }
         profileData = newProfile;
       } else {
         profileData = existingProfile;
@@ -368,14 +374,24 @@ const App: React.FC = () => {
           fullName: profileData.full_name || currentUser.fullName || 'User',
           email: currentUser.primaryEmailAddress?.emailAddress || 'User',
           subscriptionTier: profileData.subscription_tier,
-          organizationName: profileData.organization_name || 'Workspace',
+          organizationName: profileData.organization_name || 'My Workspace',
           orgLogoUrl: profileData.org_logo_url,
           creditsUsed: usageCount
         });
       }
-      const { data: projectData } = await supabase.from('projects').select('*').order('created_at', { ascending: false });
+
+      const { data: projectData, error: projectError } = await supabase.from('projects').select('*').order('created_at', { ascending: false });
+      if (projectError) {
+        console.error("[Auth Debug] Failed to fetch projects:", projectError.message, projectError.code);
+        if (projectError.code === '42501' || projectError.message.includes('JWT')) {
+          setInitializationError("Authentication sync failed. Please check your Supabase JWT Secret in the Clerk dashboard.");
+        }
+      }
       if (projectData) setProjects(projectData.map((p: any) => ({ id: p.id, userId: p.user_id, name: p.name || 'Untitled Folder', parentId: p.parent_id, description: p.description, createdAt: p.created_at, color: p.color })));
-      const { data: rosterData } = await supabase.from('rosters').select('*').order('created_at', { ascending: false });
+
+      const { data: rosterData, error: rosterError } = await supabase.from('rosters').select('*').order('created_at', { ascending: false });
+      if (rosterError) console.error("[Auth Debug] Failed to fetch rosters:", rosterError.message);
+
       if (rosterData) {
         setRosters(rosterData.map((r: any) => ({
           id: r.id,
@@ -393,8 +409,9 @@ const App: React.FC = () => {
           isSynced: true
         })));
       }
-    } catch (err) {
-      console.error('Error fetching data:', err);
+    } catch (err: any) {
+      console.error('[Auth Debug] Fatal error in fetchData:', err);
+      setInitializationError(err.message || "Failed to initialize user session.");
     } finally {
       setLoadingData(false);
     }

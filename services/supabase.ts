@@ -36,9 +36,17 @@ export const supabase = createClient(finalUrl, finalKey);
  */
 export const setSupabaseToken = async (token: string | null) => {
   if (token) {
+    // Standard RLS Injection for Clerk + Supabase
     (supabase as any).rest.headers['Authorization'] = `Bearer ${token}`;
+    // Also inject into other sub-clients if they exist
+    if ((supabase as any).storage) {
+      (supabase as any).storage.headers['Authorization'] = `Bearer ${token}`;
+    }
   } else {
     delete (supabase as any).rest.headers['Authorization'];
+    if ((supabase as any).storage) {
+      delete (supabase as any).storage.headers['Authorization'];
+    }
   }
 };
 
