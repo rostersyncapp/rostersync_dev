@@ -171,7 +171,7 @@ export const Engine: React.FC<Props> = ({
                 </div>
               </div>
             </div>
-            <textarea className={`w-full h-96 px-6 py-6 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl outline-none transition-all text-base leading-relaxed font-mono text-gray-900 dark:text-gray-200 placeholder:text-gray-400 dark:placeholder:text-gray-600 ${isProcessing ? 'opacity-50 pointer-events-none' : 'focus:ring-2 focus:ring-[#5B5FFF]/20'}`} placeholder={isNocMode ? "Paste Olympic Delegation or Event Data here...\n<add season>" : "<paste raw text here>\n<add season>"} value={rawInput} onChange={(e) => setRawInput(e.target.value)} />
+            <textarea className={`w-full h-96 px-6 py-6 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl outline-none transition-all text-base leading-relaxed font-mono text-gray-900 dark:text-gray-200 placeholder:text-gray-400 dark:placeholder:text-gray-600 ${isProcessing ? 'opacity-50 pointer-events-none' : 'focus:ring-2 focus:ring-[#5B5FFF]/20'}`} placeholder="Help me, Obi-Wan Kenobi. You're my only hope... to paste this data" value={rawInput} onChange={(e) => setRawInput(e.target.value)} />
             <div className="flex items-center gap-4 mt-4">
               <div className="flex items-center gap-3 px-4 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl">
                 <Calendar size={18} className="text-gray-400" />
