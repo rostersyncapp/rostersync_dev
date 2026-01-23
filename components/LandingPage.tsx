@@ -375,6 +375,14 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
                 <label className="text-[9px] font-bold text-gray-400 uppercase tracking-widest ml-1">Work Email</label>
                 <input type="email" required value={demoForm.email} onChange={(e) => setDemoForm({ ...demoForm, email: e.target.value })} className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border-none rounded-lg text-sm font-medium text-gray-900 dark:text-white" />
               </div>
+              <div className="space-y-1">
+                <label className="text-[9px] font-bold text-gray-400 uppercase tracking-widest ml-1">Organization</label>
+                <input type="text" value={demoForm.organization} onChange={(e) => setDemoForm({ ...demoForm, organization: e.target.value })} className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border-none rounded-lg text-sm font-medium text-gray-900 dark:text-white" />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[9px] font-bold text-gray-400 uppercase tracking-widest ml-1">Broadcast Use Case</label>
+                <textarea rows={2} value={demoForm.useCase} onChange={(e) => setDemoForm({ ...demoForm, useCase: e.target.value })} className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border-none rounded-lg text-sm font-medium text-gray-900 dark:text-white resize-none" />
+              </div>
               {demoStatus === 'success' ? (
                 <div className="p-3 bg-emerald-50 text-emerald-600 rounded-lg text-center font-bold text-xs flex items-center justify-center gap-2">
                   <CheckCircle2 size={16} /> Request Received!
