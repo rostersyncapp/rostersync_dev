@@ -235,9 +235,21 @@ const App: React.FC = () => {
   const { getToken, signOut } = useAuth();
   const { openSignIn, openSignUp } = useClerk();
 
-  const [isInitializing, setIsInitializing] = useState(true);
-  const [showLanding, setShowLanding] = useState(true);
+  // All hooks must be called unconditionally - no early returns before hooks
   const [view, setView] = useState<'dashboard' | 'engine' | 'settings'>('dashboard');
+
+  useEffect(() => {
+    const saved = localStorage.getItem('lastView');
+    if (saved === 'engine' || saved === 'settings') {
+      setView(saved);
+    }
+  }, []);
+
+  const handleSetView = (newView: 'dashboard' | 'engine' | 'settings') => {
+    setView(newView);
+    localStorage.setItem('lastView', newView);
+  };
+
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
   const [expandedFolderIds, setExpandedFolderIds] = useState<string[]>([]);
   const [siteConfig, setSiteConfig] = useState<SiteConfig>({ site_name: 'rosterSync', logo_url: null });
@@ -282,7 +294,6 @@ const App: React.FC = () => {
         try {
           const token = await getToken({ template: 'supabase', forceRefresh: true } as any);
           await setSupabaseToken(token);
-          setShowLanding(false);
           await logActivity(user.id, 'LOGIN', 'Signed in to production workspace.');
           fetchData(user);
         } catch (err) {
@@ -290,7 +301,6 @@ const App: React.FC = () => {
         }
       } else if (clerkLoaded) {
         setSupabaseToken(null);
-        setShowLanding(true);
         setRosters([]);
         setProjects([]);
       }
@@ -325,7 +335,6 @@ const App: React.FC = () => {
         const { data } = await supabase.from('release_notes').select('*').order('created_at', { ascending: false });
         if (data) setReleaseNotes(data);
       }
-      setIsInitializing(false);
     };
 
     initApp();
@@ -435,15 +444,15 @@ const App: React.FC = () => {
     if (user) {
       await logActivity(user.id, 'LOGOUT', 'User signed out of production workspace.');
     }
+    localStorage.removeItem('lastView');
     await signOut();
-    setShowLanding(true);
   };
 
   const handleStartProcessing = async (text: string, isNocMode: boolean = false, seasonYear: string = '', findBranding: boolean = false) => {
     const limit = getTierLimit(profile.subscriptionTier);
     if (profile.creditsUsed >= limit) { alert(`Limit Reached! ${profile.creditsUsed}/${limit}`); return; }
     setIsProcessing(true);
-    setView('engine');
+    handleSetView('engine');
     try {
       const result = await processRosterRawText(text, profile.subscriptionTier, isNocMode, seasonYear, findBranding);
       setPendingRoster(result);
@@ -476,7 +485,7 @@ const App: React.FC = () => {
       setRosters(prev => [{ ...newRoster, isSynced: false }, ...prev]);
     }
     setPendingRoster(null);
-    setView('dashboard');
+    handleSetView('dashboard');
   };
 
   const handleSupportSubmit = async (e: React.FormEvent) => {
@@ -503,28 +512,22 @@ const App: React.FC = () => {
     }
   };
 
-  if (isInitializing || loadingData) {
-    return (
-      <div className="min-h-screen bg-[#FAFAFA] dark:bg-gray-950 flex flex-col items-center justify-center gap-6 text-center px-4">
-        <Loader2 className="animate-spin text-[#5B5FFF]" size={40} />
-        <p className="text-xs font-bold text-gray-400 uppercase tracking-[0.2em] animate-pulse">Initializing Production Sync</p>
-      </div>
-    );
-  }
-
-  if (showLanding) {
-    return (
-      <>
-        <LandingPage onSignIn={() => openSignIn()} onSignUp={() => openSignUp()} darkMode={darkMode} toggleDarkMode={() => setDarkMode(!darkMode)} siteConfig={siteConfig} />
-      </>
-    );
-  }
-
   return (
-    <div className={`flex min-h-screen bg-[#FAFAFA] dark:bg-gray-950 font-sans text-[#1A1A1A] dark:text-gray-100 transition-colors duration-300`}>
-      <aside className="w-16 lg:w-60 border-r border-gray-200 dark:border-gray-800 flex flex-col fixed h-full bg-white dark:bg-gray-900 z-20 transition-all duration-300 shadow-sm">
+    <>
+      <SignedOut>
+        <LandingPage 
+          onSignIn={() => openSignIn()} 
+          onSignUp={() => openSignUp()} 
+          darkMode={darkMode} 
+          toggleDarkMode={() => setDarkMode(!darkMode)} 
+          siteConfig={siteConfig} 
+        />
+      </SignedOut>
+      <SignedIn>
+      <div className={`flex min-h-screen bg-[#FAFAFA] dark:bg-gray-950 font-sans text-[#1A1A1A] dark:text-gray-100 transition-colors duration-300`}>
+        <aside className="w-16 lg:w-60 border-r border-gray-200 dark:border-gray-800 flex flex-col fixed h-full bg-white dark:bg-gray-900 z-20 transition-all duration-300 shadow-sm">
         <div className="h-16 flex items-center justify-between px-4 lg:px-5 border-b border-gray-100 dark:border-gray-800 shrink-0">
-          <div className="flex items-center gap-3 text-gray-900 dark:text-white cursor-pointer" onClick={() => { setView('dashboard'); setActiveProjectId(null); setSelectedRosterId(null); }}>
+          <div className="flex items-center gap-3 text-gray-900 dark:text-white cursor-pointer" onClick={() => { handleSetView('dashboard'); setActiveProjectId(null); setSelectedRosterId(null); }}>
             <BrandLogo siteConfig={siteConfig} />
             <span className="font-extrabold text-base tracking-tight hidden lg:block">{siteConfig.site_name}</span>
           </div>
@@ -535,15 +538,15 @@ const App: React.FC = () => {
 
         <div className="flex-1 overflow-y-auto custom-scrollbar p-3 lg:p-4 space-y-6">
           <nav className="space-y-1">
-            <button onClick={() => { setView('dashboard'); setActiveProjectId(null); setSelectedRosterId(null); }} className={`w-full flex items-center gap-3 p-2 rounded-xl transition-all ${view === 'dashboard' && activeProjectId === null ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF] font-bold' : 'text-gray-500 hover:bg-gray-50 font-medium'}`}>
+            <button onClick={() => { handleSetView('dashboard'); setActiveProjectId(null); setSelectedRosterId(null); }} className={`w-full flex items-center gap-3 p-2 rounded-xl transition-all ${view === 'dashboard' && activeProjectId === null ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF] font-bold' : 'text-gray-500 hover:bg-gray-50 font-medium'}`}>
               <LayoutDashboard size={20} />
               <span className="hidden lg:block text-[14px]">Dashboard</span>
             </button>
-            <button onClick={() => setView('engine')} className={`w-full flex items-center gap-3 p-2 rounded-xl transition-all ${view === 'engine' ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF] font-bold' : 'text-gray-500 hover:bg-gray-50 font-medium'}`}>
+            <button onClick={() => handleSetView('engine')} className={`w-full flex items-center gap-3 p-2 rounded-xl transition-all ${view === 'engine' ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF] font-bold' : 'text-gray-500 hover:bg-gray-50 font-medium'}`}>
               <Cpu size={20} />
               <span className="hidden lg:block text-[14px]">The Engine</span>
             </button>
-            <button onClick={() => setView('settings')} className={`w-full flex items-center gap-3 p-2 rounded-xl transition-all ${view === 'settings' ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF] font-bold' : 'text-gray-500 hover:bg-gray-100 font-medium'}`}><SettingsIcon size={20} /><span className="hidden lg:block text-[14px]">Settings</span></button>
+            <button onClick={() => handleSetView('settings')} className={`w-full flex items-center gap-3 p-2 rounded-xl transition-all ${view === 'settings' ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF] font-bold' : 'text-gray-500 hover:bg-gray-100 font-medium'}`}><SettingsIcon size={20} /><span className="hidden lg:block text-[14px]">Settings</span></button>
           </nav>
           <div className="space-y-2">
             <div className="flex items-center justify-between px-3">
@@ -580,7 +583,7 @@ const App: React.FC = () => {
                   await logActivity(user.id, 'LOGOUT', 'User signed out of production workspace.');
                 }
                 await signOut();
-                setShowLanding(true);
+                localStorage.removeItem('lastView');
               }}
               onOpenProfile={() => setShowUserProfile(true)}
             />
@@ -590,7 +593,7 @@ const App: React.FC = () => {
 
       <main className="flex-1 ml-16 lg:ml-60 p-4 lg:p-8 overflow-y-auto h-screen">
         <div className="max-w-[1400px] mx-auto h-full">
-          {view === 'dashboard' && <Dashboard userId={profile.id} rosters={rosters} projects={projects} activeProjectId={activeProjectId} onNewRoster={() => setView('engine')} onDeleteRoster={async (id) => {
+          {view === 'dashboard' && <Dashboard userId={profile.id} rosters={rosters} projects={projects} activeProjectId={activeProjectId} onNewRoster={() => handleSetView('engine')} onDeleteRoster={async (id) => {
             const roster = rosters.find(r => r.id === id);
             if (roster) {
               await logActivity(profile.id, 'ROSTER_DELETE', `Deleted roster for ${roster.teamName}.`);
@@ -751,6 +754,8 @@ const App: React.FC = () => {
         </div>
       )}
     </div>
+    </SignedIn>
+    </>
   );
 };
 

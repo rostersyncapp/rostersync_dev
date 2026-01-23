@@ -163,20 +163,20 @@ const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
       </div>
 
       <div className="flex flex-col md:flex-row gap-10">
-        <aside className="w-full md:w-64 space-y-1.5 shrink-0">
-          <button onClick={() => setActiveTab('org')} className={`w-full flex items-center justify-between px-5 py-3.5 rounded-2xl text-base font-bold transition-all ${activeTab === 'org' ? 'bg-white dark:bg-gray-800 shadow-sm text-[#5B5FFF] border border-gray-100 dark:border-gray-700' : 'text-gray-500 hover:text-gray-900'}`}>
+          <aside className="w-full md:w-64 space-y-1.5 shrink-0">
+          <button onClick={() => setActiveTab('org')} className={`w-full flex items-center justify-between px-5 py-3.5 rounded-2xl text-base font-bold transition-all ${activeTab === 'org' ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF]' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
             <div className="flex items-center gap-4"><Building2 size={20} /> Organization</div>
             {activeTab === 'org' && <ChevronRight size={18} />}
           </button>
-          <button onClick={() => setActiveTab('subscription')} className={`w-full flex items-center justify-between px-5 py-3.5 rounded-2xl text-base font-bold transition-all ${activeTab === 'subscription' ? 'bg-white dark:bg-gray-800 shadow-sm text-[#5B5FFF] border border-gray-100 dark:border-gray-700' : 'text-gray-500 hover:text-gray-900'}`}>
+          <button onClick={() => setActiveTab('subscription')} className={`w-full flex items-center justify-between px-5 py-3.5 rounded-2xl text-base font-bold transition-all ${activeTab === 'subscription' ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF]' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
             <div className="flex items-center gap-4"><CreditCard size={20} /> Subscription</div>
             {activeTab === 'subscription' && <ChevronRight size={18} />}
           </button>
-          <button onClick={() => setActiveTab('activity')} className={`w-full flex items-center justify-between px-5 py-3.5 rounded-2xl text-base font-bold transition-all ${activeTab === 'activity' ? 'bg-white dark:bg-gray-800 shadow-sm text-[#5B5FFF] border border-gray-100 dark:border-gray-700' : 'text-gray-500 hover:text-gray-900'}`}>
+          <button onClick={() => setActiveTab('activity')} className={`w-full flex items-center justify-between px-5 py-3.5 rounded-2xl text-base font-bold transition-all ${activeTab === 'activity' ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF]' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
             <div className="flex items-center gap-4"><History size={20} /> Activity Log</div>
             {activeTab === 'activity' && <ChevronRight size={18} />}
           </button>
-          <button onClick={() => setActiveTab('roi')} className={`w-full flex items-center justify-between px-5 py-3.5 rounded-2xl text-base font-bold transition-all ${activeTab === 'roi' ? 'bg-white dark:bg-gray-800 shadow-sm text-[#5B5FFF] border border-gray-100 dark:border-gray-700' : 'text-gray-500 hover:text-gray-900'}`}>
+          <button onClick={() => setActiveTab('roi')} className={`w-full flex items-center justify-between px-5 py-3.5 rounded-2xl text-base font-bold transition-all ${activeTab === 'roi' ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF]' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
             <div className="flex items-center gap-4"><BarChart4 size={20} /> Performance ROI</div>
             {activeTab === 'roi' && <ChevronRight size={18} />}
           </button>

@@ -96,6 +96,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
 }
 
 import { ClerkProvider } from '@clerk/clerk-react';
+import { BrowserRouter } from 'react-router-dom';
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
@@ -116,15 +117,17 @@ if (!(window as any)._reactRoot) {
 const root = (window as any)._reactRoot;
 root.render(
   <React.StrictMode>
-    <ClerkProvider 
-      publishableKey={PUBLISHABLE_KEY}
-      afterSignOutUrl="/"
-      navigate={(to) => window.location.href = to}
-      tokenCache={localStorage.getItem('clerk-token-cache')}
-    >
-      <ErrorBoundary>
-        <App />
-      </ErrorBoundary>
-    </ClerkProvider>
+    <BrowserRouter>
+      <ClerkProvider 
+        publishableKey={PUBLISHABLE_KEY}
+        afterSignOutUrl="/"
+        navigate={(to) => window.location.href = to}
+        tokenCache={localStorage.getItem('clerk-token-cache')}
+      >
+        <ErrorBoundary>
+          <App />
+        </ErrorBoundary>
+      </ClerkProvider>
+    </BrowserRouter>
   </React.StrictMode>
 );
