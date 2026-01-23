@@ -31,6 +31,8 @@ import {
   MessageSquare,
   Send,
   CheckCircle2,
+  Folder,
+  FileText,
   FolderOpen,
   Plus,
   Check,
@@ -78,6 +80,12 @@ const getRecursiveRosterCount = (projectId: string, projects: Project[], rosters
   const childProjects = projects.filter(p => p.parentId === projectId);
   const subRosters = childProjects.reduce((acc, child) => acc + getRecursiveRosterCount(child.id, projects, rosters), 0);
   return directRosters + subRosters;
+};
+
+const getRecursiveSubfolderCount = (projectId: string, projects: Project[]): number => {
+  const childProjects = projects.filter(p => p.parentId === projectId);
+  const subfolders = childProjects.reduce((acc, child) => acc + getRecursiveSubfolderCount(child.id, projects), 0);
+  return childProjects.length + subfolders;
 };
 
 const UserMenu: React.FC<{ user: any; darkMode: boolean; onSignOut: () => void; onOpenProfile: () => void }> = ({ user, darkMode, onSignOut, onOpenProfile }) => {
@@ -695,6 +703,46 @@ const App: React.FC = () => {
                 </button>
               )}
             </form>
+          </div>
+        </div>
+      )}
+
+      {confirmDeleteProject && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-300">
+          <div className="relative w-full max-w-md bg-white dark:bg-gray-900 rounded-xl p-6 shadow-2xl animate-in zoom-in duration-300">
+            <div className="text-center mb-6">
+              <div className="w-12 h-12 rounded-lg bg-red-100 dark:bg-red-900/30 text-red-500 flex items-center justify-center mx-auto mb-3">
+                <Trash2 size={24} />
+              </div>
+              <h2 className="text-xl font-extrabold text-gray-900 dark:text-white">Delete Folder?</h2>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                Are you sure you want to delete "{confirmDeleteProject.name}"? This action cannot be undone.
+              </p>
+            </div>
+            <div className="space-y-2 mb-6 text-sm">
+              <div className="flex items-center gap-2 text-orange-500 dark:text-orange-400">
+                <Folder size={16} />
+                <span>{getRecursiveSubfolderCount(confirmDeleteProject.id, projects)} subfolder(s) will be deleted</span>
+              </div>
+              <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400">
+                <FileText size={16} />
+                <span>{getRecursiveRosterCount(confirmDeleteProject.id, projects, rosters)} roster(s) will be unlinked (remain in library)</span>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <button 
+                onClick={() => setConfirmDeleteProject(null)}
+                className="flex-1 py-2.5 px-4 rounded-lg text-gray-500 dark:text-gray-400 font-medium hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={() => handleDeleteProject(confirmDeleteProject.id)}
+                className="flex-1 py-2.5 px-4 rounded-lg bg-red-500 text-white font-bold hover:bg-red-600 transition-all flex items-center justify-center gap-2"
+              >
+                <Trash2 size={16} /> Delete
+              </button>
+            </div>
           </div>
         </div>
       )}
