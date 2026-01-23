@@ -530,11 +530,15 @@ const App: React.FC = () => {
           'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
         },
         body: JSON.stringify({
-          type: 'support_ticket',
-          name: supportForm.name,
-          email: supportForm.email,
-          message: supportForm.message,
-          userId: user?.id || 'guest'
+          table: 'support',
+          record: {
+            id: Math.random().toString(36).substring(7), // Mock ID since we aren't using DB
+            name: supportForm.name,
+            email: supportForm.email,
+            user_email: supportForm.email, // Dual field for robustness
+            message: supportForm.message,
+            user_id: user?.id || 'guest'
+          }
         })
       });
 
