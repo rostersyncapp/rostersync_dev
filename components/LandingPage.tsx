@@ -20,166 +20,14 @@ import {
   Calendar,
   Zap,
   Twitter,
-  FileText,
-  MonitorPlay,
-  Database,
-  Cpu,
-  FileCode,
-  Box,
-  Share2
+  Box
 } from 'lucide-react';
 import { useClerk, SignInButton, SignUpButton } from '@clerk/clerk-react';
 import { WavyBackground } from './ui/wavy-background';
+import TerminalWorkflow from './TerminalWorkflow';
 
 // --- Utility for Tailwind classes ---
 const cn = (...classes: any[]) => classes.filter(Boolean).join(' ');
-
-// --- Laser Beam Component ---
-
-const Circle = forwardRef<
-  HTMLDivElement,
-  { className?: string; children?: React.ReactNode; isActive?: boolean }
->(({ className, children }, ref) => {
-  return (
-    <div
-      ref={ref}
-      className={cn(
-        "z-20 flex size-12 items-center justify-center rounded-full border-2 bg-white dark:bg-gray-900 p-3 shadow-sm transition-all duration-300 border-gray-100 dark:border-gray-800",
-        className
-      )}
-    >
-      {children}
-    </div>
-  )
-})
-Circle.displayName = "Circle"
-
-interface AnimatedBeamProps {
-  containerRef: React.RefObject<HTMLElement | null>
-  fromRef: React.RefObject<HTMLElement | null>
-  toRef: React.RefObject<HTMLElement | null>
-  curvature?: number
-  duration?: number
-  pathColor?: string
-  gradientColor?: string
-  isActive?: boolean
-  activeStep?: number
-}
-
-const AnimatedBeam: React.FC<AnimatedBeamProps> = ({
-  fromRef,
-  toRef,
-  containerRef,
-  curvature = 0,
-  duration = 0.5,
-  pathColor = "rgba(156, 163, 175, 0.08)",
-  gradientColor = "#5B5FFF",
-  isActive = false,
-  activeStep = 0,
-}) => {
-  const id = useId();
-  const [path, setPath] = useState("");
-  const rafRef = useRef<number | null>(null);
-  const lastUpdateRef = useRef<number>(0);
-
-  useEffect(() => {
-    const updatePath = () => {
-      if (!containerRef.current || !fromRef.current || !toRef.current) return;
-
-      const containerRect = containerRef.current.getBoundingClientRect();
-      const fromRect = fromRef.current.getBoundingClientRect();
-      const toRect = toRef.current.getBoundingClientRect();
-
-      const x1 = fromRect.left - containerRect.left + fromRect.width / 2;
-      const x2 = toRect.left - containerRect.left + toRect.width / 2;
-      const y1 = fromRect.top - containerRect.top + fromRect.height / 2;
-      const y2 = toRect.top - containerRect.top + toRect.height / 2;
-
-      const cx = (x1 + x2) / 2;
-      const cy = (y1 + y2) / 2 + curvature;
-
-      setPath(`M ${x1} ${y1} Q ${cx} ${cy} ${x2} ${y2}`);
-    };
-
-    const throttledUpdate = () => {
-      const now = Date.now();
-      if (now - lastUpdateRef.current < 16) return;
-      lastUpdateRef.current = now;
-      updatePath();
-    };
-
-    const resizeObserver = new ResizeObserver(throttledUpdate);
-    if (containerRef.current) resizeObserver.observe(containerRef.current);
-
-    const onScroll = () => {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-      rafRef.current = requestAnimationFrame(throttledUpdate);
-    };
-
-    throttledUpdate();
-    const timeoutId = setTimeout(throttledUpdate, 150);
-
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => {
-      resizeObserver.disconnect();
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-      window.removeEventListener("scroll", onScroll);
-      clearTimeout(timeoutId);
-    };
-  }, [fromRef, toRef, containerRef, curvature]);
-
-  return (
-    <svg
-      fill="none"
-      width="100%"
-      height="100%"
-      xmlns="http://www.w3.org/2000/svg"
-      className="pointer-events-none absolute left-0 top-0 size-full z-10 overflow-visible"
-    >
-      <path
-        d={path}
-        stroke={pathColor}
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-
-      {isActive && (
-        <React.Fragment key={`${id}-${activeStep}`}>
-          <defs>
-            <filter id={`glow-${id}`} x="-20%" y="-20%" width="140%" height="140%">
-              <feGaussianBlur stdDeviation="3" result="blur" />
-              <feComposite in="SourceGraphic" in2="blur" operator="over" />
-            </filter>
-            <linearGradient id={id} gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stopColor={gradientColor} stopOpacity="0" />
-              <stop offset="50%" stopColor={gradientColor} stopOpacity="1" />
-              <stop offset="100%" stopColor={gradientColor} stopOpacity="0" />
-            </linearGradient>
-          </defs>
-          <path
-            d={path}
-            stroke={`url(#${id})`}
-            strokeWidth="3"
-            strokeLinecap="round"
-            filter={`url(#glow-${id})`}
-            pathLength="100"
-            strokeDasharray="20 1000"
-            className="animate-laser"
-          />
-        </React.Fragment>
-      )}
-      <style>{`
-        .animate-laser {
-          animation: laserTravel ${duration}s linear 1 forwards;
-        }
-        @keyframes laserTravel {
-          from { stroke-dashoffset: 20; }
-          to { stroke-dashoffset: -100; }
-        }
-      `}</style>
-    </svg>
-  );
-};
 
 // --- Landing Page Content ---
 
@@ -226,27 +74,6 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
   const [showDemoModal, setShowDemoModal] = useState(false);
   const [demoForm, setDemoForm] = useState({ name: '', email: '', organization: '', useCase: '' });
   const [demoStatus, setDemoStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
-
-  // Sequential Animation State
-  const [activeStep, setActiveStep] = useState(0);
-
-  useEffect(() => {
-    const stepDuration = 1000;
-    const interval = setInterval(() => {
-      setActiveStep((prev) => (prev + 1) % 6);
-    }, stepDuration);
-    return () => clearInterval(interval);
-  }, [activeStep]);
-
-  // Refs for Animated Beam
-  const beamContainerRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLDivElement>(null);
-  const engineRef = useRef<HTMLDivElement>(null);
-  const out1Ref = useRef<HTMLDivElement>(null);
-  const out2Ref = useRef<HTMLDivElement>(null);
-  const out3Ref = useRef<HTMLDivElement>(null);
-  const out4Ref = useRef<HTMLDivElement>(null);
-  const out5Ref = useRef<HTMLDivElement>(null);
 
   const handleDemoSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -336,164 +163,19 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
         </div>
       </section>
 
-      {/* Animated Beam Distribution Section */}
-      <section className="py-16 px-6 relative overflow-hidden bg-white dark:bg-gray-900 border-y border-gray-100 dark:border-gray-800">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#5B5FFF]/5 rounded-full blur-[120px] -z-10"></div>
-        <div className="max-w-6xl mx-auto">
-          <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-12">
-            <div className="lg:w-1/2 space-y-5 text-left animate-in slide-in-from-left duration-1000">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-[#5B5FFF]/10 text-[#5B5FFF] text-[10px] font-black uppercase tracking-widest">
-                <Share2 size={12} /> Sequential Metadata Push
-              </div>
-              <h2 className="text-2xl md:text-4xl font-extrabold tracking-tight leading-[1.2] text-gray-900 dark:text-white">
-                Scrub and Sync. <br />
-                <span className="text-transparent bg-clip-text accent-gradient inline-block py-1">
-                  Zero Parity Errors.
-                </span>
-              </h2>
-              <p className="text-base text-gray-500 dark:text-gray-400 font-medium leading-relaxed max-w-md">
-                RosterSync ingests your raw rosters, scrubs the errors, and cycles clean data through your entire hardware stack. One source of truth, multiple export formats, zero parity errors.
-              </p>
-              <div className="space-y-4 pt-2">
-                {[
-                  { title: "Parallel Parsing", desc: "Sync Engine standardizes data once for multiple hardwares." },
-                  { title: "Real-time Verification", desc: "Visual laser confirmation of successful metadata delivery." }
-                ].map((item, i) => (
-                  <div key={i} className="flex items-start gap-3">
-                    <div className="mt-1 w-5 h-5 rounded-full bg-[#5B5FFF]/10 flex items-center justify-center shrink-0">
-                      <CheckCircle2 className="text-[#5B5FFF]" size={14} />
-                    </div>
-                    <div>
-                      <p className="text-sm font-bold text-gray-900 dark:text-white">{item.title}</p>
-                      <p className="text-xs text-gray-500 font-medium">{item.desc}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="lg:w-1/2 w-full animate-in slide-in-from-right duration-1000">
-              <div
-                className="relative flex h-[320px] md:h-[420px] w-full items-center justify-center overflow-hidden rounded-xl md:rounded-2xl border border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/40 p-4 md:p-8 shadow-inner"
-                ref={beamContainerRef}
-              >
-                <div className="flex md:hidden size-full max-w-sm flex-row items-stretch justify-between gap-3">
-                  {/* INPUT COLUMN - Mobile */}
-                  <div className="flex flex-col justify-center items-center">
-                    <Circle ref={inputRef} className="size-10">
-                      <FileText className="text-blue-500" size={18} />
-                    </Circle>
-                    <div className="mt-1 text-center text-[8px] font-black text-gray-400 uppercase tracking-widest">Raw</div>
-                  </div>
-
-                  {/* ENGINE - Mobile */}
-                  <div className="flex flex-col justify-center items-center">
-                    <Circle ref={engineRef} className="size-12 border-[#5B5FFF]/30 bg-[#5B5FFF]/5 p-1.5">
-                      <Cpu className="text-[#5B5FFF]" size={16} />
-                    </Circle>
-                    <div className="mt-1 text-center text-[8px] font-black text-[#5B5FFF] uppercase tracking-widest">Engine</div>
-                  </div>
-
-                  {/* OUTPUTS - Mobile (horizontal) */}
-                  <div className="flex flex-col justify-center gap-2">
-                    <div className="flex items-center gap-1.5">
-                      <Circle ref={out1Ref} className="size-8 p-1">
-                        <MonitorPlay className="text-blue-600" size={12} />
-                      </Circle>
-                      <span className="text-[7px] font-black text-gray-400 uppercase tracking-tighter">Ross</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <Circle ref={out2Ref} className="size-8 p-1">
-                        <Database className="text-purple-500" size={12} />
-                      </Circle>
-                      <span className="text-[7px] font-black text-gray-400 uppercase tracking-tighter">Vizrt</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <Circle ref={out3Ref} className="size-8 p-1">
-                        <FileCode className="text-blue-400" size={12} />
-                      </Circle>
-                      <span className="text-[7px] font-black text-gray-400 uppercase tracking-tighter">Prem</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <Circle ref={out4Ref} className="size-8 p-1">
-                        <Layers className="text-amber-500" size={12} />
-                      </Circle>
-                      <span className="text-[7px] font-black text-gray-400 uppercase tracking-tighter">MAM</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <Circle ref={out5Ref} className="size-8 p-1">
-                        <Box className="text-emerald-500" size={12} />
-                      </Circle>
-                      <span className="text-[7px] font-black text-gray-400 uppercase tracking-tighter">ODF</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Desktop Layout */}
-                <div className="hidden md:flex size-full max-w-md flex-row items-stretch justify-between gap-6">
-                  {/* INPUT COLUMN */}
-                  <div className="flex flex-col justify-center items-center">
-                    <Circle ref={inputRef}>
-                      <FileText className="text-blue-500" size={24} />
-                    </Circle>
-                    <div className="mt-2 text-center text-[9px] font-black text-gray-400 uppercase tracking-widest">Raw Data</div>
-                  </div>
-
-                  {/* CORE ENGINE COLUMN */}
-                  <div className="flex flex-col justify-center items-center">
-                    <Circle ref={engineRef} className="size-14 border-[#5B5FFF]/30 bg-[#5B5FFF]/5 p-2">
-                      <Cpu className="text-[#5B5FFF]" size={20} />
-                    </Circle>
-                    <div className="mt-2 text-center text-[10px] font-black text-[#5B5FFF] uppercase tracking-widest">Engine</div>
-                  </div>
-
-                  {/* OUTPUTS COLUMN */}
-                  <div className="flex flex-col justify-center gap-3">
-                    <div className="flex flex-col items-center">
-                      <Circle ref={out1Ref} className="size-10 p-2">
-                        <MonitorPlay className="text-blue-600" size={18} />
-                      </Circle>
-                      <span className="mt-1 text-[8px] md:text-[9px] font-black text-gray-400 uppercase tracking-tighter">Ross XP</span>
-                    </div>
-                    <div className="flex flex-col items-center">
-                      <Circle ref={out2Ref} className="size-10 p-2">
-                        <Database className="text-purple-500" size={18} />
-                      </Circle>
-                      <span className="mt-1 text-[8px] md:text-[9px] font-black text-gray-400 uppercase tracking-tighter">Vizrt</span>
-                    </div>
-                    <div className="flex flex-col items-center">
-                      <Circle ref={out3Ref} className="size-10 p-2">
-                        <FileCode className="text-blue-400" size={18} />
-                      </Circle>
-                      <span className="mt-1 text-[8px] md:text-[9px] font-black text-gray-400 uppercase tracking-tighter">Premiere</span>
-                    </div>
-                    <div className="flex flex-col items-center">
-                      <Circle ref={out4Ref} className="size-10 p-2">
-                        <Layers className="text-amber-500" size={18} />
-                      </Circle>
-                      <span className="mt-1 text-[8px] md:text-[9px] font-black text-gray-400 uppercase tracking-tighter">MAM/DAM</span>
-                    </div>
-                    <div className="flex flex-col items-center">
-                      <Circle ref={out5Ref} className="size-10 p-2">
-                        <Box className="text-emerald-500" size={18} />
-                      </Circle>
-                      <span className="mt-1 text-[8px] md:text-[9px] font-black text-gray-400 uppercase tracking-tighter">ODF XML</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* --- Laser Beams (Desktop only) --- */}
-                <div className="hidden md:block">
-                  <AnimatedBeam containerRef={beamContainerRef} fromRef={inputRef} toRef={engineRef} duration={0.6} isActive={activeStep === 0} activeStep={activeStep} />
-                  <AnimatedBeam containerRef={beamContainerRef} fromRef={engineRef} toRef={out1Ref} duration={0.5} curvature={-50} gradientColor="#2563EB" isActive={activeStep === 1} activeStep={activeStep} />
-                  <AnimatedBeam containerRef={beamContainerRef} fromRef={engineRef} toRef={out2Ref} duration={0.5} curvature={-25} gradientColor="#A855F7" isActive={activeStep === 2} activeStep={activeStep} />
-                  <AnimatedBeam containerRef={beamContainerRef} fromRef={engineRef} toRef={out3Ref} duration={0.5} curvature={0} gradientColor="#60A5FA" isActive={activeStep === 3} activeStep={activeStep} />
-                  <AnimatedBeam containerRef={beamContainerRef} fromRef={engineRef} toRef={out4Ref} duration={0.5} curvature={25} gradientColor="#F59E0B" isActive={activeStep === 4} activeStep={activeStep} />
-                  <AnimatedBeam containerRef={beamContainerRef} fromRef={engineRef} toRef={out5Ref} duration={0.5} curvature={50} gradientColor="#10B981" isActive={activeStep === 5} activeStep={activeStep} />
-                </div>
-              </div>
-            </div>
+      {/* Terminal Workflow Demo Section */}
+      <section className="pt-32 pb-20 px-6 bg-[#FAFAFA] dark:bg-gray-900">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-8">
+            <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-[#5B5FFF] mb-2">How It Works</h2>
+            <h3 className="text-2xl md:text-4xl font-extrabold tracking-tight">
+              <span className="bg-gradient-to-r from-purple-600 via-fuchsia-500 to-cyan-400 text-transparent bg-clip-text inline-block py-1">Paste. Parse. Export.</span>
+            </h3>
+            <p className="text-base text-gray-600 dark:text-gray-300 mt-3 max-w-xl mx-auto">
+              Watch rosterSync transform messy roster data into broadcast-ready metadata in seconds.
+            </p>
           </div>
+          <TerminalWorkflow loop onExportComplete={(format) => console.log('Exported:', format)} />
         </div>
       </section>
 

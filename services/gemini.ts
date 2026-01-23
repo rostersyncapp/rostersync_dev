@@ -4,7 +4,7 @@ import { Athlete, NILStatus, SubscriptionTier } from "../types.ts";
 
 // Helper to get the key even if the build tool is doing static analysis on process.env.API_KEY
 const getApiKey = () => {
-  return (process.env as any).API_KEY || (window as any).process?.env?.API_KEY;
+  return (import.meta as any).env?.VITE_GEMINI_API_KEY || '';
 };
 
 export const isGeminiConfigured = !!getApiKey();

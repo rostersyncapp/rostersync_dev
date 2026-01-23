@@ -190,4 +190,13 @@
   .dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     background: #3f3f46;
   }
+
+  @keyframes progress-fill {
+    from { width: 0%; }
+    to { width: 100%; }
+  }
+
+  .animate-progress {
+    animation: progress-fill 4s ease-in-out forwards;
+  }
 }
