@@ -42,6 +42,7 @@ interface Props {
   isProcessing: boolean;
   pendingRoster: ProcessedRoster | null;
   onClearPending: () => void;
+  onDeletePlayer?: (athleteName: string) => void;
   initialText?: string;
 }
 
@@ -55,6 +56,7 @@ export const Engine: React.FC<Props> = ({
   isProcessing, 
   pendingRoster, 
   onClearPending,
+  onDeletePlayer,
   initialText = ''
 }) => {
   const [step, setStep] = useState(1);
@@ -128,6 +130,11 @@ export const Engine: React.FC<Props> = ({
     }, 800);
   };
 
+  const handleDeletePlayer = (athleteName: string) => {
+    setProcessedAthletes(prev => prev.filter(a => a.fullName !== athleteName));
+    onDeletePlayer?.(athleteName);
+  };
+
   const hasCredits = creditsUsed < maxCredits;
 
   return (
@@ -154,41 +161,40 @@ export const Engine: React.FC<Props> = ({
 
       {step === 1 && (
         <div className="space-y-10 animate-in fade-in duration-500">
-          <div className="bg-white dark:bg-gray-900 p-10 rounded-[40px] border border-gray-100 dark:border-gray-800 shadow-sm relative overflow-hidden">
+          <div className="bg-white dark:bg-gray-900 p-10 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm relative overflow-hidden">
             <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-6">
               <h2 className="text-3xl font-extrabold flex items-center gap-4 tracking-tight text-gray-900 dark:text-white shrink-0"><Upload size={32} className="text-[#5B5FFF]" /> Input Raw Data</h2>
               <div className="flex flex-wrap items-center gap-4">
-                 <div className="flex items-center gap-3 px-4 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl">
-                   <Calendar size={18} className="text-gray-400" />
-                   <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest font-mono">Season:</label>
-                   <input 
-                     type="text" 
-                     value={seasonYear} 
-                     onChange={(e) => setSeasonYear(e.target.value)}
-                     className="bg-transparent border-none outline-none text-base font-bold text-[#5B5FFF] w-24"
-                     placeholder="2025"
-                   />
-                 </div>
-
-                 <div className={`px-5 py-3 rounded-2xl flex items-center gap-3 border ${hasCredits ? 'bg-[#5B5FFF]/5 border-[#5B5FFF]/20 text-[#5B5FFF]' : 'bg-red-50 border-red-200 text-red-600'}`}>
-                   <Zap size={18} className={hasCredits ? "fill-[#5B5FFF]" : "fill-red-600"} />
-                   <span className="text-sm font-bold tracking-tight uppercase">{maxCredits - creditsUsed} Credits</span>
-                 </div>
+                <div className={`px-5 py-3 rounded-2xl flex items-center gap-3 border ${hasCredits ? 'bg-[#5B5FFF]/5 border-[#5B5FFF]/20 text-[#5B5FFF]' : 'bg-red-50 border-red-200 text-red-600'}`}>
+                  <Zap size={18} className={hasCredits ? "fill-[#5B5FFF]" : "fill-red-600"} />
+                  <span className="text-sm font-bold tracking-tight uppercase">{maxCredits - creditsUsed} Credits</span>
+                </div>
               </div>
             </div>
-            <textarea className={`w-full h-96 px-6 py-6 bg-gray-50 dark:bg-gray-800 border-none rounded-[28px] outline-none transition-all text-base leading-relaxed font-mono text-gray-900 dark:text-gray-200 placeholder:text-gray-400 dark:placeholder:text-gray-600 ${isProcessing ? 'opacity-50 pointer-events-none' : 'focus:ring-2 focus:ring-[#5B5FFF]/20'}`} placeholder={isNocMode ? "Paste Olympic Delegation or Event Data here..." : "<paste raw roster text here>"} value={rawInput} onChange={(e) => setRawInput(e.target.value)} />
-          </div>
-          <div className="flex items-center justify-end">
-            <button onClick={handleProcess} disabled={isProcessing || !rawInput || !hasCredits} className={`px-10 py-5 rounded-[24px] font-bold flex items-center gap-4 shadow-xl transition-all text-base uppercase tracking-widest ${hasCredits ? 'primary-gradient text-white shadow-[#5B5FFF]/20' : 'bg-gray-200 text-gray-400 cursor-not-allowed shadow-none'}`}>
-              {isProcessing ? <Loader2 className="animate-spin" size={24} /> : <Cpu size={24} />} {isProcessing ? 'Processing...' : 'Run Engine'}
-            </button>
+            <textarea className={`w-full h-96 px-6 py-6 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl outline-none transition-all text-base leading-relaxed font-mono text-gray-900 dark:text-gray-200 placeholder:text-gray-400 dark:placeholder:text-gray-600 ${isProcessing ? 'opacity-50 pointer-events-none' : 'focus:ring-2 focus:ring-[#5B5FFF]/20'}`} placeholder={isNocMode ? "Paste Olympic Delegation or Event Data here...\n<add season>" : "<paste raw text here>\n<add season>"} value={rawInput} onChange={(e) => setRawInput(e.target.value)} />
+            <div className="flex items-center gap-4 mt-4">
+              <div className="flex items-center gap-3 px-4 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl">
+                <Calendar size={18} className="text-gray-400" />
+                <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest font-mono">Season:</label>
+                <input 
+                  type="text" 
+                  value={seasonYear} 
+                  onChange={(e) => setSeasonYear(e.target.value)}
+                  className="bg-transparent border-none outline-none text-base font-bold text-[#5B5FFF] w-24"
+                  placeholder="2025"
+                />
+              </div>
+              <button onClick={handleProcess} disabled={isProcessing || !rawInput || !hasCredits} className={`px-6 py-2.5 rounded-2xl font-bold flex items-center gap-2 shadow-lg transition-all text-sm uppercase tracking-widest ${hasCredits ? 'primary-gradient text-white shadow-[#5B5FFF]/20' : 'bg-gray-200 text-gray-400 cursor-not-allowed shadow-none'}`}>
+                {isProcessing ? <Loader2 className="animate-spin" size={18} /> : <Cpu size={18} />} {isProcessing ? 'Processing...' : 'Run Engine'}
+              </button>
+            </div>
           </div>
         </div>
       )}
 
       {step === 2 && (
         <div className="space-y-10 animate-in slide-in-from-right-4 duration-500 pb-24">
-          <div className="bg-white dark:bg-gray-900 rounded-[48px] border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
             <div className="p-10 border-b border-gray-100 dark:border-gray-800 flex flex-col md:flex-row md:items-start justify-between bg-gray-50/30 dark:bg-gray-800/30 gap-10">
               <div className="flex-1 flex flex-col md:flex-row gap-6">
                 <div className="w-24 h-24 rounded-3xl text-white flex items-center justify-center shadow-lg shrink-0 overflow-hidden relative group bg-white border border-gray-100 dark:border-gray-700">
@@ -241,7 +247,7 @@ export const Engine: React.FC<Props> = ({
                        <select 
                          value={selectedProjectId} 
                          onChange={(e) => setSelectedProjectId(e.target.value)}
-                         className="pl-12 pr-6 py-3.5 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-[20px] text-sm font-bold outline-none focus:ring-2 focus:ring-[#5B5FFF]/20 text-gray-900 dark:text-white cursor-pointer w-full"
+                         className="pl-12 pr-6 py-3.5 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg text-sm font-bold outline-none focus:ring-2 focus:ring-[#5B5FFF]/20 text-gray-900 dark:text-white cursor-pointer w-full"
                        >
                          <option value="">Unassigned (Library)</option>
                          {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
@@ -249,7 +255,7 @@ export const Engine: React.FC<Props> = ({
                     </div>
                  </div>
 
-                 <button onClick={handleSaveToLibrary} disabled={isSaving} className="w-full flex items-center justify-center gap-3 px-8 py-4.5 rounded-[24px] primary-gradient text-white font-bold text-base hover:shadow-lg shadow-[#5B5FFF]/20 transition-all uppercase tracking-widest">
+                 <button onClick={handleSaveToLibrary} disabled={isSaving} className="w-full flex items-center justify-center gap-3 px-8 py-4.5 rounded-xl primary-gradient text-white font-bold text-base hover:shadow-lg shadow-[#5B5FFF]/20 transition-all uppercase tracking-widest">
                    {isSaving ? <Loader2 size={20} className="animate-spin" /> : <Save size={20} />} Save to Cloud
                  </button>
               </div>
@@ -289,19 +295,31 @@ export const Engine: React.FC<Props> = ({
               <table className="w-full text-left">
                 <thead className="sticky top-0 z-10">
                   <tr className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-md">
-                    <th className="px-10 py-5 text-[11px] font-bold text-gray-400 uppercase tracking-[0.2em] border-b border-gray-100 dark:border-gray-800">Athlete Name</th>
-                    <th className="px-10 py-5 text-[11px] font-bold text-gray-400 uppercase tracking-[0.2em] text-center border-b border-gray-100 dark:border-gray-800">{isNocMode ? 'Bib' : 'Jersey'}</th>
-                    <th className="px-10 py-5 text-[11px] font-bold text-gray-400 uppercase tracking-[0.2em] text-center border-b border-gray-100 dark:border-gray-800">{isNocMode ? 'Event/Discipline' : 'Position'}</th>
-                    <th className="px-10 py-5 text-[11px] font-bold text-gray-400 uppercase tracking-[0.2em] text-center border-b border-gray-100 dark:border-gray-800">Hardware Safe</th>
+                    <th className="px-6 py-5 text-[11px] font-bold text-gray-400 uppercase tracking-[0.2em] border-b border-gray-100 dark:border-gray-800">Athlete Name</th>
+                    <th className="px-6 py-5 text-[11px] font-bold text-gray-400 uppercase tracking-[0.2em] text-center border-b border-gray-100 dark:border-gray-800">{isNocMode ? 'Bib' : 'Jersey'}</th>
+                    <th className="px-6 py-5 text-[11px] font-bold text-gray-400 uppercase tracking-[0.2em] text-center border-b border-gray-100 dark:border-gray-800">{isNocMode ? 'Event/Discipline' : 'Position'}</th>
+                    <th className="px-6 py-5 text-[11px] font-bold text-gray-400 uppercase tracking-[0.2em] text-center border-b border-gray-100 dark:border-gray-800">Hardware Safe</th>
+                    {onDeletePlayer && <th className="px-6 py-5 text-[11px] font-bold text-gray-400 uppercase tracking-[0.2em] text-center border-b border-gray-100 dark:border-gray-800 w-20"></th>}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                   {processedAthletes.map((a, idx) => (
-                    <tr key={a.id || idx} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors">
-                      <td className="px-10 py-5 text-base font-semibold text-gray-900 dark:text-white">{a.fullName}</td>
-                      <td className="px-10 py-5 text-center"><span className="inline-block w-12 py-1.5 rounded-xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-sm font-bold">#{a.jerseyNumber}</span></td>
-                      <td className="px-10 py-5 text-center"><span className="inline-block px-4 py-1.5 rounded-xl bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 text-[11px] font-bold uppercase">#{a.position}</span></td>
-                      <td className="px-10 py-5 text-center"><span className="bg-emerald-50 dark:bg-emerald-900/30 px-4 py-1.5 rounded-xl text-[11px] font-bold text-emerald-700 dark:text-emerald-400 tracking-wider font-mono">{a.displayNameSafe}</span></td>
+                    <tr key={a.id || idx} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors group">
+                      <td className="px-6 py-5 text-base font-semibold text-gray-900 dark:text-white">{a.fullName}</td>
+                      <td className="px-6 py-5 text-center"><span className="inline-block w-12 py-1.5 rounded-xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-sm font-bold">#{a.jerseyNumber}</span></td>
+                      <td className="px-6 py-5 text-center"><span className="inline-block px-4 py-1.5 rounded-xl bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 text-[11px] font-bold uppercase">#{a.position}</span></td>
+                      <td className="px-6 py-5 text-center"><span className="bg-emerald-50 dark:bg-emerald-900/30 px-4 py-1.5 rounded-xl text-[11px] font-bold text-emerald-700 dark:text-emerald-400 tracking-wider font-mono">{a.displayNameSafe}</span></td>
+                      {onDeletePlayer && (
+                        <td className="px-6 py-5 text-center">
+                          <button
+                            onClick={() => handleDeletePlayer(a.fullName)}
+                            className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                            title="Remove player"
+                          >
+                            <UserMinus size={16} />
+                          </button>
+                        </td>
+                      )}
                     </tr>
                   ))}
                 </tbody>

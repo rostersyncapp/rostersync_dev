@@ -90,8 +90,8 @@ const TeamLogo: React.FC<{
   
   const sizeClasses = {
     sm: 'w-10 h-10 rounded-lg text-xs',
-    md: 'w-12 h-12 rounded-xl text-sm',
-    lg: 'w-16 h-16 rounded-xl text-xl'
+    md: 'w-12 h-12 rounded-lg text-sm',
+    lg: 'w-16 h-16 rounded-lg text-xl'
   };
 
   const fallbackName = name || 'Untitled';
@@ -223,7 +223,7 @@ export const Dashboard: React.FC<Props> = ({
           <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" /> Back to {currentProject?.name || 'Library'}
         </button>
 
-        <div className="bg-white dark:bg-gray-900 rounded-[28px] border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden mb-8">
+        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden mb-8">
           <div className="p-8 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between relative overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-full opacity-5 pointer-events-none" style={{ background: `linear-gradient(135deg, ${primaryColor} 0%, transparent 100%)` }}></div>
             <div className="flex items-center gap-6 relative z-10 w-full lg:w-auto">
@@ -236,11 +236,11 @@ export const Dashboard: React.FC<Props> = ({
                         type="text" 
                         value={editName} 
                         onChange={(e) => setEditName(e.target.value)}
-                        className="text-2xl font-extrabold tracking-tight bg-gray-50 dark:bg-gray-800 border-none rounded-xl px-4 py-2.5 outline-none ring-2 ring-[#5B5FFF]/20 text-gray-900 dark:text-white w-full max-w-md"
+                        className="text-2xl font-extrabold tracking-tight bg-gray-50 dark:bg-gray-800 border-none rounded-lg px-4 py-2.5 outline-none ring-2 ring-[#5B5FFF]/20 text-gray-900 dark:text-white w-full max-w-md"
                         autoFocus
                       />
-                      <button onClick={handleUpdateMetadata} className="p-2.5 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 shadow-md"><Check size={20} /></button>
-                      <button onClick={() => setIsEditingMetadata(false)} className="p-2.5 bg-gray-100 dark:bg-gray-800 text-gray-500 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700"><X size={20} /></button>
+                      <button onClick={handleUpdateMetadata} className="p-2.5 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 shadow-md"><Check size={20} /></button>
+                      <button onClick={() => setIsEditingMetadata(false)} className="p-2.5 bg-gray-100 dark:bg-gray-800 text-gray-500 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700"><X size={20} /></button>
                     </div>
                     <div className="flex items-center gap-4">
                       <div className="flex items-center gap-2 bg-gray-50 dark:bg-gray-800 px-3 py-1.5 rounded-lg border border-gray-100 dark:border-gray-700">
@@ -273,7 +273,7 @@ export const Dashboard: React.FC<Props> = ({
                 )}
               </div>
             </div>
-            <button onClick={() => setShowExportDrawer(true)} className="px-6 py-3.5 rounded-xl primary-gradient text-white font-bold text-sm hover:scale-[1.02] transition-all flex items-center gap-2.5 shadow-lg shadow-[#5B5FFF]/20 hidden lg:flex">
+            <button onClick={() => setShowExportDrawer(true)} className="px-6 py-3.5 rounded-lg primary-gradient text-white font-bold text-sm hover:scale-[1.02] transition-all flex items-center gap-2.5 shadow-lg shadow-[#5B5FFF]/20 hidden lg:flex">
               <Download size={18} /> Export Data
             </button>
           </div>
@@ -311,21 +311,21 @@ export const Dashboard: React.FC<Props> = ({
             <div className="w-full max-w-md bg-white dark:bg-gray-950 h-full shadow-2xl animate-in slide-in-from-right duration-1000 overflow-y-auto flex flex-col" onClick={(e) => e.stopPropagation()}>
               <div className="p-8 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between bg-white dark:bg-gray-900 sticky top-0 z-10 shrink-0">
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-[#5B5FFF]/10 text-[#5B5FFF] flex items-center justify-center shadow-inner"><Download size={24} /></div>
+                  <div className="w-12 h-12 rounded-lg bg-[#5B5FFF]/10 text-[#5B5FFF] flex items-center justify-center shadow-inner"><Download size={24} /></div>
                   <div>
                     <h3 className="text-xl font-extrabold text-gray-900 dark:text-white tracking-tight">Export Assembly</h3>
                     <p className="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-widest mt-0.5">Hardware optimized</p>
                   </div>
                 </div>
-                <button onClick={() => setShowExportDrawer(false)} className="p-3 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-2xl transition-all"><X size={24} /></button>
+                <button onClick={() => setShowExportDrawer(false)} className="p-3 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-all"><X size={24} /></button>
               </div>
 
               <div className="flex-1 p-8 space-y-10">
                 <div>
                   <label className="text-[11px] font-black text-gray-400 uppercase tracking-[0.25em] mb-4 block font-mono">1. Production Locale</label>
-                  <div className="flex bg-gray-50 dark:bg-gray-900 p-1.5 rounded-[24px] border border-gray-100 dark:border-gray-800">
+                  <div className="flex bg-gray-50 dark:bg-gray-900 p-1.5 rounded-xl border border-gray-100 dark:border-gray-800">
                     {['EN', 'ES', 'ZH'].map((lang) => (
-                      <button key={lang} onClick={() => setExportLanguage(lang)} className={`flex-1 flex items-center justify-center gap-2.5 py-3.5 rounded-2xl text-xs font-black transition-all ${exportLanguage === lang ? 'bg-white dark:bg-gray-800 shadow-md text-[#5B5FFF] ring-1 ring-[#5B5FFF]/10' : 'text-gray-400 hover:text-gray-600'}`}>
+                      <button key={lang} onClick={() => setExportLanguage(lang)} className={`flex-1 flex items-center justify-center gap-2.5 py-3.5 rounded-lg text-xs font-black transition-all ${exportLanguage === lang ? 'bg-white dark:bg-gray-800 shadow-md text-[#5B5FFF] ring-1 ring-[#5B5FFF]/10' : 'text-gray-400 hover:text-gray-600'}`}>
                         <Globe size={16} /> {lang}
                       </button>
                     ))}
@@ -387,35 +387,35 @@ export const Dashboard: React.FC<Props> = ({
            </div>
            <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white">{currentProject?.name || 'Metadata Library'}</h1>
         </div>
-        <button onClick={onNewRoster} className="px-6 py-3.5 rounded-2xl primary-gradient text-white font-bold shadow-lg shadow-[#5B5FFF]/20 hover:scale-105 transition-transform flex items-center gap-2.5 cursor-pointer text-sm">
+        <button onClick={onNewRoster} className="px-6 py-3.5 rounded-lg primary-gradient text-white font-bold shadow-lg shadow-[#5B5FFF]/20 hover:scale-105 transition-transform flex items-center gap-2.5 cursor-pointer text-sm">
           <Plus size={20} /> New Roster
         </button>
       </div>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-white dark:bg-gray-900 p-6 rounded-[28px] border border-gray-100 dark:border-gray-800 shadow-sm">
+        <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
            <div className="flex items-center gap-3 mb-2">
              <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-[#5B5FFF] flex items-center justify-center"><Users size={18} /></div>
              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest font-mono">Athletes</span>
            </div>
            <div className="text-2xl font-extrabold text-gray-900 dark:text-white">{totalAthletes}</div>
         </div>
-        <div className="bg-white dark:bg-gray-900 p-6 rounded-[28px] border border-gray-100 dark:border-gray-800 shadow-sm">
+        <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
            <div className="flex items-center gap-3 mb-2">
              <div className="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 flex items-center justify-center"><Activity size={18} /></div>
              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest font-mono">Health</span>
            </div>
            <div className="text-2xl font-extrabold text-emerald-500">{healthScore}%</div>
         </div>
-        <div className="bg-white dark:bg-gray-900 p-6 rounded-[28px] border border-gray-100 dark:border-gray-800 shadow-sm">
+        <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
            <div className="flex items-center gap-3 mb-2">
              <div className="w-8 h-8 rounded-lg bg-purple-50 dark:bg-purple-900/20 text-purple-600 flex items-center justify-center"><Clock size={18} /></div>
              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest font-mono">Saved</span>
            </div>
            <div className="text-2xl font-extrabold text-gray-900 dark:text-white">{timeSavedHours} <span className="text-xs text-gray-400">h</span></div>
         </div>
-        <div className="bg-white dark:bg-gray-900 p-6 rounded-[28px] border border-gray-100 dark:border-gray-800 shadow-sm">
+        <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
            <div className="flex items-center gap-3 mb-2">
              <div className="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 text-[#5B5FFF] flex items-center justify-center"><Zap size={18} /></div>
              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest font-mono">Usage</span>
@@ -427,7 +427,7 @@ export const Dashboard: React.FC<Props> = ({
       {/* Search */}
       <div className="relative group">
         <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-        <input type="text" placeholder="Search library..." value={search} onChange={(e) => setSearch(e.target.value)} className="w-full pl-12 pr-6 py-4 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl outline-none focus:ring-2 focus:ring-[#5B5FFF]/10 transition-all text-sm font-medium shadow-sm" />
+        <input type="text" placeholder="Search library..." value={search} onChange={(e) => setSearch(e.target.value)} className="w-full pl-12 pr-6 py-4 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-lg outline-none focus:ring-2 focus:ring-[#5B5FFF]/10 transition-all text-sm font-medium shadow-sm" />
       </div>
 
       {/* Sub-folders Section */}
@@ -438,8 +438,8 @@ export const Dashboard: React.FC<Props> = ({
             {subfolders.map(folder => {
               const totalRosterCount = getRecursiveRosterCount(folder.id, projects, rosters);
               return (
-                <button key={folder.id} onClick={() => onSelectProject(folder.id)} className="p-4 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl flex items-center gap-4 hover:shadow-md transition-all text-left group">
-                  <div className="w-11 h-11 rounded-xl bg-[#5B5FFF]/5 text-[#5B5FFF] flex items-center justify-center group-hover:bg-[#5B5FFF] group-hover:text-white transition-all">
+                <button key={folder.id} onClick={() => onSelectProject(folder.id)} className="p-4 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-lg flex items-center gap-4 hover:shadow-md transition-all text-left group">
+                  <div className="w-11 h-11 rounded-lg bg-[#5B5FFF]/5 text-[#5B5FFF] flex items-center justify-center group-hover:bg-[#5B5FFF] group-hover:text-white transition-all">
                     <FolderOpen size={22} />
                   </div>
                   <div className="flex-1 min-w-0">
@@ -459,7 +459,7 @@ export const Dashboard: React.FC<Props> = ({
       <div>
         <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.25em] mb-4 font-mono ml-1">Assemblies</h3>
         {filteredRosters.length === 0 ? (
-          <div className="text-center py-20 bg-gray-50 dark:bg-gray-800/30 rounded-[32px] border border-dashed border-gray-200 dark:border-gray-700">
+          <div className="text-center py-20 bg-gray-50 dark:bg-gray-800/30 rounded-xl border border-dashed border-gray-200 dark:border-gray-700">
             <FolderOpen size={48} className="mx-auto mb-4 text-gray-300" />
             <p className="text-xs text-gray-500 dark:text-gray-400 font-medium uppercase tracking-widest">Empty Library</p>
           </div>
@@ -468,7 +468,7 @@ export const Dashboard: React.FC<Props> = ({
             {filteredRosters.map(roster => {
               const primaryColor = roster.teamMetadata?.primaryColor || '#5B5FFF';
               return (
-                <div key={roster.id} onClick={() => onSelectRoster(roster.id)} className="group bg-white dark:bg-gray-900 rounded-[28px] border border-gray-100 dark:border-gray-800 p-6 cursor-pointer hover:shadow-lg hover:scale-[1.01] transition-all relative overflow-hidden flex flex-col">
+                <div key={roster.id} onClick={() => onSelectRoster(roster.id)} className="group bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-6 cursor-pointer hover:shadow-lg hover:scale-[1.01] transition-all relative overflow-hidden flex flex-col">
                   <div className="absolute top-0 left-0 w-full h-1" style={{ backgroundColor: primaryColor }}></div>
                   <div className="flex justify-between items-start mb-4">
                     <TeamLogo url={roster.teamMetadata?.logoUrl} name={roster.teamName} abbreviation={roster.teamMetadata?.abbreviation} primaryColor={primaryColor} size="md" />
@@ -497,9 +497,9 @@ export const Dashboard: React.FC<Props> = ({
                           <button onClick={() => setMovingRosterId(null)} className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"><X size={16} /></button>
                        </div>
                        <div className="flex-1 overflow-y-auto space-y-1 custom-scrollbar">
-                          <button onClick={() => handleMoveRoster(undefined)} className="w-full text-left p-2.5 text-xs font-bold hover:bg-[#5B5FFF]/5 hover:text-[#5B5FFF] rounded-xl transition-all flex items-center gap-3"><FolderOpen size={14} /> Root</button>
+                          <button onClick={() => handleMoveRoster(undefined)} className="w-full text-left p-2.5 text-xs font-bold hover:bg-[#5B5FFF]/5 hover:text-[#5B5FFF] rounded-lg transition-all flex items-center gap-3"><FolderOpen size={14} /> Root</button>
                           {projects.map(p => (
-                            <button key={p.id} onClick={() => handleMoveRoster(p.id)} className="w-full text-left p-2.5 text-xs font-bold hover:bg-[#5B5FFF]/5 hover:text-[#5B5FFF] rounded-xl transition-all flex items-center gap-3"><FolderOpen size={14} /> {p.name}</button>
+                            <button key={p.id} onClick={() => handleMoveRoster(p.id)} className="w-full text-left p-2.5 text-xs font-bold hover:bg-[#5B5FFF]/5 hover:text-[#5B5FFF] rounded-lg transition-all flex items-center gap-3"><FolderOpen size={14} /> {p.name}</button>
                           ))}
                        </div>
                     </div>
@@ -520,9 +520,9 @@ export const Dashboard: React.FC<Props> = ({
 };
 
 const ExportItem: React.FC<{ icon: React.ReactNode; title: string; desc: string; onClick: () => void }> = ({ icon, title, desc, onClick }) => (
-  <button onClick={onClick} className="w-full flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 hover:bg-[#5B5FFF]/5 dark:hover:bg-[#5B5FFF]/10 rounded-[20px] transition-all group border border-gray-100 dark:border-gray-800 hover:border-[#5B5FFF]/20">
+  <button onClick={onClick} className="w-full flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 hover:bg-[#5B5FFF]/5 dark:hover:bg-[#5B5FFF]/10 rounded-lg transition-all group border border-gray-100 dark:border-gray-800 hover:border-[#5B5FFF]/20">
     <div className="flex items-center gap-4">
-      <div className="w-12 h-12 rounded-xl bg-white dark:bg-gray-800 flex items-center justify-center text-gray-400 group-hover:text-[#5B5FFF] shadow-sm transition-colors group-hover:scale-110">
+      <div className="w-12 h-12 rounded-lg bg-white dark:bg-gray-800 flex items-center justify-center text-gray-400 group-hover:text-[#5B5FFF] shadow-sm transition-colors group-hover:scale-110">
         {icon}
       </div>
       <div className="text-left min-w-0">

@@ -3,12 +3,11 @@ import React, { useState, useEffect } from 'react';
 import { Dashboard } from './components/Dashboard.tsx';
 import Engine from './components/Engine.tsx';
 import Settings from './components/Settings.tsx';
-import Auth from './components/Auth.tsx';
 import LandingPage from './components/LandingPage.tsx';
 import { Roster, Profile, Project } from './types.ts';
 import { processRosterRawText, ProcessedRoster } from './services/gemini.ts';
 import { supabase, isSupabaseConfigured, getMonthlyUsage, getSiteConfig, SiteConfig, logActivity, setSupabaseToken } from './services/supabase.ts';
-import { useUser, useAuth, useClerk, SignedIn, SignedOut, SignInButton, SignUpButton, UserButton } from '@clerk/clerk-react';
+import { useUser, useAuth, useClerk, SignedIn, SignedOut, SignInButton, SignUpButton, UserButton, UserProfile } from '@clerk/clerk-react';
 import { dark } from '@clerk/themes';
 import { PRICING_TIERS, getTierLimit, BRAND_CONFIG } from './constants.tsx';
 import {
@@ -58,7 +57,7 @@ const ICON_MAP: Record<string, any> = {
 // BrandLogo component that uses Database Branding
 const BrandLogo: React.FC<{ siteConfig?: SiteConfig; size?: 'sm' | 'md' }> = ({ siteConfig, size = 'md' }) => {
   const containerClasses = size === 'md'
-    ? "w-8 h-8 rounded-xl shrink-0"
+    ? "w-8 h-8 rounded-lg shrink-0"
     : "w-6 h-6 rounded-lg shrink-0";
 
   const logoSrc = siteConfig?.logo_url;
@@ -79,6 +78,74 @@ const getRecursiveRosterCount = (projectId: string, projects: Project[], rosters
   const childProjects = projects.filter(p => p.parentId === projectId);
   const subRosters = childProjects.reduce((acc, child) => acc + getRecursiveRosterCount(child.id, projects, rosters), 0);
   return directRosters + subRosters;
+};
+
+const UserMenu: React.FC<{ user: any; darkMode: boolean; onSignOut: () => void; onOpenProfile: () => void }> = ({ user, darkMode, onSignOut, onOpenProfile }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const { signOut } = useClerk();
+
+  const handleSignOut = async () => {
+    setIsOpen(false);
+    await onSignOut();
+  };
+
+  const handleOpenProfile = () => {
+    setIsOpen(false);
+    onOpenProfile();
+  };
+
+  return (
+    <div className="relative">
+      <button 
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full flex items-center gap-3 p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 font-medium transition-colors"
+      >
+        <div className="w-5 h-5 shrink-0 flex items-center justify-center overflow-hidden rounded-lg">
+          {user?.imageUrl ? (
+            <img src={user.imageUrl} alt="User" className="w-full h-full object-cover" />
+          ) : (
+            <div className="w-full h-full primary-gradient flex items-center justify-center text-white text-xs font-bold">
+              {user?.firstName?.[0] || 'U'}
+            </div>
+          )}
+        </div>
+        <span className="hidden lg:block text-[14px] truncate max-w-[120px]">
+          {user?.fullName || user?.primaryEmailAddress?.emailAddress || 'User'}
+        </span>
+        <ChevronDown size={14} className={`hidden lg:block transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+      </button>
+
+      {isOpen && (
+        <>
+          <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
+          <div className="absolute bottom-full left-0 right-0 mb-2 bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-gray-100 dark:border-gray-800 overflow-hidden z-50 animate-in slide-in-from-bottom-2 duration-200">
+            <div className="p-3 border-b border-gray-100 dark:border-gray-800">
+              <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
+                {user?.fullName || 'User'}
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                {user?.primaryEmailAddress?.emailAddress || ''}
+              </p>
+            </div>
+            <button 
+              onClick={handleOpenProfile}
+              className="w-full flex items-center gap-3 p-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+            >
+              <SettingsIcon size={16} />
+              <span>Account Settings</span>
+            </button>
+            <button
+              onClick={handleSignOut}
+              className="w-full flex items-center gap-3 p-3 text-sm text-red-600 dark:text-red-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+            >
+              <LogOut size={16} />
+              <span>Sign Out</span>
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  );
 };
 
 const FolderInput: React.FC<{
@@ -120,7 +187,8 @@ const FolderItem: React.FC<{
   newProjectName: string;
   handleCreateProject: (parentId?: string) => void;
   isSavingProject: boolean;
-}> = ({ folder, level, projects, activeProjectId, rosters, expandedFolderIds, toggleExpand, setView, setActiveProjectId, setSelectedRosterId, setCreatingFolderInId, setNewProjectName, handleDeleteProject, creatingFolderInId, newProjectName, handleCreateProject, isSavingProject }) => {
+  setConfirmDeleteProject: (project: Project | null) => void;
+}> = ({ folder, level, projects, activeProjectId, rosters, expandedFolderIds, toggleExpand, setView, setActiveProjectId, setSelectedRosterId, setCreatingFolderInId, setNewProjectName, handleDeleteProject, creatingFolderInId, newProjectName, handleCreateProject, isSavingProject, setConfirmDeleteProject }) => {
   const hasChildren = projects.some(p => p.parentId === folder.id);
   const isOpen = expandedFolderIds.includes(folder.id);
   const totalRosterCount = getRecursiveRosterCount(folder.id, projects, rosters);
@@ -128,7 +196,7 @@ const FolderItem: React.FC<{
   return (
     <div className="space-y-0.5">
       <div className="group flex items-center gap-1" style={{ paddingLeft: `${level * 16}px` }}>
-        <button onClick={() => { setView('dashboard'); setActiveProjectId(folder.id); setSelectedRosterId(null); }} className={`flex-1 flex items-center px-2 py-1.5 rounded-xl text-[13px] font-bold transition-all ${activeProjectId === folder.id ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF]' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800'}`}>
+        <button onClick={() => { setView('dashboard'); setActiveProjectId(folder.id); setSelectedRosterId(null); }} className={`flex-1 flex items-center px-2 py-1.5 rounded-lg text-[13px] font-bold transition-all ${activeProjectId === folder.id ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF]' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800'}`}>
           <div className="flex items-center gap-2 min-w-0 flex-1">
             {hasChildren ? (
               <button
@@ -147,17 +215,18 @@ const FolderItem: React.FC<{
                 <span className="text-[9px] font-mono opacity-40 translate-y-[-1px] shrink-0 font-black">
                   {totalRosterCount}
                 </span>
-              )}
-            </div>
+      )}
+
+    </div>
           </div>
         </button>
         <div className="flex items-center opacity-0 group-hover:opacity-100 transition-all shrink-0">
           <button onClick={() => { setCreatingFolderInId(folder.id); setNewProjectName(''); if (!isOpen) toggleExpand(folder.id); }} className="p-1.5 text-gray-300 hover:text-[#5B5FFF] hover:bg-[#5B5FFF]/5 rounded-lg transition-all cursor-pointer hidden lg:block" title="Add Sub-folder"><Plus size={14} /></button>
-          <button onClick={() => handleDeleteProject(folder.id)} className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all cursor-pointer hidden lg:block" title="Delete Folder"><Trash2 size={14} /></button>
+          <button onClick={() => setConfirmDeleteProject(folder)} className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all cursor-pointer hidden lg:block" title="Delete Folder"><Trash2 size={14} /></button>
         </div>
       </div>
       {creatingFolderInId === folder.id && <div style={{ paddingLeft: `${(level + 1) * 16}px` }}><FolderInput parentId={folder.id} newProjectName={newProjectName} setNewProjectName={setNewProjectName} handleCreateProject={handleCreateProject} setCreatingFolderInId={setCreatingFolderInId} isSavingProject={isSavingProject} /></div>}
-      {isOpen && projects.filter(p => p.parentId === folder.id).map(child => <FolderItem key={child.id} folder={child} level={level + 1} projects={projects} activeProjectId={activeProjectId} rosters={rosters} expandedFolderIds={expandedFolderIds} toggleExpand={toggleExpand} setView={setView} setActiveProjectId={setActiveProjectId} setSelectedRosterId={setSelectedRosterId} setCreatingFolderInId={setCreatingFolderInId} setNewProjectName={setNewProjectName} handleDeleteProject={handleDeleteProject} creatingFolderInId={creatingFolderInId} newProjectName={newProjectName} handleCreateProject={handleCreateProject} isSavingProject={isSavingProject} />)}
+      {isOpen && projects.filter(p => p.parentId === folder.id).map(child => <FolderItem key={child.id} folder={child} level={level + 1} projects={projects} activeProjectId={activeProjectId} rosters={rosters} expandedFolderIds={expandedFolderIds} toggleExpand={toggleExpand} setView={setView} setActiveProjectId={setActiveProjectId} setSelectedRosterId={setSelectedRosterId} setCreatingFolderInId={setCreatingFolderInId} setNewProjectName={setNewProjectName} handleDeleteProject={handleDeleteProject} creatingFolderInId={creatingFolderInId} newProjectName={newProjectName} handleCreateProject={handleCreateProject} isSavingProject={isSavingProject} setConfirmDeleteProject={setConfirmDeleteProject} />)}
     </div>
   );
 };
@@ -165,13 +234,23 @@ const FolderItem: React.FC<{
 const App: React.FC = () => {
   const { isLoaded: clerkLoaded, user } = useUser();
   const { getToken, signOut } = useAuth();
-  const { openSignIn } = useClerk();
+  const { openSignIn, openSignUp } = useClerk();
 
-  const [isInitializing, setIsInitializing] = useState(true);
-  const [initializationError, setInitializationError] = useState<string | null>(null);
-  const [showLanding, setShowLanding] = useState(true);
-  const [authModal, setAuthModal] = useState<'signin' | 'signup' | null>(null);
+  // All hooks must be called unconditionally - no early returns before hooks
   const [view, setView] = useState<'dashboard' | 'engine' | 'settings'>('dashboard');
+
+  useEffect(() => {
+    const saved = localStorage.getItem('lastView');
+    if (saved === 'engine' || saved === 'settings') {
+      setView(saved);
+    }
+  }, []);
+
+  const handleSetView = (newView: 'dashboard' | 'engine' | 'settings') => {
+    setView(newView);
+    localStorage.setItem('lastView', newView);
+  };
+
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
   const [expandedFolderIds, setExpandedFolderIds] = useState<string[]>([]);
   const [siteConfig, setSiteConfig] = useState<SiteConfig>({ site_name: 'rosterSync', logo_url: null });
@@ -197,6 +276,8 @@ const App: React.FC = () => {
   const [profile, setProfile] = useState<Profile>({ id: 'guest_user', fullName: 'Guest User', email: 'guest@rostersync.io', subscriptionTier: 'BASIC', organizationName: 'Demo Studio', creditsUsed: 0 });
   const [isProcessing, setIsProcessing] = useState(false);
   const [pendingRoster, setPendingRoster] = useState<ProcessedRoster | null>(null);
+  const [confirmDeleteProject, setConfirmDeleteProject] = useState<Project | null>(null);
+  const [showUserProfile, setShowUserProfile] = useState(false);
 
   useEffect(() => {
     if (darkMode) {
@@ -212,12 +293,9 @@ const App: React.FC = () => {
     const syncToken = async () => {
       if (user) {
         try {
-          // getToken with template 'supabase' requires the JWT template to exist in Clerk dashboard
-          const token = await getToken({ template: 'supabase' });
-          if (!token) throw new Error("Could not retrieve Supabase token from Clerk.");
+          const token = await getToken({ template: 'supabase', forceRefresh: true } as any);
           await setSupabaseToken(token);
-          setShowLanding(false);
-          setInitializationError(null);
+          await logActivity(user.id, 'LOGIN', 'Signed in to production workspace.');
           fetchData(user);
         } catch (err: any) {
           console.error("Error syncing token with Supabase:", err);
@@ -225,14 +303,30 @@ const App: React.FC = () => {
         }
       } else if (clerkLoaded) {
         setSupabaseToken(null);
-        setShowLanding(true);
-        setInitializationError(null);
         setRosters([]);
         setProjects([]);
       }
     };
     syncToken();
   }, [user, clerkLoaded]);
+
+  useEffect(() => {
+    const handleTokenExpired = async () => {
+      console.log('Token expired event received, refreshing...');
+      if (user) {
+        try {
+          const token = await getToken({ template: 'supabase', forceRefresh: true } as any);
+          await setSupabaseToken(token);
+          console.log('Token refreshed successfully');
+        } catch (err) {
+          console.error('Error refreshing token:', err);
+        }
+      }
+    };
+    
+    window.addEventListener('clerk-token-expired', handleTokenExpired);
+    return () => window.removeEventListener('clerk-token-expired', handleTokenExpired);
+  }, [user]);
 
   useEffect(() => {
     const initApp = async () => {
@@ -243,7 +337,6 @@ const App: React.FC = () => {
         const { data } = await supabase.from('release_notes').select('*').order('created_at', { ascending: false });
         if (data) setReleaseNotes(data);
       }
-      setIsInitializing(false);
     };
 
     initApp();
@@ -352,9 +445,14 @@ const App: React.FC = () => {
 
   const handleDeleteProject = async (projectId: string) => {
     const project = projects.find(p => p.id === projectId);
-    if (!project || !window.confirm(`Delete folder "${project.name}"?`)) return;
-    if (user && isSupabaseConfigured) await supabase.from('projects').delete().eq('id', projectId);
+    if (user && isSupabaseConfigured) {
+      await supabase.from('projects').delete().eq('id', projectId);
+      if (project) {
+        await logActivity(profile.id, 'PROJECT_FOLDER_DELETE', `Deleted folder "${project.name}".`);
+      }
+    }
     setProjects(prev => prev.filter(p => p.id !== projectId));
+    setConfirmDeleteProject(null);
   };
 
   const toggleExpand = (id: string) => setExpandedFolderIds(prev => prev.includes(id) ? prev.filter(fid => fid !== id) : [...prev, id]);
@@ -363,15 +461,15 @@ const App: React.FC = () => {
     if (user) {
       await logActivity(user.id, 'LOGOUT', 'User signed out of production workspace.');
     }
+    localStorage.removeItem('lastView');
     await signOut();
-    setShowLanding(true);
   };
 
   const handleStartProcessing = async (text: string, isNocMode: boolean = false, seasonYear: string = '', findBranding: boolean = false) => {
     const limit = getTierLimit(profile.subscriptionTier);
     if (profile.creditsUsed >= limit) { alert(`Limit Reached! ${profile.creditsUsed}/${limit}`); return; }
     setIsProcessing(true);
-    setView('engine');
+    handleSetView('engine');
     try {
       const result = await processRosterRawText(text, profile.subscriptionTier, isNocMode, seasonYear, findBranding);
       setPendingRoster(result);
@@ -398,14 +496,13 @@ const App: React.FC = () => {
         version_description: newRoster.versionDescription || ''
       }).select().single();
       if (data) {
-        await logActivity(user.id, 'ROSTER_SAVE', `Saved new roster assembly for ${newRoster.teamName}.`);
         setRosters(prev => [{ ...newRoster, id: data.id, createdAt: data.created_at, isSynced: true }, ...prev]);
       }
     } else {
       setRosters(prev => [{ ...newRoster, isSynced: false }, ...prev]);
     }
     setPendingRoster(null);
-    setView('dashboard');
+    handleSetView('dashboard');
   };
 
   const handleSupportSubmit = async (e: React.FormEvent) => {
@@ -432,86 +529,22 @@ const App: React.FC = () => {
     }
   };
 
-  if (isInitializing || loadingData || initializationError) {
-    return (
-      <div className="min-h-screen bg-[#FAFAFA] dark:bg-gray-950 flex flex-col items-center justify-center gap-6 text-center px-4">
-        {initializationError ? (
-          <>
-            <div className="w-16 h-16 rounded-2xl bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-500 mb-2">
-              <AlertCircle size={32} />
-            </div>
-            <h2 className="text-xl font-black text-gray-900 dark:text-white tracking-tight">Sync Failure</h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400 max-w-sm leading-relaxed">
-              {initializationError.includes('template')
-                ? "Your Clerk dashboard is missing the 'supabase' JWT template. Please create it to continue."
-                : initializationError}
-            </p>
-            <button
-              onClick={() => {
-                setInitializationError(null);
-                window.location.reload();
-              }}
-              className="mt-4 px-6 py-2 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded-xl font-bold text-sm hover:bg-gray-200 dark:hover:bg-gray-700 transition-all cursor-pointer"
-            >
-              Retry Sync
-            </button>
-            <button
-              onClick={() => signOut()}
-              className="mt-2 text-xs font-bold text-[#5B5FFF] hover:underline uppercase tracking-widest cursor-pointer"
-            >
-              Sign Out & Return Home
-            </button>
-          </>
-        ) : (
-          <>
-            <Loader2 className="animate-spin text-[#5B5FFF]" size={40} />
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-[0.2em] animate-pulse">Initializing Production Sync</p>
-          </>
-        )}
-      </div>
-    );
-  }
-
-  if (showLanding) {
-    return (
-      <>
-        <LandingPage onSignIn={() => setAuthModal('signin')} onSignUp={() => setAuthModal('signup')} darkMode={darkMode} toggleDarkMode={() => setDarkMode(!darkMode)} siteConfig={siteConfig} />
-        {authModal && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in zoom-in duration-200">
-            <div className="relative w-full max-w-sm" onClick={(e) => e.stopPropagation()}>
-              <Auth initialView={authModal} onClose={() => setAuthModal(null)} onGuestLogin={() => setShowLanding(false)} darkMode={darkMode} />
-            </div>
-          </div>
-        )}
-      </>
-    );
-  }
-
   return (
-    <div className={`flex min-h-screen bg-[#FAFAFA] dark:bg-gray-950 font-sans text-[#1A1A1A] dark:text-gray-100 transition-colors duration-300`}>
-      {/* Clerk Auth Header */}
-      <header className="fixed top-0 right-0 p-4 flex items-center gap-4 z-50">
-        <SignedOut>
-          <div className="flex gap-4">
-            <SignInButton mode="modal">
-              <button className="px-4 py-2 text-sm font-bold text-gray-600 dark:text-gray-400 hover:text-[#5B5FFF] transition-all cursor-pointer">
-                Sign In
-              </button>
-            </SignInButton>
-            <SignUpButton mode="modal">
-              <button className="bg-[#5B5FFF] text-white rounded-full font-bold text-sm h-10 px-6 shadow-lg shadow-[#5B5FFF]/20 hover:scale-105 transition-all cursor-pointer">
-                Sign Up
-              </button>
-            </SignUpButton>
-          </div>
-        </SignedOut>
-        <SignedIn>
-          <UserButton appearance={{ baseTheme: darkMode ? dark : undefined }} />
-        </SignedIn>
-      </header>
-      <aside className="w-16 lg:w-60 border-r border-gray-200 dark:border-gray-800 flex flex-col fixed h-full bg-white dark:bg-gray-900 z-20 transition-all duration-300 shadow-sm">
+    <>
+      <SignedOut>
+        <LandingPage 
+          onSignIn={() => openSignIn()} 
+          onSignUp={() => openSignUp()} 
+          darkMode={darkMode} 
+          toggleDarkMode={() => setDarkMode(!darkMode)} 
+          siteConfig={siteConfig} 
+        />
+      </SignedOut>
+      <SignedIn>
+      <div className={`flex min-h-screen bg-[#FAFAFA] dark:bg-gray-950 font-sans text-[#1A1A1A] dark:text-gray-100 transition-colors duration-300`}>
+        <aside className="w-16 lg:w-60 border-r border-gray-200 dark:border-gray-800 flex flex-col fixed h-full bg-white dark:bg-gray-900 z-20 transition-all duration-300 shadow-sm">
         <div className="h-16 flex items-center justify-between px-4 lg:px-5 border-b border-gray-100 dark:border-gray-800 shrink-0">
-          <div className="flex items-center gap-3 text-gray-900 dark:text-white cursor-pointer" onClick={() => { setView('dashboard'); setActiveProjectId(null); setSelectedRosterId(null); }}>
+          <div className="flex items-center gap-3 text-gray-900 dark:text-white cursor-pointer" onClick={() => { handleSetView('dashboard'); setActiveProjectId(null); setSelectedRosterId(null); }}>
             <BrandLogo siteConfig={siteConfig} />
             <span className="font-extrabold text-base tracking-tight hidden lg:block">{siteConfig.site_name}</span>
           </div>
@@ -522,15 +555,15 @@ const App: React.FC = () => {
 
         <div className="flex-1 overflow-y-auto custom-scrollbar p-3 lg:p-4 space-y-6">
           <nav className="space-y-1">
-            <button onClick={() => { setView('dashboard'); setActiveProjectId(null); setSelectedRosterId(null); }} className={`w-full flex items-center gap-3 p-2 rounded-xl transition-all ${view === 'dashboard' && activeProjectId === null ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF] font-bold' : 'text-gray-500 hover:bg-gray-50 font-medium'}`}>
+            <button onClick={() => { handleSetView('dashboard'); setActiveProjectId(null); setSelectedRosterId(null); }} className={`w-full flex items-center gap-3 p-2 rounded-lg transition-all ${view === 'dashboard' && activeProjectId === null ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF] font-bold' : 'text-gray-500 hover:bg-gray-50 font-medium'}`}>
               <LayoutDashboard size={20} />
               <span className="hidden lg:block text-[14px]">Dashboard</span>
             </button>
-            <button onClick={() => setView('engine')} className={`w-full flex items-center gap-3 p-2 rounded-xl transition-all ${view === 'engine' ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF] font-bold' : 'text-gray-500 hover:bg-gray-50 font-medium'}`}>
+            <button onClick={() => handleSetView('engine')} className={`w-full flex items-center gap-3 p-2 rounded-lg transition-all ${view === 'engine' ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF] font-bold' : 'text-gray-500 hover:bg-gray-50 font-medium'}`}>
               <Cpu size={20} />
               <span className="hidden lg:block text-[14px]">The Engine</span>
             </button>
-            <button onClick={() => setView('settings')} className={`w-full flex items-center gap-3 p-2 rounded-xl transition-all ${view === 'settings' ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF] font-bold' : 'text-gray-500 hover:bg-gray-100 font-medium'}`}><SettingsIcon size={20} /><span className="hidden lg:block text-[14px]">Settings</span></button>
+            <button onClick={() => handleSetView('settings')} className={`w-full flex items-center gap-3 p-2 rounded-lg transition-all ${view === 'settings' ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF] font-bold' : 'text-gray-500 hover:bg-gray-100 font-medium'}`}><SettingsIcon size={20} /><span className="hidden lg:block text-[14px]">Settings</span></button>
           </nav>
           <div className="space-y-2">
             <div className="flex items-center justify-between px-3">
@@ -539,24 +572,45 @@ const App: React.FC = () => {
             </div>
             <div className="space-y-0.5 px-0.5">
               {creatingFolderInId === 'root' && <FolderInput newProjectName={newProjectName} setNewProjectName={setNewProjectName} handleCreateProject={handleCreateProject} setCreatingFolderInId={setCreatingFolderInId} isSavingProject={isSavingProject} />}
-              {projects.filter(p => !p.parentId).map(p => <FolderItem key={p.id} folder={p} level={0} projects={projects} activeProjectId={activeProjectId} rosters={rosters} expandedFolderIds={expandedFolderIds} toggleExpand={toggleExpand} setView={setView} setActiveProjectId={setActiveProjectId} setSelectedRosterId={setSelectedRosterId} setCreatingFolderInId={setCreatingFolderInId} setNewProjectName={setNewProjectName} handleDeleteProject={handleDeleteProject} creatingFolderInId={creatingFolderInId} newProjectName={newProjectName} handleCreateProject={handleCreateProject} isSavingProject={isSavingProject} />)}
+              {projects.filter(p => !p.parentId).map(p => <FolderItem key={p.id} folder={p} level={0} projects={projects} activeProjectId={activeProjectId} rosters={rosters} expandedFolderIds={expandedFolderIds} toggleExpand={toggleExpand} setView={setView} setActiveProjectId={setActiveProjectId} setSelectedRosterId={setSelectedRosterId} setCreatingFolderInId={setCreatingFolderInId} setNewProjectName={setNewProjectName} handleDeleteProject={handleDeleteProject} creatingFolderInId={creatingFolderInId} newProjectName={newProjectName} handleCreateProject={handleCreateProject} isSavingProject={isSavingProject} setConfirmDeleteProject={setConfirmDeleteProject} />)}
             </div>
           </div>
         </div>
 
         <div className="p-3 lg:p-4 border-t border-gray-100 dark:border-gray-800 space-y-1 bg-white dark:bg-gray-900">
-          <button onClick={() => setShowChangelog(true)} className="w-full flex items-center gap-3 p-2 rounded-xl text-gray-500 hover:bg-gray-100 font-medium"><ScrollText size={20} /><span className="hidden lg:block text-[14px]">Updates</span></button>
-          <button onClick={() => setShowSupportModal(true)} className="w-full flex items-center gap-3 p-2 rounded-xl text-gray-500 hover:bg-gray-100 font-medium">
+          <button onClick={() => setShowChangelog(true)} className="w-full flex items-center gap-3 p-2 rounded-lg text-gray-500 hover:bg-gray-100 font-medium"><ScrollText size={20} /><span className="hidden lg:block text-[14px]">Updates</span></button>
+          <button onClick={() => setShowSupportModal(true)} className="w-full flex items-center gap-3 p-2 rounded-lg text-gray-500 hover:bg-gray-100 font-medium">
             <HelpCircle size={20} />
             <span className="hidden lg:block text-[14px]">Support</span>
           </button>
-          <button onClick={handleLogout} className="w-full flex items-center gap-3 p-2 rounded-xl text-gray-400 hover:bg-red-50 hover:text-red-500 transition-all font-medium"><LogOut size={20} /><span className="hidden lg:block text-[14px]">Sign Out</span></button>
+          <SignedOut>
+            <SignInButton mode="modal">
+              <button className="w-full flex items-center gap-3 p-2 rounded-lg text-gray-500 hover:bg-gray-100 font-medium">
+                <LogOut size={20} />
+                <span className="hidden lg:block text-[14px]">Sign In</span>
+              </button>
+            </SignInButton>
+          </SignedOut>
+          <SignedIn>
+            <UserMenu 
+              user={user} 
+              darkMode={darkMode}
+              onSignOut={async () => {
+                if (user) {
+                  await logActivity(user.id, 'LOGOUT', 'User signed out of production workspace.');
+                }
+                await signOut();
+                localStorage.removeItem('lastView');
+              }}
+              onOpenProfile={() => setShowUserProfile(true)}
+            />
+          </SignedIn>
         </div>
       </aside>
 
       <main className="flex-1 ml-16 lg:ml-60 p-4 lg:p-8 overflow-y-auto h-screen">
         <div className="max-w-[1400px] mx-auto h-full">
-          {view === 'dashboard' && <Dashboard userId={profile.id} rosters={rosters} projects={projects} activeProjectId={activeProjectId} onNewRoster={() => setView('engine')} onDeleteRoster={async (id) => {
+          {view === 'dashboard' && <Dashboard userId={profile.id} rosters={rosters} projects={projects} activeProjectId={activeProjectId} onNewRoster={() => handleSetView('engine')} onDeleteRoster={async (id) => {
             const roster = rosters.find(r => r.id === id);
             if (roster) {
               await logActivity(profile.id, 'ROSTER_DELETE', `Deleted roster for ${roster.teamName}.`);
@@ -598,9 +652,10 @@ const App: React.FC = () => {
             // Update local state
             setRosters(prev => prev.map(old => old.id === r.id ? r : old));
           }} userTier={profile.subscriptionTier} creditsUsed={profile.creditsUsed} selectedRosterId={selectedRosterId} onSelectRoster={setSelectedRosterId} onSelectProject={setActiveProjectId} onCreateSubfolder={(pid) => { setCreatingFolderInId(pid || 'root'); setNewProjectName(''); }} />}
-          {view === 'engine' && <Engine userTier={profile.subscriptionTier} projects={projects} creditsUsed={profile.creditsUsed} maxCredits={getTierLimit(profile.subscriptionTier)} onSave={handleSaveRoster} onStartProcessing={handleStartProcessing} isProcessing={isProcessing} pendingRoster={pendingRoster} onClearPending={() => setPendingRoster(null)} />}
+          {view === 'engine' && <Engine userTier={profile.subscriptionTier} projects={projects} creditsUsed={profile.creditsUsed} maxCredits={getTierLimit(profile.subscriptionTier)} onSave={handleSaveRoster} onStartProcessing={handleStartProcessing} isProcessing={isProcessing} pendingRoster={pendingRoster} onClearPending={() => setPendingRoster(null)} onDeletePlayer={async (athleteName) => {
+            await logActivity(profile.id, 'PLAYER_DELETE', `Removed player ${athleteName} from roster.`);
+          }} />}
           {view === 'settings' && <Settings profile={profile} rosters={rosters} onUpdate={async (updates) => {
-            await logActivity(profile.id, 'WORKSPACE_UPDATE', 'Updated workspace/profile settings.');
             setProfile(prev => ({ ...prev, ...updates }));
           }} />}
         </div>
@@ -608,10 +663,10 @@ const App: React.FC = () => {
 
       {showSupportModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-300">
-          <div className="relative w-full max-w-md bg-white dark:bg-gray-900 rounded-[32px] p-8 shadow-2xl animate-in zoom-in duration-300">
+          <div className="relative w-full max-w-md bg-white dark:bg-gray-900 rounded-xl p-8 shadow-2xl animate-in zoom-in duration-300">
             <button onClick={() => setShowSupportModal(false)} className="absolute top-6 right-6 p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-all"><X size={20} /></button>
             <div className="text-center mb-8">
-              <div className="w-16 h-16 rounded-xl bg-[#5B5FFF]/10 text-[#5B5FFF] flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 rounded-lg bg-[#5B5FFF]/10 text-[#5B5FFF] flex items-center justify-center mx-auto mb-4">
                 <Headphones size={32} />
               </div>
               <h2 className="text-2xl font-extrabold text-gray-900 dark:text-white">Broadcast Support</h2>
@@ -620,22 +675,22 @@ const App: React.FC = () => {
             <form onSubmit={handleSupportSubmit} className="space-y-4">
               <div className="space-y-1">
                 <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1 font-mono">Your Name</label>
-                <input type="text" required value={supportForm.name} onChange={(e) => setSupportForm({ ...supportForm, name: e.target.value })} className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border-none rounded-xl outline-none focus:ring-2 focus:ring-[#5B5FFF]/20 text-sm text-gray-900 dark:text-white" />
+                <input type="text" required value={supportForm.name} onChange={(e) => setSupportForm({ ...supportForm, name: e.target.value })} className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border-none rounded-lg outline-none focus:ring-2 focus:ring-[#5B5FFF]/20 text-sm text-gray-900 dark:text-white" />
               </div>
               <div className="space-y-1">
                 <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1 font-mono">Work Email</label>
-                <input type="email" required value={supportForm.email} onChange={(e) => setSupportForm({ ...supportForm, email: e.target.value })} className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border-none rounded-xl outline-none focus:ring-2 focus:ring-[#5B5FFF]/20 text-sm text-gray-900 dark:text-white" />
+                <input type="email" required value={supportForm.email} onChange={(e) => setSupportForm({ ...supportForm, email: e.target.value })} className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border-none rounded-lg outline-none focus:ring-2 focus:ring-[#5B5FFF]/20 text-sm text-gray-900 dark:text-white" />
               </div>
               <div className="space-y-1">
                 <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1 font-mono">Message</label>
-                <textarea required rows={4} value={supportForm.message} onChange={(e) => setSupportForm({ ...supportForm, message: e.target.value })} className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border-none rounded-xl outline-none focus:ring-2 focus:ring-[#5B5FFF]/20 text-sm text-gray-900 dark:text-white resize-none" />
+                <textarea required rows={4} value={supportForm.message} onChange={(e) => setSupportForm({ ...supportForm, message: e.target.value })} className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border-none rounded-lg outline-none focus:ring-2 focus:ring-[#5B5FFF]/20 text-sm text-gray-900 dark:text-white resize-none" />
               </div>
               {supportStatus === 'success' ? (
-                <div className="p-4 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 rounded-xl text-center font-bold text-sm flex items-center justify-center gap-2">
+                <div className="p-4 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 rounded-lg text-center font-bold text-sm flex items-center justify-center gap-2">
                   <CheckCircle2 size={18} /> Ticket Created!
                 </div>
               ) : (
-                <button type="submit" disabled={supportStatus === 'sending'} className="w-full py-4 rounded-xl primary-gradient text-white font-bold text-sm shadow-lg shadow-[#5B5FFF]/20 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2">
+                <button type="submit" disabled={supportStatus === 'sending'} className="w-full py-4 rounded-lg primary-gradient text-white font-bold text-sm shadow-lg shadow-[#5B5FFF]/20 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2">
                   {supportStatus === 'sending' ? <Loader2 className="animate-spin" size={18} /> : <><MessageSquare size={18} /> Send Ticket</>}
                 </button>
               )}
@@ -646,10 +701,10 @@ const App: React.FC = () => {
 
       {showChangelog && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-300">
-          <div className="relative w-full max-w-2xl bg-white dark:bg-gray-900 rounded-[32px] shadow-2xl animate-in zoom-in duration-300 overflow-hidden flex flex-col max-h-[85vh]">
+          <div className="relative w-full max-w-2xl bg-white dark:bg-gray-900 rounded-xl shadow-2xl animate-in zoom-in duration-300 overflow-hidden flex flex-col max-h-[85vh]">
             <div className="p-8 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between shrink-0">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-[#5B5FFF]/10 text-[#5B5FFF] flex items-center justify-center"><ScrollText size={24} /></div>
+                <div className="w-12 h-12 rounded-lg bg-[#5B5FFF]/10 text-[#5B5FFF] flex items-center justify-center"><ScrollText size={24} /></div>
                 <div>
                   <h2 className="text-2xl font-extrabold text-gray-900 dark:text-white tracking-tight">Production Log</h2>
                   <p className="text-sm text-gray-500 font-medium">System enhancements.</p>
@@ -672,7 +727,7 @@ const App: React.FC = () => {
                     {(note.features || []).map((feat: any, idx: number) => {
                       const Icon = ICON_MAP[feat.icon] || Sparkles;
                       return (
-                        <div key={idx} className="p-4 rounded-2xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700">
+                        <div key={idx} className="p-4 rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700">
                           <div className="flex items-center gap-2 mb-2">
                             <Icon size={16} className="text-[#5B5FFF]" />
                             <span className="text-[10px] font-black uppercase tracking-widest text-[#5B5FFF]">{feat.label}</span>
@@ -688,7 +743,36 @@ const App: React.FC = () => {
           </div>
         </div>
       )}
+
+      {showUserProfile && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-300">
+          <div className="relative w-full max-w-4xl bg-white dark:bg-gray-900 rounded-xl shadow-2xl animate-in zoom-in duration-300 overflow-hidden max-h-[90vh]">
+            <div className="flex items-center justify-between p-6 border-b border-gray-100 dark:border-gray-800">
+              <h2 className="text-xl font-extrabold text-gray-900 dark:text-white">Account Settings</h2>
+              <button onClick={() => setShowUserProfile(false)} className="p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-all">
+                <X size={24} />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto max-h-[calc(90vh-80px)]">
+              <UserProfile 
+                appearance={{
+                  baseTheme: darkMode ? dark : undefined,
+                  elements: {
+                    rootBox: 'w-full',
+                    card: 'shadow-none bg-transparent',
+                    header: 'hidden',
+                    pageScrollBox: 'p-0',
+                    componentContainer: 'border-0 shadow-none'
+                  }
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
+    </SignedIn>
+    </>
   );
 };
 

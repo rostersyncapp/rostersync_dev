@@ -1,16 +1,16 @@
 import React, { useState, forwardRef, useRef, useEffect, useId } from 'react';
 import { supabase, isSupabaseConfigured, SiteConfig } from '../services/supabase.ts';
 import { PRICING_TIERS, BRAND_CONFIG } from '../constants.tsx';
-import { 
-  CheckCircle2, 
-  ArrowRight, 
-  Sparkles, 
-  Plus, 
-  Minus, 
-  X, 
-  Send, 
-  Loader2, 
-  Sun, 
+import {
+  CheckCircle2,
+  ArrowRight,
+  Sparkles,
+  Plus,
+  Minus,
+  X,
+  Send,
+  Loader2,
+  Sun,
   Moon,
   Wand2,
   ShieldCheck,
@@ -28,6 +28,8 @@ import {
   Box,
   Share2
 } from 'lucide-react';
+import { useClerk, SignInButton, SignUpButton } from '@clerk/clerk-react';
+import { WavyBackground } from './ui/wavy-background';
 
 // --- Utility for Tailwind classes ---
 const cn = (...classes: any[]) => classes.filter(Boolean).join(' ');
@@ -77,6 +79,8 @@ const AnimatedBeam: React.FC<AnimatedBeamProps> = ({
 }) => {
   const id = useId();
   const [path, setPath] = useState("");
+  const rafRef = useRef<number | null>(null);
+  const lastUpdateRef = useRef<number>(0);
 
   useEffect(() => {
     const updatePath = () => {
@@ -97,16 +101,29 @@ const AnimatedBeam: React.FC<AnimatedBeamProps> = ({
       setPath(`M ${x1} ${y1} Q ${cx} ${cy} ${x2} ${y2}`);
     };
 
-    const resizeObserver = new ResizeObserver(updatePath);
-    if (containerRef.current) resizeObserver.observe(containerRef.current);
-    
-    updatePath();
-    const timeoutId = setTimeout(updatePath, 150);
+    const throttledUpdate = () => {
+      const now = Date.now();
+      if (now - lastUpdateRef.current < 16) return;
+      lastUpdateRef.current = now;
+      updatePath();
+    };
 
-    window.addEventListener("scroll", updatePath);
+    const resizeObserver = new ResizeObserver(throttledUpdate);
+    if (containerRef.current) resizeObserver.observe(containerRef.current);
+
+    const onScroll = () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      rafRef.current = requestAnimationFrame(throttledUpdate);
+    };
+
+    throttledUpdate();
+    const timeoutId = setTimeout(throttledUpdate, 150);
+
+    window.addEventListener("scroll", onScroll, { passive: true });
     return () => {
       resizeObserver.disconnect();
-      window.removeEventListener("scroll", updatePath);
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      window.removeEventListener("scroll", onScroll);
       clearTimeout(timeoutId);
     };
   }, [fromRef, toRef, containerRef, curvature]);
@@ -119,15 +136,13 @@ const AnimatedBeam: React.FC<AnimatedBeamProps> = ({
       xmlns="http://www.w3.org/2000/svg"
       className="pointer-events-none absolute left-0 top-0 size-full z-10 overflow-visible"
     >
-      {/* Static background path */}
       <path
         d={path}
         stroke={pathColor}
         strokeWidth="2"
         strokeLinecap="round"
       />
-      
-      {/* Animated Laser Beam */}
+
       {isActive && (
         <React.Fragment key={`${id}-${activeStep}`}>
           <defs>
@@ -183,6 +198,7 @@ const FAQS = [
   { q: "Can I export for Ross Xpression or Vizrt?", a: "Yes. Our Network tier includes direct exports for Ross DataLinq (XML/CSV) and Vizrt DataCenter, including automatic accent removal and case normalization." }
 ];
 
+
 const FEATURES = [
   { icon: <Wand2 size={20} />, title: "AI Normalization", desc: "Instantly parses messy text from PDF scrapes, websites, and emails with 99.9% accuracy." },
   { icon: <ShieldCheck size={20} />, title: "Broadcast Safe", desc: "Automatically strips accents and sanitizes special characters for character generator compatibility." },
@@ -215,10 +231,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
   const [activeStep, setActiveStep] = useState(0);
 
   useEffect(() => {
-    const stepDuration = 1000; 
+    const stepDuration = 1000;
     const interval = setInterval(() => {
       setActiveStep((prev) => (prev + 1) % 6);
-    }, stepDuration); 
+    }, stepDuration);
     return () => clearInterval(interval);
   }, [activeStep]);
 
@@ -244,45 +260,76 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
     } catch (err) { setDemoStatus('error'); }
   };
 
+  const CLERK_DOMAIN = 'https://winning-doe-44.accounts.dev';
+  const clerk = useClerk();
+
+  // Initialize with robust fallback for Safari/ITP blocking
+  const [signInUrl, setSignInUrl] = useState(`${CLERK_DOMAIN}/sign-in?redirect_url=${encodeURIComponent(window.location.origin)}/`);
+  const [signUpUrl, setSignUpUrl] = useState(`${CLERK_DOMAIN}/sign-up?redirect_url=${encodeURIComponent(window.location.origin)}/`);
+
+  useEffect(() => {
+    if (clerk?.loaded) {
+      setSignInUrl(clerk.buildSignInUrl());
+      setSignUpUrl(clerk.buildSignUpUrl());
+    }
+  }, [clerk?.loaded]);
+
   return (
-    <div className="min-h-screen w-full bg-[#FAFAFA] dark:bg-gray-900 font-sans text-[#1A1A1A] dark:text-gray-100 transition-colors duration-300">
-      {/* Navigation */}
-      <nav className="fixed top-0 left-0 w-full z-50 border-b border-gray-100 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md">
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-              <BrandLogo siteConfig={siteConfig} />
-              <span className="font-extrabold text-base tracking-tight font-mono text-gray-900 dark:text-white">{siteConfig.site_name}</span>
+    <div className={`min-h-screen font-sans selection:bg-[#5B5FFF]/30 ${darkMode ? 'dark' : ''} bg-[#FAFAFA] dark:bg-[#111827] text-gray-900 dark:text-gray-100 transition-colors duration-300`}>
+      {/* Background Layer - Moved to root to avoid Safari Stacking Context issues */}
+      <div className="absolute top-0 left-0 w-full h-[800px] z-0 pointer-events-none overflow-hidden">
+        <WavyBackground
+          className="w-full h-full pb-0"
+          backgroundFill={darkMode ? "#111827" : "#FAFAFA"}
+          waveOpacity={darkMode ? 0.5 : 0.3}
+          containerClassName="h-full"
+          speed="slow"
+          waveWidth={50}
+          colors={['#5B5FFF', '#5BC5FF', '#8B5CF6']}
+        />
+      </div>
+
+      <nav className="fixed top-0 w-full px-4 md:px-8 py-6 z-50 transition-all duration-300 bg-white/50 dark:bg-[#111827]/50 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-800/50">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-2 relative z-50">
+            <div className="w-8 h-8 rounded-lg primary-gradient text-white flex items-center justify-center shadow-lg shadow-[#5B5FFF]/20">
+              {siteConfig?.logo_url ? <img src={siteConfig.logo_url} alt="Logo" className="w-full h-full object-cover rounded-lg" /> : <Box size={18} />}
             </div>
-            <button onClick={toggleDarkMode} className="p-1.5 rounded-lg text-gray-400 hover:text-[#5B5FFF] transition-colors">
-              {darkMode ? <Sun size={16} /> : <Moon size={16} />}
-            </button>
+            <span className="text-lg font-black tracking-tight text-gray-900 dark:text-white">{siteConfig?.site_name || 'rosterSync'}</span>
           </div>
-          <div className="flex items-center gap-4">
-            <button onClick={onSignIn} className="hidden md:block text-xs font-bold text-gray-500 hover:text-[#5B5FFF] transition-colors">Sign In</button>
-            <button onClick={onSignUp} className="px-4 py-2 rounded-xl bg-[#1A1A1A] dark:bg-white text-white dark:text-[#1A1A1A] font-bold text-xs shadow-md hover:scale-105 active:scale-95 transition-all">Get Started</button>
+          <div className="flex items-center gap-4 relative z-50">
+            <button
+              onClick={toggleDarkMode}
+              className="p-2 text-gray-400 hover:text-[#5B5FFF] transition-colors rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
+            >
+              {darkMode ? <Sun size={20} /> : <Moon size={20} />}
+            </button>
+            <a href={signInUrl} className="hidden md:block text-xs font-bold text-gray-500 hover:text-[#5B5FFF] transition-colors cursor-pointer relative z-50">
+              Sign In
+            </a>
+            <a href={signUpUrl} className="relative z-50 px-4 py-2 rounded-lg bg-[#1A1A1A] dark:bg-white text-white dark:text-[#1A1A1A] font-bold text-xs shadow-md hover:scale-105 active:scale-95 transition-all cursor-pointer">
+              Get Started
+            </a>
           </div>
         </div>
       </nav>
 
       {/* Hero Section */}
-      <section className="pt-28 pb-12 px-6 text-center">
-        <div className="max-w-4xl mx-auto space-y-6 animate-in fade-in zoom-in duration-1000">
+      <section className="relative pt-32 pb-64 md:pb-80 px-4 overflow-hidden z-10">
+        <div className="max-w-7xl mx-auto text-center relative z-20">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#5B5FFF]/5 border border-[#5B5FFF]/10 text-[#5B5FFF] text-[10px] font-black uppercase tracking-widest mb-2">
             <Sparkles size={12} /> New: Gemini 3 Integration
           </div>
           <h1 className="text-4xl md:text-6xl font-extrabold tracking-tighter leading-[1.2] text-gray-900 dark:text-white">
             Athlete Rosters. <br />
-            <span className="text-transparent bg-clip-text accent-gradient inline-block py-1">Simplified for Production.</span>
+            <span className="bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-purple-600 text-transparent bg-clip-text inline-block py-1">Simplified for Production.</span>
           </h1>
+
           <p className="text-lg md:text-xl text-gray-500 dark:text-gray-400 max-w-2xl mx-auto font-medium leading-relaxed">
             Middleware transforming messy athlete data into production-ready metadata for MAM, DAM, and Broadcast systems.
           </p>
-          <div className="pt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
-            <button onClick={onSignUp} className="w-full sm:w-auto px-6 py-3.5 rounded-2xl primary-gradient text-white font-bold text-base shadow-lg shadow-[#5B5FFF]/20 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2">
-              Start Free Trial <ArrowRight size={18} />
-            </button>
-            <button onClick={() => setShowDemoModal(true)} className="w-full sm:w-auto px-6 py-3.5 rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-300 font-bold text-base hover:bg-gray-50 dark:hover:bg-gray-800 transition-all">
+          <div className="pt-6 flex justify-center relative z-50">
+            <button onClick={() => setShowDemoModal(true)} className="px-6 py-3.5 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-300 font-bold text-base hover:bg-gray-50 dark:hover:bg-gray-800 transition-all">
               Book Demo
             </button>
           </div>
@@ -327,10 +374,63 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
 
             <div className="lg:w-1/2 w-full animate-in slide-in-from-right duration-1000">
               <div
-                className="relative flex h-[420px] w-full items-center justify-center overflow-hidden rounded-[40px] border border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/40 p-8 shadow-inner"
+                className="relative flex h-[320px] md:h-[420px] w-full items-center justify-center overflow-hidden rounded-xl md:rounded-2xl border border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/40 p-4 md:p-8 shadow-inner"
                 ref={beamContainerRef}
               >
-                <div className="flex size-full max-w-md flex-row items-stretch justify-between gap-6">
+                <div className="flex md:hidden size-full max-w-sm flex-row items-stretch justify-between gap-3">
+                  {/* INPUT COLUMN - Mobile */}
+                  <div className="flex flex-col justify-center items-center">
+                    <Circle ref={inputRef} className="size-10">
+                      <FileText className="text-blue-500" size={18} />
+                    </Circle>
+                    <div className="mt-1 text-center text-[8px] font-black text-gray-400 uppercase tracking-widest">Raw</div>
+                  </div>
+
+                  {/* ENGINE - Mobile */}
+                  <div className="flex flex-col justify-center items-center">
+                    <Circle ref={engineRef} className="size-12 border-[#5B5FFF]/30 bg-[#5B5FFF]/5 p-1.5">
+                      <Cpu className="text-[#5B5FFF]" size={16} />
+                    </Circle>
+                    <div className="mt-1 text-center text-[8px] font-black text-[#5B5FFF] uppercase tracking-widest">Engine</div>
+                  </div>
+
+                  {/* OUTPUTS - Mobile (horizontal) */}
+                  <div className="flex flex-col justify-center gap-2">
+                    <div className="flex items-center gap-1.5">
+                      <Circle ref={out1Ref} className="size-8 p-1">
+                        <MonitorPlay className="text-blue-600" size={12} />
+                      </Circle>
+                      <span className="text-[7px] font-black text-gray-400 uppercase tracking-tighter">Ross</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <Circle ref={out2Ref} className="size-8 p-1">
+                        <Database className="text-purple-500" size={12} />
+                      </Circle>
+                      <span className="text-[7px] font-black text-gray-400 uppercase tracking-tighter">Vizrt</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <Circle ref={out3Ref} className="size-8 p-1">
+                        <FileCode className="text-blue-400" size={12} />
+                      </Circle>
+                      <span className="text-[7px] font-black text-gray-400 uppercase tracking-tighter">Prem</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <Circle ref={out4Ref} className="size-8 p-1">
+                        <Layers className="text-amber-500" size={12} />
+                      </Circle>
+                      <span className="text-[7px] font-black text-gray-400 uppercase tracking-tighter">MAM</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <Circle ref={out5Ref} className="size-8 p-1">
+                        <Box className="text-emerald-500" size={12} />
+                      </Circle>
+                      <span className="text-[7px] font-black text-gray-400 uppercase tracking-tighter">ODF</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Desktop Layout */}
+                <div className="hidden md:flex size-full max-w-md flex-row items-stretch justify-between gap-6">
                   {/* INPUT COLUMN */}
                   <div className="flex flex-col justify-center items-center">
                     <Circle ref={inputRef}>
@@ -353,42 +453,44 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
                       <Circle ref={out1Ref} className="size-10 p-2">
                         <MonitorPlay className="text-blue-600" size={18} />
                       </Circle>
-                      <span className="mt-1 text-[7px] font-black text-gray-400 uppercase tracking-tighter">Ross XP</span>
+                      <span className="mt-1 text-[8px] md:text-[9px] font-black text-gray-400 uppercase tracking-tighter">Ross XP</span>
                     </div>
                     <div className="flex flex-col items-center">
                       <Circle ref={out2Ref} className="size-10 p-2">
                         <Database className="text-purple-500" size={18} />
                       </Circle>
-                      <span className="mt-1 text-[7px] font-black text-gray-400 uppercase tracking-tighter">Vizrt</span>
+                      <span className="mt-1 text-[8px] md:text-[9px] font-black text-gray-400 uppercase tracking-tighter">Vizrt</span>
                     </div>
                     <div className="flex flex-col items-center">
                       <Circle ref={out3Ref} className="size-10 p-2">
                         <FileCode className="text-blue-400" size={18} />
                       </Circle>
-                      <span className="mt-1 text-[7px] font-black text-gray-400 uppercase tracking-tighter">Premiere</span>
+                      <span className="mt-1 text-[8px] md:text-[9px] font-black text-gray-400 uppercase tracking-tighter">Premiere</span>
                     </div>
                     <div className="flex flex-col items-center">
                       <Circle ref={out4Ref} className="size-10 p-2">
                         <Layers className="text-amber-500" size={18} />
                       </Circle>
-                      <span className="mt-1 text-[7px] font-black text-gray-400 uppercase tracking-tighter">MAM/DAM</span>
+                      <span className="mt-1 text-[8px] md:text-[9px] font-black text-gray-400 uppercase tracking-tighter">MAM/DAM</span>
                     </div>
                     <div className="flex flex-col items-center">
                       <Circle ref={out5Ref} className="size-10 p-2">
                         <Box className="text-emerald-500" size={18} />
                       </Circle>
-                      <span className="mt-1 text-[7px] font-black text-gray-400 uppercase tracking-tighter">ODF XML</span>
+                      <span className="mt-1 text-[8px] md:text-[9px] font-black text-gray-400 uppercase tracking-tighter">ODF XML</span>
                     </div>
                   </div>
                 </div>
 
-                {/* --- Laser Beams --- */}
-                <AnimatedBeam containerRef={beamContainerRef} fromRef={inputRef} toRef={engineRef} duration={0.6} isActive={activeStep === 0} activeStep={activeStep} />
-                <AnimatedBeam containerRef={beamContainerRef} fromRef={engineRef} toRef={out1Ref} duration={0.5} curvature={-50} gradientColor="#2563EB" isActive={activeStep === 1} activeStep={activeStep} />
-                <AnimatedBeam containerRef={beamContainerRef} fromRef={engineRef} toRef={out2Ref} duration={0.5} curvature={-25} gradientColor="#A855F7" isActive={activeStep === 2} activeStep={activeStep} />
-                <AnimatedBeam containerRef={beamContainerRef} fromRef={engineRef} toRef={out3Ref} duration={0.5} curvature={0} gradientColor="#60A5FA" isActive={activeStep === 3} activeStep={activeStep} />
-                <AnimatedBeam containerRef={beamContainerRef} fromRef={engineRef} toRef={out4Ref} duration={0.5} curvature={25} gradientColor="#F59E0B" isActive={activeStep === 4} activeStep={activeStep} />
-                <AnimatedBeam containerRef={beamContainerRef} fromRef={engineRef} toRef={out5Ref} duration={0.5} curvature={50} gradientColor="#10B981" isActive={activeStep === 5} activeStep={activeStep} />
+                {/* --- Laser Beams (Desktop only) --- */}
+                <div className="hidden md:block">
+                  <AnimatedBeam containerRef={beamContainerRef} fromRef={inputRef} toRef={engineRef} duration={0.6} isActive={activeStep === 0} activeStep={activeStep} />
+                  <AnimatedBeam containerRef={beamContainerRef} fromRef={engineRef} toRef={out1Ref} duration={0.5} curvature={-50} gradientColor="#2563EB" isActive={activeStep === 1} activeStep={activeStep} />
+                  <AnimatedBeam containerRef={beamContainerRef} fromRef={engineRef} toRef={out2Ref} duration={0.5} curvature={-25} gradientColor="#A855F7" isActive={activeStep === 2} activeStep={activeStep} />
+                  <AnimatedBeam containerRef={beamContainerRef} fromRef={engineRef} toRef={out3Ref} duration={0.5} curvature={0} gradientColor="#60A5FA" isActive={activeStep === 3} activeStep={activeStep} />
+                  <AnimatedBeam containerRef={beamContainerRef} fromRef={engineRef} toRef={out4Ref} duration={0.5} curvature={25} gradientColor="#F59E0B" isActive={activeStep === 4} activeStep={activeStep} />
+                  <AnimatedBeam containerRef={beamContainerRef} fromRef={engineRef} toRef={out5Ref} duration={0.5} curvature={50} gradientColor="#10B981" isActive={activeStep === 5} activeStep={activeStep} />
+                </div>
               </div>
             </div>
           </div>
@@ -405,7 +507,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {FEATURES.map((f, i) => (
               <div key={i} className="p-6 rounded-3xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 hover:shadow-lg transition-all group">
-                <div className="w-10 h-10 rounded-xl bg-[#5B5FFF]/10 text-[#5B5FFF] flex items-center justify-center mb-4 group-hover:bg-[#5B5FFF] group-hover:text-white transition-all">
+                <div className="w-10 h-10 rounded-lg bg-[#5B5FFF]/10 text-[#5B5FFF] flex items-center justify-center mb-4 group-hover:bg-[#5B5FFF] group-hover:text-white transition-all">
                   {f.icon}
                 </div>
                 <h4 className="text-lg font-bold mb-2 text-gray-900 dark:text-white">{f.title}</h4>
@@ -426,7 +528,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {PRICING_TIERS.map((tier) => (
-              <div key={tier.id} className={`p-6 rounded-[28px] bg-white dark:bg-gray-800 border-2 transition-all relative flex flex-col ${tier.id === 'PRO' ? 'border-[#5B5FFF] shadow-xl scale-105 z-10' : 'border-gray-100 dark:border-gray-700'}`}>
+              <div key={tier.id} className={`p-6 rounded-2xl bg-white dark:bg-gray-800 border-2 transition-all relative flex flex-col ${tier.id === 'PRO' ? 'border-[#5B5FFF] shadow-xl scale-105 z-10' : 'border-gray-100 dark:border-gray-700'}`}>
                 {tier.id === 'PRO' && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full primary-gradient text-white text-[9px] font-black uppercase tracking-widest">Most Popular</div>
                 )}
@@ -446,12 +548,13 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
                     </div>
                   ))}
                 </div>
-                <button 
-                  onClick={onSignUp}
-                  className={`w-full py-3 rounded-xl font-bold text-sm transition-all ${tier.id === 'PRO' ? 'primary-gradient text-white shadow-lg' : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white hover:bg-gray-200'}`}
-                >
-                  Choose {tier.name}
-                </button>
+                <SignUpButton mode="redirect">
+                  <span
+                    className={`relative z-50 block w-full py-3 rounded-lg font-bold text-sm transition-all text-center cursor-pointer ${tier.id === 'PRO' ? 'primary-gradient text-white shadow-lg' : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white hover:bg-gray-200'}`}
+                  >
+                    Choose {tier.name}
+                  </span>
+                </SignUpButton>
               </div>
             ))}
           </div>
@@ -470,12 +573,12 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
               const isOpen = openFaqIndex === i;
               return (
                 <div key={i} className={cn(
-                  "rounded-xl border transition-all duration-300 overflow-hidden",
-                  isOpen 
-                    ? "border-[#5B5FFF]/30 bg-white dark:bg-gray-800 shadow-md" 
+                  "rounded-lg border transition-all duration-300 overflow-hidden",
+                  isOpen
+                    ? "border-[#5B5FFF]/30 bg-white dark:bg-gray-800 shadow-md"
                     : "border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-800"
                 )}>
-                  <button 
+                  <button
                     onClick={() => setOpenFaqIndex(isOpen ? null : i)}
                     className={cn(
                       "w-full px-5 py-4 flex items-center justify-between text-left transition-colors",
@@ -505,10 +608,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
       <footer className="py-8 px-6 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-3">
-             <BrandLogo siteConfig={siteConfig} />
-             <span className="font-extrabold text-base tracking-tight font-mono text-gray-900 dark:text-white">{siteConfig.site_name}</span>
+            <BrandLogo siteConfig={siteConfig} />
+            <span className="font-extrabold text-base tracking-tight font-mono text-gray-900 dark:text-white">{siteConfig.site_name}</span>
           </div>
-          
+
           <div className="flex items-center gap-6 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
             <a href="#" className="hover:text-[#5B5FFF]">Privacy</a>
             <a href="#" className="hover:text-[#5B5FFF]">Terms</a>
@@ -527,33 +630,33 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
       {/* Demo Modal */}
       {showDemoModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-300">
-          <div className="relative w-full max-w-sm bg-white dark:bg-gray-900 rounded-[28px] p-6 shadow-2xl animate-in zoom-in duration-300" onClick={(e) => e.stopPropagation()}>
-             <button onClick={() => setShowDemoModal(false)} className="absolute top-5 right-5 p-1.5 text-gray-400 hover:bg-gray-100 rounded-full"><X size={18} /></button>
+          <div className="relative w-full max-w-sm bg-white dark:bg-gray-900 rounded-2xl p-6 shadow-2xl animate-in zoom-in duration-300" onClick={(e) => e.stopPropagation()}>
+            <button onClick={() => setShowDemoModal(false)} className="absolute top-5 right-5 p-1.5 text-gray-400 hover:bg-gray-100 rounded-full"><X size={18} /></button>
             <div className="text-center mb-6">
-              <div className="w-12 h-12 rounded-xl bg-[#5B5FFF]/10 text-[#5B5FFF] flex items-center justify-center mx-auto mb-3">
+              <div className="w-12 h-12 rounded-lg bg-[#5B5FFF]/10 text-[#5B5FFF] flex items-center justify-center mx-auto mb-3">
                 <Calendar size={24} />
               </div>
               <h2 className="text-xl font-extrabold text-gray-900 dark:text-white">Technical Demo</h2>
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">See how RosterSync fits your stack.</p>
             </div>
             <form onSubmit={handleDemoSubmit} className="space-y-3">
-                <div className="space-y-1">
-                  <label className="text-[9px] font-bold text-gray-400 uppercase tracking-widest ml-1">Full Name</label>
-                  <input type="text" required value={demoForm.name} onChange={(e) => setDemoForm({...demoForm, name: e.target.value})} className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border-none rounded-xl text-sm font-medium text-gray-900 dark:text-white" />
+              <div className="space-y-1">
+                <label className="text-[9px] font-bold text-gray-400 uppercase tracking-widest ml-1">Full Name</label>
+                <input type="text" required value={demoForm.name} onChange={(e) => setDemoForm({ ...demoForm, name: e.target.value })} className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border-none rounded-lg text-sm font-medium text-gray-900 dark:text-white" />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[9px] font-bold text-gray-400 uppercase tracking-widest ml-1">Work Email</label>
+                <input type="email" required value={demoForm.email} onChange={(e) => setDemoForm({ ...demoForm, email: e.target.value })} className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border-none rounded-lg text-sm font-medium text-gray-900 dark:text-white" />
+              </div>
+              {demoStatus === 'success' ? (
+                <div className="p-3 bg-emerald-50 text-emerald-600 rounded-lg text-center font-bold text-xs flex items-center justify-center gap-2">
+                  <CheckCircle2 size={16} /> Request Received!
                 </div>
-                <div className="space-y-1">
-                  <label className="text-[9px] font-bold text-gray-400 uppercase tracking-widest ml-1">Work Email</label>
-                  <input type="email" required value={demoForm.email} onChange={(e) => setDemoForm({...demoForm, email: e.target.value})} className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border-none rounded-xl text-sm font-medium text-gray-900 dark:text-white" />
-                </div>
-                {demoStatus === 'success' ? (
-                  <div className="p-3 bg-emerald-50 text-emerald-600 rounded-xl text-center font-bold text-xs flex items-center justify-center gap-2">
-                    <CheckCircle2 size={16} /> Request Received!
-                  </div>
-                ) : (
-                  <button type="submit" disabled={demoStatus === 'sending'} className="w-full py-3.5 rounded-xl primary-gradient text-white font-bold shadow-lg flex items-center justify-center gap-2 text-sm">
-                    {demoStatus === 'sending' ? <Loader2 className="animate-spin" size={16} /> : <><Send size={16} /> Request Demo Access</>}
-                  </button>
-                )}
+              ) : (
+                <button type="submit" disabled={demoStatus === 'sending'} className="w-full py-3.5 rounded-lg primary-gradient text-white font-bold shadow-lg flex items-center justify-center gap-2 text-sm">
+                  {demoStatus === 'sending' ? <Loader2 className="animate-spin" size={16} /> : <><Send size={16} /> Request Demo Access</>}
+                </button>
+              )}
             </form>
           </div>
         </div>
