@@ -79,12 +79,53 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
     e.preventDefault();
     setDemoStatus('sending');
     try {
-      if (isSupabaseConfigured) {
-        await supabase.from('demo').insert([{ name: demoForm.name, email: demoForm.email, organization: demoForm.organization, use_case: demoForm.useCase }]);
-        setDemoStatus('success');
-        setTimeout(() => setShowDemoModal(false), 2000);
+      const functionUrl = import.meta.env.VITE_RESEND_EMAIL_FUNCTION_URL;
+
+      if (!functionUrl) {
+        // Fallback for demo if env var is missing, though we expect it to be there
+        console.warn("Missing VITE_RESEND_EMAIL_FUNCTION_URL");
+        // Try direct insert as fallback or throw error? 
+        // Given the user wants email, let's treat it as primary.
+        throw new Error("Email service configuration missing.");
       }
-    } catch (err) { setDemoStatus('error'); }
+
+      const response = await fetch(functionUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
+        },
+        body: JSON.stringify({
+          table: 'demo',
+          record: {
+            id: 'new', // Flag as new record
+            name: demoForm.name,
+            email: demoForm.email,
+            user_email: demoForm.email,
+            organization: demoForm.organization,
+            use_case: demoForm.useCase || "Demo Request",
+            message: `Organization: ${demoForm.organization || 'N/A'}\nUse Case: ${demoForm.useCase || 'General Inqiury'}` // Provide composed message for fallback
+          }
+        })
+      });
+
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.error || "Failed to send request");
+      }
+
+      setDemoStatus('success');
+      setTimeout(() => {
+        setShowDemoModal(false);
+        setDemoStatus('idle');
+        setDemoForm({ name: '', email: '', organization: '', useCase: '' });
+      }, 2000);
+
+    } catch (err: any) {
+      console.error("Demo request failed:", err);
+      setDemoStatus('error');
+      alert(`Request failed: ${err.message}`);
+    }
   };
 
   const CLERK_DOMAIN = 'https://winning-doe-44.accounts.dev';
