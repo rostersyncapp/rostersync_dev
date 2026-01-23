@@ -119,15 +119,15 @@ const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
 
         <div className="flex flex-col md:flex-row gap-10">
           <aside className="w-full md:w-64 space-y-1.5 shrink-0">
-            <button onClick={() => setActiveTab('subscription')} className={`w-full flex items-center justify-between px-5 py-3.5 rounded-2xl text-base font-bold transition-all ${activeTab === 'subscription' ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF]' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
+            <button onClick={() => setActiveTab('subscription')} className={`w-full flex items-center justify-between px-5 py-3.5 rounded-lg text-base font-bold transition-all ${activeTab === 'subscription' ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF]' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
               <div className="flex items-center gap-4"><CreditCard size={20} /> Subscription</div>
               {activeTab === 'subscription' && <ChevronRight size={18} />}
             </button>
-            <button onClick={() => setActiveTab('activity')} className={`w-full flex items-center justify-between px-5 py-3.5 rounded-2xl text-base font-bold transition-all ${activeTab === 'activity' ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF]' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
+            <button onClick={() => setActiveTab('activity')} className={`w-full flex items-center justify-between px-5 py-3.5 rounded-lg text-base font-bold transition-all ${activeTab === 'activity' ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF]' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
               <div className="flex items-center gap-4"><History size={20} /> Activity Log</div>
               {activeTab === 'activity' && <ChevronRight size={18} />}
             </button>
-            <button onClick={() => setActiveTab('roi')} className={`w-full flex items-center justify-between px-5 py-3.5 rounded-2xl text-base font-bold transition-all ${activeTab === 'roi' ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF]' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
+            <button onClick={() => setActiveTab('roi')} className={`w-full flex items-center justify-between px-5 py-3.5 rounded-lg text-base font-bold transition-all ${activeTab === 'roi' ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF]' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
               <div className="flex items-center gap-4"><BarChart4 size={20} /> Performance ROI</div>
               {activeTab === 'roi' && <ChevronRight size={18} />}
             </button>
@@ -137,7 +137,7 @@ const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
           {activeTab === 'subscription' && (
             <div className="space-y-10">
               {/* Usage Card */}
-              <div className="bg-white dark:bg-gray-900 rounded-[40px] border border-gray-100 dark:border-gray-800 p-10 shadow-sm">
+              <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-10 shadow-sm">
                 <div className="flex items-center justify-between mb-10">
                   <h3 className="text-2xl font-extrabold flex items-center gap-4 text-gray-900 dark:text-white">
                     <Zap size={24} className="text-[#5B5FFF]" /> Current Usage
@@ -176,7 +176,7 @@ const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
                   return (
                     <div 
                       key={tier.id} 
-                      className={`relative p-8 rounded-[36px] border transition-all ${
+                      className={`relative p-8 rounded-2xl border transition-all ${
                         isCurrent 
                           ? 'border-[#5B5FFF] bg-[#5B5FFF]/[0.02] ring-1 ring-[#5B5FFF]' 
                           : 'border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900'
@@ -206,7 +206,7 @@ const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
                       </div>
 
                       {isCurrent ? (
-                        <div className="w-full py-4 rounded-2xl bg-gray-100 dark:bg-gray-800 text-gray-400 text-sm font-bold text-center uppercase tracking-widest">
+                        <div className="w-full py-4 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-400 text-sm font-bold text-center uppercase tracking-widest">
                           Manage Plan
                         </div>
                       ) : (
@@ -214,7 +214,7 @@ const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
                           href={tier.polarCheckoutUrl} 
                           target="_blank" 
                           rel="noopener noreferrer"
-                          className="w-full py-4 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white text-sm font-bold text-center uppercase tracking-widest hover:bg-[#5B5FFF] hover:text-white hover:border-[#5B5FFF] transition-all flex items-center justify-center gap-2.5"
+                          className="w-full py-4 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white text-sm font-bold text-center uppercase tracking-widest hover:bg-[#5B5FFF] hover:text-white hover:border-[#5B5FFF] transition-all flex items-center justify-center gap-2.5"
                         >
                           Upgrade <ArrowRight size={16} />
                         </a>
@@ -228,7 +228,7 @@ const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
 
           {activeTab === 'activity' && (
             <div className="space-y-8">
-               <div className="bg-white dark:bg-gray-900 rounded-[40px] border border-gray-100 dark:border-gray-800 p-10 shadow-sm min-h-[400px]">
+               <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-10 shadow-sm min-h-[400px]">
                   <div className="flex items-center justify-between mb-8">
                      <h3 className="text-2xl font-extrabold flex items-center gap-4 text-gray-900 dark:text-white">
                         <History size={24} className="text-[#5B5FFF]" /> Activity Log
@@ -244,14 +244,14 @@ const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
                        <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Querying Logs...</span>
                     </div>
                   ) : activities.length === 0 ? (
-                    <div className="text-center py-20 bg-gray-50/50 dark:bg-gray-800/30 rounded-[32px] border border-dashed border-gray-100 dark:border-gray-700">
+                    <div className="text-center py-20 bg-gray-50/50 dark:bg-gray-800/30 rounded-xl border border-dashed border-gray-100 dark:border-gray-700">
                        <Clock size={40} className="mx-auto text-gray-300 mb-4" />
                        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">No Recent Activity</p>
                     </div>
                    ) : (
                      <div className="space-y-3 max-h-[400px] overflow-y-auto custom-scrollbar pr-2">
                         {activities.map((log) => (
-                          <div key={log.id} className="flex items-start gap-4 p-4 bg-gray-50/50 dark:bg-gray-800/30 rounded-2xl border border-transparent hover:border-gray-100 dark:hover:border-gray-700 transition-all group">
+                          <div key={log.id} className="flex items-start gap-4 p-4 bg-gray-50/50 dark:bg-gray-800/30 rounded-lg border border-transparent hover:border-gray-100 dark:hover:border-gray-700 transition-all group">
                              <div className="mt-0.5 w-9 h-9 rounded-lg bg-white dark:bg-gray-800 flex items-center justify-center shadow-sm shrink-0">
                                 {ACTIVITY_ICONS[log.action_type as ActivityType] || <Activity size={16} className="text-gray-400" />}
                              </div>
@@ -275,20 +275,20 @@ const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
           {activeTab === 'roi' && (
             <div className="space-y-8">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                 <div className="bg-white dark:bg-gray-900 p-8 rounded-[36px] border border-gray-100 dark:border-gray-800 shadow-sm">
+                 <div className="bg-white dark:bg-gray-900 p-8 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
                    <div className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2 font-mono">Net Savings</div>
                    <div className="text-4xl font-black text-emerald-500">${netSavings.toFixed(2)}</div>
                  </div>
-                 <div className="bg-white dark:bg-gray-900 p-8 rounded-[36px] border border-gray-100 dark:border-gray-800 shadow-sm">
+                 <div className="bg-white dark:bg-gray-900 p-8 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
                    <div className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2 font-mono">Time Saved</div>
                    <div className="text-4xl font-black text-[#5B5FFF]">{(totalAthletes * 4 / 60).toFixed(1)} hrs</div>
                  </div>
-                 <div className="bg-white dark:bg-gray-900 p-8 rounded-[36px] border border-gray-100 dark:border-gray-800 shadow-sm">
+                 <div className="bg-white dark:bg-gray-900 p-8 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
                    <div className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2 font-mono">Total Syncs</div>
                    <div className="text-4xl font-black text-gray-900 dark:text-white">{totalAthletes}</div>
                  </div>
               </div>
-              <div className="bg-white dark:bg-gray-900 rounded-[48px] border border-gray-100 dark:border-gray-800 p-10 shadow-sm">
+              <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-10 shadow-sm">
                  <h3 className="text-2xl font-extrabold mb-5 flex items-center gap-4 text-gray-900 dark:text-white"><BarChart4 size={24} className="text-[#5B5FFF]" /> Efficiency Breakdown</h3>
                  <p className="text-base text-gray-500 dark:text-gray-400 leading-relaxed font-medium">
                    Production benchmarks estimate manual entry takes ~4 minutes per athlete. At an industry rate of $45/hr, RosterSync has significantly reduced overhead for your broadcast workflow.

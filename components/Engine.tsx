@@ -161,7 +161,7 @@ export const Engine: React.FC<Props> = ({
 
       {step === 1 && (
         <div className="space-y-10 animate-in fade-in duration-500">
-          <div className="bg-white dark:bg-gray-900 p-10 rounded-[40px] border border-gray-100 dark:border-gray-800 shadow-sm relative overflow-hidden">
+          <div className="bg-white dark:bg-gray-900 p-10 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm relative overflow-hidden">
             <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-6">
               <h2 className="text-3xl font-extrabold flex items-center gap-4 tracking-tight text-gray-900 dark:text-white shrink-0"><Upload size={32} className="text-[#5B5FFF]" /> Input Raw Data</h2>
               <div className="flex flex-wrap items-center gap-4">
@@ -171,7 +171,7 @@ export const Engine: React.FC<Props> = ({
                 </div>
               </div>
             </div>
-            <textarea className={`w-full h-96 px-6 py-6 bg-gray-50 dark:bg-gray-800 border-none rounded-[28px] outline-none transition-all text-base leading-relaxed font-mono text-gray-900 dark:text-gray-200 placeholder:text-gray-400 dark:placeholder:text-gray-600 ${isProcessing ? 'opacity-50 pointer-events-none' : 'focus:ring-2 focus:ring-[#5B5FFF]/20'}`} placeholder={isNocMode ? "Paste Olympic Delegation or Event Data here...\n<add season>" : "<paste raw text here>\n<add season>"} value={rawInput} onChange={(e) => setRawInput(e.target.value)} />
+            <textarea className={`w-full h-96 px-6 py-6 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl outline-none transition-all text-base leading-relaxed font-mono text-gray-900 dark:text-gray-200 placeholder:text-gray-400 dark:placeholder:text-gray-600 ${isProcessing ? 'opacity-50 pointer-events-none' : 'focus:ring-2 focus:ring-[#5B5FFF]/20'}`} placeholder={isNocMode ? "Paste Olympic Delegation or Event Data here...\n<add season>" : "<paste raw text here>\n<add season>"} value={rawInput} onChange={(e) => setRawInput(e.target.value)} />
             <div className="flex items-center gap-4 mt-4">
               <div className="flex items-center gap-3 px-4 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl">
                 <Calendar size={18} className="text-gray-400" />
@@ -194,7 +194,7 @@ export const Engine: React.FC<Props> = ({
 
       {step === 2 && (
         <div className="space-y-10 animate-in slide-in-from-right-4 duration-500 pb-24">
-          <div className="bg-white dark:bg-gray-900 rounded-[48px] border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
             <div className="p-10 border-b border-gray-100 dark:border-gray-800 flex flex-col md:flex-row md:items-start justify-between bg-gray-50/30 dark:bg-gray-800/30 gap-10">
               <div className="flex-1 flex flex-col md:flex-row gap-6">
                 <div className="w-24 h-24 rounded-3xl text-white flex items-center justify-center shadow-lg shrink-0 overflow-hidden relative group bg-white border border-gray-100 dark:border-gray-700">
@@ -247,7 +247,7 @@ export const Engine: React.FC<Props> = ({
                        <select 
                          value={selectedProjectId} 
                          onChange={(e) => setSelectedProjectId(e.target.value)}
-                         className="pl-12 pr-6 py-3.5 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-[20px] text-sm font-bold outline-none focus:ring-2 focus:ring-[#5B5FFF]/20 text-gray-900 dark:text-white cursor-pointer w-full"
+                         className="pl-12 pr-6 py-3.5 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg text-sm font-bold outline-none focus:ring-2 focus:ring-[#5B5FFF]/20 text-gray-900 dark:text-white cursor-pointer w-full"
                        >
                          <option value="">Unassigned (Library)</option>
                          {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
@@ -255,7 +255,7 @@ export const Engine: React.FC<Props> = ({
                     </div>
                  </div>
 
-                 <button onClick={handleSaveToLibrary} disabled={isSaving} className="w-full flex items-center justify-center gap-3 px-8 py-4.5 rounded-[24px] primary-gradient text-white font-bold text-base hover:shadow-lg shadow-[#5B5FFF]/20 transition-all uppercase tracking-widest">
+                 <button onClick={handleSaveToLibrary} disabled={isSaving} className="w-full flex items-center justify-center gap-3 px-8 py-4.5 rounded-xl primary-gradient text-white font-bold text-base hover:shadow-lg shadow-[#5B5FFF]/20 transition-all uppercase tracking-widest">
                    {isSaving ? <Loader2 size={20} className="animate-spin" /> : <Save size={20} />} Save to Cloud
                  </button>
               </div>

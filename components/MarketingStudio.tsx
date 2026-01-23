@@ -137,7 +137,7 @@ const MarketingStudio: React.FC<Props> = ({ profile, rosters }) => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-1 space-y-6">
-          <div className="bg-white dark:bg-gray-900 p-6 rounded-[32px] border border-gray-100 dark:border-gray-800 shadow-sm space-y-6">
+          <div className="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm space-y-6">
             <h3 className="text-sm font-black uppercase tracking-widest text-gray-400 font-mono">1. Choose Style</h3>
             <div className="space-y-3">
               {PRESETS.map((preset) => (
@@ -158,7 +158,7 @@ const MarketingStudio: React.FC<Props> = ({ profile, rosters }) => {
             </div>
           </div>
 
-          <div className="bg-gray-50 dark:bg-gray-800/50 p-6 rounded-[32px] border border-gray-100 dark:border-gray-700">
+          <div className="bg-gray-50 dark:bg-gray-800/50 p-6 rounded-xl border border-gray-100 dark:border-gray-700">
              <div className="flex items-center gap-2 text-gray-400 mb-3">
                <AlertCircle size={16} />
                <span className="text-[10px] font-bold uppercase tracking-widest font-mono">Production Note</span>
@@ -171,7 +171,7 @@ const MarketingStudio: React.FC<Props> = ({ profile, rosters }) => {
         </div>
 
         <div className="lg:col-span-2 space-y-6">
-          <div className="bg-white dark:bg-gray-900 rounded-[40px] border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden flex flex-col min-h-[500px]">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden flex flex-col min-h-[500px]">
             <div className="p-8 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between bg-gray-50/30 dark:bg-gray-800/30">
               <div className="flex items-center gap-4">
                 <div className="w-10 h-10 rounded-xl bg-[#5B5FFF]/10 text-[#5B5FFF] flex items-center justify-center"><Video size={20} /></div>
@@ -211,7 +211,7 @@ const MarketingStudio: React.FC<Props> = ({ profile, rosters }) => {
                 </div>
               ) : videoUrl ? (
                 <div className="flex-1 flex flex-col items-center justify-center gap-6 animate-in zoom-in duration-500">
-                   <div className="w-full aspect-video rounded-[32px] overflow-hidden bg-black shadow-2xl relative group">
+                   <div className="w-full aspect-video rounded-xl overflow-hidden bg-black shadow-2xl relative group">
                       <video 
                         src={videoUrl} 
                         controls 
@@ -232,7 +232,7 @@ const MarketingStudio: React.FC<Props> = ({ profile, rosters }) => {
                       value={prompt} 
                       onChange={(e) => setPrompt(e.target.value)}
                       placeholder="Enter a descriptive prompt or choose a style preset..."
-                      className="w-full h-40 p-6 bg-gray-50 dark:bg-gray-800 border-none rounded-[28px] text-gray-900 dark:text-white text-base leading-relaxed font-medium outline-none focus:ring-2 focus:ring-[#5B5FFF]/20 transition-all resize-none"
+                      className="w-full h-40 p-6 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl text-gray-900 dark:text-white text-base leading-relaxed font-medium outline-none focus:ring-2 focus:ring-[#5B5FFF]/20 transition-all resize-none"
                     />
                   </div>
 

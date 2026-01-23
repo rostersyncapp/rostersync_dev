@@ -292,8 +292,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
       <nav className="fixed top-0 w-full px-4 md:px-8 py-6 z-50 transition-all duration-300 bg-white/50 dark:bg-[#111827]/50 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-800/50">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2 relative z-50">
-            <div className="w-8 h-8 rounded-xl primary-gradient text-white flex items-center justify-center shadow-lg shadow-[#5B5FFF]/20">
-              {siteConfig?.logo_url ? <img src={siteConfig.logo_url} alt="Logo" className="w-full h-full object-cover rounded-xl" /> : <Box size={18} />}
+            <div className="w-8 h-8 rounded-lg primary-gradient text-white flex items-center justify-center shadow-lg shadow-[#5B5FFF]/20">
+              {siteConfig?.logo_url ? <img src={siteConfig.logo_url} alt="Logo" className="w-full h-full object-cover rounded-lg" /> : <Box size={18} />}
             </div>
             <span className="text-lg font-black tracking-tight text-gray-900 dark:text-white">{siteConfig?.site_name || 'rosterSync'}</span>
           </div>
@@ -307,7 +307,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
             <a href={signInUrl} className="hidden md:block text-xs font-bold text-gray-500 hover:text-[#5B5FFF] transition-colors cursor-pointer relative z-50">
               Sign In
             </a>
-            <a href={signUpUrl} className="relative z-50 px-4 py-2 rounded-xl bg-[#1A1A1A] dark:bg-white text-white dark:text-[#1A1A1A] font-bold text-xs shadow-md hover:scale-105 active:scale-95 transition-all cursor-pointer">
+            <a href={signUpUrl} className="relative z-50 px-4 py-2 rounded-lg bg-[#1A1A1A] dark:bg-white text-white dark:text-[#1A1A1A] font-bold text-xs shadow-md hover:scale-105 active:scale-95 transition-all cursor-pointer">
               Get Started
             </a>
           </div>
@@ -329,7 +329,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
             Middleware transforming messy athlete data into production-ready metadata for MAM, DAM, and Broadcast systems.
           </p>
           <div className="pt-6 flex justify-center relative z-50">
-            <button onClick={() => setShowDemoModal(true)} className="px-6 py-3.5 rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-300 font-bold text-base hover:bg-gray-50 dark:hover:bg-gray-800 transition-all">
+            <button onClick={() => setShowDemoModal(true)} className="px-6 py-3.5 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-300 font-bold text-base hover:bg-gray-50 dark:hover:bg-gray-800 transition-all">
               Book Demo
             </button>
           </div>
@@ -374,7 +374,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
 
             <div className="lg:w-1/2 w-full animate-in slide-in-from-right duration-1000">
               <div
-                className="relative flex h-[320px] md:h-[420px] w-full items-center justify-center overflow-hidden rounded-[24px] md:rounded-[40px] border border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/40 p-4 md:p-8 shadow-inner"
+                className="relative flex h-[320px] md:h-[420px] w-full items-center justify-center overflow-hidden rounded-xl md:rounded-2xl border border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/40 p-4 md:p-8 shadow-inner"
                 ref={beamContainerRef}
               >
                 <div className="flex md:hidden size-full max-w-sm flex-row items-stretch justify-between gap-3">
@@ -507,7 +507,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {FEATURES.map((f, i) => (
               <div key={i} className="p-6 rounded-3xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 hover:shadow-lg transition-all group">
-                <div className="w-10 h-10 rounded-xl bg-[#5B5FFF]/10 text-[#5B5FFF] flex items-center justify-center mb-4 group-hover:bg-[#5B5FFF] group-hover:text-white transition-all">
+                <div className="w-10 h-10 rounded-lg bg-[#5B5FFF]/10 text-[#5B5FFF] flex items-center justify-center mb-4 group-hover:bg-[#5B5FFF] group-hover:text-white transition-all">
                   {f.icon}
                 </div>
                 <h4 className="text-lg font-bold mb-2 text-gray-900 dark:text-white">{f.title}</h4>
@@ -528,7 +528,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {PRICING_TIERS.map((tier) => (
-              <div key={tier.id} className={`p-6 rounded-[28px] bg-white dark:bg-gray-800 border-2 transition-all relative flex flex-col ${tier.id === 'PRO' ? 'border-[#5B5FFF] shadow-xl scale-105 z-10' : 'border-gray-100 dark:border-gray-700'}`}>
+              <div key={tier.id} className={`p-6 rounded-2xl bg-white dark:bg-gray-800 border-2 transition-all relative flex flex-col ${tier.id === 'PRO' ? 'border-[#5B5FFF] shadow-xl scale-105 z-10' : 'border-gray-100 dark:border-gray-700'}`}>
                 {tier.id === 'PRO' && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full primary-gradient text-white text-[9px] font-black uppercase tracking-widest">Most Popular</div>
                 )}
@@ -550,7 +550,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
                 </div>
                 <SignUpButton mode="redirect">
                   <span
-                    className={`relative z-50 block w-full py-3 rounded-xl font-bold text-sm transition-all text-center cursor-pointer ${tier.id === 'PRO' ? 'primary-gradient text-white shadow-lg' : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white hover:bg-gray-200'}`}
+                    className={`relative z-50 block w-full py-3 rounded-lg font-bold text-sm transition-all text-center cursor-pointer ${tier.id === 'PRO' ? 'primary-gradient text-white shadow-lg' : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white hover:bg-gray-200'}`}
                   >
                     Choose {tier.name}
                   </span>
@@ -573,7 +573,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
               const isOpen = openFaqIndex === i;
               return (
                 <div key={i} className={cn(
-                  "rounded-xl border transition-all duration-300 overflow-hidden",
+                  "rounded-lg border transition-all duration-300 overflow-hidden",
                   isOpen
                     ? "border-[#5B5FFF]/30 bg-white dark:bg-gray-800 shadow-md"
                     : "border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-800"
@@ -630,10 +630,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
       {/* Demo Modal */}
       {showDemoModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-300">
-          <div className="relative w-full max-w-sm bg-white dark:bg-gray-900 rounded-[28px] p-6 shadow-2xl animate-in zoom-in duration-300" onClick={(e) => e.stopPropagation()}>
+          <div className="relative w-full max-w-sm bg-white dark:bg-gray-900 rounded-2xl p-6 shadow-2xl animate-in zoom-in duration-300" onClick={(e) => e.stopPropagation()}>
             <button onClick={() => setShowDemoModal(false)} className="absolute top-5 right-5 p-1.5 text-gray-400 hover:bg-gray-100 rounded-full"><X size={18} /></button>
             <div className="text-center mb-6">
-              <div className="w-12 h-12 rounded-xl bg-[#5B5FFF]/10 text-[#5B5FFF] flex items-center justify-center mx-auto mb-3">
+              <div className="w-12 h-12 rounded-lg bg-[#5B5FFF]/10 text-[#5B5FFF] flex items-center justify-center mx-auto mb-3">
                 <Calendar size={24} />
               </div>
               <h2 className="text-xl font-extrabold text-gray-900 dark:text-white">Technical Demo</h2>
@@ -642,18 +642,18 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
             <form onSubmit={handleDemoSubmit} className="space-y-3">
               <div className="space-y-1">
                 <label className="text-[9px] font-bold text-gray-400 uppercase tracking-widest ml-1">Full Name</label>
-                <input type="text" required value={demoForm.name} onChange={(e) => setDemoForm({ ...demoForm, name: e.target.value })} className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border-none rounded-xl text-sm font-medium text-gray-900 dark:text-white" />
+                <input type="text" required value={demoForm.name} onChange={(e) => setDemoForm({ ...demoForm, name: e.target.value })} className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border-none rounded-lg text-sm font-medium text-gray-900 dark:text-white" />
               </div>
               <div className="space-y-1">
                 <label className="text-[9px] font-bold text-gray-400 uppercase tracking-widest ml-1">Work Email</label>
-                <input type="email" required value={demoForm.email} onChange={(e) => setDemoForm({ ...demoForm, email: e.target.value })} className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border-none rounded-xl text-sm font-medium text-gray-900 dark:text-white" />
+                <input type="email" required value={demoForm.email} onChange={(e) => setDemoForm({ ...demoForm, email: e.target.value })} className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border-none rounded-lg text-sm font-medium text-gray-900 dark:text-white" />
               </div>
               {demoStatus === 'success' ? (
-                <div className="p-3 bg-emerald-50 text-emerald-600 rounded-xl text-center font-bold text-xs flex items-center justify-center gap-2">
+                <div className="p-3 bg-emerald-50 text-emerald-600 rounded-lg text-center font-bold text-xs flex items-center justify-center gap-2">
                   <CheckCircle2 size={16} /> Request Received!
                 </div>
               ) : (
-                <button type="submit" disabled={demoStatus === 'sending'} className="w-full py-3.5 rounded-xl primary-gradient text-white font-bold shadow-lg flex items-center justify-center gap-2 text-sm">
+                <button type="submit" disabled={demoStatus === 'sending'} className="w-full py-3.5 rounded-lg primary-gradient text-white font-bold shadow-lg flex items-center justify-center gap-2 text-sm">
                   {demoStatus === 'sending' ? <Loader2 className="animate-spin" size={16} /> : <><Send size={16} /> Request Demo Access</>}
                 </button>
               )}

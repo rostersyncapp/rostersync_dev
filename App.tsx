@@ -56,7 +56,7 @@ const ICON_MAP: Record<string, any> = {
 // BrandLogo component that uses Database Branding
 const BrandLogo: React.FC<{ siteConfig?: SiteConfig; size?: 'sm' | 'md' }> = ({ siteConfig, size = 'md' }) => {
   const containerClasses = size === 'md'
-    ? "w-8 h-8 rounded-xl shrink-0"
+    ? "w-8 h-8 rounded-lg shrink-0"
     : "w-6 h-6 rounded-lg shrink-0";
 
   const logoSrc = siteConfig?.logo_url;
@@ -97,7 +97,7 @@ const UserMenu: React.FC<{ user: any; darkMode: boolean; onSignOut: () => void; 
     <div className="relative">
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center gap-3 p-2 rounded-xl text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 font-medium transition-colors"
+        className="w-full flex items-center gap-3 p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 font-medium transition-colors"
       >
         <div className="w-5 h-5 shrink-0 flex items-center justify-center overflow-hidden rounded-lg">
           {user?.imageUrl ? (
@@ -117,7 +117,7 @@ const UserMenu: React.FC<{ user: any; darkMode: boolean; onSignOut: () => void; 
       {isOpen && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
-          <div className="absolute bottom-full left-0 right-0 mb-2 bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-gray-100 dark:border-gray-800 overflow-hidden z-50 animate-in slide-in-from-bottom-2 duration-200">
+          <div className="absolute bottom-full left-0 right-0 mb-2 bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-gray-100 dark:border-gray-800 overflow-hidden z-50 animate-in slide-in-from-bottom-2 duration-200">
             <div className="p-3 border-b border-gray-100 dark:border-gray-800">
               <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
                 {user?.fullName || 'User'}
@@ -195,7 +195,7 @@ const FolderItem: React.FC<{
   return (
     <div className="space-y-0.5">
       <div className="group flex items-center gap-1" style={{ paddingLeft: `${level * 16}px` }}>
-        <button onClick={() => { setView('dashboard'); setActiveProjectId(folder.id); setSelectedRosterId(null); }} className={`flex-1 flex items-center px-2 py-1.5 rounded-xl text-[13px] font-bold transition-all ${activeProjectId === folder.id ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF]' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800'}`}>
+        <button onClick={() => { setView('dashboard'); setActiveProjectId(folder.id); setSelectedRosterId(null); }} className={`flex-1 flex items-center px-2 py-1.5 rounded-lg text-[13px] font-bold transition-all ${activeProjectId === folder.id ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF]' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800'}`}>
           <div className="flex items-center gap-2 min-w-0 flex-1">
             {hasChildren ? (
               <button
@@ -538,15 +538,15 @@ const App: React.FC = () => {
 
         <div className="flex-1 overflow-y-auto custom-scrollbar p-3 lg:p-4 space-y-6">
           <nav className="space-y-1">
-            <button onClick={() => { handleSetView('dashboard'); setActiveProjectId(null); setSelectedRosterId(null); }} className={`w-full flex items-center gap-3 p-2 rounded-xl transition-all ${view === 'dashboard' && activeProjectId === null ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF] font-bold' : 'text-gray-500 hover:bg-gray-50 font-medium'}`}>
+            <button onClick={() => { handleSetView('dashboard'); setActiveProjectId(null); setSelectedRosterId(null); }} className={`w-full flex items-center gap-3 p-2 rounded-lg transition-all ${view === 'dashboard' && activeProjectId === null ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF] font-bold' : 'text-gray-500 hover:bg-gray-50 font-medium'}`}>
               <LayoutDashboard size={20} />
               <span className="hidden lg:block text-[14px]">Dashboard</span>
             </button>
-            <button onClick={() => handleSetView('engine')} className={`w-full flex items-center gap-3 p-2 rounded-xl transition-all ${view === 'engine' ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF] font-bold' : 'text-gray-500 hover:bg-gray-50 font-medium'}`}>
+            <button onClick={() => handleSetView('engine')} className={`w-full flex items-center gap-3 p-2 rounded-lg transition-all ${view === 'engine' ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF] font-bold' : 'text-gray-500 hover:bg-gray-50 font-medium'}`}>
               <Cpu size={20} />
               <span className="hidden lg:block text-[14px]">The Engine</span>
             </button>
-            <button onClick={() => handleSetView('settings')} className={`w-full flex items-center gap-3 p-2 rounded-xl transition-all ${view === 'settings' ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF] font-bold' : 'text-gray-500 hover:bg-gray-100 font-medium'}`}><SettingsIcon size={20} /><span className="hidden lg:block text-[14px]">Settings</span></button>
+            <button onClick={() => handleSetView('settings')} className={`w-full flex items-center gap-3 p-2 rounded-lg transition-all ${view === 'settings' ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF] font-bold' : 'text-gray-500 hover:bg-gray-100 font-medium'}`}><SettingsIcon size={20} /><span className="hidden lg:block text-[14px]">Settings</span></button>
           </nav>
           <div className="space-y-2">
             <div className="flex items-center justify-between px-3">
@@ -561,14 +561,14 @@ const App: React.FC = () => {
         </div>
 
         <div className="p-3 lg:p-4 border-t border-gray-100 dark:border-gray-800 space-y-1 bg-white dark:bg-gray-900">
-          <button onClick={() => setShowChangelog(true)} className="w-full flex items-center gap-3 p-2 rounded-xl text-gray-500 hover:bg-gray-100 font-medium"><ScrollText size={20} /><span className="hidden lg:block text-[14px]">Updates</span></button>
-          <button onClick={() => setShowSupportModal(true)} className="w-full flex items-center gap-3 p-2 rounded-xl text-gray-500 hover:bg-gray-100 font-medium">
+          <button onClick={() => setShowChangelog(true)} className="w-full flex items-center gap-3 p-2 rounded-lg text-gray-500 hover:bg-gray-100 font-medium"><ScrollText size={20} /><span className="hidden lg:block text-[14px]">Updates</span></button>
+          <button onClick={() => setShowSupportModal(true)} className="w-full flex items-center gap-3 p-2 rounded-lg text-gray-500 hover:bg-gray-100 font-medium">
             <HelpCircle size={20} />
             <span className="hidden lg:block text-[14px]">Support</span>
           </button>
           <SignedOut>
             <SignInButton mode="modal">
-              <button className="w-full flex items-center gap-3 p-2 rounded-xl text-gray-500 hover:bg-gray-100 font-medium">
+              <button className="w-full flex items-center gap-3 p-2 rounded-lg text-gray-500 hover:bg-gray-100 font-medium">
                 <LogOut size={20} />
                 <span className="hidden lg:block text-[14px]">Sign In</span>
               </button>
@@ -646,10 +646,10 @@ const App: React.FC = () => {
 
       {showSupportModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-300">
-          <div className="relative w-full max-w-md bg-white dark:bg-gray-900 rounded-[32px] p-8 shadow-2xl animate-in zoom-in duration-300">
+          <div className="relative w-full max-w-md bg-white dark:bg-gray-900 rounded-xl p-8 shadow-2xl animate-in zoom-in duration-300">
             <button onClick={() => setShowSupportModal(false)} className="absolute top-6 right-6 p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-all"><X size={20} /></button>
             <div className="text-center mb-8">
-              <div className="w-16 h-16 rounded-xl bg-[#5B5FFF]/10 text-[#5B5FFF] flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 rounded-lg bg-[#5B5FFF]/10 text-[#5B5FFF] flex items-center justify-center mx-auto mb-4">
                 <Headphones size={32} />
               </div>
               <h2 className="text-2xl font-extrabold text-gray-900 dark:text-white">Broadcast Support</h2>
@@ -658,22 +658,22 @@ const App: React.FC = () => {
             <form onSubmit={handleSupportSubmit} className="space-y-4">
               <div className="space-y-1">
                 <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1 font-mono">Your Name</label>
-                <input type="text" required value={supportForm.name} onChange={(e) => setSupportForm({ ...supportForm, name: e.target.value })} className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border-none rounded-xl outline-none focus:ring-2 focus:ring-[#5B5FFF]/20 text-sm text-gray-900 dark:text-white" />
+                <input type="text" required value={supportForm.name} onChange={(e) => setSupportForm({ ...supportForm, name: e.target.value })} className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border-none rounded-lg outline-none focus:ring-2 focus:ring-[#5B5FFF]/20 text-sm text-gray-900 dark:text-white" />
               </div>
               <div className="space-y-1">
                 <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1 font-mono">Work Email</label>
-                <input type="email" required value={supportForm.email} onChange={(e) => setSupportForm({ ...supportForm, email: e.target.value })} className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border-none rounded-xl outline-none focus:ring-2 focus:ring-[#5B5FFF]/20 text-sm text-gray-900 dark:text-white" />
+                <input type="email" required value={supportForm.email} onChange={(e) => setSupportForm({ ...supportForm, email: e.target.value })} className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border-none rounded-lg outline-none focus:ring-2 focus:ring-[#5B5FFF]/20 text-sm text-gray-900 dark:text-white" />
               </div>
               <div className="space-y-1">
                 <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1 font-mono">Message</label>
-                <textarea required rows={4} value={supportForm.message} onChange={(e) => setSupportForm({ ...supportForm, message: e.target.value })} className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border-none rounded-xl outline-none focus:ring-2 focus:ring-[#5B5FFF]/20 text-sm text-gray-900 dark:text-white resize-none" />
+                <textarea required rows={4} value={supportForm.message} onChange={(e) => setSupportForm({ ...supportForm, message: e.target.value })} className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border-none rounded-lg outline-none focus:ring-2 focus:ring-[#5B5FFF]/20 text-sm text-gray-900 dark:text-white resize-none" />
               </div>
               {supportStatus === 'success' ? (
-                <div className="p-4 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 rounded-xl text-center font-bold text-sm flex items-center justify-center gap-2">
+                <div className="p-4 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 rounded-lg text-center font-bold text-sm flex items-center justify-center gap-2">
                   <CheckCircle2 size={18} /> Ticket Created!
                 </div>
               ) : (
-                <button type="submit" disabled={supportStatus === 'sending'} className="w-full py-4 rounded-xl primary-gradient text-white font-bold text-sm shadow-lg shadow-[#5B5FFF]/20 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2">
+                <button type="submit" disabled={supportStatus === 'sending'} className="w-full py-4 rounded-lg primary-gradient text-white font-bold text-sm shadow-lg shadow-[#5B5FFF]/20 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2">
                   {supportStatus === 'sending' ? <Loader2 className="animate-spin" size={18} /> : <><MessageSquare size={18} /> Send Ticket</>}
                 </button>
               )}
@@ -684,10 +684,10 @@ const App: React.FC = () => {
 
       {showChangelog && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-300">
-          <div className="relative w-full max-w-2xl bg-white dark:bg-gray-900 rounded-[32px] shadow-2xl animate-in zoom-in duration-300 overflow-hidden flex flex-col max-h-[85vh]">
+          <div className="relative w-full max-w-2xl bg-white dark:bg-gray-900 rounded-xl shadow-2xl animate-in zoom-in duration-300 overflow-hidden flex flex-col max-h-[85vh]">
             <div className="p-8 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between shrink-0">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-[#5B5FFF]/10 text-[#5B5FFF] flex items-center justify-center"><ScrollText size={24} /></div>
+                <div className="w-12 h-12 rounded-lg bg-[#5B5FFF]/10 text-[#5B5FFF] flex items-center justify-center"><ScrollText size={24} /></div>
                 <div>
                   <h2 className="text-2xl font-extrabold text-gray-900 dark:text-white tracking-tight">Production Log</h2>
                   <p className="text-sm text-gray-500 font-medium">System enhancements.</p>
@@ -710,7 +710,7 @@ const App: React.FC = () => {
                     {(note.features || []).map((feat: any, idx: number) => {
                       const Icon = ICON_MAP[feat.icon] || Sparkles;
                       return (
-                        <div key={idx} className="p-4 rounded-2xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700">
+                        <div key={idx} className="p-4 rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700">
                           <div className="flex items-center gap-2 mb-2">
                             <Icon size={16} className="text-[#5B5FFF]" />
                             <span className="text-[10px] font-black uppercase tracking-widest text-[#5B5FFF]">{feat.label}</span>
@@ -729,7 +729,7 @@ const App: React.FC = () => {
 
       {showUserProfile && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-300">
-          <div className="relative w-full max-w-4xl bg-white dark:bg-gray-900 rounded-[32px] shadow-2xl animate-in zoom-in duration-300 overflow-hidden max-h-[90vh]">
+          <div className="relative w-full max-w-4xl bg-white dark:bg-gray-900 rounded-xl shadow-2xl animate-in zoom-in duration-300 overflow-hidden max-h-[90vh]">
             <div className="flex items-center justify-between p-6 border-b border-gray-100 dark:border-gray-800">
               <h2 className="text-xl font-extrabold text-gray-900 dark:text-white">Account Settings</h2>
               <button onClick={() => setShowUserProfile(false)} className="p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-all">
