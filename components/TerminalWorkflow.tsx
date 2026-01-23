@@ -70,6 +70,24 @@ const EXPORT_FORMATS = [
   { id: 'catdv', name: 'CatDV', ext: 'CSV', color: 'text-red-500' }
 ];
 
+const ProgressBar = () => {
+  const [width, setWidth] = useState(0);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setWidth(100);
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []);
+
+  return (
+    <div
+      className="bg-[#5B5FFF] h-full rounded-full transition-all duration-[4000ms] ease-in-out"
+      style={{ width: `${width}%` }}
+    />
+  );
+};
+
 const TerminalWorkflow: React.FC<TerminalWorkflowProps> = ({
   autoPlay = true,
   loop = true,
@@ -115,43 +133,43 @@ const TerminalWorkflow: React.FC<TerminalWorkflowProps> = ({
     if (typingTimeout.current) {
       clearTimeout(typingTimeout.current);
     }
-    
+
     let index = 0;
     state.current.isAnimating = true;
     setDisplayText('');
-    
+
     const animateText = () => {
       if (state.current.cancelled || !state.current.isAnimating) {
         state.current.isAnimating = false;
         return;
       }
-      
+
       if (index >= text.length) {
         state.current.isAnimating = false;
         if (callback) callback();
         return;
       }
-      
+
       // Dynamic chunk size based on text length and speed
       const baseChunk = speed < 20 ? 4 : speed < 30 ? 3 : 2;
       const chunkSize = text.length > 300 ? baseChunk + 2 : baseChunk;
       const nextIndex = Math.min(index + chunkSize, text.length);
-      
+
       setDisplayText(text.slice(0, nextIndex));
       index = nextIndex;
-      
+
       // Use setTimeout for consistent timing
       typingTimeout.current = setTimeout(() => {
         animationFrame.current = requestAnimationFrame(animateText);
       }, speed);
     };
-    
+
     animateText();
   };
 
   const runPhase = (p: Phase) => {
     if (state.current.cancelled) return;
-    
+
     switch (p) {
       case 'raw': {
         setPhase('raw');
@@ -188,7 +206,7 @@ const TerminalWorkflow: React.FC<TerminalWorkflowProps> = ({
         setSelectedFormat(null);
         setSelectionIndex(0);
         state.current.isAnimating = false;
-        
+
         const cursorTimer = setInterval(() => {
           setSelectionIndex(prev => {
             if (prev >= 6) {
@@ -202,7 +220,7 @@ const TerminalWorkflow: React.FC<TerminalWorkflowProps> = ({
             return prev + 1;
           });
         }, 500);
-        
+
         intervals.current.push(cursorTimer);
         break;
       }
@@ -317,10 +335,10 @@ const TerminalWorkflow: React.FC<TerminalWorkflowProps> = ({
                   key={format.id}
                   onClick={() => handleFormatSelect(format.id)}
                   className={`block w-full text-left font-mono text-xs md:text-sm px-2 py-1 rounded transition-all duration-200
-                    ${index === selectionIndex 
-                      ? 'bg-[#5B5FFF]/15 text-[#5B5FFF] ring-1 ring-[#5B5FFF]/30' 
-                      : selectedFormat === format.id 
-                        ? 'bg-[#5B5FFF]/10 text-[#5B5FFF]' 
+                    ${index === selectionIndex
+                      ? 'bg-[#5B5FFF]/15 text-[#5B5FFF] ring-1 ring-[#5B5FFF]/30'
+                      : selectedFormat === format.id
+                        ? 'bg-[#5B5FFF]/10 text-[#5B5FFF]'
                         : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
                     }`}
                 >
@@ -344,10 +362,11 @@ const TerminalWorkflow: React.FC<TerminalWorkflowProps> = ({
               export --format={selectedFormat || 'unknown'} --output=/broadcast/roster.xml
             </div>
             <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
-              <div className="bg-[#5B5FFF] h-full rounded-full animate-progress" />
+              <ProgressBar />
             </div>
           </div>
         );
+
       case 'complete':
         return (
           <div className="space-y-3">
@@ -398,9 +417,8 @@ const TerminalWorkflow: React.FC<TerminalWorkflowProps> = ({
         {(['raw', 'processing', 'json', 'prompt', 'exporting', 'complete'] as Phase[]).map((p) => (
           <div
             key={p}
-            className={`h-1.5 rounded-full transition-all duration-300 ${
-              phase === p ? 'w-8 bg-[#5B5FFF]' : 'w-2 bg-gray-300 dark:bg-gray-700'
-            }`}
+            className={`h-1.5 rounded-full transition-all duration-300 ${phase === p ? 'w-8 bg-[#5B5FFF]' : 'w-2 bg-gray-300 dark:bg-gray-700'
+              }`}
           />
         ))}
       </div>
