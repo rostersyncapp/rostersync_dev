@@ -274,25 +274,88 @@ const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
 
           {activeTab === 'roi' && (
             <div className="space-y-8">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                 <div className="bg-white dark:bg-gray-900 p-8 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
-                   <div className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2 font-mono">Net Savings</div>
-                   <div className="text-4xl font-black text-emerald-500">${netSavings.toFixed(2)}</div>
-                 </div>
-                 <div className="bg-white dark:bg-gray-900 p-8 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
-                   <div className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2 font-mono">Time Saved</div>
-                   <div className="text-4xl font-black text-[#5B5FFF]">{(totalAthletes * 4 / 60).toFixed(1)} hrs</div>
-                 </div>
-                 <div className="bg-white dark:bg-gray-900 p-8 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
-                   <div className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2 font-mono">Total Syncs</div>
-                   <div className="text-4xl font-black text-gray-900 dark:text-white">{totalAthletes}</div>
-                 </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="bg-white dark:bg-gray-900 p-8 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
+                  <div className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2 font-mono">Net Savings</div>
+                  <div className="text-4xl font-black text-emerald-500">${netSavings.toFixed(2)}</div>
+                </div>
+                <div className="bg-white dark:bg-gray-900 p-8 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
+                  <div className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2 font-mono">Time Saved</div>
+                  <div className="text-4xl font-black text-[#5B5FFF]">{(totalAthletes * 4 / 60).toFixed(1)} hrs</div>
+                </div>
+                <div className="bg-white dark:bg-gray-900 p-8 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
+                  <div className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2 font-mono">Total Syncs</div>
+                  <div className="text-4xl font-black text-gray-900 dark:text-white">{totalAthletes}</div>
+                </div>
+                <div className="bg-white dark:bg-gray-900 p-8 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
+                  <div className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2 font-mono">Athletes/Credit</div>
+                  <div className="text-4xl font-black text-[#5B5FFF]">
+                    {profile.creditsUsed > 0 ? (totalAthletes / profile.creditsUsed).toFixed(1) : '-'}
+                  </div>
+                </div>
               </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="bg-white dark:bg-gray-900 p-8 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
+                  <div className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2 font-mono">This Month</div>
+                  <div className="text-3xl font-black text-[#5B5FFF]">$0.00</div>
+                  <div className="text-xs text-gray-400 mt-2 font-medium">Keep tracking to see monthly savings</div>
+                </div>
+                <div className="bg-white dark:bg-gray-900 p-8 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
+                  <div className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2 font-mono">All Time Savings</div>
+                  <div className="text-3xl font-black text-emerald-500">${netSavings.toFixed(2)}</div>
+                  <div className="text-xs text-gray-400 mt-2 font-medium">Total cost avoidance since signup</div>
+                </div>
+              </div>
+
               <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-10 shadow-sm">
-                 <h3 className="text-2xl font-extrabold mb-5 flex items-center gap-4 text-gray-900 dark:text-white"><BarChart4 size={24} className="text-[#5B5FFF]" /> Efficiency Breakdown</h3>
-                 <p className="text-base text-gray-500 dark:text-gray-400 leading-relaxed font-medium">
-                   Production benchmarks estimate manual entry takes ~4 minutes per athlete. At an industry rate of $45/hr, RosterSync has significantly reduced overhead for your broadcast workflow.
-                 </p>
+                <h3 className="text-xl font-extrabold mb-6 flex items-center gap-3 text-gray-900 dark:text-white">Manual Entry vs RosterSync</h3>
+                <div className="space-y-6">
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-bold text-gray-900 dark:text-white">Manual Entry</span>
+                      <span className="text-sm font-bold text-gray-500">${(totalAthletes * 4 / 60 * 45).toFixed(2)}</span>
+                    </div>
+                    <div className="w-full h-6 bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden">
+                      <div className="h-full bg-gray-400 dark:bg-gray-600 transition-all duration-1000" style={{ width: '100%' }}></div>
+                    </div>
+                  </div>
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-bold text-[#5B5FFF]">RosterSync</span>
+                      <span className="text-sm font-bold text-[#5B5FFF]">${(totalAthletes * 0.04).toFixed(2)}</span>
+                    </div>
+                    <div className="w-full h-6 bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden">
+                      <div className="h-full primary-gradient transition-all duration-1000" style={{ width: `${(totalAthletes * 0.04) / (totalAthletes * 4 / 60 * 45) * 100}%`, maxWidth: '100%' }}></div>
+                    </div>
+                  </div>
+                  <div className="pt-4 border-t border-gray-100 dark:border-gray-800">
+                    <div className="text-sm font-bold text-emerald-500">
+                      You're saving 90% on data entry costs
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-r from-[#5B5FFF]/10 to-emerald-500/10 dark:from-[#5B5FFF]/5 dark:to-emerald-500/5 rounded-2xl border border-[#5B5FFF]/20 dark:border-[#5B5FFF]/20 p-8">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-[#5B5FFF] flex items-center justify-center shrink-0">
+                    <Zap size={24} className="text-white" />
+                  </div>
+                  <div>
+                    <div className="text-xl font-black text-gray-900 dark:text-white">3.6x Faster Than Average</div>
+                    <div className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                      Your {totalAthletes} athletes saved {(totalAthletes * 4 / 60).toFixed(1)} hrs at 4 min/athlete. Industry average: {(totalAthletes * 4 * 3.6 / 60).toFixed(1)} hrs for same workload.
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-10 shadow-sm">
+                <h3 className="text-2xl font-extrabold mb-5 flex items-center gap-4 text-gray-900 dark:text-white"><BarChart4 size={24} className="text-[#5B5FFF]" /> Efficiency Breakdown</h3>
+                <p className="text-base text-gray-500 dark:text-gray-400 leading-relaxed font-medium">
+                  Production benchmarks estimate manual entry takes ~4 minutes per athlete. At an industry rate of $45/hr, RosterSync has significantly reduced overhead for your broadcast workflow.
+                </p>
               </div>
             </div>
           )}
