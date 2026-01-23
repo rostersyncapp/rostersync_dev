@@ -184,7 +184,9 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-[#5B5FFF] mb-2">The Engine</h2>
-            <h3 className="text-2xl md:text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white">Built for High-Stakes Broadcast</h3>
+            <h3 className="text-2xl md:text-4xl font-extrabold tracking-tight">
+              <span className="bg-gradient-to-r from-indigo-400 via-purple-500 to-pink-500 text-transparent bg-clip-text inline-block py-1">Built for High-Stakes Broadcast</span>
+            </h3>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {FEATURES.map((f, i) => (
@@ -206,7 +208,9 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-[#5B5FFF] mb-2">Pricing</h2>
-            <h3 className="text-2xl md:text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white">Scalable Workflows</h3>
+            <h3 className="text-2xl md:text-4xl font-extrabold tracking-tight">
+              <span className="bg-gradient-to-r from-blue-400 via-indigo-500 to-purple-500 text-transparent bg-clip-text inline-block py-1">Scalable Workflows</span>
+            </h3>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {PRICING_TIERS.map((tier) => (

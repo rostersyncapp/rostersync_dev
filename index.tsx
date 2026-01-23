@@ -1,37 +1,55 @@
 
 /**
- * POLYFILL: Must be at the absolute top to ensure process.env is available 
- * to all subsequent imports during their module evaluation phase.
+ * SAFARI COMPATIBILITY POLYFILL: Must be at the absolute top to ensure 
+ * all browser APIs are available before subsequent imports.
  */
-const _window = window as any;
-if (typeof _window.process === 'undefined') {
-  _window.process = { env: {} };
-}
-if (!_window.process.env) {
-  _window.process.env = {};
-}
 
-// Ensure globalThis also has the shim for broader compatibility
-(globalThis as any).process = _window.process;
-
-// Robust environment variable detection and mapping to process.env.API_KEY
-const detectAndShimApiKey = () => {
-  try {
-    // 1. Try Vite/ESM standard
-    const metaEnv = (import.meta as any).env;
-    if (metaEnv) {
-      const key = metaEnv.API_KEY || metaEnv.VITE_API_KEY || metaEnv.NEXT_PUBLIC_API_KEY;
-      if (key) _window.process.env.API_KEY = key;
-    }
-  } catch (e) { }
-
-  // 2. Try common Vercel/Next.js client-side patterns if not already set
-  if (!_window.process.env.API_KEY) {
-    _window.process.env.API_KEY = _window.NEXT_PUBLIC_API_KEY || _window.VITE_API_KEY;
+// Safari 26.2 compatibility polyfills
+(function() {
+  // Add globalThis shim if missing
+  if (typeof globalThis === 'undefined') {
+    var globalThis = (function() {
+      return this || (0, eval)('this');
+    })();
+    (globalThis as any).globalThis = globalThis;
   }
-};
 
-detectAndShimApiKey();
+  // Add process polyfill for older Safari versions
+  const _window = window as any;
+  if (typeof _window.process === 'undefined') {
+    _window.process = { env: {} };
+  }
+  if (!_window.process.env) {
+    _window.process.env = {};
+  }
+
+  // Ensure globalThis also has the shim for broader compatibility
+  (globalThis as any).process = _window.process;
+
+  // Add additional Safari polyfills
+  if (typeof Promise === 'undefined') {
+    console.error('Promise is required but not available in this browser');
+  }
+
+  // Robust environment variable detection and mapping to process.env.API_KEY
+  const detectAndShimApiKey = () => {
+    try {
+      // 1. Try Vite/ESM standard
+      const metaEnv = (import.meta as any).env;
+      if (metaEnv) {
+        const key = metaEnv.API_KEY || metaEnv.VITE_API_KEY || metaEnv.NEXT_PUBLIC_API_KEY;
+        if (key) _window.process.env.API_KEY = key;
+      }
+    } catch (e) { }
+
+    // 2. Try common Vercel/Next.js client-side patterns if not already set
+    if (!_window.process.env.API_KEY) {
+      _window.process.env.API_KEY = _window.NEXT_PUBLIC_API_KEY || _window.VITE_API_KEY;
+    }
+  };
+
+  detectAndShimApiKey();
+})();
 
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -120,7 +138,7 @@ root.render(
     <BrowserRouter>
       <ClerkProvider 
         publishableKey={PUBLISHABLE_KEY}
-        afterSignOutUrl="/"
+        fallbackRedirectUrl="/"
         navigate={(to) => window.location.href = to}
         tokenCache={localStorage.getItem('clerk-token-cache')}
       >

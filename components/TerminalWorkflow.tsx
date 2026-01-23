@@ -83,38 +83,80 @@ const TerminalWorkflow: React.FC<TerminalWorkflowProps> = ({
 
   const timeouts = useRef<ReturnType<typeof setTimeout>[]>([]);
   const intervals = useRef<ReturnType<typeof setInterval>[]>([]);
+  const animationFrame = useRef<number | null>(null);
+  const typingTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const state = useRef({
     sampleIndex: 0,
-    cancelled: false
+    cancelled: false,
+    isAnimating: false
   });
 
   const clearAll = () => {
     timeouts.current.forEach(clearTimeout);
     intervals.current.forEach(clearInterval);
+    if (animationFrame.current) {
+      cancelAnimationFrame(animationFrame.current);
+    }
+    if (typingTimeout.current) {
+      clearTimeout(typingTimeout.current);
+    }
     timeouts.current = [];
     intervals.current = [];
+    animationFrame.current = null;
+    typingTimeout.current = null;
   };
 
   const typeText = (text: string, speed: number, callback?: () => void) => {
+    // Cancel any existing animation
+    if (animationFrame.current) {
+      cancelAnimationFrame(animationFrame.current);
+    }
+    if (typingTimeout.current) {
+      clearTimeout(typingTimeout.current);
+    }
+    
     let index = 0;
+    state.current.isAnimating = true;
     setDisplayText('');
-    const interval = setInterval(() => {
-      setDisplayText(text.slice(0, index + 1));
-      index++;
-      if (index >= text.length) {
-        clearInterval(interval);
-        if (callback) callback();
+    
+    const animateText = () => {
+      if (state.current.cancelled || !state.current.isAnimating) {
+        state.current.isAnimating = false;
+        return;
       }
-    }, speed);
-    intervals.current.push(interval);
+      
+      if (index >= text.length) {
+        state.current.isAnimating = false;
+        if (callback) callback();
+        return;
+      }
+      
+      // Dynamic chunk size based on text length and speed
+      const baseChunk = speed < 20 ? 4 : speed < 30 ? 3 : 2;
+      const chunkSize = text.length > 300 ? baseChunk + 2 : baseChunk;
+      const nextIndex = Math.min(index + chunkSize, text.length);
+      
+      setDisplayText(text.slice(0, nextIndex));
+      index = nextIndex;
+      
+      // Use setTimeout for consistent timing
+      typingTimeout.current = setTimeout(() => {
+        animationFrame.current = requestAnimationFrame(animateText);
+      }, speed);
+    };
+    
+    animateText();
   };
 
   const runPhase = (p: Phase) => {
+    if (state.current.cancelled) return;
+    
     switch (p) {
       case 'raw': {
         setPhase('raw');
         setDisplayText('');
+        state.current.isAnimating = false;
         const sample = MESSY_SAMPLES[state.current.sampleIndex];
         typeText(sample, 25, () => {
           if (state.current.cancelled) return;
@@ -125,6 +167,7 @@ const TerminalWorkflow: React.FC<TerminalWorkflowProps> = ({
       case 'processing': {
         setPhase('processing');
         setDisplayText('');
+        state.current.isAnimating = false;
         if (state.current.cancelled) return;
         timeouts.current.push(setTimeout(() => runPhase('json'), 2500));
         break;
@@ -132,7 +175,9 @@ const TerminalWorkflow: React.FC<TerminalWorkflowProps> = ({
       case 'json': {
         setPhase('json');
         setDisplayText('');
-        typeText(CLEAN_JSON_SAMPLES[state.current.sampleIndex], 15, () => {
+        state.current.isAnimating = false;
+        // Slightly slower for JSON to make it more readable
+        typeText(CLEAN_JSON_SAMPLES[state.current.sampleIndex], 25, () => {
           if (state.current.cancelled) return;
           timeouts.current.push(setTimeout(() => runPhase('prompt'), 600));
         });
@@ -142,6 +187,7 @@ const TerminalWorkflow: React.FC<TerminalWorkflowProps> = ({
         setPhase('prompt');
         setSelectedFormat(null);
         setSelectionIndex(0);
+        state.current.isAnimating = false;
         
         const cursorTimer = setInterval(() => {
           setSelectionIndex(prev => {
@@ -164,6 +210,7 @@ const TerminalWorkflow: React.FC<TerminalWorkflowProps> = ({
         intervals.current.forEach(clearInterval);
         intervals.current = [];
         setPhase('exporting');
+        state.current.isAnimating = false;
         if (state.current.cancelled) return;
         // Wait for progress bar animation to complete (4s)
         timeouts.current.push(setTimeout(() => {
@@ -192,15 +239,26 @@ const TerminalWorkflow: React.FC<TerminalWorkflowProps> = ({
     if (!autoPlay) return;
 
     state.current.cancelled = false;
+    state.current.isAnimating = false;
     timeouts.current.push(setTimeout(() => runPhase('raw'), 500));
 
     return () => {
       state.current.cancelled = true;
+      state.current.isAnimating = false;
       clearAll();
     };
   }, [autoPlay, loop]);
 
   const handleFormatSelect = (formatId: string) => {
+    if (state.current.isAnimating) {
+      state.current.isAnimating = false;
+      if (animationFrame.current) {
+        cancelAnimationFrame(animationFrame.current);
+      }
+      if (typingTimeout.current) {
+        clearTimeout(typingTimeout.current);
+      }
+    }
     setSelectedFormat(formatId);
     runPhase('exporting');
   };
@@ -220,7 +278,7 @@ const TerminalWorkflow: React.FC<TerminalWorkflowProps> = ({
         return (
           <div className="space-y-2">
             <div className="text-xs text-[#5B5FFF] font-mono font-medium">[{phaseLabel}]</div>
-            <div className="font-mono text-xs md:text-sm leading-relaxed whitespace-pre-wrap text-gray-800 dark:text-gray-100">
+            <div className="font-mono text-xs md:text-sm leading-relaxed whitespace-pre-wrap text-gray-800 dark:text-gray-100 max-h-64 overflow-y-auto">
               {displayText}
             </div>
           </div>
@@ -239,7 +297,7 @@ const TerminalWorkflow: React.FC<TerminalWorkflowProps> = ({
         return (
           <div className="space-y-2">
             <div className="text-xs text-[#5B5FFF] font-mono font-medium">[{phaseLabel}]</div>
-            <div className="font-mono text-xs md:text-sm leading-relaxed whitespace-pre-wrap">
+            <div className="font-mono text-xs md:text-sm leading-relaxed whitespace-pre-wrap max-h-64 overflow-y-auto">
               <span className="text-purple-600 dark:text-purple-400">{displayText}</span>
             </div>
           </div>
