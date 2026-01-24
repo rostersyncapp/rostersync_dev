@@ -395,7 +395,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
           <div className="grid grid-cols-1 md:grid-cols-10 gap-8 pt-8 border-t border-gray-100 dark:border-gray-800">
             <div className="md:col-span-3">
               <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                © 2026 {siteConfig.site_name}. <br /> All rights reserved.
+                © 2026 {siteConfig.site_name}. All rights reserved.
               </p>
             </div>
 
