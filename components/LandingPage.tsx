@@ -62,9 +62,7 @@ const BrandLogo: React.FC<{ siteConfig: SiteConfig; size?: 'sm' | 'md' }> = ({ s
     <div className={`${containerClasses} primary-gradient flex items-center justify-center text-white shadow-lg shadow-[#5B5FFF]/20 overflow-hidden`}>
       {siteConfig.logo_url ? (
         <img src={siteConfig.logo_url} alt="Site Logo" className="w-full h-full object-cover" />
-      ) : (
-        React.cloneElement(BRAND_CONFIG.icon as React.ReactElement<any>, { size: 16 })
-      )}
+      ) : null}
     </div>
   );
 };
