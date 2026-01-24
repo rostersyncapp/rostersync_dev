@@ -83,16 +83,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
   // Navigation State
   const [currentPage, setCurrentPage] = useState<'home' | 'about'>('home');
 
-  // --- Render About Page if active ---
-  if (currentPage === 'about') {
-    return (
-      <AboutPage
-        onBack={() => setCurrentPage('home')}
-        siteConfig={siteConfig}
-        darkMode={darkMode}
-      />
-    );
-  }
+
 
   const handleDemoSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -160,6 +151,17 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
       setSignUpUrl(clerk.buildSignUpUrl());
     }
   }, [clerk?.loaded]);
+
+  // --- Render About Page if active ---
+  if (currentPage === 'about') {
+    return (
+      <AboutPage
+        onBack={() => setCurrentPage('home')}
+        siteConfig={siteConfig}
+        darkMode={darkMode}
+      />
+    );
+  }
 
   return (
     <div className={`min-h-screen font-sans selection:bg-[#5B5FFF]/30 ${darkMode ? 'dark' : ''} bg-[#FAFAFA] dark:bg-[#111827] text-gray-900 dark:text-gray-100 transition-colors duration-300`}>
