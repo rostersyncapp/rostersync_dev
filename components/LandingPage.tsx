@@ -290,8 +290,9 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
           <div className="text-left">
             <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-[#5B5FFF] mb-3">FAQ</h2>
             <h3 className="text-3xl md:text-5xl font-extrabold tracking-tight text-gray-900 dark:text-white mb-6">
-              Frequently Asked <br />
-              <span className="bg-gradient-to-r from-blue-400 via-indigo-500 to-purple-500 text-transparent bg-clip-text inline-block py-1">Questions</span>
+              <span className="bg-gradient-to-r from-blue-400 via-indigo-500 to-purple-500 text-transparent bg-clip-text inline-block py-1">
+                Frequently Asked <br /> Questions
+              </span>
             </h3>
             <p className="text-base text-gray-500 dark:text-gray-400 font-medium mb-8 max-w-md leading-relaxed">
               Everything you need to know about the product and billing. Can't find the answer you're looking for?
