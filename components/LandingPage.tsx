@@ -218,15 +218,11 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
       </section>
 
       {/* Features Section */}
-      <section className="py-16 px-6 bg-[#FAFAFA] dark:bg-gray-900">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-[#5B5FFF] mb-2">The Engine</h2>
-            <h3 className="text-2xl md:text-4xl font-extrabold tracking-tight">
-              <span className="bg-gradient-to-r from-indigo-400 via-purple-500 to-pink-500 text-transparent bg-clip-text inline-block py-1">Built for High-Stakes Broadcast</span>
-            </h3>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <section className="py-24 px-6 bg-[#FAFAFA] dark:bg-gray-900">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-12 lg:gap-24 items-start">
+
+          {/* Features Grid - Left Side on Desktop */}
+          <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6 order-last lg:order-first">
             {FEATURES.map((f, i) => (
               <div key={i} className="p-6 rounded-3xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 hover:shadow-lg transition-all group">
                 <div className="w-10 h-10 rounded-lg bg-[#5B5FFF]/10 text-[#5B5FFF] flex items-center justify-center mb-4 group-hover:bg-[#5B5FFF] group-hover:text-white transition-all">
@@ -236,6 +232,19 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
                 <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed font-medium">{f.desc}</p>
               </div>
             ))}
+          </div>
+
+          {/* Headline - Right Side on Desktop */}
+          <div className="lg:col-span-1 text-left lg:sticky lg:top-32 order-first lg:order-last">
+            <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-[#5B5FFF] mb-3">The Engine</h2>
+            <h3 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-6">
+              <span className="bg-gradient-to-r from-indigo-400 via-purple-500 to-pink-500 text-transparent bg-clip-text inline-block py-1">
+                Built for High-Stakes Broadcast
+              </span>
+            </h3>
+            <p className="text-base text-gray-500 dark:text-gray-400 font-medium leading-relaxed">
+              Reliability is our core feature. From local production to national networks, RosterSync delivers data you can trust when the red light is on.
+            </p>
           </div>
         </div>
       </section>
