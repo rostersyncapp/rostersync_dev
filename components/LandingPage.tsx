@@ -339,24 +339,36 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
       </section>
 
       {/* Footer */}
-      <footer className="py-8 px-6 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-3">
-            <BrandLogo siteConfig={siteConfig} />
-            <span className="font-extrabold text-base tracking-tight font-mono text-gray-900 dark:text-white">{siteConfig.site_name}</span>
+      <footer className="py-16 px-6 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900">
+        <div className="max-w-6xl mx-auto space-y-16">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
+            <div className="flex items-center gap-3">
+              <BrandLogo siteConfig={siteConfig} />
+              <span className="font-extrabold text-lg tracking-tight font-mono text-gray-900 dark:text-white">{siteConfig.site_name}</span>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <a href="https://x.com/rostersync" target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                <Twitter size={20} />
+              </a>
+            </div>
           </div>
 
-          <div className="flex items-center gap-6 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-            <a href="#" className="hover:text-[#5B5FFF]">Privacy</a>
-            <a href="#" className="hover:text-[#5B5FFF]">Terms</a>
-            <a href="mailto:support@rostersync.io" className="hover:text-[#5B5FFF]">Support</a>
-          </div>
+          <div className="grid grid-cols-1 md:grid-cols-10 gap-8 pt-8 border-t border-gray-100 dark:border-gray-800">
+            <div className="md:col-span-3">
+              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                © 2026 {siteConfig.site_name}. <br /> All rights reserved.
+              </p>
+            </div>
 
-          <div className="flex items-center gap-4">
-            <a href="https://x.com/rostersync" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-[#5B5FFF] transition-colors">
-              <Twitter size={18} />
-            </a>
-            <span className="text-[9px] text-gray-300 dark:text-gray-600 font-bold uppercase tracking-[0.3em]">© 2026 {siteConfig.site_name}</span>
+            <div className="md:col-span-7 flex flex-wrap gap-8 md:justify-end">
+              <a href="#" className="text-sm font-medium text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors">Products</a>
+              <a href="#" className="text-sm font-medium text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors">About</a>
+              <a href="#" className="text-sm font-medium text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors">Blog</a>
+              <a href="mailto:support@rostersync.io" className="text-sm font-medium text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors">Contact</a>
+              <a href="#" className="text-sm font-medium text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors">Privacy</a>
+              <a href="#" className="text-sm font-medium text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors">Terms</a>
+            </div>
           </div>
         </div>
       </footer>
