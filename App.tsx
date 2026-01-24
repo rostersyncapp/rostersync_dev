@@ -786,7 +786,7 @@ const App: React.FC = () => {
 
           {showUserProfile && (
             <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-300">
-              <div className="relative w-full max-w-[880px] h-[700px] bg-white dark:bg-gray-900 rounded-xl shadow-2xl animate-in zoom-in duration-300 overflow-hidden flex flex-col">
+              <div className="relative w-full max-w-[880px] h-[85vh] bg-white dark:bg-gray-900 rounded-xl shadow-2xl animate-in zoom-in duration-300 overflow-hidden flex flex-col">
                 <button
                   onClick={() => setShowUserProfile(false)}
                   className="absolute top-4 right-4 z-50 p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-all"
