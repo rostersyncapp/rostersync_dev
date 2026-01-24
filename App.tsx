@@ -786,23 +786,24 @@ const App: React.FC = () => {
 
           {showUserProfile && (
             <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-300">
-              <div className="relative w-full max-w-4xl bg-white dark:bg-gray-900 rounded-xl shadow-2xl animate-in zoom-in duration-300 overflow-hidden max-h-[90vh]">
-                <div className="flex items-center justify-between p-6 border-b border-gray-100 dark:border-gray-800">
-                  <h2 className="text-xl font-extrabold text-gray-900 dark:text-white">Account Settings</h2>
-                  <button onClick={() => setShowUserProfile(false)} className="p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-all">
-                    <X size={24} />
-                  </button>
-                </div>
-                <div className="flex-1 overflow-y-auto max-h-[calc(90vh-80px)]">
+              <div className="relative w-full max-w-[880px] h-[700px] bg-white dark:bg-gray-900 rounded-xl shadow-2xl animate-in zoom-in duration-300 overflow-hidden flex flex-col">
+                <button
+                  onClick={() => setShowUserProfile(false)}
+                  className="absolute top-4 right-4 z-50 p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-all"
+                >
+                  <X size={24} />
+                </button>
+                <div className="flex-1 w-full h-full">
                   <UserProfile
                     appearance={{
                       baseTheme: darkMode ? dark : undefined,
                       elements: {
-                        rootBox: 'w-full',
-                        card: 'shadow-none bg-transparent',
-                        header: 'hidden',
+                        rootBox: 'w-full h-full',
+                        card: 'shadow-none bg-transparent w-full h-full',
+                        navbar: 'hidden md:flex', // Ensure navbar is visible on desktop
+                        navbarMobileMenuButton: 'md:hidden',
+                        scrollBox: 'rounded-none', // Fix corners
                         pageScrollBox: 'p-0',
-                        componentContainer: 'border-0 shadow-none'
                       }
                     }}
                   />
