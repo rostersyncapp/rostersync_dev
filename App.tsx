@@ -694,13 +694,7 @@ const App: React.FC = () => {
           {showSupportModal && (
             <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-300">
               <div className="relative w-full max-w-4xl animate-in zoom-in duration-300" onClick={(e) => e.stopPropagation()}>
-                <button
-                  onClick={() => setShowSupportModal(false)}
-                  className="absolute top-4 right-4 z-50 p-2 text-white/50 hover:text-white rounded-full hover:bg-white/10 transition-colors"
-                >
-                  <X size={24} />
-                </button>
-                <SupportCard darkMode={darkMode} />
+                <SupportCard darkMode={darkMode} onClose={() => setShowSupportModal(false)} />
               </div>
             </div>
           )}

@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
-import { MessageCircle, Send, Loader2, CheckCircle2 } from 'lucide-react';
+import { MessageCircle, Send, Loader2, CheckCircle2, X } from 'lucide-react';
 import { supabase } from '../services/supabase.ts';
 
 interface SupportCardProps {
     darkMode?: boolean;
+    onClose?: () => void;
 }
 
-const SupportCard: React.FC<SupportCardProps> = ({ darkMode }) => {
+const SupportCard: React.FC<SupportCardProps> = ({ darkMode, onClose }) => {
     const [form, setForm] = useState({ name: '', email: '', message: '' });
     const [status, setStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
 
@@ -39,7 +40,16 @@ const SupportCard: React.FC<SupportCardProps> = ({ darkMode }) => {
     };
 
     return (
-        <div className="w-full max-w-4xl mx-auto shadow-2xl rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-800 flex flex-col md:flex-row">
+        <div className="w-full max-w-4xl mx-auto shadow-2xl rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-800 flex flex-col md:flex-row relative group">
+            {onClose && (
+                <button
+                    onClick={onClose}
+                    className="absolute top-4 right-4 z-50 p-2 rounded-full transition-all text-white/70 hover:text-white md:text-gray-400 md:hover:text-gray-900 md:hover:bg-gray-100 dark:md:text-gray-500 dark:md:hover:text-white dark:md:hover:bg-gray-800"
+                >
+                    <X size={20} />
+                </button>
+            )}
+
             {/* Left Side - Brand & Info */}
             <div className="md:w-1/2 bg-[#5B5FFF] p-12 text-white flex flex-col justify-between relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-white/10 to-transparent pointer-events-none" />
