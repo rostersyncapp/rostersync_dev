@@ -285,39 +285,48 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
       </section>
 
       {/* FAQ Section */}
-      <section className="py-16 px-6 bg-[#FAFAFA] dark:bg-gray-900">
-        <div className="max-w-2xl mx-auto">
-          <div className="text-center mb-8">
-            <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-[#5B5FFF] mb-2">FAQ</h2>
-            <h3 className="text-2xl font-extrabold tracking-tight text-gray-900 dark:text-white">Questions</h3>
+      <section className="py-24 px-6 bg-[#FAFAFA] dark:bg-gray-900">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16">
+          <div className="text-left">
+            <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-[#5B5FFF] mb-3">FAQ</h2>
+            <h3 className="text-3xl md:text-5xl font-extrabold tracking-tight text-gray-900 dark:text-white mb-6">
+              Frequently Asked <br /> Questions
+            </h3>
+            <p className="text-base text-gray-500 dark:text-gray-400 font-medium mb-8 max-w-md leading-relaxed">
+              Everything you need to know about the product and billing. Can't find the answer you're looking for?
+            </p>
+            <a href="mailto:support@rostersync.io" className="inline-flex items-center justify-center px-6 py-3 rounded-lg bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-bold text-sm hover:opacity-90 transition-opacity">
+              Contact Support
+            </a>
           </div>
-          <div className="space-y-3">
+
+          <div className="space-y-4">
             {FAQS.map((faq, i) => {
               const isOpen = openFaqIndex === i;
               return (
                 <div key={i} className={cn(
-                  "rounded-lg border transition-all duration-300 overflow-hidden",
+                  "rounded-xl border transition-all duration-300 overflow-hidden",
                   isOpen
-                    ? "border-[#5B5FFF]/30 bg-white dark:bg-gray-800 shadow-md"
-                    : "border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-800"
+                    ? "border-[#5B5FFF]/30 bg-white dark:bg-gray-800 shadow-lg shadow-[#5B5FFF]/5"
+                    : "border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800/50"
                 )}>
                   <button
                     onClick={() => setOpenFaqIndex(isOpen ? null : i)}
                     className={cn(
-                      "w-full px-5 py-4 flex items-center justify-between text-left transition-colors",
-                      "hover:bg-gray-50 dark:hover:bg-gray-700/50",
+                      "w-full px-6 py-5 flex items-center justify-between text-left transition-colors",
+                      "hover:bg-gray-50 dark:hover:bg-gray-700/30",
                       isOpen && "bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/10"
                     )}
                   >
                     <span className={cn(
-                      "font-bold text-sm transition-colors",
+                      "font-bold text-base transition-colors",
                       isOpen ? "text-[#5B5FFF]" : "text-gray-900 dark:text-white"
                     )}>{faq.q}</span>
-                    {isOpen ? <Minus size={16} className="text-[#5B5FFF]" /> : <Plus size={16} className="text-gray-400" />}
+                    {isOpen ? <Minus size={18} className="text-[#5B5FFF]" /> : <Plus size={18} className="text-gray-400" />}
                   </button>
                   {isOpen && (
-                    <div className="px-5 pb-4 animate-in slide-in-from-top-2 duration-300">
-                      <p className="text-gray-500 dark:text-gray-400 text-xs leading-relaxed font-medium">{faq.a}</p>
+                    <div className="px-6 pb-6 pt-2 animate-in slide-in-from-top-1 duration-200">
+                      <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed font-medium">{faq.a}</p>
                     </div>
                   )}
                 </div>
