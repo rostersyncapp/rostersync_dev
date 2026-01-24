@@ -25,6 +25,14 @@ const AboutPage: React.FC<AboutPageProps> = ({ onBack, siteConfig, darkMode }) =
                     )}
                     <span className="font-mono tracking-tight">{siteConfig.site_name}</span>
                 </button>
+
+                <button
+                    onClick={onBack}
+                    className="flex items-center gap-2 px-4 py-2 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 font-bold text-sm transition-colors"
+                >
+                    <ChevronLeft size={16} />
+                    <span>Back to Home</span>
+                </button>
             </header>
 
             {/* Main Split Layout */}
