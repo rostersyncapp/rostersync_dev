@@ -693,38 +693,14 @@ const App: React.FC = () => {
 
           {showSupportModal && (
             <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-300">
-              <div className="relative w-full max-w-md bg-white dark:bg-gray-900 rounded-xl p-8 shadow-2xl animate-in zoom-in duration-300">
-                <button onClick={() => setShowSupportModal(false)} className="absolute top-6 right-6 p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-all"><X size={20} /></button>
-                <div className="text-center mb-8">
-                  <div className="w-16 h-16 rounded-lg bg-[#5B5FFF]/10 text-[#5B5FFF] flex items-center justify-center mx-auto mb-4">
-                    <Headphones size={32} />
-                  </div>
-                  <h2 className="text-2xl font-extrabold text-gray-900 dark:text-white">Broadcast Support</h2>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-2 font-medium">Technical issues or hardware requests?</p>
-                </div>
-                <form onSubmit={handleSupportSubmit} className="space-y-4">
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1 font-mono">Your Name</label>
-                    <input type="text" required value={supportForm.name} onChange={(e) => setSupportForm({ ...supportForm, name: e.target.value })} className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border-none rounded-lg outline-none focus:ring-2 focus:ring-[#5B5FFF]/20 text-sm text-gray-900 dark:text-white" />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1 font-mono">Work Email</label>
-                    <input type="email" required value={supportForm.email} onChange={(e) => setSupportForm({ ...supportForm, email: e.target.value })} className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border-none rounded-lg outline-none focus:ring-2 focus:ring-[#5B5FFF]/20 text-sm text-gray-900 dark:text-white" />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1 font-mono">Message</label>
-                    <textarea required rows={4} value={supportForm.message} onChange={(e) => setSupportForm({ ...supportForm, message: e.target.value })} className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border-none rounded-lg outline-none focus:ring-2 focus:ring-[#5B5FFF]/20 text-sm text-gray-900 dark:text-white resize-none" />
-                  </div>
-                  {supportStatus === 'success' ? (
-                    <div className="p-4 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 rounded-lg text-center font-bold text-sm flex items-center justify-center gap-2">
-                      <CheckCircle2 size={18} /> Ticket Created!
-                    </div>
-                  ) : (
-                    <button type="submit" disabled={supportStatus === 'sending'} className="w-full py-4 rounded-lg primary-gradient text-white font-bold text-sm shadow-lg shadow-[#5B5FFF]/20 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2">
-                      {supportStatus === 'sending' ? <Loader2 className="animate-spin" size={18} /> : <><MessageSquare size={18} /> Send Ticket</>}
-                    </button>
-                  )}
-                </form>
+              <div className="relative w-full max-w-4xl animate-in zoom-in duration-300" onClick={(e) => e.stopPropagation()}>
+                <button
+                  onClick={() => setShowSupportModal(false)}
+                  className="absolute top-4 right-4 z-50 p-2 text-white/50 hover:text-white rounded-full hover:bg-white/10 transition-colors"
+                >
+                  <X size={24} />
+                </button>
+                <SupportCard darkMode={darkMode} />
               </div>
             </div>
           )}

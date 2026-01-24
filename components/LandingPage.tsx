@@ -373,12 +373,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
         </div>
       </section>
 
-      {/* Support Section */}
-      <section className="py-24 px-6 bg-white dark:bg-gray-900 relative">
-        <div className="max-w-4xl mx-auto">
-          <SupportCard darkMode={darkMode} />
-        </div>
-      </section>
+
 
       {/* Footer */}
       <footer className="py-16 px-6 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900">
