@@ -202,18 +202,20 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
       </section>
 
       {/* Terminal Workflow Demo Section */}
-      <section className="pt-32 pb-20 px-6 bg-[#FAFAFA] dark:bg-gray-900">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-8">
-            <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-[#5B5FFF] mb-2">How It Works</h2>
-            <h3 className="text-2xl md:text-4xl font-extrabold tracking-tight">
+      <section className="py-24 px-6 bg-[#FAFAFA] dark:bg-gray-900">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-start">
+          <div className="text-left lg:sticky lg:top-32">
+            <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-[#5B5FFF] mb-3">How It Works</h2>
+            <h3 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-6">
               <span className="bg-gradient-to-r from-purple-600 via-fuchsia-500 to-cyan-400 text-transparent bg-clip-text inline-block py-1">Paste. Parse. Export.</span>
             </h3>
-            <p className="text-base text-gray-600 dark:text-gray-300 mt-3 max-w-xl mx-auto">
+            <p className="text-base text-gray-600 dark:text-gray-300 font-medium leading-relaxed max-w-md">
               Watch rosterSync transform messy roster data into broadcast-ready metadata in seconds.
             </p>
           </div>
-          <TerminalWorkflow loop onExportComplete={(format) => console.log('Exported:', format)} />
+          <div>
+            <TerminalWorkflow loop onExportComplete={(format) => console.log('Exported:', format)} />
+          </div>
         </div>
       </section>
 
