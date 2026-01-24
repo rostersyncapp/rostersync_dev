@@ -57,7 +57,7 @@ const FEATURES = [
 ];
 
 const BrandLogo: React.FC<{ siteConfig: SiteConfig; size?: 'sm' | 'md' }> = ({ siteConfig, size = 'md' }) => {
-  const containerClasses = "w-7 h-7 rounded-lg shrink-0";
+  const containerClasses = size === 'md' ? "w-8 h-8 rounded-lg shrink-0" : "w-7 h-7 rounded-lg shrink-0";
   if (!siteConfig.logo_url) return null;
 
   return (
@@ -158,9 +158,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
       <nav className="fixed top-0 w-full px-4 md:px-8 py-6 z-50 transition-all duration-300 bg-white/50 dark:bg-[#111827]/50 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-800/50">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2 relative z-50">
-            <div className="w-8 h-8 rounded-lg primary-gradient text-white flex items-center justify-center shadow-lg shadow-[#5B5FFF]/20">
-              {siteConfig?.logo_url ? <img src={siteConfig.logo_url} alt="Logo" className="w-full h-full object-cover rounded-lg" /> : <Box size={18} />}
-            </div>
+            <BrandLogo siteConfig={siteConfig} size="md" />
             <span className="text-lg font-black tracking-tight text-gray-900 dark:text-white">{siteConfig?.site_name || 'rosterSync'}</span>
           </div>
           <div className="flex items-center gap-4 relative z-50">
