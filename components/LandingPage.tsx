@@ -20,6 +20,7 @@ import {
   Calendar,
   Zap,
   Twitter,
+  Linkedin,
   Box
 } from 'lucide-react';
 import { useClerk, SignInButton, SignUpButton } from '@clerk/clerk-react';
