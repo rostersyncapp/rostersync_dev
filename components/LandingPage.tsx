@@ -68,11 +68,31 @@ const BrandLogo: React.FC<{ siteConfig: SiteConfig; size?: 'sm' | 'md' }> = ({ s
   );
 };
 
+import AboutPage from './AboutPage.tsx';
+
+// ... (keep existing imports)
+
+// ... (keep existing interfaces/constants)
+
 const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode, toggleDarkMode, siteConfig }) => {
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
   const [showDemoModal, setShowDemoModal] = useState(false);
   const [demoForm, setDemoForm] = useState({ name: '', email: '', organization: '', useCase: '' });
   const [demoStatus, setDemoStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
+
+  // Navigation State
+  const [currentPage, setCurrentPage] = useState<'home' | 'about'>('home');
+
+  // --- Render About Page if active ---
+  if (currentPage === 'about') {
+    return (
+      <AboutPage
+        onBack={() => setCurrentPage('home')}
+        siteConfig={siteConfig}
+        darkMode={darkMode}
+      />
+    );
+  }
 
   const handleDemoSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
