@@ -64,11 +64,11 @@ const BrandLogo: React.FC<{ siteConfig?: SiteConfig; size?: 'sm' | 'md' }> = ({ 
 
   const logoSrc = siteConfig?.logo_url;
 
+  if (!logoSrc) return null;
+
   return (
-    <div className={`${containerClasses} primary-gradient flex items-center justify-center text-white shadow-lg shadow-[#5B5FFF]/20 overflow-hidden`}>
-      {logoSrc ? (
-        <img src={logoSrc} alt="Logo" className="w-full h-full object-cover" />
-      ) : null}
+    <div className={`${containerClasses} flex items-center justify-center overflow-hidden`}>
+      <img src={logoSrc} alt="Logo" className="w-full h-full object-cover" />
     </div>
   );
 };

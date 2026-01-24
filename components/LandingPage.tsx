@@ -58,11 +58,11 @@ const FEATURES = [
 
 const BrandLogo: React.FC<{ siteConfig: SiteConfig; size?: 'sm' | 'md' }> = ({ siteConfig, size = 'md' }) => {
   const containerClasses = "w-7 h-7 rounded-lg shrink-0";
+  if (!siteConfig.logo_url) return null;
+
   return (
-    <div className={`${containerClasses} primary-gradient flex items-center justify-center text-white shadow-lg shadow-[#5B5FFF]/20 overflow-hidden`}>
-      {siteConfig.logo_url ? (
-        <img src={siteConfig.logo_url} alt="Site Logo" className="w-full h-full object-cover" />
-      ) : null}
+    <div className={`${containerClasses} flex items-center justify-center overflow-hidden`}>
+      <img src={siteConfig.logo_url} alt="Site Logo" className="w-full h-full object-cover" />
     </div>
   );
 };
