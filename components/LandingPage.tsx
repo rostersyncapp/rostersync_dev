@@ -239,7 +239,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
             <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-[#5B5FFF] mb-3">The Engine</h2>
             <h3 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-6">
               <span className="bg-gradient-to-r from-indigo-400 via-purple-500 to-pink-500 text-transparent bg-clip-text inline-block py-1">
-                Built for High-Stakes Broadcast
+                Built for <br /> High-Stakes Broadcast
               </span>
             </h3>
             <p className="text-base text-gray-500 dark:text-gray-400 font-medium leading-relaxed">
