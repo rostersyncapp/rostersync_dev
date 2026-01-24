@@ -231,7 +231,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
                 <span className="flex-shrink-0 w-8 h-8 rounded-full bg-[#5B5FFF]/10 text-[#5B5FFF] flex items-center justify-center font-bold text-sm">3</span>
                 <div>
                   <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-1">Export</h4>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Download cleaned JSON, CSV, or XML ready for broadcast.</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Download cleaned JSON, CSV, or XML ready for broadcast, MAM and DAM.</p>
                 </div>
               </li>
             </ol>
