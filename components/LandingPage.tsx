@@ -209,9 +209,32 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
             <h3 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-6">
               <span className="bg-gradient-to-r from-purple-600 via-fuchsia-500 to-cyan-400 text-transparent bg-clip-text inline-block py-1">Paste. Parse. Export.</span>
             </h3>
-            <p className="text-base text-gray-600 dark:text-gray-300 font-medium leading-relaxed max-w-md">
+            <p className="text-base text-gray-600 dark:text-gray-300 font-medium leading-relaxed max-w-md mb-8">
               Watch rosterSync transform messy roster data into broadcast-ready metadata in seconds.
             </p>
+            <ol className="space-y-4 max-w-md">
+              <li className="flex gap-4">
+                <span className="flex-shrink-0 w-8 h-8 rounded-full bg-[#5B5FFF]/10 text-[#5B5FFF] flex items-center justify-center font-bold text-sm">1</span>
+                <div>
+                  <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-1">Paste</h4>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Copy raw roster data from any PDF, website, or spreadsheet.</p>
+                </div>
+              </li>
+              <li className="flex gap-4">
+                <span className="flex-shrink-0 w-8 h-8 rounded-full bg-[#5B5FFF]/10 text-[#5B5FFF] flex items-center justify-center font-bold text-sm">2</span>
+                <div>
+                  <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-1">Parse</h4>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Our engine instantly identifies athletes, stats, and teams.</p>
+                </div>
+              </li>
+              <li className="flex gap-4">
+                <span className="flex-shrink-0 w-8 h-8 rounded-full bg-[#5B5FFF]/10 text-[#5B5FFF] flex items-center justify-center font-bold text-sm">3</span>
+                <div>
+                  <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-1">Export</h4>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Download cleaned JSON, CSV, or XML ready for broadcast.</p>
+                </div>
+              </li>
+            </ol>
           </div>
           <div>
             <TerminalWorkflow loop onExportComplete={(format) => console.log('Exported:', format)} />
