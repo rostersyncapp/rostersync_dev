@@ -202,7 +202,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
       </section>
 
       {/* Terminal Workflow Demo Section */}
-      <section className="py-24 px-6 bg-[#FAFAFA] dark:bg-gray-900">
+      <section className="relative z-20 pt-32 pb-24 px-6 bg-[#FAFAFA] dark:bg-gray-900">
         <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-start">
           <div className="text-left">
             <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-[#5B5FFF] mb-3">How It Works</h2>
