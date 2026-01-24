@@ -26,6 +26,7 @@ import {
 import { useClerk, SignInButton, SignUpButton } from '@clerk/clerk-react';
 import { WavyBackground } from './ui/wavy-background';
 import TerminalWorkflow from './TerminalWorkflow';
+import SupportCard from './SupportCard';
 
 // --- Utility for Tailwind classes ---
 const cn = (...classes: any[]) => classes.filter(Boolean).join(' ');
@@ -370,6 +371,13 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
               );
             })}
           </div>
+        </div>
+      </section>
+
+      {/* Support Section */}
+      <section className="py-24 px-6 bg-white dark:bg-gray-900 relative">
+        <div className="max-w-4xl mx-auto">
+          <SupportCard darkMode={darkMode} />
         </div>
       </section>
 
