@@ -4,6 +4,7 @@ import { Dashboard } from './components/Dashboard.tsx';
 import Engine from './components/Engine.tsx';
 import Settings from './components/Settings.tsx';
 import LandingPage from './components/LandingPage.tsx';
+import SupportCard from './components/SupportCard.tsx';
 import { Roster, Profile, Project } from './types.ts';
 import { processRosterRawText, ProcessedRoster } from './services/gemini.ts';
 import { supabase, isSupabaseConfigured, getMonthlyUsage, getSiteConfig, SiteConfig, logActivity, setSupabaseToken } from './services/supabase.ts';

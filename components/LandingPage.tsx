@@ -26,7 +26,6 @@ import {
 import { useClerk, SignInButton, SignUpButton } from '@clerk/clerk-react';
 import { WavyBackground } from './ui/wavy-background';
 import TerminalWorkflow from './TerminalWorkflow';
-import SupportCard from './SupportCard';
 
 // --- Utility for Tailwind classes ---
 const cn = (...classes: any[]) => classes.filter(Boolean).join(' ');
