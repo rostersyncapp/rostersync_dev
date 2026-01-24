@@ -700,7 +700,7 @@ const App: React.FC = () => {
                 >
                   <X size={24} />
                 </button>
-                <SupportCard darkMode={darkMode} />
+                <SupportCard darkMode={darkMode} logoUrl={siteConfig.logo_url} />
               </div>
             </div>
           )}

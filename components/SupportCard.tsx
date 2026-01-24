@@ -4,9 +4,10 @@ import { supabase } from '../services/supabase.ts';
 
 interface SupportCardProps {
     darkMode?: boolean;
+    logoUrl?: string | null;
 }
 
-const SupportCard: React.FC<SupportCardProps> = ({ darkMode }) => {
+const SupportCard: React.FC<SupportCardProps> = ({ darkMode, logoUrl }) => {
     const [form, setForm] = useState({ name: '', email: '', message: '' });
     const [status, setStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
 
@@ -44,8 +45,12 @@ const SupportCard: React.FC<SupportCardProps> = ({ darkMode }) => {
             <div className="md:w-1/2 bg-[#5B5FFF] p-12 text-white flex flex-col justify-between relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-white/10 to-transparent pointer-events-none" />
                 <div className="relative z-10">
-                    <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mb-8 backdrop-blur-sm">
-                        <MessageCircle size={32} className="text-white" />
+                    <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mb-8 backdrop-blur-sm overflow-hidden">
+                        {logoUrl ? (
+                            <img src={logoUrl} alt="Logo" className="w-full h-full object-cover" />
+                        ) : (
+                            <MessageCircle size={32} className="text-white" />
+                        )}
                     </div>
                     <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-4">
                         We're here to help.
