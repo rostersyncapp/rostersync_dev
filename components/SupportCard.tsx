@@ -17,15 +17,15 @@ const SupportCard: React.FC<SupportCardProps> = ({ darkMode }) => {
         try {
             const { error } = await supabase.functions.invoke('resend-email', {
                 body: {
-                    to: 'ryan@rostersync.io', // Hardcoded support email for now
-                    subject: `New Support Ticket from ${form.name}`,
-                    html: `
-            <h2>New Support Request</h2>
-            <p><strong>Name:</strong> ${form.name}</p>
-            <p><strong>Email:</strong> ${form.email}</p>
-            <p><strong>Message:</strong></p>
-            <p>${form.message.replace(/\n/g, '<br>')}</p>
-          `,
+                    table: 'support_tickets',
+                    record: {
+                        id: crypto.randomUUID(), // Unique ID for the ticket
+                        name: form.name,
+                        email: form.email,
+                        user_email: form.email, // Edge function checks both
+                        message: form.message,
+                        created_at: new Date().toISOString()
+                    }
                 },
             });
 
