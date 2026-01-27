@@ -55,19 +55,19 @@ const AboutPage: React.FC<AboutPageProps> = ({ onBack, siteConfig, darkMode }) =
                 <div className="w-full md:w-1/2 flex flex-col justify-center p-8 md:p-20 lg:p-32">
 
                     <div className="space-y-2 mb-8 animate-in slide-in-from-right-4 duration-500 delay-100">
-                        <h1 className="text-5xl md:text-6xl font-black uppercase tracking-tighter text-gray-900 dark:text-white">About Us</h1>
+                        <h1 className="text-5xl md:text-6xl font-black uppercase tracking-tighter text-gray-900 dark:text-white">About Me</h1>
                         <p className="text-[#5B5FFF] font-bold tracking-widest uppercase text-sm">RosterSync • Broadcast Automation</p>
                     </div>
 
                     <div className="prose dark:prose-invert max-w-lg space-y-6 animate-in slide-in-from-right-4 duration-500 delay-200">
                         <p className="text-lg text-gray-600 dark:text-gray-300 leading-relaxed font-medium">
-                            We started RosterSync with a simple mission: to eliminate the chaos of manual data entry in live broadcast environments.
+                            I started RosterSync with a simple mission: to eliminate the chaos of manual data entry in live broadcast environments.
                         </p>
                         <p className="text-base text-gray-500 dark:text-gray-400 leading-relaxed">
-                            Every weekend, thousands of production teams scramble to type athlete names, jersey numbers, and stats into their graphics systems. One typo can ruin a graphic. We believed there had to be a better way.
+                            Every weekend, thousands of production teams scramble to type athlete names, jersey numbers, and stats into their graphics systems. One typo can ruin a graphic. I believed there had to be a better way.
                         </p>
                         <p className="text-base text-gray-500 dark:text-gray-400 leading-relaxed">
-                            Today, our AI-driven engine processes thousands of messy roster PDFs and websites instantly, converting them into broadcast-ready data for Ross Xpression, Vizrt, and more. We handle the data, so you can focus on the show.
+                            Today, the AI-driven engine processes thousands of messy roster PDFs and websites instantly, converting them into broadcast-ready data for Ross Xpression, Vizrt, and more. RosterSync handles the data, so you can focus on the show.
                         </p>
                     </div>
 
