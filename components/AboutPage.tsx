@@ -66,9 +66,7 @@ const AboutPage: React.FC<AboutPageProps> = ({ onBack, siteConfig, darkMode }) =
                         <p className="text-base text-gray-500 dark:text-gray-400 leading-relaxed">
                             Every weekend, thousands of production teams scramble to type athlete names, jersey numbers, and stats into their graphics systems. One typo can ruin a graphic. I believed there had to be a better way.
                         </p>
-                        <p className="text-base text-gray-500 dark:text-gray-400 leading-relaxed">
-                            Today, the AI-driven engine processes thousands of messy roster PDFs and websites instantly, converting them into broadcast-ready data for Ross Xpression, Vizrt, and more. RosterSync handles the data, so you can focus on the show.
-                        </p>
+                        Today, the AI-driven engine instantly converts messy roster PDFs and websites into broadcast-ready data for Ross Xpression, Vizrt, and more. RosterSync handles the data, so you can focus on the show.
                     </div>
 
                     <div className="flex items-center gap-6 mt-12 animate-in slide-in-from-right-4 duration-500 delay-300">
