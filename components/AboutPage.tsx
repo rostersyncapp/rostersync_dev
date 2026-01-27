@@ -56,7 +56,7 @@ const AboutPage: React.FC<AboutPageProps> = ({ onBack, siteConfig, darkMode }) =
 
                     <div className="space-y-2 mb-8 animate-in slide-in-from-right-4 duration-500 delay-100">
                         <h1 className="text-5xl md:text-6xl font-black uppercase tracking-tighter text-gray-900 dark:text-white">About Me</h1>
-                        <p className="text-[#5B5FFF] font-bold tracking-widest uppercase text-sm">RosterSync</p>
+                        <p className="text-[#5B5FFF] font-bold tracking-widest uppercase text-sm">RosterSync • Ryan Roettele</p>
                     </div>
 
                     <div className="prose dark:prose-invert max-w-lg space-y-6 animate-in slide-in-from-right-4 duration-500 delay-200">
