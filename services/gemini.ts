@@ -142,16 +142,21 @@ export async function processRosterRawText(
   const modelParams: any = {
     model: "gemini-2.0-flash-001",
     systemInstruction,
-    generationConfig: {
-      responseMimeType: "application/json",
-      // Controlled generation causes 400 error when used with Search tool
-      responseSchema: findBranding ? undefined : schema,
-    }
   };
+
+  // Controlled generation (JSON mode/Schema) is NOT compatible with Search tools in Gemini 2.0
+  if (!findBranding) {
+    modelParams.generationConfig = {
+      responseMimeType: "application/json",
+      responseSchema: schema,
+    };
+  }
 
   if (findBranding) {
     modelParams.tools = [{ googleSearch: {} }];
   }
+
+
 
   const model = genAI.getGenerativeModel(modelParams);
 
