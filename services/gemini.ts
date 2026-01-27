@@ -1,5 +1,5 @@
 
-import { GoogleGenAI, Type } from "@google/genai";
+import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
 import { Athlete, NILStatus, SubscriptionTier } from "../types.ts";
 
 // Helper to get the key even if the build tool is doing static analysis on process.env.API_KEY
@@ -54,44 +54,44 @@ function formatJerseyNumber(num: any): string {
 
 function getSchemaForTier(tier: SubscriptionTier, isNocMode: boolean, findBranding: boolean): any {
   const baseAthleteProperties: Record<string, any> = {
-    fullName: { type: Type.STRING },
-    jerseyNumber: { type: Type.STRING, description: isNocMode ? "Bib number for the athlete. Always use two digits (pad with 0 if needed)." : "Jersey number. Always use two digits (pad with 0 if needed)." },
-    position: { type: Type.STRING, description: isNocMode ? "Main sport/discipline (e.g. Swimming)." : "Player position." },
-    nilStatus: { type: Type.STRING },
+    fullName: { type: SchemaType.STRING },
+    jerseyNumber: { type: SchemaType.STRING, description: isNocMode ? "Bib number for the athlete. Always use two digits (pad with 0 if needed)." : "Jersey number. Always use two digits (pad with 0 if needed)." },
+    position: { type: SchemaType.STRING, description: isNocMode ? "Main sport/discipline (e.g. Swimming)." : "Player position." },
+    nilStatus: { type: SchemaType.STRING },
   };
 
   const requiredFields = ["fullName", "jerseyNumber", "position", "nilStatus"];
 
   if (isNocMode) {
-    baseAthleteProperties.countryCode = { type: Type.STRING, description: "3-letter IOC Country Code (e.g. JAM, USA)." };
-    baseAthleteProperties.event = { type: Type.STRING, description: "Specific event (e.g. 100m Butterfly)." };
+    baseAthleteProperties.countryCode = { type: SchemaType.STRING, description: "3-letter IOC Country Code (e.g. JAM, USA)." };
+    baseAthleteProperties.event = { type: SchemaType.STRING, description: "Specific event (e.g. 100m Butterfly)." };
   }
 
   if (tier !== 'BASIC') {
-    baseAthleteProperties.phoneticSimplified = { type: Type.STRING };
+    baseAthleteProperties.phoneticSimplified = { type: SchemaType.STRING };
   }
 
   if (tier === 'NETWORK') {
-    baseAthleteProperties.nameSpanish = { type: Type.STRING };
-    baseAthleteProperties.nameMandarin = { type: Type.STRING };
-    baseAthleteProperties.bioStats = { type: Type.STRING, description: "Summary of Olympic achievements/medals or career stats." };
-    baseAthleteProperties.socialHandle = { type: Type.STRING, description: "Likely social media handle (e.g. @name)." };
+    baseAthleteProperties.nameSpanish = { type: SchemaType.STRING };
+    baseAthleteProperties.nameMandarin = { type: SchemaType.STRING };
+    baseAthleteProperties.bioStats = { type: SchemaType.STRING, description: "Summary of Olympic achievements/medals or career stats." };
+    baseAthleteProperties.socialHandle = { type: SchemaType.STRING, description: "Likely social media handle (e.g. @name)." };
   }
 
   const rootProperties: Record<string, any> = {
-    teamName: { type: Type.STRING, description: isNocMode ? "National Olympic Committee Name (e.g. Team Jamaica)." : "Team Name." },
-    abbreviation: { type: Type.STRING, description: isNocMode ? "3-letter IOC Code." : "3-letter Team Abbreviation." },
-    countryCode: { type: Type.STRING, description: "3-letter IOC Country Code." },
-    conference: { type: Type.STRING },
-    sport: { type: Type.STRING },
+    teamName: { type: SchemaType.STRING, description: isNocMode ? "National Olympic Committee Name (e.g. Team Jamaica)." : "Team Name." },
+    abbreviation: { type: SchemaType.STRING, description: isNocMode ? "3-letter IOC Code." : "3-letter Team Abbreviation." },
+    countryCode: { type: SchemaType.STRING, description: "3-letter IOC Country Code." },
+    conference: { type: SchemaType.STRING },
+    sport: { type: SchemaType.STRING },
     seasonYear: {
-      type: Type.STRING,
+      type: SchemaType.STRING,
       description: "The specific season year or range found in the text (e.g. '2025-26', '2024-25', '2026')."
     },
     athletes: {
-      type: Type.ARRAY,
+      type: SchemaType.ARRAY,
       items: {
-        type: Type.OBJECT,
+        type: SchemaType.OBJECT,
         properties: baseAthleteProperties,
         required: requiredFields,
       }
@@ -101,14 +101,14 @@ function getSchemaForTier(tier: SubscriptionTier, isNocMode: boolean, findBrandi
   const rootRequired = ["teamName", "sport", "seasonYear", "athletes", "abbreviation"];
 
   if (findBranding) {
-    rootProperties.primaryColor = { type: Type.STRING, description: "The official primary hex color code for the team." };
-    rootProperties.secondaryColor = { type: Type.STRING, description: "The official secondary hex color code for the team." };
-    rootProperties.logoUrl = { type: Type.STRING, description: "Direct URL to the official team logo (preferably PNG/SVG)." };
+    rootProperties.primaryColor = { type: SchemaType.STRING, description: "The official primary hex color code for the team." };
+    rootProperties.secondaryColor = { type: SchemaType.STRING, description: "The official secondary hex color code for the team." };
+    rootProperties.logoUrl = { type: SchemaType.STRING, description: "Direct URL to the official team logo (preferably PNG/SVG)." };
     rootRequired.push("primaryColor", "secondaryColor");
   }
 
   return {
-    type: Type.OBJECT,
+    type: SchemaType.OBJECT,
     properties: rootProperties,
     required: rootRequired
   };
@@ -126,7 +126,7 @@ export async function processRosterRawText(
     throw new Error("Gemini API Key is not configured.");
   }
 
-  const ai = new GoogleGenAI({ apiKey });
+  const genAI = new GoogleGenerativeAI(apiKey);
   const schema = getSchemaForTier(tier, isNocMode, findBranding);
 
   const brandingInstruction = findBranding
@@ -139,32 +139,35 @@ export async function processRosterRawText(
     - JERSEY NUMBERS: Always use at least two digits. Pad single digits with a leading zero (e.g., '3' becomes '03', '0' becomes '00').
     - OUTPUT: Valid JSON matching the schema provided.`;
 
-  const config: any = {
+  const modelParams: any = {
+    model: "gemini-1.5-flash",
     systemInstruction,
-    responseMimeType: "application/json",
-    responseSchema: schema,
+    generationConfig: {
+      responseMimeType: "application/json",
+      responseSchema: schema,
+    }
   };
 
   if (findBranding) {
-    config.tools = [{ googleSearch: {} }];
+    modelParams.tools = [{ googleSearch: {} }];
   }
 
-  const response = await ai.models.generateContent({
-    model: 'gemini-1.5-flash-001',
-    contents: `Tier: ${tier}. Mode: ${isNocMode ? 'NOC' : 'Standard'}. Data: ${text}`,
-    config,
-  });
+  const model = genAI.getGenerativeModel(modelParams);
 
-  if (!response.text) {
+  const result = await model.generateContent(`Tier: ${tier}. Mode: ${isNocMode ? 'NOC' : 'Standard'}. Data: ${text}`);
+  const response = await result.response;
+  const textResponse = response.text();
+
+  if (!textResponse) {
     throw new Error("AI returned no content.");
   }
 
-  const result = JSON.parse(response.text.trim() || "{}");
-  const extractedSeason = overrideSeason || result.seasonYear || new Date().getFullYear().toString();
+  const parsedResult = JSON.parse(textResponse.trim() || "{}");
+  const extractedSeason = overrideSeason || parsedResult.seasonYear || new Date().getFullYear().toString();
 
   // Extract verification sources from grounding metadata if branding was used
   const verificationSources: { title: string; uri: string }[] = [];
-  const groundingChunks = response.candidates?.[0]?.groundingMetadata?.groundingChunks;
+  const groundingChunks = response.candidates?.[0]?.groundingMetadata?.groundingChunks; // Use optional chaining just in case
   if (groundingChunks) {
     groundingChunks.forEach((chunk: any) => {
       if (chunk.web?.uri) {
@@ -176,7 +179,7 @@ export async function processRosterRawText(
     });
   }
 
-  const athletes: Athlete[] = (result.athletes || []).map((a: any, idx: number) => ({
+  const athletes: Athlete[] = (parsedResult.athletes || []).map((a: any, idx: number) => ({
     id: `athlete-${idx}-${Date.now()}`,
     originalName: a.fullName || "",
     fullName: a.fullName || "",
@@ -191,24 +194,24 @@ export async function processRosterRawText(
     nameMandarin: a.nameMandarin,
     bioStats: a.bioStats,
     socialHandle: a.socialHandle,
-    countryCode: a.countryCode || result.countryCode,
+    countryCode: a.countryCode || parsedResult.countryCode,
     event: a.event
   }));
 
   return {
-    teamName: result.teamName || (isNocMode ? "Unknown NOC" : "Unknown Team"),
-    sport: result.sport || "General",
+    teamName: parsedResult.teamName || (isNocMode ? "Unknown NOC" : "Unknown Team"),
+    sport: parsedResult.sport || "General",
     seasonYear: extractedSeason,
     isNocMode: isNocMode,
     athletes: athletes,
     verificationSources,
     teamMetadata: {
-      primaryColor: result.primaryColor || "#5B5FFF",
-      secondaryColor: result.secondaryColor || "#1A1A1A",
-      conference: result.conference || "General",
-      abbreviation: result.abbreviation || "UNK",
-      countryCode: result.countryCode,
-      logoUrl: result.logoUrl
+      primaryColor: parsedResult.primaryColor || "#5B5FFF",
+      secondaryColor: parsedResult.secondaryColor || "#1A1A1A",
+      conference: parsedResult.conference || "General",
+      abbreviation: parsedResult.abbreviation || "UNK",
+      countryCode: parsedResult.countryCode,
+      logoUrl: parsedResult.logoUrl
     }
   };
 }
