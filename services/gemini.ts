@@ -140,7 +140,7 @@ export async function processRosterRawText(
     - OUTPUT: Valid JSON matching the schema provided.`;
 
   const modelParams: any = {
-    model: "gemini-1.5-flash-001",
+    model: "gemini-2.0-flash-001",
     systemInstruction,
     generationConfig: {
       responseMimeType: "application/json",
