@@ -285,6 +285,7 @@ const App: React.FC = () => {
   const [pendingRoster, setPendingRoster] = useState<ProcessedRoster | null>(null);
   const [confirmDeleteProject, setConfirmDeleteProject] = useState<Project | null>(null);
   const [showUserProfile, setShowUserProfile] = useState(false);
+  const [initializationError, setInitializationError] = useState<string | null>(null);
 
   useEffect(() => {
     if (darkMode) {
@@ -490,7 +491,7 @@ const App: React.FC = () => {
 
   const handleSaveRoster = async (newRoster: Roster) => {
     if (user && isSupabaseConfigured) {
-      const { data } = await supabase.from('rosters').insert({
+      const { data, error } = await supabase.from('rosters').insert({
         user_id: user.id,
         project_id: newRoster.projectId,
         team_name: newRoster.teamName,
@@ -502,6 +503,13 @@ const App: React.FC = () => {
         team_metadata: newRoster.teamMetadata,
         version_description: newRoster.versionDescription || ''
       }).select().single();
+
+      if (error) {
+        console.error("Save Error:", error);
+        alert(`Failed to save roster: ${error.message} (${error.code})`);
+        return;
+      }
+
       if (data) {
         setRosters(prev => [{ ...newRoster, id: data.id, createdAt: data.created_at, isSynced: true }, ...prev]);
       }
