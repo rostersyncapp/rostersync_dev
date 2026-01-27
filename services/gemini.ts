@@ -137,6 +137,7 @@ export async function processRosterRawText(
     - ${brandingInstruction}
     - NORMALIZE: Convert all athlete names to UPPERCASE and strip accents.
     - JERSEY NUMBERS: Always use at least two digits. Pad single digits with a leading zero (e.g., '3' becomes '03', '0' becomes '00').
+    - STRUCTURE: The output MUST be a JSON object with this exact structure: { "teamName": string, "athletes": [ { "fullName": string, "jerseyNumber": string, "position": string, "nilStatus": string } ], ... }.
     - OUTPUT: Valid JSON matching the schema provided.`;
 
   const modelParams: any = {
@@ -170,6 +171,7 @@ export async function processRosterRawText(
 
   // Clean up markdown code blocks if present (since we disabled strict JSON mode)
   const cleanJson = textResponse.replace(/```json/g, '').replace(/```/g, '').trim();
+  console.log("Raw AI Response:", cleanJson); // Debugging log
   const parsedResult = JSON.parse(cleanJson || "{}");
   const extractedSeason = overrideSeason || parsedResult.seasonYear || new Date().getFullYear().toString();
 
