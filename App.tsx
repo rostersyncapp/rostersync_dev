@@ -490,7 +490,10 @@ const App: React.FC = () => {
   };
 
   const handleSaveRoster = async (newRoster: Roster) => {
+    console.log("Saving Roster...", { user: user?.id, isSupabaseConfigured });
+
     if (user && isSupabaseConfigured) {
+      console.log("Sending insert to Supabase:", newRoster);
       const { data, error } = await supabase.from('rosters').insert({
         user_id: user.id,
         project_id: newRoster.projectId,
