@@ -169,10 +169,19 @@ export async function processRosterRawText(
     throw new Error("AI returned no content.");
   }
 
-  // Clean up markdown code blocks if present (since we disabled strict JSON mode)
-  const cleanJson = textResponse.replace(/```json/g, '').replace(/```/g, '').trim();
-  console.log("Raw AI Response:", cleanJson); // Debugging log
-  const parsedResult = JSON.parse(cleanJson || "{}");
+  console.log("Raw AI Response (Full):", textResponse);
+
+  // Robust JSON extraction: Find the outer-most braces
+  const firstOpen = textResponse.indexOf('{');
+  const lastClose = textResponse.lastIndexOf('}');
+
+  let cleanJson = textResponse;
+  if (firstOpen !== -1 && lastClose !== -1 && lastClose > firstOpen) {
+    cleanJson = textResponse.substring(firstOpen, lastClose + 1);
+  }
+
+  console.log("Candidate JSON:", cleanJson);
+  const parsedResult = JSON.parse(cleanJson);
   const extractedSeason = overrideSeason || parsedResult.seasonYear || new Date().getFullYear().toString();
 
   // Extract verification sources from grounding metadata if branding was used
