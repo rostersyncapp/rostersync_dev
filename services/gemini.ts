@@ -144,7 +144,8 @@ export async function processRosterRawText(
     systemInstruction,
     generationConfig: {
       responseMimeType: "application/json",
-      responseSchema: schema,
+      // Controlled generation causes 400 error when used with Search tool
+      responseSchema: findBranding ? undefined : schema,
     }
   };
 
