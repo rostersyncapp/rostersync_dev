@@ -168,7 +168,9 @@ export async function processRosterRawText(
     throw new Error("AI returned no content.");
   }
 
-  const parsedResult = JSON.parse(textResponse.trim() || "{}");
+  // Clean up markdown code blocks if present (since we disabled strict JSON mode)
+  const cleanJson = textResponse.replace(/```json/g, '').replace(/```/g, '').trim();
+  const parsedResult = JSON.parse(cleanJson || "{}");
   const extractedSeason = overrideSeason || parsedResult.seasonYear || new Date().getFullYear().toString();
 
   // Extract verification sources from grounding metadata if branding was used
