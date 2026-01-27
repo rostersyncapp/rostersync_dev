@@ -32,9 +32,9 @@ function toSafeName(name: string): string {
   if (!name) return "";
   return name
     .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "") 
+    .replace(/[\u0300-\u036f]/g, "")
     .toUpperCase()
-    .replace(/[^A-Z0-9\s-]/g, "") 
+    .replace(/[^A-Z0-9\s-]/g, "")
     .trim();
 }
 
@@ -84,9 +84,9 @@ function getSchemaForTier(tier: SubscriptionTier, isNocMode: boolean, findBrandi
     countryCode: { type: Type.STRING, description: "3-letter IOC Country Code." },
     conference: { type: Type.STRING },
     sport: { type: Type.STRING },
-    seasonYear: { 
-      type: Type.STRING, 
-      description: "The specific season year or range found in the text (e.g. '2025-26', '2024-25', '2026')." 
+    seasonYear: {
+      type: Type.STRING,
+      description: "The specific season year or range found in the text (e.g. '2025-26', '2024-25', '2026')."
     },
     athletes: {
       type: Type.ARRAY,
@@ -115,9 +115,9 @@ function getSchemaForTier(tier: SubscriptionTier, isNocMode: boolean, findBrandi
 }
 
 export async function processRosterRawText(
-  text: string, 
-  tier: SubscriptionTier = 'BASIC', 
-  isNocMode: boolean = false, 
+  text: string,
+  tier: SubscriptionTier = 'BASIC',
+  isNocMode: boolean = false,
   overrideSeason: string = '',
   findBranding: boolean = false
 ): Promise<ProcessedRoster> {
@@ -129,7 +129,7 @@ export async function processRosterRawText(
   const ai = new GoogleGenAI({ apiKey });
   const schema = getSchemaForTier(tier, isNocMode, findBranding);
 
-  const brandingInstruction = findBranding 
+  const brandingInstruction = findBranding
     ? "BRANDING DISCOVERY: Use Google Search to find the official team logo URL and their primary/secondary hex color codes. Ensure the logo URL is direct and high quality."
     : "Use default branding colors (#5B5FFF and #1A1A1A).";
 
@@ -150,7 +150,7 @@ export async function processRosterRawText(
   }
 
   const response = await ai.models.generateContent({
-    model: 'gemini-3-flash-preview',
+    model: 'gemini-1.5-flash',
     contents: `Tier: ${tier}. Mode: ${isNocMode ? 'NOC' : 'Standard'}. Data: ${text}`,
     config,
   });
@@ -161,7 +161,7 @@ export async function processRosterRawText(
 
   const result = JSON.parse(response.text.trim() || "{}");
   const extractedSeason = overrideSeason || result.seasonYear || new Date().getFullYear().toString();
-  
+
   // Extract verification sources from grounding metadata if branding was used
   const verificationSources: { title: string; uri: string }[] = [];
   const groundingChunks = response.candidates?.[0]?.groundingMetadata?.groundingChunks;
@@ -208,7 +208,7 @@ export async function processRosterRawText(
       conference: result.conference || "General",
       abbreviation: result.abbreviation || "UNK",
       countryCode: result.countryCode,
-      logoUrl: result.logoUrl 
+      logoUrl: result.logoUrl
     }
   };
 }
