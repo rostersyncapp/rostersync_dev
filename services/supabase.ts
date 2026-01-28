@@ -173,6 +173,7 @@ export type ActivityType =
   | 'ROSTER_SAVE'
   | 'ROSTER_DELETE'
   | 'ROSTER_EXPORT'
+  | 'PLAYER_ADD'
   | 'PLAYER_DELETE'
   | 'PROJECT_FOLDER_DELETE'
   | 'ROSTER_UPDATE';

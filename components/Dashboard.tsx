@@ -201,16 +201,21 @@ export const Dashboard: React.FC<Props> = ({
     setNewPlayerJersey('');
     setNewPlayerPosition('');
     setShowAddPlayerForm(false);
+    logActivity(userId, 'PLAYER_ADD', `Added ${newAthlete.fullName} (#${newAthlete.jerseyNumber}) to ${selectedRoster.teamName}.`);
   };
 
   const handleDeletePlayer = (athleteId: string) => {
     if (!selectedRoster) return;
+    const deletedAthlete = selectedRoster.rosterData.find((a: Athlete) => a.id === athleteId);
     const updatedRosterData = selectedRoster.rosterData.filter((a: Athlete) => a.id !== athleteId);
     onUpdateRoster({
       ...selectedRoster,
       rosterData: updatedRosterData,
       athleteCount: updatedRosterData.length
     });
+    if (deletedAthlete) {
+      logActivity(userId, 'PLAYER_DELETE', `Removed ${deletedAthlete.fullName} from ${selectedRoster.teamName}.`);
+    }
   };
 
   const filteredRosters = rosters.filter(r => {

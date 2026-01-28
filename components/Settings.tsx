@@ -4,7 +4,7 @@ import { Profile, SubscriptionTier, Roster } from '../types.ts';
 import { PRICING_TIERS } from '../constants.tsx';
 import { getActivityLogs, setSupabaseToken, ActivityType } from '../services/supabase.ts';
 import { useUser, useAuth } from '@clerk/clerk-react';
-import { 
+import {
   CreditCard,
   Loader2,
   BarChart4,
@@ -20,7 +20,10 @@ import {
   Edit,
   Activity,
   UserX,
-  FolderX
+  FolderX,
+  UserPlus,
+  Save,
+  Download
 } from 'lucide-react';
 
 interface Props {
@@ -32,17 +35,20 @@ interface Props {
 const ACTIVITY_ICONS: Record<ActivityType, React.ReactNode> = {
   LOGIN: <LogIn size={16} className="text-green-500" />,
   LOGOUT: <LogOut size={16} className="text-gray-500" />,
+  ROSTER_SAVE: <Save size={16} className="text-emerald-500" />,
   ROSTER_DELETE: <Trash2 size={16} className="text-red-500" />,
+  ROSTER_EXPORT: <Download size={16} className="text-blue-500" />,
+  PLAYER_ADD: <UserPlus size={16} className="text-cyan-500" />,
   PLAYER_DELETE: <UserX size={16} className="text-orange-500" />,
   PROJECT_FOLDER_DELETE: <FolderX size={16} className="text-pink-500" />,
-  ROSTER_UPDATE: <Edit size={16} className="text-blue-500" />
+  ROSTER_UPDATE: <Edit size={16} className="text-purple-500" />
 };
 
 const formatTimeAgo = (dateString: string) => {
   const date = new Date(dateString);
   const now = new Date();
   const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-  
+
   if (seconds < 60) return 'Just now';
   if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
   if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
@@ -64,7 +70,7 @@ const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
 
   const fetchActivities = async () => {
     setIsLoadingActivities(true);
-    
+
     // Force refresh the Clerk token before fetching activities
     try {
       if (user) {
@@ -78,12 +84,12 @@ const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
     } catch (tokenError) {
       console.error('Failed to refresh token:', tokenError);
     }
-    
+
     // First attempt with current client - use user.id directly for consistency
     const currentUserId = user?.id || profile.id;
     let logs = await getActivityLogs(currentUserId);
     console.log('First query activities fetched:', logs);
-    
+
     // If empty, retry with fresh token/client (handles re-auth timing issues)
     if (logs.length === 0 && user) {
       console.log('Initial query returned empty, refreshing token and retrying...');
@@ -95,7 +101,7 @@ const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
         console.log('Retry activities fetched:', logs);
       }
     }
-    
+
     setActivities(logs);
     setIsLoadingActivities(false);
   };
@@ -117,21 +123,21 @@ const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
         <p className="text-base text-gray-500 dark:text-gray-400 font-medium">Manage your organization's metadata and preferences.</p>
       </div>
 
-        <div className="flex flex-col md:flex-row gap-10">
-          <aside className="w-full md:w-64 space-y-1.5 shrink-0">
-            <button onClick={() => setActiveTab('subscription')} className={`w-full flex items-center justify-between px-5 py-3.5 rounded-lg text-base font-bold transition-all ${activeTab === 'subscription' ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF]' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
-              <div className="flex items-center gap-4"><CreditCard size={20} /> Subscription</div>
-              {activeTab === 'subscription' && <ChevronRight size={18} />}
-            </button>
-            <button onClick={() => setActiveTab('activity')} className={`w-full flex items-center justify-between px-5 py-3.5 rounded-lg text-base font-bold transition-all ${activeTab === 'activity' ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF]' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
-              <div className="flex items-center gap-4"><History size={20} /> Activity Log</div>
-              {activeTab === 'activity' && <ChevronRight size={18} />}
-            </button>
-            <button onClick={() => setActiveTab('roi')} className={`w-full flex items-center justify-between px-5 py-3.5 rounded-lg text-base font-bold transition-all ${activeTab === 'roi' ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF]' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
-              <div className="flex items-center gap-4"><BarChart4 size={20} /> Performance ROI</div>
-              {activeTab === 'roi' && <ChevronRight size={18} />}
-            </button>
-          </aside>
+      <div className="flex flex-col md:flex-row gap-10">
+        <aside className="w-full md:w-64 space-y-1.5 shrink-0">
+          <button onClick={() => setActiveTab('subscription')} className={`w-full flex items-center justify-between px-5 py-3.5 rounded-lg text-base font-bold transition-all ${activeTab === 'subscription' ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF]' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
+            <div className="flex items-center gap-4"><CreditCard size={20} /> Subscription</div>
+            {activeTab === 'subscription' && <ChevronRight size={18} />}
+          </button>
+          <button onClick={() => setActiveTab('activity')} className={`w-full flex items-center justify-between px-5 py-3.5 rounded-lg text-base font-bold transition-all ${activeTab === 'activity' ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF]' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
+            <div className="flex items-center gap-4"><History size={20} /> Activity Log</div>
+            {activeTab === 'activity' && <ChevronRight size={18} />}
+          </button>
+          <button onClick={() => setActiveTab('roi')} className={`w-full flex items-center justify-between px-5 py-3.5 rounded-lg text-base font-bold transition-all ${activeTab === 'roi' ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF]' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
+            <div className="flex items-center gap-4"><BarChart4 size={20} /> Performance ROI</div>
+            {activeTab === 'roi' && <ChevronRight size={18} />}
+          </button>
+        </aside>
 
         <div className="flex-1 space-y-10">
           {activeTab === 'subscription' && (
@@ -146,7 +152,7 @@ const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
                     <span className="text-sm font-black text-[#5B5FFF] uppercase tracking-widest">{profile.subscriptionTier} PLAN</span>
                   </div>
                 </div>
-                
+
                 <div className="space-y-6">
                   <div className="flex items-end justify-between">
                     <div>
@@ -155,14 +161,14 @@ const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
                     </div>
                     <span className="text-base font-bold text-gray-400 uppercase tracking-widest">{usagePercent}%</span>
                   </div>
-                  
+
                   <div className="w-full h-4 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
-                    <div 
+                    <div
                       className="h-full primary-gradient transition-all duration-1000 ease-out"
                       style={{ width: `${usagePercent}%` }}
                     />
                   </div>
-                  
+
                   <p className="text-sm text-gray-400 font-medium italic mt-3">
                     Credits reset on the 1st of every month. Upgrade your plan to unlock higher limits.
                   </p>
@@ -174,20 +180,19 @@ const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
                 {PRICING_TIERS.map((tier) => {
                   const isCurrent = tier.id === profile.subscriptionTier;
                   return (
-                    <div 
-                      key={tier.id} 
-                      className={`relative p-8 rounded-2xl border transition-all ${
-                        isCurrent 
-                          ? 'border-[#5B5FFF] bg-[#5B5FFF]/[0.02] ring-1 ring-[#5B5FFF]' 
-                          : 'border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900'
-                      }`}
+                    <div
+                      key={tier.id}
+                      className={`relative p-8 rounded-2xl border transition-all ${isCurrent
+                        ? 'border-[#5B5FFF] bg-[#5B5FFF]/[0.02] ring-1 ring-[#5B5FFF]'
+                        : 'border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900'
+                        }`}
                     >
                       {isCurrent && (
                         <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-5 py-1.5 primary-gradient text-white text-[10px] font-black uppercase tracking-widest rounded-full shadow-md">
                           Active Plan
                         </div>
                       )}
-                      
+
                       <div className="mb-8">
                         <h4 className="text-lg font-black text-gray-900 dark:text-white uppercase tracking-tight mb-2">{tier.name}</h4>
                         <div className="flex items-baseline gap-2">
@@ -210,9 +215,9 @@ const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
                           Manage Plan
                         </div>
                       ) : (
-                        <a 
-                          href={tier.polarCheckoutUrl} 
-                          target="_blank" 
+                        <a
+                          href={tier.polarCheckoutUrl}
+                          target="_blank"
                           rel="noopener noreferrer"
                           className="w-full py-4 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white text-sm font-bold text-center uppercase tracking-widest hover:bg-[#5B5FFF] hover:text-white hover:border-[#5B5FFF] transition-all flex items-center justify-center gap-2.5"
                         >
@@ -228,47 +233,47 @@ const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
 
           {activeTab === 'activity' && (
             <div className="space-y-8">
-               <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-10 shadow-sm min-h-[400px]">
-                  <div className="flex items-center justify-between mb-8">
-                     <h3 className="text-2xl font-extrabold flex items-center gap-4 text-gray-900 dark:text-white">
-                        <History size={24} className="text-[#5B5FFF]" /> Activity Log
-                     </h3>
-                     <button onClick={fetchActivities} className="p-2 text-gray-400 hover:text-[#5B5FFF] hover:bg-[#5B5FFF]/5 rounded-lg transition-all">
-                        <Zap size={18} className={isLoadingActivities ? 'animate-spin' : ''} />
-                     </button>
-                  </div>
+              <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-10 shadow-sm min-h-[400px]">
+                <div className="flex items-center justify-between mb-8">
+                  <h3 className="text-2xl font-extrabold flex items-center gap-4 text-gray-900 dark:text-white">
+                    <History size={24} className="text-[#5B5FFF]" /> Activity Log
+                  </h3>
+                  <button onClick={fetchActivities} className="p-2 text-gray-400 hover:text-[#5B5FFF] hover:bg-[#5B5FFF]/5 rounded-lg transition-all">
+                    <Zap size={18} className={isLoadingActivities ? 'animate-spin' : ''} />
+                  </button>
+                </div>
 
-                  {isLoadingActivities ? (
-                    <div className="flex flex-col items-center justify-center py-20 gap-4">
-                       <Loader2 className="animate-spin text-gray-300" size={40} />
-                       <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Querying Logs...</span>
-                    </div>
-                  ) : activities.length === 0 ? (
-                    <div className="text-center py-20 bg-gray-50/50 dark:bg-gray-800/30 rounded-xl border border-dashed border-gray-100 dark:border-gray-700">
-                       <Clock size={40} className="mx-auto text-gray-300 mb-4" />
-                       <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">No Recent Activity</p>
-                    </div>
-                   ) : (
-                     <div className="space-y-3 max-h-[400px] overflow-y-auto custom-scrollbar pr-2">
-                        {activities.map((log) => (
-                          <div key={log.id} className="flex items-start gap-4 p-4 bg-gray-50/50 dark:bg-gray-800/30 rounded-lg border border-transparent hover:border-gray-100 dark:hover:border-gray-700 transition-all group">
-                             <div className="mt-0.5 w-9 h-9 rounded-lg bg-white dark:bg-gray-800 flex items-center justify-center shadow-sm shrink-0">
-                                {ACTIVITY_ICONS[log.action_type as ActivityType] || <Activity size={16} className="text-gray-400" />}
-                             </div>
-                             <div className="flex-1 min-w-0">
-                                <div className="flex items-center justify-between gap-2">
-                                   <span className="text-sm font-bold text-gray-900 dark:text-white">{log.action_type.replace(/_/g, ' ')}</span>
-                                   <span className="text-xs font-bold text-gray-400 uppercase tracking-tight font-mono whitespace-nowrap">
-                                      {formatTimeAgo(log.created_at)}
-                                   </span>
-                                </div>
-                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 font-medium leading-relaxed truncate">{log.description}</p>
-                             </div>
+                {isLoadingActivities ? (
+                  <div className="flex flex-col items-center justify-center py-20 gap-4">
+                    <Loader2 className="animate-spin text-gray-300" size={40} />
+                    <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Querying Logs...</span>
+                  </div>
+                ) : activities.length === 0 ? (
+                  <div className="text-center py-20 bg-gray-50/50 dark:bg-gray-800/30 rounded-xl border border-dashed border-gray-100 dark:border-gray-700">
+                    <Clock size={40} className="mx-auto text-gray-300 mb-4" />
+                    <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">No Recent Activity</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3 max-h-[400px] overflow-y-auto custom-scrollbar pr-2">
+                    {activities.map((log) => (
+                      <div key={log.id} className="flex items-start gap-4 p-4 bg-gray-50/50 dark:bg-gray-800/30 rounded-lg border border-transparent hover:border-gray-100 dark:hover:border-gray-700 transition-all group">
+                        <div className="mt-0.5 w-9 h-9 rounded-lg bg-white dark:bg-gray-800 flex items-center justify-center shadow-sm shrink-0">
+                          {ACTIVITY_ICONS[log.action_type as ActivityType] || <Activity size={16} className="text-gray-400" />}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="text-sm font-bold text-gray-900 dark:text-white">{log.action_type.replace(/_/g, ' ')}</span>
+                            <span className="text-xs font-bold text-gray-400 uppercase tracking-tight font-mono whitespace-nowrap">
+                              {formatTimeAgo(log.created_at)}
+                            </span>
                           </div>
-                        ))}
-                     </div>
-                   )}
-               </div>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 font-medium leading-relaxed truncate">{log.description}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           )}
 
