@@ -905,7 +905,8 @@ COLORS: Search teamcolorcodes.com for HEX, RGB, Pantone (PMS), and CMYK values.`
     finalBranding.secondaryColor = knownTeam.secondaryColor;
   }
 
-  if (findBranding && parsedResult.teamName && parsedResult.sport) {
+  // Check Supabase cache if branding mode is on AND we didn't find a hardcoded match
+  if (findBranding && parsedResult.teamName && parsedResult.sport && !knownTeam) {
     // Try to get cached branding
     const cachedBranding = await getBrandingCache(parsedResult.teamName, parsedResult.sport);
 
