@@ -350,6 +350,7 @@ export const Dashboard: React.FC<Props> = ({
             <table className="w-full text-left">
               <thead>
                 <tr className="bg-gray-50/50 dark:bg-gray-800/50">
+                  <th className="px-4 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] text-center w-12">#</th>
                   <th className="px-8 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">Athlete Name</th>
                   <th className="px-8 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] text-center">{selectedRoster.isNocMode ? 'Bib' : 'Jersey'}</th>
                   <th className="px-8 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] text-center">{selectedRoster.isNocMode ? 'Event' : 'Position'}</th>
@@ -367,8 +368,9 @@ export const Dashboard: React.FC<Props> = ({
                     };
                     return getLastName(a.fullName).localeCompare(getLastName(b.fullName));
                   })
-                  .map((a: Athlete) => (
+                  .map((a: Athlete, idx: number) => (
                     <tr key={a.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors group">
+                      <td className="px-4 py-4 text-center text-sm font-medium text-gray-400 dark:text-gray-500">{idx + 1}</td>
                       <td className="px-8 py-4 text-sm font-semibold text-gray-900 dark:text-white tracking-tight">
                         {a.fullName}
                         {a.countryCode && <span className="ml-2 text-[10px] bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded font-mono font-bold text-gray-400 uppercase tracking-wider">{a.countryCode}</span>}
