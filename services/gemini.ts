@@ -186,6 +186,19 @@ export async function processRosterRawText(
 
   console.log("Candidate JSON:", cleanJson);
   const parsedResult = JSON.parse(cleanJson);
+
+  // Debug: log branding data received from AI
+  if (findBranding) {
+    console.log('[Gemini] Branding data from AI:', {
+      teamName: parsedResult.teamName,
+      sport: parsedResult.sport,
+      logoUrl: parsedResult.logoUrl,
+      primaryColor: parsedResult.primaryColor,
+      secondaryColor: parsedResult.secondaryColor,
+      abbreviation: parsedResult.abbreviation
+    });
+  }
+
   const extractedSeason = overrideSeason || parsedResult.seasonYear || new Date().getFullYear().toString();
 
   // Extract verification sources from grounding metadata if branding was used

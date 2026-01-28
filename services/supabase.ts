@@ -283,30 +283,65 @@ export async function getBrandingCache(teamName: string, sport: string): Promise
  * Save branding to cache
  */
 export async function saveBrandingCache(branding: BrandingCache): Promise<void> {
-  if (!isSupabaseConfigured || !branding.team_name || !branding.sport) return;
+  if (!isSupabaseConfigured || !branding.team_name || !branding.sport) {
+    console.log('[BrandingCache] Skipping save - not configured or missing data:', {
+      configured: isSupabaseConfigured,
+      team: branding.team_name,
+      sport: branding.sport
+    });
+    return;
+  }
+
+  console.log('[BrandingCache] Attempting to save:', branding);
 
   try {
-    const { error } = await supabase
+    // First try to check if entry exists
+    const { data: existing } = await supabase
       .from('team_branding_cache')
-      .upsert({
-        team_name: branding.team_name.toUpperCase(),
-        sport: branding.sport.toUpperCase(),
-        logo_url: branding.logo_url,
-        primary_color: branding.primary_color,
-        secondary_color: branding.secondary_color,
-        abbreviation: branding.abbreviation,
-        updated_at: new Date().toISOString()
-      }, {
-        onConflict: 'LOWER(team_name), LOWER(sport)',
-        ignoreDuplicates: false
-      });
+      .select('id')
+      .ilike('team_name', branding.team_name)
+      .ilike('sport', branding.sport)
+      .single();
 
-    if (error) {
-      console.error('[BrandingCache] Save error:', error);
+    if (existing) {
+      // Update existing
+      const { error } = await supabase
+        .from('team_branding_cache')
+        .update({
+          logo_url: branding.logo_url,
+          primary_color: branding.primary_color,
+          secondary_color: branding.secondary_color,
+          abbreviation: branding.abbreviation,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', existing.id);
+
+      if (error) {
+        console.error('[BrandingCache] Update error:', error);
+      } else {
+        console.log('[BrandingCache] Updated existing entry for:', branding.team_name);
+      }
     } else {
-      console.log('[BrandingCache] Saved:', branding.team_name, branding.sport);
+      // Insert new
+      const { error } = await supabase
+        .from('team_branding_cache')
+        .insert({
+          team_name: branding.team_name.toUpperCase(),
+          sport: branding.sport.toUpperCase(),
+          logo_url: branding.logo_url,
+          primary_color: branding.primary_color,
+          secondary_color: branding.secondary_color,
+          abbreviation: branding.abbreviation
+        });
+
+      if (error) {
+        console.error('[BrandingCache] Insert error:', error);
+      } else {
+        console.log('[BrandingCache] Saved new entry for:', branding.team_name, branding.sport);
+      }
     }
   } catch (err) {
     console.error('[BrandingCache] Save exception:', err);
   }
 }
+
