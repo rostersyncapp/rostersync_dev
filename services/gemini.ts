@@ -1428,7 +1428,21 @@ COLORS: Search teamcolorcodes.com for HEX, RGB, Pantone (PMS), and CMYK values.`
   // Standardize Sport/League from ESPN ID Mapping
   let standardizedSport = parsedResult.sport || "General";
   const upperTeamName = (parsedResult.teamName || "").toUpperCase().trim();
-  const espnIdentity = ESPN_TEAM_IDS[upperTeamName];
+
+  let espnIdentity = ESPN_TEAM_IDS[upperTeamName];
+
+  // If no direct match, try fuzzy match
+  if (!espnIdentity) {
+    // Sort keys by length descending to match specific "San Jose Earthquakes" before generic "Earthquakes" if both existed (though strict keys prevent that usually)
+    const fuzzyKey = Object.keys(ESPN_TEAM_IDS).find(key =>
+      upperTeamName.includes(key) || key.includes(upperTeamName)
+    );
+    if (fuzzyKey) {
+      console.log(`[Gemini] Fuzzy matched team for sport lookup: "${upperTeamName}" -> "${fuzzyKey}"`);
+      espnIdentity = ESPN_TEAM_IDS[fuzzyKey];
+    }
+  }
+
   if (espnIdentity && espnIdentity.league) {
     const rawLeague = espnIdentity.league.toLowerCase();
     standardizedSport = LEAGUE_DISPLAY_NAMES[rawLeague] || rawLeague.toUpperCase();
