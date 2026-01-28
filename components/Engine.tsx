@@ -64,6 +64,7 @@ export const Engine: React.FC<Props> = ({
   const [selectedProjectId, setSelectedProjectId] = useState<string>('');
   const [isNocMode, setIsNocMode] = useState(false);
   const [showSeasonModal, setShowSeasonModal] = useState(false);
+  const [manualTeamName, setManualTeamName] = useState('');
 
   // Metadata States
   const [teamName, setTeamName] = useState('');
@@ -99,7 +100,11 @@ export const Engine: React.FC<Props> = ({
   const handleProcess = () => {
     if (!rawInput || isProcessing) return;
     setShowSeasonModal(false);
-    onStartProcessing(rawInput, isNocMode, seasonYear, true);
+    // Prepend team name to raw input if provided (helps AI identification)
+    const inputWithTeam = manualTeamName.trim()
+      ? `Team: ${manualTeamName.trim()}\n\n${rawInput}`
+      : rawInput;
+    onStartProcessing(inputWithTeam, isNocMode, seasonYear, true);
   };
 
   const handleSaveToLibrary = () => {
@@ -196,15 +201,30 @@ export const Engine: React.FC<Props> = ({
               <div className="w-16 h-16 rounded-2xl bg-[#5B5FFF]/10 text-[#5B5FFF] flex items-center justify-center mx-auto mb-4">
                 <Calendar size={32} />
               </div>
-              <h3 className="text-2xl font-extrabold text-gray-900 dark:text-white tracking-tight">Select Season</h3>
-              <p className="text-sm text-gray-500 font-medium mt-2">Which competition year is this roster for?</p>
+              <h3 className="text-2xl font-extrabold text-gray-900 dark:text-white tracking-tight">Processing Options</h3>
+              <p className="text-sm text-gray-500 font-medium mt-2">Specify season and team details</p>
             </div>
 
             <div className="space-y-6">
               <div className="space-y-2">
-                <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest font-mono">Season Year</label>
+                <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest font-mono flex items-center gap-2">
+                  <Trophy size={12} /> Team Name <span className="text-gray-300 dark:text-gray-600">(optional)</span>
+                </label>
                 <input
                   autoFocus
+                  type="text"
+                  value={manualTeamName}
+                  onChange={(e) => setManualTeamName(e.target.value)}
+                  className="w-full px-5 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl text-base font-medium outline-none focus:ring-2 focus:ring-[#5B5FFF]/20"
+                  placeholder="e.g. Sacramento Republic FC"
+                />
+                <p className="text-[10px] text-gray-400 mt-1">Helps identify branding if not in the pasted data</p>
+              </div>
+              <div className="space-y-2">
+                <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest font-mono flex items-center gap-2">
+                  <Calendar size={12} /> Season Year
+                </label>
+                <input
                   type="text"
                   value={seasonYear}
                   onChange={(e) => setSeasonYear(e.target.value)}
