@@ -670,20 +670,33 @@ const App: React.FC = () => {
                 const roster = rosters.find(r => r.id === id);
                 if (!roster) return;
 
-                // Always delete from database first
-                if (user && isSupabaseConfigured) {
-                  const { error } = await supabase.from('rosters').delete().eq('id', id);
-                  if (error) {
-                    console.error("Delete Error:", error);
-                    alert(`Failed to delete roster: ${error.message}`);
-                    return; // Don't update local state if DB delete failed
+                if (roster.projectId) {
+                  // Roster is in a folder - just remove from folder (keep in library)
+                  if (user && isSupabaseConfigured) {
+                    const { error } = await supabase.from('rosters').update({ project_id: null }).eq('id', id);
+                    if (error) {
+                      console.error("Unassign Error:", error);
+                      alert(`Failed to remove from folder: ${error.message}`);
+                      return;
+                    }
                   }
+                  const updated = { ...roster, projectId: undefined };
+                  setRosters(prev => prev.map(r => r.id === id ? updated : r));
+                  setSelectedRosterId(null);
+                } else {
+                  // Roster not in folder - permanently delete
+                  if (user && isSupabaseConfigured) {
+                    const { error } = await supabase.from('rosters').delete().eq('id', id);
+                    if (error) {
+                      console.error("Delete Error:", error);
+                      alert(`Failed to delete roster: ${error.message}`);
+                      return;
+                    }
+                  }
+                  await logActivity(profile.id, 'ROSTER_DELETE', `Deleted roster for ${roster.teamName}.`);
+                  setRosters(prev => prev.filter(r => r.id !== id));
+                  setSelectedRosterId(null);
                 }
-
-                // Log activity and update local state only after successful delete
-                await logActivity(profile.id, 'ROSTER_DELETE', `Deleted roster for ${roster.teamName}.`);
-                setRosters(prev => prev.filter(r => r.id !== id));
-                setSelectedRosterId(null); // Clear selection after delete
               }} onUpdateRoster={async (r) => {
                 await logActivity(profile.id, 'ROSTER_UPDATE', `Updated metadata for ${r.teamName}.`);
 
