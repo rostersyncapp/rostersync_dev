@@ -494,7 +494,7 @@ const App: React.FC = () => {
     setIsProcessing(true);
     handleSetView('engine');
     try {
-      const result = await processRosterRawText(text, profile.subscriptionTier, isNocMode, seasonYear, findBranding);
+      const result = await processRosterRawText(text, profile.subscriptionTier, isNocMode, seasonYear, findBranding, profile.id);
 
       // Check if there are multiple team candidates
       if (result.candidateTeams && result.candidateTeams.length > 1) {

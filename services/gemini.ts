@@ -1,7 +1,7 @@
 
 import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
 import { Athlete, NILStatus, SubscriptionTier } from "../types.ts";
-import { getBrandingCache, saveBrandingCache } from "./supabase.ts";
+import { getBrandingCache, saveBrandingCache, recordUsage } from "./supabase.ts";
 
 // Helper to get the key even if the build tool is doing static analysis on process.env.API_KEY
 const getApiKey = () => {
@@ -1148,7 +1148,8 @@ export async function processRosterRawText(
   tier: SubscriptionTier = 'BASIC',
   isNocMode: boolean = false,
   overrideSeason: string = '',
-  findBranding: boolean = false
+  findBranding: boolean = false,
+  userId?: string
 ): Promise<ProcessedRoster> {
   const apiKey = getApiKey();
   if (!apiKey) {
@@ -1210,7 +1211,33 @@ COLORS: Search teamcolorcodes.com for HEX, RGB, Pantone (PMS), and CMYK values.`
 
   const result = await model.generateContent(`Tier: ${tier}. Mode: ${isNocMode ? 'NOC' : 'Standard'}. Data: ${text}`);
   const response = await result.response;
+  const usage = response.usageMetadata;
   const textResponse = response.text();
+
+  // Track Usage
+  if (usage && userId) {
+    const inputTokens = usage.promptTokenCount || 0;
+    const outputTokens = usage.candidatesTokenCount || 0;
+
+    // Gemini 2.0 Flash Pricing (Approximate)
+    // Input: $0.10 / 1M tokens
+    // Output: $0.40 / 1M tokens
+    const inputCost = (inputTokens / 1000000) * 0.10;
+    const outputCost = (outputTokens / 1000000) * 0.40;
+    const totalCost = inputCost + outputCost;
+
+    console.log(`[Gemini Usage] Input: ${inputTokens}, Output: ${outputTokens}, Cost: $${totalCost.toFixed(6)}`);
+
+    // Fire and forget usage recording
+    recordUsage(userId, {
+      operationType: 'ROSTER_IMPORT',
+      modelName: 'gemini-2.0-flash-001',
+      inputTokens,
+      outputTokens,
+      searchQueries: 0, // Search tool accounting would go here if we tracked it separately
+      total_cost_usd: totalCost
+    }).catch(err => console.error("[Usage Tracking] Failed to record:", err));
+  }
 
   if (!textResponse) {
     throw new Error("AI returned no content.");
