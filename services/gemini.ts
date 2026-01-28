@@ -130,7 +130,7 @@ export async function processRosterRawText(
   const schema = getSchemaForTier(tier, isNocMode, findBranding);
 
   const brandingInstruction = findBranding
-    ? "BRANDING DISCOVERY: Use Google Search to find the official team logo URL. PRIORITY ORDER: 1) ESPN CDN (format: https://a.espncdn.com/combiner/i?img=/i/teamlogos/{league}/500/{teamcode}.png&h=200&w=200 - e.g. nhl/500/bos.png for Boston Bruins, nfl/500/ne.png for New England Patriots), 2) Wikipedia, 3) Official team site. PREFER PNG with transparent background. For COLORS: Search teamcolorcodes.com or the official team website for accurate hex codes. Example: Boston Bruins = Gold #FFB81C, Black #000000."
+    ? "BRANDING DISCOVERY: Query ESPN API at http://site.api.espn.com/apis/site/v2/sports/{sport}/{league}/teams for team data including logos and colors. For logo URLs use ESPN CDN format: https://a.espncdn.com/combiner/i?img=/i/teamlogos/{league}/500/{teamcode}.png&h=200&w=200 (e.g. nhl/500/bos.png for Boston Bruins). For COLORS: Use teamcolorcodes.com or official team website. Example: Boston Bruins = Gold #FFB81C, Black #000000."
     : "Use default branding colors (#5B5FFF and #1A1A1A).";
 
   const systemInstruction = `You are an expert broadcast metadata extractor.
