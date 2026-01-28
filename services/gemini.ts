@@ -137,7 +137,19 @@ export async function processRosterRawText(
   const schema = getSchemaForTier(tier, isNocMode, findBranding);
 
   const brandingInstruction = findBranding
-    ? "BRANDING DISCOVERY: Query ESPN API at http://site.api.espn.com/apis/site/v2/sports/{sport}/{league}/teams for team data. For logos use ESPN CDN: https://a.espncdn.com/combiner/i?img=/i/teamlogos/{league}/500/{teamcode}.png&h=200&w=200. For COLORS: Search teamcolorcodes.com for complete color info including HEX, RGB, Pantone (PMS), and CMYK values. Example Boston Bruins: HEX #FFB81C/#000000, RGB 255,184,28/0,0,0, Pantone PMS 130 C/Black, CMYK 0,28,89,0/0,0,0,100."
+    ? `BRANDING DISCOVERY: 
+LOGO SOURCES (in priority order):
+1. US SPORTS (NFL/NHL/NBA/MLB/MLS): ESPN CDN https://a.espncdn.com/combiner/i?img=/i/teamlogos/{league}/500/{teamcode}.png&h=200&w=200
+2. SOCCER/FOOTBALL: ESPN Soccer CDN https://a.espncdn.com/combiner/i?img=/i/teamlogos/soccer/500/{team_id}.png or Wikipedia Commons
+3. ALL TEAMS: Wikipedia Commons (search for "{team name} logo" - use the official SVG/PNG from upload.wikimedia.org)
+4. FALLBACK: Official team website logo or thesportsdb.com
+
+EXAMPLE LOGOS:
+- Liverpool FC: https://a.espncdn.com/combiner/i?img=/i/teamlogos/soccer/500/364.png&w=200
+- Boston Bruins: https://a.espncdn.com/combiner/i?img=/i/teamlogos/nhl/500/bos.png&h=200&w=200
+- Real Madrid: https://a.espncdn.com/combiner/i?img=/i/teamlogos/soccer/500/86.png&w=200
+
+COLORS: Search teamcolorcodes.com for complete color info including HEX, RGB, Pantone (PMS), and CMYK values.`
     : "Use default branding colors (#5B5FFF and #1A1A1A).";
 
   const systemInstruction = `You are an expert broadcast metadata extractor.
