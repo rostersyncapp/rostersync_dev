@@ -17,7 +17,7 @@ interface ProcessedRoster {
   athletes: Athlete[];
   isNocMode?: boolean;
   verificationSources?: { title: string; uri: string }[];
-  candidateTeams?: { name: string; logoUrl: string; primaryColor: string; secondaryColor: string }[];
+  candidateTeams?: { name: string; logoUrl: string; primaryColor: string; secondaryColor: string; sport?: string; league?: string }[];
   teamMetadata?: {
     primaryColor: string;
     secondaryColor: string;
@@ -1533,7 +1533,7 @@ COLORS: Search teamcolorcodes.com for HEX, RGB, Pantone (PMS), and CMYK values.`
 
   // AMBIGUITY DETECTION: Even if we have an exact match, check if other teams contain the same substring
   // This handles cases like "KINGS" which matches LA Kings exactly but should prompt for Sacramento Kings too
-  let candidateTeams: { name: string; logoUrl: string; primaryColor: string; secondaryColor: string }[] = [];
+  let candidateTeams: { name: string; logoUrl: string; primaryColor: string; secondaryColor: string; sport?: string; league?: string }[] = [];
 
   // Always check for ambiguity when the search term is short enough to be ambiguous (< 20 chars)
   if (teamNameUpper.length > 3 && teamNameUpper.length < 20) {
@@ -1543,11 +1543,17 @@ COLORS: Search teamcolorcodes.com for HEX, RGB, Pantone (PMS), and CMYK values.`
 
     if (allMatchingKeys.length > 0) {
       // Deduplicate by logoUrl (same logo = same team, different aliases)
-      const uniqueTeams = new Map<string, { name: string; logoUrl: string; primaryColor: string; secondaryColor: string }>();
+      const uniqueTeams = new Map<string, { name: string; logoUrl: string; primaryColor: string; secondaryColor: string; sport?: string; league?: string }>();
       for (const key of allMatchingKeys) {
         const team = KNOWN_TEAM_LOGOS[key];
+        const espnData = ESPN_TEAM_IDS[key]; // Look up sport/league metadata
         if (!uniqueTeams.has(team.logoUrl)) {
-          uniqueTeams.set(team.logoUrl, { name: key, ...team });
+          uniqueTeams.set(team.logoUrl, {
+            name: key,
+            ...team,
+            sport: espnData?.sport,
+            league: espnData?.league
+          });
         }
       }
 
