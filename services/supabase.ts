@@ -250,6 +250,13 @@ export interface BrandingCache {
   primary_color: string | null;
   secondary_color: string | null;
   abbreviation: string | null;
+  // Additional color formats
+  primary_rgb: string | null;
+  secondary_rgb: string | null;
+  primary_pantone: string | null;
+  secondary_pantone: string | null;
+  primary_cmyk: string | null;
+  secondary_cmyk: string | null;
 }
 
 /**
@@ -312,6 +319,12 @@ export async function saveBrandingCache(branding: BrandingCache): Promise<void> 
           primary_color: branding.primary_color,
           secondary_color: branding.secondary_color,
           abbreviation: branding.abbreviation,
+          primary_rgb: branding.primary_rgb,
+          secondary_rgb: branding.secondary_rgb,
+          primary_pantone: branding.primary_pantone,
+          secondary_pantone: branding.secondary_pantone,
+          primary_cmyk: branding.primary_cmyk,
+          secondary_cmyk: branding.secondary_cmyk,
           updated_at: new Date().toISOString()
         })
         .eq('id', existing.id);
@@ -331,7 +344,13 @@ export async function saveBrandingCache(branding: BrandingCache): Promise<void> 
           logo_url: branding.logo_url,
           primary_color: branding.primary_color,
           secondary_color: branding.secondary_color,
-          abbreviation: branding.abbreviation
+          abbreviation: branding.abbreviation,
+          primary_rgb: branding.primary_rgb,
+          secondary_rgb: branding.secondary_rgb,
+          primary_pantone: branding.primary_pantone,
+          secondary_pantone: branding.secondary_pantone,
+          primary_cmyk: branding.primary_cmyk,
+          secondary_cmyk: branding.secondary_cmyk
         });
 
       if (error) {

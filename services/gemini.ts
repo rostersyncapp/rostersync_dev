@@ -102,9 +102,15 @@ function getSchemaForTier(tier: SubscriptionTier, isNocMode: boolean, findBrandi
   const rootRequired = ["teamName", "sport", "seasonYear", "athletes", "abbreviation"];
 
   if (findBranding) {
-    rootProperties.primaryColor = { type: SchemaType.STRING, description: "The official primary hex color code for the team." };
-    rootProperties.secondaryColor = { type: SchemaType.STRING, description: "The official secondary hex color code for the team." };
-    rootProperties.logoUrl = { type: SchemaType.STRING, description: "Direct URL to the official team logo (preferably PNG/SVG)." };
+    rootProperties.primaryColor = { type: SchemaType.STRING, description: "The official primary HEX color code for the team (e.g. #FFB81C)." };
+    rootProperties.secondaryColor = { type: SchemaType.STRING, description: "The official secondary HEX color code for the team." };
+    rootProperties.logoUrl = { type: SchemaType.STRING, description: "Direct URL to the official team logo (preferably from ESPN CDN)." };
+    rootProperties.primaryRgb = { type: SchemaType.STRING, description: "Primary color in RGB format (e.g. '255, 184, 28')." };
+    rootProperties.secondaryRgb = { type: SchemaType.STRING, description: "Secondary color in RGB format." };
+    rootProperties.primaryPantone = { type: SchemaType.STRING, description: "Primary color Pantone code (e.g. 'PMS 130 C')." };
+    rootProperties.secondaryPantone = { type: SchemaType.STRING, description: "Secondary color Pantone code." };
+    rootProperties.primaryCmyk = { type: SchemaType.STRING, description: "Primary color in CMYK format (e.g. '0, 28, 89, 0')." };
+    rootProperties.secondaryCmyk = { type: SchemaType.STRING, description: "Secondary color in CMYK format." };
     rootRequired.push("primaryColor", "secondaryColor");
   }
 
@@ -131,7 +137,7 @@ export async function processRosterRawText(
   const schema = getSchemaForTier(tier, isNocMode, findBranding);
 
   const brandingInstruction = findBranding
-    ? "BRANDING DISCOVERY: Query ESPN API at http://site.api.espn.com/apis/site/v2/sports/{sport}/{league}/teams for team data including logos and colors. For logo URLs use ESPN CDN format: https://a.espncdn.com/combiner/i?img=/i/teamlogos/{league}/500/{teamcode}.png&h=200&w=200 (e.g. nhl/500/bos.png for Boston Bruins). For COLORS: Use teamcolorcodes.com or official team website. Example: Boston Bruins = Gold #FFB81C, Black #000000."
+    ? "BRANDING DISCOVERY: Query ESPN API at http://site.api.espn.com/apis/site/v2/sports/{sport}/{league}/teams for team data. For logos use ESPN CDN: https://a.espncdn.com/combiner/i?img=/i/teamlogos/{league}/500/{teamcode}.png&h=200&w=200. For COLORS: Search teamcolorcodes.com for complete color info including HEX, RGB, Pantone (PMS), and CMYK values. Example Boston Bruins: HEX #FFB81C/#000000, RGB 255,184,28/0,0,0, Pantone PMS 130 C/Black, CMYK 0,28,89,0/0,0,0,100."
     : "Use default branding colors (#5B5FFF and #1A1A1A).";
 
   const systemInstruction = `You are an expert broadcast metadata extractor.
@@ -267,7 +273,13 @@ export async function processRosterRawText(
         logo_url: parsedResult.logoUrl || null,
         primary_color: parsedResult.primaryColor || null,
         secondary_color: parsedResult.secondaryColor || null,
-        abbreviation: parsedResult.abbreviation || null
+        abbreviation: parsedResult.abbreviation || null,
+        primary_rgb: parsedResult.primaryRgb || null,
+        secondary_rgb: parsedResult.secondaryRgb || null,
+        primary_pantone: parsedResult.primaryPantone || null,
+        secondary_pantone: parsedResult.secondaryPantone || null,
+        primary_cmyk: parsedResult.primaryCmyk || null,
+        secondary_cmyk: parsedResult.secondaryCmyk || null
       });
     }
   }
