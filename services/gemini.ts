@@ -914,11 +914,12 @@ COLORS: Search teamcolorcodes.com for HEX, RGB, Pantone (PMS), and CMYK values.`
 
   let knownTeam = KNOWN_TEAM_LOGOS[teamNameUpper];
 
-  // If no exact match, try fuzzy matching (e.g. "Sacramento Republic" -> "SACRAMENTO REPUBLIC FC")
-  // SMART MATCHING: Prefer the LONGEST match to avoid "KINGS" matching LA Kings over "SACRAMENTO KINGS"
+  // AMBIGUITY DETECTION: Even if we have an exact match, check if other teams contain the same substring
+  // This handles cases like "KINGS" which matches LA Kings exactly but should prompt for Sacramento Kings too
   let candidateTeams: { name: string; logoUrl: string; primaryColor: string; secondaryColor: string }[] = [];
 
-  if (!knownTeam && teamNameUpper.length > 3) {
+  // Always check for ambiguity when the search term is short enough to be ambiguous (< 20 chars)
+  if (teamNameUpper.length > 3 && teamNameUpper.length < 20) {
     const allMatchingKeys = Object.keys(KNOWN_TEAM_LOGOS).filter(key =>
       key.includes(teamNameUpper) || teamNameUpper.includes(key)
     );
@@ -936,12 +937,12 @@ COLORS: Search teamcolorcodes.com for HEX, RGB, Pantone (PMS), and CMYK values.`
       // If multiple DISTINCT teams match, return them as candidates for user selection
       if (uniqueTeams.size > 1) {
         candidateTeams = Array.from(uniqueTeams.values());
-        console.log(`[Gemini] Multiple teams match "${teamNameUpper}": ${candidateTeams.map(t => t.name).join(', ')}`);
-        // Still pick the longest match as default, but flag that there are alternatives
+        console.log(`[Gemini] AMBIGUITY DETECTED for "${teamNameUpper}": ${candidateTeams.map(t => t.name).join(', ')}`);
+        // Pick the longest match as default
         allMatchingKeys.sort((a, b) => b.length - a.length);
         knownTeam = KNOWN_TEAM_LOGOS[allMatchingKeys[0]];
-      } else if (uniqueTeams.size === 1) {
-        // Single team (possibly with aliases) - use it directly
+      } else if (uniqueTeams.size === 1 && !knownTeam) {
+        // Single team (possibly with aliases) and no exact match - use fuzzy result
         const bestMatch = allMatchingKeys.sort((a, b) => b.length - a.length)[0];
         console.log(`[Gemini] Fuzzy match found: "${teamNameUpper}" -> "${bestMatch}"`);
         knownTeam = KNOWN_TEAM_LOGOS[bestMatch];
