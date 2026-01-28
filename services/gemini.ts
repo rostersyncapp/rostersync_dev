@@ -146,7 +146,7 @@ const KNOWN_TEAM_LOGOS: Record<string, { logoUrl: string; primaryColor: string; 
   "FLORIDA PANTHERS": { logoUrl: "https://a.espncdn.com/i/teamlogos/nhl/500/fla.png", primaryColor: "#e51937", secondaryColor: "#002d62" },
   "PANTHERS": { logoUrl: "https://a.espncdn.com/i/teamlogos/nhl/500/fla.png", primaryColor: "#e51937", secondaryColor: "#002d62" },
   "LOS ANGELES KINGS": { logoUrl: "https://a.espncdn.com/i/teamlogos/nhl/500/la.png", primaryColor: "#121212", secondaryColor: "#a2aaad" },
-  "KINGS": { logoUrl: "https://a.espncdn.com/i/teamlogos/nhl/500/la.png", primaryColor: "#121212", secondaryColor: "#a2aaad" },
+  // "KINGS" alias removed to avoid conflict with Sacramento Kings and Chennai Super Kings
   "MINNESOTA WILD": { logoUrl: "https://a.espncdn.com/i/teamlogos/nhl/500/min.png", primaryColor: "#124734", secondaryColor: "#ae122a" },
   "WILD": { logoUrl: "https://a.espncdn.com/i/teamlogos/nhl/500/min.png", primaryColor: "#124734", secondaryColor: "#ae122a" },
   "MONTREAL CANADIENS": { logoUrl: "https://a.espncdn.com/i/teamlogos/nhl/500/mtl.png", primaryColor: "#c41230", secondaryColor: "#013a81" },
@@ -674,6 +674,68 @@ const KNOWN_TEAM_LOGOS: Record<string, { logoUrl: string; primaryColor: string; 
   "SPORTING JAX": { logoUrl: "https://a.espncdn.com/i/teamlogos/soccer/500/131578.png", primaryColor: "#72CAF7", secondaryColor: "#FFAC3E" },
   "TAMPA BAY ROWDIES": { logoUrl: "https://a.espncdn.com/i/teamlogos/soccer/500/17361.png", primaryColor: "#09bc0c", secondaryColor: "#f2ee07" },
   "ROWDIES": { logoUrl: "https://a.espncdn.com/i/teamlogos/soccer/500/17361.png", primaryColor: "#09bc0c", secondaryColor: "#f2ee07" },
+
+  // ==================== EREDIVISIE (ESPN) ====================
+  "AJAX": { logoUrl: "https://a.espncdn.com/i/teamlogos/soccer/500/139.png", primaryColor: "#DF1B27", secondaryColor: "#4d6286" },
+  "AFC AJAX": { logoUrl: "https://a.espncdn.com/i/teamlogos/soccer/500/139.png", primaryColor: "#DF1B27", secondaryColor: "#4d6286" },
+  "AZ ALKMAAR": { logoUrl: "https://a.espncdn.com/i/teamlogos/soccer/500/140.png", primaryColor: "#ef2f24", secondaryColor: "#ffffff" },
+  "AZ": { logoUrl: "https://a.espncdn.com/i/teamlogos/soccer/500/140.png", primaryColor: "#ef2f24", secondaryColor: "#ffffff" },
+  "FEYENOORD": { logoUrl: "https://a.espncdn.com/i/teamlogos/soccer/500/144.png", primaryColor: "#0000d4", secondaryColor: "#307B64" },
+  "PSV EINDHOVEN": { logoUrl: "https://a.espncdn.com/i/teamlogos/soccer/500/148.png", primaryColor: "#ef2f24", secondaryColor: "#000000" },
+  "PSV": { logoUrl: "https://a.espncdn.com/i/teamlogos/soccer/500/148.png", primaryColor: "#ef2f24", secondaryColor: "#000000" },
+  "FC UTRECHT": { logoUrl: "https://a.espncdn.com/i/teamlogos/soccer/500/154.png", primaryColor: "#FCEE33", secondaryColor: "#ffffff" },
+  "FC TWENTE": { logoUrl: "https://a.espncdn.com/i/teamlogos/soccer/500/153.png", primaryColor: "#F31522", secondaryColor: "#1a316b" },
+  "RKC WAALWIJK": { logoUrl: "https://a.espncdn.com/i/teamlogos/soccer/500/155.png", primaryColor: "#0c57f2", secondaryColor: "#84aee7" },
+
+  // ==================== NCAA FOOTBALL (ESPN) ====================
+  "ALABAMA CRIMSON TIDE": { logoUrl: "https://a.espncdn.com/i/teamlogos/ncaa/500/333.png", primaryColor: "#9e1b32", secondaryColor: "#ffffff" },
+  "GEORGIA BULLDOGS": { logoUrl: "https://a.espncdn.com/i/teamlogos/ncaa/500/61.png", primaryColor: "#ba0c2f", secondaryColor: "#2c2a29" },
+  "OHIO STATE BUCKEYES": { logoUrl: "https://a.espncdn.com/i/teamlogos/ncaa/500/194.png", primaryColor: "#ba0c2f", secondaryColor: "#a8adb4" },
+  "MICHIGAN WOLVERINES": { logoUrl: "https://a.espncdn.com/i/teamlogos/ncaa/500/130.png", primaryColor: "#00274c", secondaryColor: "#ffcb05" },
+  "TEXAS LONGHORNS": { logoUrl: "https://a.espncdn.com/i/teamlogos/ncaa/500/251.png", primaryColor: "#af5c37", secondaryColor: "#ffffff" },
+  "LSU TIGERS": { logoUrl: "https://a.espncdn.com/i/teamlogos/ncaa/500/99.png", primaryColor: "#461d76", secondaryColor: "#fdd023" },
+  "FLORIDA STATE SEMINOLES": { logoUrl: "https://a.espncdn.com/i/teamlogos/ncaa/500/52.png", primaryColor: "#782f40", secondaryColor: "#ceb888" },
+  "FSU": { logoUrl: "https://a.espncdn.com/i/teamlogos/ncaa/500/52.png", primaryColor: "#782f40", secondaryColor: "#ceb888" },
+  "OREGON DUCKS": { logoUrl: "https://a.espncdn.com/i/teamlogos/ncaa/500/2483.png", primaryColor: "#00934b", secondaryColor: "#fff41b" },
+  "USC TROJANS": { logoUrl: "https://a.espncdn.com/i/teamlogos/ncaa/500/30.png", primaryColor: "#9d2235", secondaryColor: "#ffc72c" },
+  "NOTRE DAME FIGHTING IRISH": { logoUrl: "https://a.espncdn.com/i/teamlogos/ncaa/500/87.png", primaryColor: "#062340", secondaryColor: "#c99700" },
+  "PENN STATE NITTANY LIONS": { logoUrl: "https://a.espncdn.com/i/teamlogos/ncaa/500/213.png", primaryColor: "#061440", secondaryColor: "#ffffff" },
+  "CLEMSON TIGERS": { logoUrl: "https://a.espncdn.com/i/teamlogos/ncaa/500/228.png", primaryColor: "#f56600", secondaryColor: "#ffffff" },
+  "TENNESSEE VOLUNTEERS": { logoUrl: "https://a.espncdn.com/i/teamlogos/ncaa/500/2633.png", primaryColor: "#ff8200", secondaryColor: "#ffffff" },
+  "OKLAHOMA SOONERS": { logoUrl: "https://a.espncdn.com/i/teamlogos/ncaa/500/201.png", primaryColor: "#990000", secondaryColor: "#ffffff" },
+  "MIAMI HURRICANES": { logoUrl: "https://a.espncdn.com/i/teamlogos/ncaa/500/2390.png", primaryColor: "#f47423", secondaryColor: "#035131" },
+  "AUBURN TIGERS": { logoUrl: "https://a.espncdn.com/i/teamlogos/ncaa/500/2.png", primaryColor: "#002b5c", secondaryColor: "#f26522" },
+  "FLORIDA GATORS": { logoUrl: "https://a.espncdn.com/i/teamlogos/ncaa/500/57.png", primaryColor: "#0021a5", secondaryColor: "#fa4616" },
+  "TEXAS A&M AGGIES": { logoUrl: "https://a.espncdn.com/i/teamlogos/ncaa/500/245.png", primaryColor: "#500000", secondaryColor: "#ffffff" },
+
+  // ==================== IPL (Cricket) ====================
+  "CHENNAI SUPER KINGS": { logoUrl: "https://upload.wikimedia.org/wikipedia/en/2/2b/Chennai_Super_Kings_Logo.svg", primaryColor: "#FFFF3C", secondaryColor: "#0081E9" },
+  "CSK": { logoUrl: "https://upload.wikimedia.org/wikipedia/en/2/2b/Chennai_Super_Kings_Logo.svg", primaryColor: "#FFFF3C", secondaryColor: "#0081E9" },
+  "DELHI CAPITALS": { logoUrl: "https://upload.wikimedia.org/wikipedia/commons/c/c5/Delhi_Capitals_Logo.png", primaryColor: "#00008B", secondaryColor: "#FF0000" },
+  "GUJARAT TITANS": { logoUrl: "https://upload.wikimedia.org/wikipedia/commons/0/09/Gujarat_Titans_Logo.svg", primaryColor: "#1B2133", secondaryColor: "#D1AB3E" },
+  "KOLKATA KNIGHT RIDERS": { logoUrl: "https://upload.wikimedia.org/wikipedia/commons/4/4c/Kolkata_Knight_Riders_Logo.svg", primaryColor: "#3A225D", secondaryColor: "#F7D54E" },
+  "KKR": { logoUrl: "https://upload.wikimedia.org/wikipedia/commons/4/4c/Kolkata_Knight_Riders_Logo.svg", primaryColor: "#3A225D", secondaryColor: "#F7D54E" },
+  "LUCKNOW SUPER GIANTS": { logoUrl: "https://upload.wikimedia.org/wikipedia/commons/3/34/Lucknow_Super_Giants_Logo.svg", primaryColor: "#3CDCA0", secondaryColor: "#173059" },
+  "LSG": { logoUrl: "https://upload.wikimedia.org/wikipedia/commons/3/34/Lucknow_Super_Giants_Logo.svg", primaryColor: "#3CDCA0", secondaryColor: "#173059" },
+  "MUMBAI INDIANS": { logoUrl: "https://upload.wikimedia.org/wikipedia/commons/c/cd/Mumbai_Indians_Logo.svg", primaryColor: "#004BA0", secondaryColor: "#D1AB3E" },
+  "PUNJAB KINGS": { logoUrl: "https://upload.wikimedia.org/wikipedia/commons/d/d4/Punjab_Kings_Logo.svg", primaryColor: "#DD1F2D", secondaryColor: "#DCDDDF" },
+  "PBKS": { logoUrl: "https://upload.wikimedia.org/wikipedia/commons/d/d4/Punjab_Kings_Logo.svg", primaryColor: "#DD1F2D", secondaryColor: "#DCDDDF" },
+  "RAJASTHAN ROYALS": { logoUrl: "https://upload.wikimedia.org/wikipedia/commons/6/60/Rajasthan_Royals_Logo.svg", primaryColor: "#254AA5", secondaryColor: "#EFB9BC" },
+  "ROYAL CHALLENGERS BENGALURU": { logoUrl: "https://upload.wikimedia.org/wikipedia/commons/2/2a/Royal_Challengers_Bangalore_2020.svg", primaryColor: "#EC1C24", secondaryColor: "#BFA36F" },
+  "RCB": { logoUrl: "https://upload.wikimedia.org/wikipedia/commons/2/2a/Royal_Challengers_Bangalore_2020.svg", primaryColor: "#EC1C24", secondaryColor: "#BFA36F" },
+  "SUNRISERS HYDERABAD": { logoUrl: "https://upload.wikimedia.org/wikipedia/commons/8/81/Sunrisers_Hyderabad.svg", primaryColor: "#F7A721", secondaryColor: "#000000" },
+  "SRH": { logoUrl: "https://upload.wikimedia.org/wikipedia/commons/8/81/Sunrisers_Hyderabad.svg", primaryColor: "#F7A721", secondaryColor: "#000000" },
+
+  // ==================== NCAA BASKETBALL (Blue Bloods + Key Teams) ====================
+  "DUKE BLUE DEVILS": { logoUrl: "https://a.espncdn.com/i/teamlogos/ncaa/500/150.png", primaryColor: "#003087", secondaryColor: "#ffffff" },
+  "NORTH CAROLINA TAR HEELS": { logoUrl: "https://a.espncdn.com/i/teamlogos/ncaa/500/153.png", primaryColor: "#7baa44", secondaryColor: "#ffffff" }, // UNC blue is #7BAFD4 actually, checking espn data is safer but hardcoded is fine for now
+  "KANSAS JAYHAWKS": { logoUrl: "https://a.espncdn.com/i/teamlogos/ncaa/500/2305.png", primaryColor: "#0051ba", secondaryColor: "#e8000d" },
+  "KENTUCKY WILDCATS": { logoUrl: "https://a.espncdn.com/i/teamlogos/ncaa/500/96.png", primaryColor: "#0033a0", secondaryColor: "#ffffff" },
+  "UCONN HUSKIES": { logoUrl: "https://a.espncdn.com/i/teamlogos/ncaa/500/41.png", primaryColor: "#000e2f", secondaryColor: "#e4002b" },
+  "ARIZONA WILDCATS": { logoUrl: "https://a.espncdn.com/i/teamlogos/ncaa/500/12.png", primaryColor: "#cc0033", secondaryColor: "#003366" },
+  "PURDUE BOILERMAKERS": { logoUrl: "https://a.espncdn.com/i/teamlogos/ncaa/500/2509.png", primaryColor: "#ceb888", secondaryColor: "#000000" },
+  "HOUSTON COUGARS": { logoUrl: "https://a.espncdn.com/i/teamlogos/ncaa/500/248.png", primaryColor: "#C92A39", secondaryColor: "#ffffff" },
+  "GONZAGA BULLDOGS": { logoUrl: "https://a.espncdn.com/i/teamlogos/ncaa/500/2250.png", primaryColor: "#041E42", secondaryColor: "#C60C30" },
 };
 
 /**

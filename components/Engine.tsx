@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Athlete, SubscriptionTier, Roster, ExportFormat, Project } from '../types.ts';
 import { ProcessedRoster } from '../services/gemini.ts';
+import { TeamSelectionModal } from './TeamSelectionModal';
 import { generateExport, downloadFile } from '../services/export.ts';
 import {
   Upload,
@@ -78,6 +79,10 @@ export const Engine: React.FC<Props> = ({
   const [isEditingMetadata, setIsEditingMetadata] = useState(false);
   const [processedAthletes, setProcessedAthletes] = useState<Athlete[]>([]);
 
+  // Team Selection Modal State
+  const [showTeamSelection, setShowTeamSelection] = useState(false);
+  const [candidateTeams, setCandidateTeams] = useState<any[]>([]);
+
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
@@ -92,6 +97,12 @@ export const Engine: React.FC<Props> = ({
       setLogoUrl(pendingRoster.teamMetadata?.logoUrl || '');
       setProcessedAthletes(pendingRoster.athletes);
       setIsNocMode(pendingRoster.isNocMode || false);
+
+      // Check for ambiguous teams
+      if (pendingRoster.candidateTeams && pendingRoster.candidateTeams.length > 1) {
+        setCandidateTeams(pendingRoster.candidateTeams);
+        setShowTeamSelection(true);
+      }
     } else if (isProcessing) {
       setStep(1);
     }
@@ -140,6 +151,14 @@ export const Engine: React.FC<Props> = ({
   const handleDeletePlayer = (athleteName: string) => {
     setProcessedAthletes(prev => prev.filter(a => a.fullName !== athleteName));
     onDeletePlayer?.(athleteName);
+  };
+
+  const handleTeamSelected = (team: any) => {
+    setTeamName(team.name);
+    setLogoUrl(team.logoUrl);
+    setPrimaryColor(team.primaryColor);
+    setSecondaryColor(team.secondaryColor);
+    setShowTeamSelection(false);
   };
 
   const hasCredits = creditsUsed < maxCredits;
@@ -244,6 +263,14 @@ export const Engine: React.FC<Props> = ({
           </div>
         </div>
       )}
+
+      {/* Ambiguous Team Selection Modal */}
+      <TeamSelectionModal
+        isOpen={showTeamSelection}
+        candidates={candidateTeams}
+        onSelect={handleTeamSelected}
+        onClose={() => setShowTeamSelection(false)}
+      />
 
 
       {
