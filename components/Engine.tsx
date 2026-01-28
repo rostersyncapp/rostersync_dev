@@ -70,6 +70,7 @@ export const Engine: React.FC<Props> = ({
   // Metadata States
   const [teamName, setTeamName] = useState('');
   const [sport, setSport] = useState('');
+  const [league, setLeague] = useState(''); // User-selected league
   const [seasonYear, setSeasonYear] = useState(new Date().getFullYear().toString());
   const [abbreviation, setAbbreviation] = useState('');
   const [primaryColor, setPrimaryColor] = useState('#5B5FFF');
@@ -127,6 +128,7 @@ export const Engine: React.FC<Props> = ({
       projectId: selectedProjectId || undefined,
       teamName,
       sport,
+      league: league || undefined, // Include user-selected league
       seasonYear,
       isNocMode,
       athleteCount: processedAthletes.length,
@@ -143,7 +145,7 @@ export const Engine: React.FC<Props> = ({
       }
     };
 
-    console.log('[Engine] Roster being saved:', { teamName: newRoster.teamName, sport: newRoster.sport });
+    console.log('[Engine] Roster being saved:', { teamName: newRoster.teamName, sport: newRoster.sport, league: newRoster.league });
 
     setTimeout(() => {
       onSave(newRoster);
@@ -249,6 +251,62 @@ export const Engine: React.FC<Props> = ({
                 />
                 <p className="text-[10px] text-gray-400 mt-1">Helps identify branding if not in the pasted data</p>
               </div>
+
+              <div className="space-y-2">
+                <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest font-mono flex items-center gap-2">
+                  <Trophy size={12} /> League <span className="text-gray-300 dark:text-gray-600">(optional)</span>
+                </label>
+                <select
+                  value={league}
+                  onChange={(e) => setLeague(e.target.value)}
+                  className="w-full px-5 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl text-base font-medium outline-none focus:ring-2 focus:ring-[#5B5FFF]/20"
+                >
+                  <option value="">Auto-detect from team name</option>
+                  <optgroup label="🏀 Basketball">
+                    <option value="nba">NBA</option>
+                    <option value="wnba">WNBA</option>
+                    <option value="ncaa-basketball">NCAA Basketball</option>
+                    <option value="euroleague">EuroLeague</option>
+                  </optgroup>
+                  <optgroup label="🏈 Football (American)">
+                    <option value="nfl">NFL</option>
+                    <option value="ncaa-football">NCAA Football</option>
+                    <option value="cfl">CFL</option>
+                  </optgroup>
+                  <optgroup label="⚽ Soccer">
+                    <option value="premier-league">Premier League</option>
+                    <option value="la-liga">La Liga</option>
+                    <option value="serie-a">Serie A</option>
+                    <option value="bundesliga">Bundesliga</option>
+                    <option value="ligue-1">Ligue 1</option>
+                    <option value="mls">MLS</option>
+                    <option value="liga-mx">Liga MX</option>
+                    <option value="eredivisie">Eredivisie</option>
+                    <option value="usl">USL Championship</option>
+                  </optgroup>
+                  <optgroup label="🏏 Cricket">
+                    <option value="ipl">IPL</option>
+                    <option value="bbl">Big Bash League</option>
+                    <option value="the-hundred">The Hundred</option>
+                    <option value="cpl">Caribbean Premier League</option>
+                  </optgroup>
+                  <optgroup label="🏒 Hockey">
+                    <option value="nhl">NHL</option>
+                    <option value="ahl">AHL</option>
+                  </optgroup>
+                  <optgroup label="⚾ Baseball">
+                    <option value="mlb">MLB</option>
+                    <option value="milb">Minor League Baseball</option>
+                  </optgroup>
+                  <optgroup label="🏎️ Racing">
+                    <option value="f1">Formula 1</option>
+                    <option value="nascar">NASCAR</option>
+                    <option value="indycar">IndyCar</option>
+                  </optgroup>
+                </select>
+                <p className="text-[10px] text-gray-400 mt-1">Selecting a league reduces AI processing costs by ~80%</p>
+              </div>
+
               <div className="space-y-2">
                 <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest font-mono flex items-center gap-2">
                   <Calendar size={12} /> Season Year

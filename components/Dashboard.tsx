@@ -568,6 +568,9 @@ export const Dashboard: React.FC<Props> = ({
                   </div>
                   <div className="flex items-center gap-2 mb-4">
                     <span className="text-[9px] font-black text-[#5B5FFF] bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/10 px-2 py-0.5 rounded-lg uppercase tracking-widest">{roster.sport || 'General'}</span>
+                    {roster.league && (
+                      <span className="text-[9px] font-black text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 px-2 py-0.5 rounded-lg uppercase tracking-widest">{roster.league}</span>
+                    )}
                     <span className="text-[10px] font-bold text-gray-400 font-mono">{roster.seasonYear}</span>
                   </div>
                   <div className="mt-auto pt-4 border-t border-gray-50 dark:border-gray-800 flex items-center justify-between">
