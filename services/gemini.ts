@@ -677,6 +677,157 @@ const KNOWN_TEAM_LOGOS: Record<string, { logoUrl: string; primaryColor: string; 
 };
 
 /**
+ * ESPN Team ID Mapping for roster lookups
+ */
+const ESPN_TEAM_IDS: Record<string, { id: number; sport: string; league: string }> = {
+  // NBA
+  "ATLANTA HAWKS": { id: 1, sport: "basketball", league: "nba" },
+  "BOSTON CELTICS": { id: 2, sport: "basketball", league: "nba" },
+  "BROOKLYN NETS": { id: 17, sport: "basketball", league: "nba" },
+  "CHARLOTTE HORNETS": { id: 30, sport: "basketball", league: "nba" },
+  "CHICAGO BULLS": { id: 4, sport: "basketball", league: "nba" },
+  "CLEVELAND CAVALIERS": { id: 5, sport: "basketball", league: "nba" },
+  "DALLAS MAVERICKS": { id: 6, sport: "basketball", league: "nba" },
+  "DENVER NUGGETS": { id: 7, sport: "basketball", league: "nba" },
+  "DETROIT PISTONS": { id: 8, sport: "basketball", league: "nba" },
+  "GOLDEN STATE WARRIORS": { id: 9, sport: "basketball", league: "nba" },
+  "HOUSTON ROCKETS": { id: 10, sport: "basketball", league: "nba" },
+  "INDIANA PACERS": { id: 11, sport: "basketball", league: "nba" },
+  "LOS ANGELES CLIPPERS": { id: 12, sport: "basketball", league: "nba" },
+  "LOS ANGELES LAKERS": { id: 13, sport: "basketball", league: "nba" },
+  "MEMPHIS GRIZZLIES": { id: 29, sport: "basketball", league: "nba" },
+  "MIAMI HEAT": { id: 14, sport: "basketball", league: "nba" },
+  "MILWAUKEE BUCKS": { id: 15, sport: "basketball", league: "nba" },
+  "MINNESOTA TIMBERWOLVES": { id: 16, sport: "basketball", league: "nba" },
+  "NEW ORLEANS PELICANS": { id: 3, sport: "basketball", league: "nba" },
+  "NEW YORK KNICKS": { id: 18, sport: "basketball", league: "nba" },
+  "OKLAHOMA CITY THUNDER": { id: 25, sport: "basketball", league: "nba" },
+  "ORLANDO MAGIC": { id: 19, sport: "basketball", league: "nba" },
+  "PHILADELPHIA 76ERS": { id: 20, sport: "basketball", league: "nba" },
+  "PHOENIX SUNS": { id: 21, sport: "basketball", league: "nba" },
+  "PORTLAND TRAIL BLAZERS": { id: 22, sport: "basketball", league: "nba" },
+  "SACRAMENTO KINGS": { id: 23, sport: "basketball", league: "nba" },
+  "SAN ANTONIO SPURS": { id: 24, sport: "basketball", league: "nba" },
+  "TORONTO RAPTORS": { id: 28, sport: "basketball", league: "nba" },
+  "UTAH JAZZ": { id: 26, sport: "basketball", league: "nba" },
+  "WASHINGTON WIZARDS": { id: 27, sport: "basketball", league: "nba" },
+  // NFL
+  "ARIZONA CARDINALS": { id: 22, sport: "football", league: "nfl" },
+  "ATLANTA FALCONS": { id: 1, sport: "football", league: "nfl" },
+  "BALTIMORE RAVENS": { id: 33, sport: "football", league: "nfl" },
+  "BUFFALO BILLS": { id: 2, sport: "football", league: "nfl" },
+  "CAROLINA PANTHERS": { id: 29, sport: "football", league: "nfl" },
+  "CHICAGO BEARS": { id: 3, sport: "football", league: "nfl" },
+  "CINCINNATI BENGALS": { id: 4, sport: "football", league: "nfl" },
+  "CLEVELAND BROWNS": { id: 5, sport: "football", league: "nfl" },
+  "DALLAS COWBOYS": { id: 6, sport: "football", league: "nfl" },
+  "DENVER BRONCOS": { id: 7, sport: "football", league: "nfl" },
+  "DETROIT LIONS": { id: 8, sport: "football", league: "nfl" },
+  "GREEN BAY PACKERS": { id: 9, sport: "football", league: "nfl" },
+  "HOUSTON TEXANS": { id: 34, sport: "football", league: "nfl" },
+  "INDIANAPOLIS COLTS": { id: 11, sport: "football", league: "nfl" },
+  "JACKSONVILLE JAGUARS": { id: 30, sport: "football", league: "nfl" },
+  "KANSAS CITY CHIEFS": { id: 12, sport: "football", league: "nfl" },
+  "LAS VEGAS RAIDERS": { id: 13, sport: "football", league: "nfl" },
+  "LOS ANGELES CHARGERS": { id: 24, sport: "football", league: "nfl" },
+  "LOS ANGELES RAMS": { id: 14, sport: "football", league: "nfl" },
+  "MIAMI DOLPHINS": { id: 15, sport: "football", league: "nfl" },
+  "MINNESOTA VIKINGS": { id: 16, sport: "football", league: "nfl" },
+  "NEW ENGLAND PATRIOTS": { id: 17, sport: "football", league: "nfl" },
+  "NEW ORLEANS SAINTS": { id: 18, sport: "football", league: "nfl" },
+  "NEW YORK GIANTS": { id: 19, sport: "football", league: "nfl" },
+  "NEW YORK JETS": { id: 20, sport: "football", league: "nfl" },
+  "PHILADELPHIA EAGLES": { id: 21, sport: "football", league: "nfl" },
+  "PITTSBURGH STEELERS": { id: 23, sport: "football", league: "nfl" },
+  "SAN FRANCISCO 49ERS": { id: 25, sport: "football", league: "nfl" },
+  "SEATTLE SEAHAWKS": { id: 26, sport: "football", league: "nfl" },
+  "TAMPA BAY BUCCANEERS": { id: 27, sport: "football", league: "nfl" },
+  "TENNESSEE TITANS": { id: 10, sport: "football", league: "nfl" },
+  "WASHINGTON COMMANDERS": { id: 28, sport: "football", league: "nfl" },
+};
+
+/**
+ * Normalize a player name for fuzzy matching
+ */
+function normalizePlayerName(name: string): string {
+  return name
+    .toUpperCase()
+    .replace(/[^A-Z\s]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/**
+ * Fetch team roster from ESPN API
+ */
+async function fetchESPNRoster(teamName: string): Promise<Map<string, string> | null> {
+  const teamUpper = teamName.toUpperCase().trim();
+  const teamInfo = ESPN_TEAM_IDS[teamUpper];
+
+  if (!teamInfo) {
+    console.log(`[ESPN] No team ID found for: ${teamName}`);
+    return null;
+  }
+
+  const url = `https://site.api.espn.com/apis/site/v2/sports/${teamInfo.sport}/${teamInfo.league}/teams/${teamInfo.id}/roster`;
+
+  try {
+    console.log(`[ESPN] Fetching roster from: ${url}`);
+    const response = await fetch(url);
+    if (!response.ok) return null;
+
+    const data = await response.json();
+    const rosterMap = new Map<string, string>();
+
+    if (data.athletes && Array.isArray(data.athletes)) {
+      for (const athlete of data.athletes) {
+        if (athlete.fullName && athlete.jersey) {
+          rosterMap.set(normalizePlayerName(athlete.fullName), athlete.jersey);
+        }
+      }
+    }
+
+    console.log(`[ESPN] Loaded ${rosterMap.size} players with jersey numbers`);
+    return rosterMap;
+  } catch (error) {
+    console.error('[ESPN] Failed to fetch roster:', error);
+    return null;
+  }
+}
+
+/**
+ * Fill in missing jersey numbers by matching against ESPN roster
+ */
+async function fillMissingJerseyNumbers(athletes: any[], teamName: string): Promise<any[]> {
+  const missingJerseys = athletes.filter(a => !a.jerseyNumber || a.jerseyNumber === '00' || a.jerseyNumber === '');
+
+  if (missingJerseys.length === 0) return athletes;
+
+  console.log(`[ESPN] ${missingJerseys.length} athlete(s) missing jersey numbers`);
+  const espnRoster = await fetchESPNRoster(teamName);
+
+  if (!espnRoster || espnRoster.size === 0) return athletes;
+
+  let filledCount = 0;
+  const updatedAthletes = athletes.map(athlete => {
+    if (!athlete.jerseyNumber || athlete.jerseyNumber === '00' || athlete.jerseyNumber === '') {
+      const normalizedName = normalizePlayerName(athlete.fullName || '');
+      const jerseyNumber = espnRoster.get(normalizedName);
+
+      if (jerseyNumber) {
+        console.log(`[ESPN] Found jersey for ${athlete.fullName}: #${jerseyNumber}`);
+        filledCount++;
+        return { ...athlete, jerseyNumber: formatJerseyNumber(jerseyNumber) };
+      }
+    }
+    return athlete;
+  });
+
+  console.log(`[ESPN] Filled ${filledCount} missing jersey numbers`);
+  return updatedAthletes;
+}
+
+/**
  * Ensures jersey numbers are at least two digits.
  * e.g. "3" -> "03", "12" -> "12", "0" -> "00"
  */
@@ -993,12 +1144,16 @@ COLORS: Search teamcolorcodes.com for HEX, RGB, Pantone (PMS), and CMYK values.`
     }
   }
 
+  // Fill missing jersey numbers from ESPN roster data
+  const teamNameForLookup = parsedResult.teamName || "";
+  const athletesWithJerseys = await fillMissingJerseyNumbers(athletes, teamNameForLookup);
+
   return {
     teamName: parsedResult.teamName || (isNocMode ? "Unknown NOC" : "Unknown Team"),
     sport: parsedResult.sport || "General",
     seasonYear: extractedSeason,
     isNocMode: isNocMode,
-    athletes: athletes,
+    athletes: athletesWithJerseys,
     verificationSources,
     candidateTeams: candidateTeams.length > 1 ? candidateTeams : undefined,
     teamMetadata: finalBranding
