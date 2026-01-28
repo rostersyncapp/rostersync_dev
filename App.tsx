@@ -268,7 +268,7 @@ const App: React.FC = () => {
     return window.matchMedia('(prefers-color-scheme: dark)').matches;
   });
 
-  const [loadingData, setLoadingData] = useState(false);
+  const [loadingData, setLoadingData] = useState(true);
   const [showChangelog, setShowChangelog] = useState(false);
   const [releaseNotes, setReleaseNotes] = useState<any[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
