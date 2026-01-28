@@ -308,9 +308,6 @@ export const Engine: React.FC<Props> = ({
                   </optgroup>
                   <optgroup label="🏏 Cricket">
                     <option value="ipl">IPL</option>
-                    <option value="bbl">Big Bash League</option>
-                    <option value="the-hundred">The Hundred</option>
-                    <option value="cpl">Caribbean Premier League</option>
                   </optgroup>
                   <optgroup label="🏒 Hockey">
                     <option value="nhl">NHL</option>
@@ -319,11 +316,6 @@ export const Engine: React.FC<Props> = ({
                   <optgroup label="⚾ Baseball">
                     <option value="mlb">MLB</option>
                     <option value="milb">Minor League Baseball</option>
-                  </optgroup>
-                  <optgroup label="🏎️ Racing">
-                    <option value="f1">Formula 1</option>
-                    <option value="nascar">NASCAR</option>
-                    <option value="indycar">IndyCar</option>
                   </optgroup>
                 </select>
                 <p className="text-[10px] text-gray-400 mt-1">Selecting a league reduces AI processing costs by ~80%</p>
