@@ -799,25 +799,36 @@ async function fetchESPNRoster(teamName: string): Promise<Map<string, string> | 
  * Fill in missing jersey numbers by matching against ESPN roster
  */
 async function fillMissingJerseyNumbers(athletes: any[], teamName: string): Promise<any[]> {
+  console.log(`[ESPN] fillMissingJerseyNumbers called with team: "${teamName}", athletes: ${athletes.length}`);
+
   const missingJerseys = athletes.filter(a => !a.jerseyNumber || a.jerseyNumber === '00' || a.jerseyNumber === '');
 
-  if (missingJerseys.length === 0) return athletes;
+  if (missingJerseys.length === 0) {
+    console.log('[ESPN] All athletes have jersey numbers, skipping lookup');
+    return athletes;
+  }
 
-  console.log(`[ESPN] ${missingJerseys.length} athlete(s) missing jersey numbers`);
+  console.log(`[ESPN] ${missingJerseys.length} athlete(s) missing jersey numbers:`, missingJerseys.map(a => a.fullName));
   const espnRoster = await fetchESPNRoster(teamName);
 
-  if (!espnRoster || espnRoster.size === 0) return athletes;
+  if (!espnRoster || espnRoster.size === 0) {
+    console.log('[ESPN] No roster data available - returning original athletes');
+    return athletes;
+  }
 
   let filledCount = 0;
   const updatedAthletes = athletes.map(athlete => {
     if (!athlete.jerseyNumber || athlete.jerseyNumber === '00' || athlete.jerseyNumber === '') {
       const normalizedName = normalizePlayerName(athlete.fullName || '');
+      console.log(`[ESPN] Looking up: "${athlete.fullName}" -> normalized: "${normalizedName}"`);
       const jerseyNumber = espnRoster.get(normalizedName);
 
       if (jerseyNumber) {
-        console.log(`[ESPN] Found jersey for ${athlete.fullName}: #${jerseyNumber}`);
+        console.log(`[ESPN] ✓ Found jersey for ${athlete.fullName}: #${jerseyNumber}`);
         filledCount++;
         return { ...athlete, jerseyNumber: formatJerseyNumber(jerseyNumber) };
+      } else {
+        console.log(`[ESPN] ✗ No match found in ESPN roster for: "${normalizedName}"`);
       }
     }
     return athlete;
