@@ -493,6 +493,14 @@ const App: React.FC = () => {
     console.log("Saving Roster...", { user: user?.id, isSupabaseConfigured });
 
     if (user && isSupabaseConfigured) {
+      // Force refresh token before save to prevent JWT expired errors
+      try {
+        const token = await getToken({ template: 'supabase' });
+        await setSupabaseToken(token);
+      } catch (tokenErr) {
+        console.warn("Token auto-refresh failed, attempting save anyway...", tokenErr);
+      }
+
       console.log("Sending insert to Supabase:", newRoster);
       const { data, error } = await supabase.from('rosters').insert({
         user_id: user.id,
