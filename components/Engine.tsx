@@ -290,8 +290,8 @@ export const Engine: React.FC<Props> = ({
                     </div>
                   </div>
 
-                  <button onClick={handleSaveToLibrary} disabled={isSaving} className="w-full flex items-center justify-center gap-3 px-8 py-4.5 rounded-xl primary-gradient text-white font-bold text-base hover:shadow-lg shadow-[#5B5FFF]/20 transition-all uppercase tracking-widest">
-                    {isSaving ? <Loader2 size={20} className="animate-spin" /> : <Save size={20} />} Save to Cloud
+                  <button onClick={handleSaveToLibrary} disabled={isSaving} className="w-full flex items-center justify-center gap-3 px-6 py-3.5 rounded-xl primary-gradient text-white font-bold text-sm hover:shadow-lg shadow-[#5B5FFF]/20 transition-all uppercase tracking-widest">
+                    {isSaving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />} Save to Library
                   </button>
                 </div>
               </div>
