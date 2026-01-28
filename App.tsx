@@ -342,6 +342,15 @@ const App: React.FC = () => {
       const config = await getSiteConfig();
       setSiteConfig(config);
 
+      // Dynamically update favicon
+      if (config.logo_url) {
+        const link = (document.querySelector("link[rel*='icon']") || document.createElement('link')) as HTMLLinkElement;
+        link.type = 'image/x-icon'; // Works for most image types in modern browsers
+        link.rel = 'icon';
+        link.href = config.logo_url;
+        document.getElementsByTagName('head')[0].appendChild(link);
+      }
+
       if (isSupabaseConfigured) {
         const { data } = await supabase.from('release_notes').select('*').order('created_at', { ascending: false });
         if (data) setReleaseNotes(data);
