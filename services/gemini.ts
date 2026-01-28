@@ -44,7 +44,7 @@ function toSafeName(name: string): string {
  */
 function formatJerseyNumber(num: any): string {
   if (num === undefined || num === null || num === "") return "00";
-  const str = num.toString().trim();
+  const str = num.toString().replace(/#/g, '').trim();
   // If it's a single digit, pad with 0
   if (/^\d$/.test(str)) {
     return `0${str}`;
@@ -206,8 +206,8 @@ export async function processRosterRawText(
     originalName: a.fullName || "",
     fullName: a.fullName || "",
     displayNameSafe: toSafeName(a.fullName || ""),
-    jerseyNumber: formatJerseyNumber(a.jerseyNumber),
-    position: a.position || "?",
+    jerseyNumber: formatJerseyNumber(a.jerseyNumber).replace(/#/g, ''),
+    position: (a.position || "?").replace(/#/g, ''),
     phoneticIPA: "",
     phoneticSimplified: a.phoneticSimplified || "",
     nilStatus: (a.nilStatus as NILStatus) || 'Active',

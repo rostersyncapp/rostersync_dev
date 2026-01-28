@@ -341,8 +341,8 @@ export const Engine: React.FC<Props> = ({
                     {processedAthletes.map((a, idx) => (
                       <tr key={a.id || idx} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors group">
                         <td className="px-6 py-5 text-base font-semibold text-gray-900 dark:text-white">{a.fullName}</td>
-                        <td className="px-6 py-5 text-center"><span className="inline-block w-12 py-1.5 rounded-xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-sm font-bold">#{a.jerseyNumber}</span></td>
-                        <td className="px-6 py-5 text-center"><span className="inline-block px-4 py-1.5 rounded-xl bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 text-[11px] font-bold uppercase">#{a.position}</span></td>
+                        <td className="px-6 py-5 text-center"><span className="inline-block w-12 py-1.5 rounded-xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-sm font-bold">{a.jerseyNumber}</span></td>
+                        <td className="px-6 py-5 text-center"><span className="inline-block px-4 py-1.5 rounded-xl bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 text-[11px] font-bold uppercase">{a.position}</span></td>
                         <td className="px-6 py-5 text-center"><span className="bg-emerald-50 dark:bg-emerald-900/30 px-4 py-1.5 rounded-xl text-[11px] font-bold text-emerald-700 dark:text-emerald-400 tracking-wider font-mono">{a.displayNameSafe}</span></td>
                         {onDeletePlayer && (
                           <td className="px-6 py-5 text-center">

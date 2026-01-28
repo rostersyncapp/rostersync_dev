@@ -4,36 +4,36 @@ import { Roster, Athlete, ExportFormat, SubscriptionTier, Project } from '../typ
 import { generateExport, downloadFile } from '../services/export.ts';
 import { getTierLimit } from '../constants.tsx';
 import { logActivity } from '../services/supabase.ts';
-import { 
-  Plus, 
-  Search, 
-  Filter, 
-  Calendar, 
-  Users, 
-  ChevronRight, 
-  Table, 
-  ArrowLeft, 
-  Download, 
-  Trash2, 
-  X, 
-  Loader2, 
-  UserMinus, 
-  Trophy, 
-  Target, 
-  Diamond, 
-  Activity, 
-  Flag, 
-  Waves, 
-  Bike, 
-  Anchor, 
-  Gamepad2, 
-  Dumbbell, 
-  Palette, 
-  ShieldCheck, 
-  AlertTriangle, 
-  Copy, 
-  Globe, 
-  Cloud, 
+import {
+  Plus,
+  Search,
+  Filter,
+  Calendar,
+  Users,
+  ChevronRight,
+  Table,
+  ArrowLeft,
+  Download,
+  Trash2,
+  X,
+  Loader2,
+  UserMinus,
+  Trophy,
+  Target,
+  Diamond,
+  Activity,
+  Flag,
+  Waves,
+  Bike,
+  Anchor,
+  Gamepad2,
+  Dumbbell,
+  Palette,
+  ShieldCheck,
+  AlertTriangle,
+  Copy,
+  Globe,
+  Cloud,
   CloudOff,
   Clock,
   Zap,
@@ -79,15 +79,15 @@ const getRecursiveRosterCount = (projectId: string, projects: Project[], rosters
   return directRosters + subRosters;
 };
 
-const TeamLogo: React.FC<{ 
-  url?: string; 
-  name: string; 
-  abbreviation?: string; 
-  primaryColor?: string; 
-  size?: 'sm' | 'md' | 'lg' 
+const TeamLogo: React.FC<{
+  url?: string;
+  name: string;
+  abbreviation?: string;
+  primaryColor?: string;
+  size?: 'sm' | 'md' | 'lg'
 }> = ({ url, name, abbreviation, primaryColor = '#5B5FFF', size = 'md' }) => {
   const [error, setError] = useState(false);
-  
+
   const sizeClasses = {
     sm: 'w-10 h-10 rounded-lg text-xs',
     md: 'w-12 h-12 rounded-lg text-sm',
@@ -100,10 +100,10 @@ const TeamLogo: React.FC<{
   if (url && !error) {
     return (
       <div className={`${sizeClasses[size]} flex items-center justify-center shadow-sm overflow-hidden bg-white border border-gray-100 dark:border-gray-800 shrink-0`}>
-        <img 
-          src={url} 
-          alt={fallbackName} 
-          className="w-full h-full object-contain p-2" 
+        <img
+          src={url}
+          alt={fallbackName}
+          className="w-full h-full object-contain p-2"
           onError={() => setError(true)}
         />
       </div>
@@ -111,7 +111,7 @@ const TeamLogo: React.FC<{
   }
 
   return (
-    <div 
+    <div
       className={`${sizeClasses[size]} flex items-center justify-center text-white font-mono font-black shadow-md shrink-0 border border-white/20`}
       style={{ backgroundColor: primaryColor }}
     >
@@ -120,14 +120,14 @@ const TeamLogo: React.FC<{
   );
 };
 
-export const Dashboard: React.FC<Props> = ({ 
+export const Dashboard: React.FC<Props> = ({
   userId,
-  rosters, 
+  rosters,
   projects,
   activeProjectId,
-  onNewRoster, 
-  onDeleteRoster, 
-  onUpdateRoster, 
+  onNewRoster,
+  onDeleteRoster,
+  onUpdateRoster,
   userTier,
   creditsUsed,
   selectedRosterId,
@@ -168,15 +168,15 @@ export const Dashboard: React.FC<Props> = ({
   };
 
   const filteredRosters = rosters.filter(r => {
-    const matchesSearch = (r.teamName || '').toLowerCase().includes(search.toLowerCase()) || 
-                         (r.sport || '').toLowerCase().includes(search.toLowerCase());
+    const matchesSearch = (r.teamName || '').toLowerCase().includes(search.toLowerCase()) ||
+      (r.sport || '').toLowerCase().includes(search.toLowerCase());
     const matchesProject = activeProjectId === null || r.projectId === activeProjectId;
     return matchesSearch && matchesProject;
   });
 
   const subfolders = projects.filter(p => p.parentId === activeProjectId);
   const currentProject = projects.find(p => p.id === activeProjectId);
-  
+
   const getBreadcrumbs = () => {
     const crumbs: Project[] = [];
     let curr = currentProject;
@@ -199,7 +199,7 @@ export const Dashboard: React.FC<Props> = ({
   };
 
   const totalAthletes = filteredRosters.reduce((acc, r) => acc + (r.athleteCount || 0), 0);
-  const totalMissingData = filteredRosters.flatMap(r => r.rosterData || []).filter(a => 
+  const totalMissingData = filteredRosters.flatMap(r => r.rosterData || []).filter(a =>
     !a.jerseyNumber || a.jerseyNumber === '00' || !a.position || a.position === '?' || a.position === ''
   ).length;
 
@@ -232,9 +232,9 @@ export const Dashboard: React.FC<Props> = ({
                 {isEditingMetadata ? (
                   <div className="space-y-3 animate-in fade-in slide-in-from-left-2 duration-200">
                     <div className="flex items-center gap-3">
-                      <input 
-                        type="text" 
-                        value={editName} 
+                      <input
+                        type="text"
+                        value={editName}
                         onChange={(e) => setEditName(e.target.value)}
                         className="text-2xl font-extrabold tracking-tight bg-gray-50 dark:bg-gray-800 border-none rounded-lg px-4 py-2.5 outline-none ring-2 ring-[#5B5FFF]/20 text-gray-900 dark:text-white w-full max-w-md"
                         autoFocus
@@ -257,8 +257,8 @@ export const Dashboard: React.FC<Props> = ({
                   <>
                     <div className="flex items-center gap-3 group">
                       <h2 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white">{selectedRoster.teamName}</h2>
-                      <button 
-                        onClick={() => setIsEditingMetadata(true)} 
+                      <button
+                        onClick={() => setIsEditingMetadata(true)}
                         className="p-1.5 text-gray-300 hover:text-[#5B5FFF] hover:bg-[#5B5FFF]/5 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
                       >
                         <Edit2 size={18} />
@@ -292,10 +292,10 @@ export const Dashboard: React.FC<Props> = ({
                 {selectedRoster.rosterData.map((a: Athlete) => (
                   <tr key={a.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors">
                     <td className="px-8 py-4 text-sm font-semibold text-gray-900 dark:text-white tracking-tight">
-                        {a.fullName}
-                        {a.countryCode && <span className="ml-2 text-[10px] bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded font-mono font-bold text-gray-400 uppercase tracking-wider">{a.countryCode}</span>}
+                      {a.fullName}
+                      {a.countryCode && <span className="ml-2 text-[10px] bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded font-mono font-bold text-gray-400 uppercase tracking-wider">{a.countryCode}</span>}
                     </td>
-                    <td className="px-8 py-4 text-center"><span className="inline-block w-10 py-1 rounded-lg bg-blue-600 dark:bg-blue-700 text-white text-xs font-bold shadow-sm">#{a.jerseyNumber}</span></td>
+                    <td className="px-8 py-4 text-center"><span className="inline-block w-10 py-1 rounded-lg bg-blue-600 dark:bg-blue-700 text-white text-xs font-bold shadow-sm">{a.jerseyNumber}</span></td>
                     <td className="px-8 py-4 text-center"><span className="inline-block px-3 py-1 rounded-lg bg-purple-600 dark:bg-purple-700 text-white text-[10px] font-black uppercase tracking-widest shadow-sm">{a.position}</span></td>
                     <td className="px-8 py-4 text-center"><span className="bg-emerald-600 dark:bg-emerald-700 px-3 py-1 rounded-lg text-[10px] font-black text-white tracking-widest font-mono shadow-sm">{a.displayNameSafe}</span></td>
                     <td className="px-8 py-4 text-left"><div className="flex gap-2"><div className="w-3.5 h-3.5 rounded-full border border-gray-200 shadow-sm" style={{ backgroundColor: selectedRoster.teamMetadata?.primaryColor || '#000' }}></div><div className="w-3.5 h-3.5 rounded-full border border-gray-200 shadow-sm" style={{ backgroundColor: selectedRoster.teamMetadata?.secondaryColor || '#fff' }}></div></div></td>
@@ -305,7 +305,7 @@ export const Dashboard: React.FC<Props> = ({
             </table>
           </div>
         </div>
-        
+
         {showExportDrawer && (
           <div className="fixed inset-0 z-[100] bg-black/40 backdrop-blur-sm animate-in fade-in duration-700 flex justify-end" onClick={() => setShowExportDrawer(false)}>
             <div className="w-full max-w-md bg-white dark:bg-gray-950 h-full shadow-2xl animate-in slide-in-from-right duration-1000 overflow-y-auto flex flex-col" onClick={(e) => e.stopPropagation()}>
@@ -360,7 +360,7 @@ export const Dashboard: React.FC<Props> = ({
                   </div>
                 </div>
               </div>
-              
+
               <div className="p-8 bg-gray-50 dark:bg-gray-900/50 border-t border-gray-100 dark:border-gray-800 shrink-0">
                 <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest text-center">Format not listed? <a href="#" className="text-[#5B5FFF] hover:underline">Request Custom Parser</a></p>
               </div>
@@ -376,16 +376,16 @@ export const Dashboard: React.FC<Props> = ({
       {/* Breadcrumbs & Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-           <div className="flex items-center gap-2 mb-2">
-             <button onClick={() => onSelectProject(null)} className={`text-[10px] font-bold uppercase tracking-[0.25em] transition-colors ${!activeProjectId ? 'text-[#5B5FFF]' : 'text-gray-400 hover:text-gray-600'}`}>Library</button>
-             {breadcrumbs.map((crumb, idx) => (
-               <React.Fragment key={crumb.id}>
-                 <ChevronRight size={12} className="text-gray-300" />
-                 <button onClick={() => onSelectProject(crumb.id)} className={`text-[10px] font-bold uppercase tracking-[0.25em] transition-colors ${idx === breadcrumbs.length - 1 ? 'text-[#5B5FFF]' : 'text-gray-400 hover:text-gray-600'}`}>{crumb.name}</button>
-               </React.Fragment>
-             ))}
-           </div>
-           <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white">{currentProject?.name || 'Metadata Library'}</h1>
+          <div className="flex items-center gap-2 mb-2">
+            <button onClick={() => onSelectProject(null)} className={`text-[10px] font-bold uppercase tracking-[0.25em] transition-colors ${!activeProjectId ? 'text-[#5B5FFF]' : 'text-gray-400 hover:text-gray-600'}`}>Library</button>
+            {breadcrumbs.map((crumb, idx) => (
+              <React.Fragment key={crumb.id}>
+                <ChevronRight size={12} className="text-gray-300" />
+                <button onClick={() => onSelectProject(crumb.id)} className={`text-[10px] font-bold uppercase tracking-[0.25em] transition-colors ${idx === breadcrumbs.length - 1 ? 'text-[#5B5FFF]' : 'text-gray-400 hover:text-gray-600'}`}>{crumb.name}</button>
+              </React.Fragment>
+            ))}
+          </div>
+          <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white">{currentProject?.name || 'Metadata Library'}</h1>
         </div>
         <button onClick={onNewRoster} className="px-6 py-3.5 rounded-lg primary-gradient text-white font-bold shadow-lg shadow-[#5B5FFF]/20 hover:scale-105 transition-transform flex items-center gap-2.5 cursor-pointer text-sm">
           <Plus size={20} /> New Roster
@@ -395,32 +395,32 @@ export const Dashboard: React.FC<Props> = ({
       {/* Stats Grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
-           <div className="flex items-center gap-3 mb-2">
-             <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-[#5B5FFF] flex items-center justify-center"><Users size={18} /></div>
-             <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest font-mono">Athletes</span>
-           </div>
-           <div className="text-2xl font-extrabold text-gray-900 dark:text-white">{totalAthletes}</div>
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-[#5B5FFF] flex items-center justify-center"><Users size={18} /></div>
+            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest font-mono">Athletes</span>
+          </div>
+          <div className="text-2xl font-extrabold text-gray-900 dark:text-white">{totalAthletes}</div>
         </div>
         <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
-           <div className="flex items-center gap-3 mb-2">
-             <div className="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 flex items-center justify-center"><Activity size={18} /></div>
-             <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest font-mono">Health</span>
-           </div>
-           <div className="text-2xl font-extrabold text-emerald-500">{healthScore}%</div>
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 flex items-center justify-center"><Activity size={18} /></div>
+            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest font-mono">Health</span>
+          </div>
+          <div className="text-2xl font-extrabold text-emerald-500">{healthScore}%</div>
         </div>
         <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
-           <div className="flex items-center gap-3 mb-2">
-             <div className="w-8 h-8 rounded-lg bg-purple-50 dark:bg-purple-900/20 text-purple-600 flex items-center justify-center"><Clock size={18} /></div>
-             <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest font-mono">Saved</span>
-           </div>
-           <div className="text-2xl font-extrabold text-gray-900 dark:text-white">{timeSavedHours} <span className="text-xs text-gray-400">h</span></div>
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-8 h-8 rounded-lg bg-purple-50 dark:bg-purple-900/20 text-purple-600 flex items-center justify-center"><Clock size={18} /></div>
+            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest font-mono">Saved</span>
+          </div>
+          <div className="text-2xl font-extrabold text-gray-900 dark:text-white">{timeSavedHours} <span className="text-xs text-gray-400">h</span></div>
         </div>
         <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
-           <div className="flex items-center gap-3 mb-2">
-             <div className="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 text-[#5B5FFF] flex items-center justify-center"><Zap size={18} /></div>
-             <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest font-mono">Usage</span>
-           </div>
-           <div className="text-2xl font-extrabold text-gray-900 dark:text-white">{creditsUsed}<span className="text-xs text-gray-400 font-bold">/{tierLimit}</span></div>
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 text-[#5B5FFF] flex items-center justify-center"><Zap size={18} /></div>
+            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest font-mono">Usage</span>
+          </div>
+          <div className="text-2xl font-extrabold text-gray-900 dark:text-white">{creditsUsed}<span className="text-xs text-gray-400 font-bold">/{tierLimit}</span></div>
         </div>
       </div>
 
@@ -473,8 +473,8 @@ export const Dashboard: React.FC<Props> = ({
                   <div className="flex justify-between items-start mb-4">
                     <TeamLogo url={roster.teamMetadata?.logoUrl} name={roster.teamName} abbreviation={roster.teamMetadata?.abbreviation} primaryColor={primaryColor} size="md" />
                     <div className="flex gap-1 relative z-10">
-                       <button onClick={(e) => { e.stopPropagation(); setMovingRosterId(roster.id); }} className="p-1.5 text-gray-300 hover:text-[#5B5FFF] opacity-0 group-hover:opacity-100"><Move size={16} /></button>
-                       <button onClick={(e) => { e.stopPropagation(); handleQuickDeleteRoster(e, roster); }} className="p-1.5 text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100"><Trash2 size={16} /></button>
+                      <button onClick={(e) => { e.stopPropagation(); setMovingRosterId(roster.id); }} className="p-1.5 text-gray-300 hover:text-[#5B5FFF] opacity-0 group-hover:opacity-100"><Move size={16} /></button>
+                      <button onClick={(e) => { e.stopPropagation(); handleQuickDeleteRoster(e, roster); }} className="p-1.5 text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100"><Trash2 size={16} /></button>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 mb-1">
@@ -486,22 +486,22 @@ export const Dashboard: React.FC<Props> = ({
                     <span className="text-[10px] font-bold text-gray-400 font-mono">{roster.seasonYear}</span>
                   </div>
                   <div className="mt-auto pt-4 border-t border-gray-50 dark:border-gray-800 flex items-center justify-between">
-                     <div className="flex items-center gap-2 text-xs font-bold text-gray-400"><Users size={14} /> {roster.athleteCount} Athletes</div>
-                     {roster.isSynced && <Cloud size={14} className="text-[#5B5FFF]" />}
+                    <div className="flex items-center gap-2 text-xs font-bold text-gray-400"><Users size={14} /> {roster.athleteCount} Athletes</div>
+                    {roster.isSynced && <Cloud size={14} className="text-[#5B5FFF]" />}
                   </div>
 
                   {movingRosterId === roster.id && (
                     <div className="absolute inset-0 bg-white dark:bg-gray-900 p-4 z-20 flex flex-col animate-in fade-in duration-200" onClick={(e) => e.stopPropagation()}>
-                       <div className="flex items-center justify-between mb-3">
-                          <h4 className="text-[9px] font-bold uppercase tracking-widest text-gray-400 font-mono">Move Target</h4>
-                          <button onClick={() => setMovingRosterId(null)} className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"><X size={16} /></button>
-                       </div>
-                       <div className="flex-1 overflow-y-auto space-y-1 custom-scrollbar">
-                          <button onClick={() => handleMoveRoster(undefined)} className="w-full text-left p-2.5 text-xs font-bold hover:bg-[#5B5FFF]/5 hover:text-[#5B5FFF] rounded-lg transition-all flex items-center gap-3"><FolderOpen size={14} /> Root</button>
-                          {projects.map(p => (
-                            <button key={p.id} onClick={() => handleMoveRoster(p.id)} className="w-full text-left p-2.5 text-xs font-bold hover:bg-[#5B5FFF]/5 hover:text-[#5B5FFF] rounded-lg transition-all flex items-center gap-3"><FolderOpen size={14} /> {p.name}</button>
-                          ))}
-                       </div>
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="text-[9px] font-bold uppercase tracking-widest text-gray-400 font-mono">Move Target</h4>
+                        <button onClick={() => setMovingRosterId(null)} className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"><X size={16} /></button>
+                      </div>
+                      <div className="flex-1 overflow-y-auto space-y-1 custom-scrollbar">
+                        <button onClick={() => handleMoveRoster(undefined)} className="w-full text-left p-2.5 text-xs font-bold hover:bg-[#5B5FFF]/5 hover:text-[#5B5FFF] rounded-lg transition-all flex items-center gap-3"><FolderOpen size={14} /> Root</button>
+                        {projects.map(p => (
+                          <button key={p.id} onClick={() => handleMoveRoster(p.id)} className="w-full text-left p-2.5 text-xs font-bold hover:bg-[#5B5FFF]/5 hover:text-[#5B5FFF] rounded-lg transition-all flex items-center gap-3"><FolderOpen size={14} /> {p.name}</button>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>
