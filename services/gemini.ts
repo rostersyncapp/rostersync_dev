@@ -130,13 +130,14 @@ export async function processRosterRawText(
   const schema = getSchemaForTier(tier, isNocMode, findBranding);
 
   const brandingInstruction = findBranding
-    ? "BRANDING DISCOVERY: Use Google Search to find the official team logo URL and their primary/secondary hex color codes. Ensure the logo URL is direct and high quality."
+    ? "BRANDING DISCOVERY: Use Google Search to find the official team logo URL (PREFER: PNG with transparent background, Wikipedia/Official Site) and their primary/secondary hex color codes."
     : "Use default branding colors (#5B5FFF and #1A1A1A).";
 
   const systemInstruction = `You are an expert broadcast metadata extractor.
     - ${brandingInstruction}
     - NORMALIZE: Convert all athlete names to UPPERCASE and strip accents.
     - JERSEY NUMBERS: Always use at least two digits. Pad single digits with a leading zero (e.g., '3' becomes '03', '0' becomes '00').
+    - SPORT INFERENCE: If the sport is not explicitly named, INFER it from the positions (e.g. GK/FWD -> Soccer, QB/WR -> Football, G/F -> Basketball).
     - ABBREVIATION: If a 3-letter team code is not found in the text, GENERATE one based on the Team Name (e.g. "Liverpool FC" -> "LIV").
     - STRUCTURE: The output MUST be a JSON object with this exact structure: { "teamName": string, "athletes": [ { "fullName": string, "jerseyNumber": string, "position": string, "nilStatus": string } ], ... }.
     ${findBranding ? `- SCHEMA DEFINITION: ${JSON.stringify(schema.properties)}` : ''}
