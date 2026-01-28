@@ -401,6 +401,7 @@ const App: React.FC = () => {
       if (rosterError) console.error("[Auth Debug] Failed to fetch rosters:", rosterError.message);
 
       if (rosterData) {
+        console.log("Fetched Rosters Raw:", rosterData);
         setRosters(rosterData.map((r: any) => ({
           id: r.id,
           userId: r.user_id,
@@ -500,6 +501,11 @@ const App: React.FC = () => {
       } catch (tokenErr) {
         console.warn("Token auto-refresh failed, attempting save anyway...", tokenErr);
       }
+
+      console.log("Saving Roster Payload:", {
+        teamName: newRoster.teamName,
+        metadata: newRoster.teamMetadata
+      });
 
       console.log("Sending insert to Supabase:", newRoster);
       const { data, error } = await supabase.from('rosters').insert({
@@ -700,7 +706,7 @@ const App: React.FC = () => {
 
                 // Update local state
                 setRosters(prev => prev.map(old => old.id === r.id ? r : old));
-              }} userTier={profile.subscriptionTier} creditsUsed={profile.creditsUsed} selectedRosterId={selectedRosterId} onSelectRoster={setSelectedRosterId} onSelectProject={setActiveProjectId} onCreateSubfolder={(pid) => { setCreatingFolderInId(pid || 'root'); setNewProjectName(''); }} />}
+              }} userTier={profile.subscriptionTier} creditsUsed={profile.creditsUsed} selectedRosterId={selectedRosterId} onSelectRoster={setSelectedRosterId} onSelectProject={setActiveProjectId} onCreateSubfolder={(pid) => { setCreatingFolderInId(pid || 'root'); setNewProjectName(''); }} isLoading={loadingData} />}
               {view === 'engine' && <Engine userTier={profile.subscriptionTier} projects={projects} creditsUsed={profile.creditsUsed} maxCredits={getTierLimit(profile.subscriptionTier)} onSave={handleSaveRoster} onStartProcessing={handleStartProcessing} isProcessing={isProcessing} pendingRoster={pendingRoster} onClearPending={() => setPendingRoster(null)} onDeletePlayer={async (athleteName) => {
                 await logActivity(profile.id, 'PLAYER_DELETE', `Removed player ${athleteName} from roster.`);
               }} />}
