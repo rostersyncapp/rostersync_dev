@@ -1,0 +1,83 @@
+{
+    "nav": {
+        "dashboard": "Panel",
+        "engine": "Motor",
+        "settings": "Configuración",
+        "about": "Acerca de",
+        "signIn": "Iniciar Sesión",
+        "signUp": "Registrarse",
+        "signOut": "Cerrar Sesión"
+    },
+    "actions": {
+        "save": "Guardar",
+        "cancel": "Cancelar",
+        "delete": "Eliminar",
+        "edit": "Editar",
+        "export": "Exportar",
+        "upload": "Subir",
+        "process": "Procesar",
+        "close": "Cerrar",
+        "confirm": "Confirmar",
+        "newRoster": "Nueva Lista",
+        "addPlayer": "Agregar Jugador",
+        "deleteRoster": "Eliminar Lista"
+    },
+    "status": {
+        "loading": "Cargando...",
+        "processing": "Procesando...",
+        "success": "Éxito",
+        "error": "Error",
+        "saved": "Guardado"
+    },
+    "dashboard": {
+        "title": "Biblioteca de Listas",
+        "empty": "Aún no hay listas",
+        "athletes": "{{count}} atleta",
+        "athletes_plural": "{{count}} atletas",
+        "search": "Buscar...",
+        "filter": "Filtrar",
+        "sort": "Ordenar por",
+        "lastModified": "Última modificación",
+        "created": "Creado"
+    },
+    "engine": {
+        "title": "Procesar Lista",
+        "teamName": "Nombre del Equipo",
+        "season": "Temporada",
+        "uploadPrompt": "Sube o pega datos de lista",
+        "preview": "Vista Previa",
+        "selectTeam": "Seleccionar Equipo"
+    },
+    "settings": {
+        "title": "Configuración",
+        "tabs": {
+            "subscription": "Suscripción",
+            "activity": "Registro de Actividad",
+            "roi": "ROI de Rendimiento"
+        },
+        "currentUsage": "Uso Actual",
+        "creditsUsed": "{{used}} / {{limit}} Créditos Usados",
+        "upgrade": "Mejorar Plan",
+        "roi": {
+            "totalSavings": "Ahorro Total de Costos",
+            "timeSaved": "Tiempo Ahorrado",
+            "rostersProcessed": "Listas Procesadas",
+            "costPerAthlete": "Costo por Atleta",
+            "efficiency": "Eficiencia",
+            "volume": "Volumen",
+            "unitCost": "Costo Unitario",
+            "timeSavedDesc": "Tiempo ahorrado vs entrada manual",
+            "rostersDesc": "Listas ({{count}} atletas)",
+            "costDesc": "Por atleta vs $3.00 manual",
+            "costBreakdown": "Desglose de Costos",
+            "manualEntry": "Entrada Manual",
+            "manualDesc": "4 min/atleta @ $45/hr",
+            "rosterSync": "RosterSync",
+            "rosterSyncDesc": "$0.04/atleta automatizado",
+            "instantProcessing": "Procesamiento instantáneo",
+            "netSavings": "Ahorro Neto",
+            "reduction": "reducción",
+            "insights": "Perspectivas de Optimización"
+        }
+    }
+}
