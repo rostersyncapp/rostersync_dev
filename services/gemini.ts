@@ -824,6 +824,13 @@ COLORS: Search teamcolorcodes.com for HEX, RGB, Pantone (PMS), and CMYK values.`
   console.log("Candidate JSON:", cleanJson);
   const parsedResult = JSON.parse(cleanJson);
 
+  // VERBOSE DEBUG: What did the AI extract for teamName?
+  console.log('[Gemini] ==== TEAM IDENTIFICATION DEBUG ====');
+  console.log('[Gemini] AI extracted teamName:', parsedResult.teamName);
+  console.log('[Gemini] AI extracted sport:', parsedResult.sport);
+  console.log('[Gemini] First 3 athletes:', (parsedResult.athletes || []).slice(0, 3).map((a: any) => a.fullName));
+
+
   // Debug: log branding data received from AI
   if (findBranding) {
     console.log('[Gemini] Branding data from AI:', {
