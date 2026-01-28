@@ -130,7 +130,7 @@ export async function processRosterRawText(
   const schema = getSchemaForTier(tier, isNocMode, findBranding);
 
   const brandingInstruction = findBranding
-    ? "BRANDING DISCOVERY: Use Google Search to find the official team logo URL (PREFER: PNG with transparent background, Wikipedia/Official Site) and their primary/secondary hex color codes."
+    ? "BRANDING DISCOVERY: Use Google Search to find the official team logo URL. PRIORITY ORDER: 1) espn.com (e.g. a]assets.espn.go.com/combiner/i?img=/i/teamlogos/...), 2) Wikipedia, 3) Official team site. PREFER PNG with transparent background. Also find the primary/secondary hex color codes."
     : "Use default branding colors (#5B5FFF and #1A1A1A).";
 
   const systemInstruction = `You are an expert broadcast metadata extractor.
