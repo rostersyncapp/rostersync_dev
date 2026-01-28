@@ -311,7 +311,6 @@ export const Engine: React.FC<Props> = ({
                   </optgroup>
                   <optgroup label="🏒 Hockey">
                     <option value="nhl">NHL</option>
-                    <option value="ahl">AHL</option>
                   </optgroup>
                   <optgroup label="⚾ Baseball">
                     <option value="mlb">MLB</option>
