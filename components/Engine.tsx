@@ -154,12 +154,17 @@ export const Engine: React.FC<Props> = ({
   };
 
   const handleTeamSelected = (team: any) => {
+    console.log('[Engine] Team selected from modal:', team);
+    console.log('[Engine] Sport metadata:', team.sport, 'League:', team.league);
     setTeamName(team.name);
     setLogoUrl(team.logoUrl);
     setPrimaryColor(team.primaryColor);
     setSecondaryColor(team.secondaryColor);
     // Preserve sport metadata (league is shown in UI but not stored separately)
-    if (team.sport) setSport(team.sport);
+    if (team.sport) {
+      console.log('[Engine] Setting sport to:', team.sport);
+      setSport(team.sport);
+    }
     setShowTeamSelection(false);
   };
 

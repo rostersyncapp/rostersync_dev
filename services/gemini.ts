@@ -1547,6 +1547,7 @@ COLORS: Search teamcolorcodes.com for HEX, RGB, Pantone (PMS), and CMYK values.`
       for (const key of allMatchingKeys) {
         const team = KNOWN_TEAM_LOGOS[key];
         const espnData = ESPN_TEAM_IDS[key]; // Look up sport/league metadata
+        console.log(`[Gemini] Team "${key}": sport=${espnData?.sport}, league=${espnData?.league}`);
         if (!uniqueTeams.has(team.logoUrl)) {
           uniqueTeams.set(team.logoUrl, {
             name: key,
