@@ -880,7 +880,21 @@ COLORS: Search teamcolorcodes.com for HEX, RGB, Pantone (PMS), and CMYK values.`
   // PRIORITY: Check hardcoded known teams first (most reliable)
   const teamNameUpper = (parsedResult.teamName || "").toUpperCase().trim();
   console.log('[Gemini] Checking KNOWN_TEAM_LOGOS for:', teamNameUpper);
-  const knownTeam = KNOWN_TEAM_LOGOS[teamNameUpper];
+
+  let knownTeam = KNOWN_TEAM_LOGOS[teamNameUpper];
+
+  // If no exact match, try fuzzy matching (e.g. "Sacramento Republic" -> "SACRAMENTO REPUBLIC FC")
+  if (!knownTeam && teamNameUpper.length > 3) {
+    const potentialKey = Object.keys(KNOWN_TEAM_LOGOS).find(key =>
+      // check if one contains the other
+      key.includes(teamNameUpper) || teamNameUpper.includes(key)
+    );
+    if (potentialKey) {
+      console.log(`[Gemini] Fuzzy match found: "${teamNameUpper}" -> "${potentialKey}"`);
+      knownTeam = KNOWN_TEAM_LOGOS[potentialKey];
+    }
+  }
+
   if (knownTeam) {
     console.log('[Gemini] Using hardcoded branding for known team:', teamNameUpper);
     finalBranding.logoUrl = knownTeam.logoUrl;
