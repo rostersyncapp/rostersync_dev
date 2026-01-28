@@ -528,6 +528,7 @@ const App: React.FC = () => {
       }
 
       if (data) {
+        await logActivity(profile.id, 'ROSTER_SAVE', `Saved roster for ${newRoster.teamName} (${newRoster.rosterData?.length || 0} athletes).`);
         setRosters(prev => [{ ...newRoster, id: data.id, createdAt: data.created_at, isSynced: true }, ...prev]);
       }
     } else {

@@ -167,12 +167,14 @@ export async function getMonthlyUsage(userId: string): Promise<number> {
 /**
  * Activity Types
  */
-export type ActivityType = 
-  | 'LOGIN' 
-  | 'LOGOUT' 
-  | 'ROSTER_DELETE' 
-  | 'PLAYER_DELETE' 
-  | 'PROJECT_FOLDER_DELETE' 
+export type ActivityType =
+  | 'LOGIN'
+  | 'LOGOUT'
+  | 'ROSTER_SAVE'
+  | 'ROSTER_DELETE'
+  | 'ROSTER_EXPORT'
+  | 'PLAYER_DELETE'
+  | 'PROJECT_FOLDER_DELETE'
   | 'ROSTER_UPDATE';
 
 export interface ActivityLog {
@@ -187,15 +189,15 @@ export interface ActivityLog {
  * Log specific user activities
  */
 export async function logActivity(
-  userId: string, 
-  actionType: ActivityType, 
+  userId: string,
+  actionType: ActivityType,
   description: string
 ): Promise<void> {
   if (!isSupabaseConfigured) {
     console.log('[Activity] (Supabase not configured):', actionType, description);
     return;
   }
-  
+
   try {
     const { error } = await supabase
       .from('activity_logs')
@@ -204,7 +206,7 @@ export async function logActivity(
         action_type: actionType,
         description: description
       });
-    
+
     if (error) {
       console.error('[Activity] Error logging:', actionType, error);
     } else {
@@ -220,18 +222,18 @@ export async function logActivity(
  */
 export async function getActivityLogs(userId: string): Promise<ActivityLog[]> {
   if (!isSupabaseConfigured) return [];
-  
+
   const { data, error } = await supabase
     .from('activity_logs')
     .select('id, user_id, action_type, description, created_at')
     .eq('user_id', userId)
     .order('created_at', { ascending: false })
     .limit(20);
-  
+
   if (error) {
     console.error('[Activity] Fetch error:', error);
     return [];
   }
-  
+
   return data || [];
 }
