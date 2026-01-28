@@ -258,7 +258,29 @@ export const Engine: React.FC<Props> = ({
                 </label>
                 <select
                   value={league}
-                  onChange={(e) => setLeague(e.target.value)}
+                  onChange={(e) => {
+                    const selectedLeague = e.target.value;
+                    setLeague(selectedLeague);
+
+                    // Auto-set sport based on league
+                    const leagueToSport: Record<string, string> = {
+                      'nba': 'NBA', 'wnba': 'WNBA', 'ncaa-basketball': 'NCAA Basketball', 'euroleague': 'EuroLeague',
+                      'nfl': 'NFL', 'ncaa-football': 'NCAA Football', 'cfl': 'CFL',
+                      'premier-league': 'Premier League', 'la-liga': 'La Liga', 'serie-a': 'Serie A',
+                      'bundesliga': 'Bundesliga', 'ligue-1': 'Ligue 1', 'mls': 'MLS', 'liga-mx': 'Liga MX',
+                      'eredivisie': 'Eredivisie', 'usl': 'USL Championship',
+                      'ipl': 'IPL', 'bbl': 'Big Bash League', 'the-hundred': 'The Hundred', 'cpl': 'Caribbean Premier League',
+                      'nhl': 'NHL', 'ahl': 'AHL',
+                      'mlb': 'MLB', 'milb': 'Minor League Baseball',
+                      'f1': 'Formula 1', 'nascar': 'NASCAR', 'indycar': 'IndyCar'
+                    };
+
+                    if (selectedLeague && leagueToSport[selectedLeague]) {
+                      setSport(leagueToSport[selectedLeague]);
+                    } else if (!selectedLeague) {
+                      setSport(''); // Reset sport if auto-detect
+                    }
+                  }}
                   className="w-full px-5 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl text-base font-medium outline-none focus:ring-2 focus:ring-[#5B5FFF]/20"
                 >
                   <option value="">Auto-detect from team name</option>
