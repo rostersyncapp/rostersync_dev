@@ -1,6 +1,7 @@
 
 import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
 import { Athlete, NILStatus, SubscriptionTier } from "../types.ts";
+import { getBrandingCache, saveBrandingCache } from "./supabase.ts";
 
 // Helper to get the key even if the build tool is doing static analysis on process.env.API_KEY
 const getApiKey = () => {
@@ -219,6 +220,44 @@ export async function processRosterRawText(
     countryCode: a.countryCode || parsedResult.countryCode,
     event: a.event
   }));
+  // Check branding cache if branding was enabled
+  let finalBranding = {
+    primaryColor: parsedResult.primaryColor || "#5B5FFF",
+    secondaryColor: parsedResult.secondaryColor || "#1A1A1A",
+    conference: parsedResult.conference || "General",
+    abbreviation: parsedResult.abbreviation || "UNK",
+    countryCode: parsedResult.countryCode,
+    logoUrl: parsedResult.logoUrl
+  };
+
+  if (findBranding && parsedResult.teamName && parsedResult.sport) {
+    // Try to get cached branding
+    const cachedBranding = await getBrandingCache(parsedResult.teamName, parsedResult.sport);
+
+    if (cachedBranding) {
+      // Use cached branding data
+      console.log('[Gemini] Using cached branding for:', parsedResult.teamName);
+      finalBranding = {
+        primaryColor: cachedBranding.primary_color || finalBranding.primaryColor,
+        secondaryColor: cachedBranding.secondary_color || finalBranding.secondaryColor,
+        conference: finalBranding.conference,
+        abbreviation: cachedBranding.abbreviation || finalBranding.abbreviation,
+        countryCode: parsedResult.countryCode,
+        logoUrl: cachedBranding.logo_url || finalBranding.logoUrl
+      };
+    } else if (parsedResult.logoUrl || parsedResult.primaryColor) {
+      // Save new branding to cache for future use
+      console.log('[Gemini] Saving branding to cache for:', parsedResult.teamName);
+      saveBrandingCache({
+        team_name: parsedResult.teamName,
+        sport: parsedResult.sport,
+        logo_url: parsedResult.logoUrl || null,
+        primary_color: parsedResult.primaryColor || null,
+        secondary_color: parsedResult.secondaryColor || null,
+        abbreviation: parsedResult.abbreviation || null
+      });
+    }
+  }
 
   return {
     teamName: parsedResult.teamName || (isNocMode ? "Unknown NOC" : "Unknown Team"),
@@ -227,13 +266,6 @@ export async function processRosterRawText(
     isNocMode: isNocMode,
     athletes: athletes,
     verificationSources,
-    teamMetadata: {
-      primaryColor: parsedResult.primaryColor || "#5B5FFF",
-      secondaryColor: parsedResult.secondaryColor || "#1A1A1A",
-      conference: parsedResult.conference || "General",
-      abbreviation: parsedResult.abbreviation || "UNK",
-      countryCode: parsedResult.countryCode,
-      logoUrl: parsedResult.logoUrl
-    }
+    teamMetadata: finalBranding
   };
 }

@@ -238,3 +238,75 @@ export async function getActivityLogs(userId: string): Promise<ActivityLog[]> {
 
   return data || [];
 }
+
+/**
+ * Branding Cache Interface
+ */
+export interface BrandingCache {
+  id?: string;
+  team_name: string;
+  sport: string;
+  logo_url: string | null;
+  primary_color: string | null;
+  secondary_color: string | null;
+  abbreviation: string | null;
+}
+
+/**
+ * Get cached branding for a team
+ */
+export async function getBrandingCache(teamName: string, sport: string): Promise<BrandingCache | null> {
+  if (!isSupabaseConfigured || !teamName || !sport) return null;
+
+  try {
+    const { data, error } = await supabase
+      .from('team_branding_cache')
+      .select('*')
+      .ilike('team_name', teamName)
+      .ilike('sport', sport)
+      .single();
+
+    if (error || !data) {
+      console.log('[BrandingCache] Cache miss for:', teamName, sport);
+      return null;
+    }
+
+    console.log('[BrandingCache] Cache hit for:', teamName, sport);
+    return data as BrandingCache;
+  } catch (err) {
+    console.error('[BrandingCache] Lookup error:', err);
+    return null;
+  }
+}
+
+/**
+ * Save branding to cache
+ */
+export async function saveBrandingCache(branding: BrandingCache): Promise<void> {
+  if (!isSupabaseConfigured || !branding.team_name || !branding.sport) return;
+
+  try {
+    const { error } = await supabase
+      .from('team_branding_cache')
+      .upsert({
+        team_name: branding.team_name.toUpperCase(),
+        sport: branding.sport.toUpperCase(),
+        logo_url: branding.logo_url,
+        primary_color: branding.primary_color,
+        secondary_color: branding.secondary_color,
+        abbreviation: branding.abbreviation,
+        updated_at: new Date().toISOString()
+      }, {
+        onConflict: 'LOWER(team_name), LOWER(sport)',
+        ignoreDuplicates: false
+      });
+
+    if (error) {
+      console.error('[BrandingCache] Save error:', error);
+    } else {
+      console.log('[BrandingCache] Saved:', branding.team_name, branding.sport);
+    }
+  } catch (err) {
+    console.error('[BrandingCache] Save exception:', err);
+  }
+}
