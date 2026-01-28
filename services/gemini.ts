@@ -969,6 +969,22 @@ const ESPN_TEAM_IDS: Record<string, { id: number; sport: string; league: string 
   "TOLUCA": { id: 233, sport: "soccer", league: "mex.1" },
 };
 
+const LEAGUE_DISPLAY_NAMES: Record<string, string> = {
+  "usa.1": "MLS",
+  "usa.nwsl": "NWSL",
+  "eng.1": "Premier League",
+  "esp.1": "La Liga",
+  "ger.1": "Bundesliga",
+  "ita.1": "Serie A",
+  "fra.1": "Ligue 1",
+  "mex.1": "Liga MX",
+  "mlb": "MLB",
+  "nba": "NBA",
+  "nfl": "NFL",
+  "nhl": "NHL",
+  "wnba": "WNBA"
+};
+
 /**
  * Normalize a player name for fuzzy matching
  */
@@ -1414,7 +1430,8 @@ COLORS: Search teamcolorcodes.com for HEX, RGB, Pantone (PMS), and CMYK values.`
   const upperTeamName = (parsedResult.teamName || "").toUpperCase().trim();
   const espnIdentity = ESPN_TEAM_IDS[upperTeamName];
   if (espnIdentity && espnIdentity.league) {
-    standardizedSport = espnIdentity.league.toUpperCase();
+    const rawLeague = espnIdentity.league.toLowerCase();
+    standardizedSport = LEAGUE_DISPLAY_NAMES[rawLeague] || rawLeague.toUpperCase();
     console.log(`[Gemini] Standardized sport to league: ${standardizedSport}`);
   }
 
