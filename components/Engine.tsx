@@ -350,6 +350,7 @@ export const Engine: React.FC<Props> = ({
                 <table className="w-full text-left">
                   <thead className="sticky top-0 z-10">
                     <tr className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-md">
+                      <th className="px-4 py-5 text-[11px] font-bold text-gray-400 uppercase tracking-[0.2em] text-center border-b border-gray-100 dark:border-gray-800 w-12">#</th>
                       <th className="px-6 py-5 text-[11px] font-bold text-gray-400 uppercase tracking-[0.2em] border-b border-gray-100 dark:border-gray-800">Athlete Name</th>
                       <th className="px-6 py-5 text-[11px] font-bold text-gray-400 uppercase tracking-[0.2em] text-center border-b border-gray-100 dark:border-gray-800">{isNocMode ? 'Bib' : 'Jersey'}</th>
                       <th className="px-6 py-5 text-[11px] font-bold text-gray-400 uppercase tracking-[0.2em] text-center border-b border-gray-100 dark:border-gray-800">{isNocMode ? 'Event/Discipline' : 'Position'}</th>
@@ -360,6 +361,7 @@ export const Engine: React.FC<Props> = ({
                   <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                     {processedAthletes.map((a, idx) => (
                       <tr key={a.id || idx} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors group">
+                        <td className="px-4 py-5 text-center text-sm font-medium text-gray-400 dark:text-gray-500">{idx + 1}</td>
                         <td className="px-6 py-5 text-base font-semibold text-gray-900 dark:text-white">{a.fullName}</td>
                         <td className="px-6 py-5 text-center"><span className="inline-block w-12 py-1.5 rounded-xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-sm font-bold">{a.jerseyNumber.toString().replace(/#/g, '')}</span></td>
                         <td className="px-6 py-5 text-center"><span className="inline-block px-4 py-1.5 rounded-xl bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 text-[11px] font-bold uppercase">{a.position.toString().replace(/#/g, '')}</span></td>
