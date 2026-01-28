@@ -1409,9 +1409,18 @@ COLORS: Search teamcolorcodes.com for HEX, RGB, Pantone (PMS), and CMYK values.`
   const teamNameForLookup = parsedResult.teamName || "";
   const athletesWithJerseys = await fillMissingJerseyNumbers(athletes, teamNameForLookup);
 
+  // Standardize Sport/League from ESPN ID Mapping
+  let standardizedSport = parsedResult.sport || "General";
+  const upperTeamName = (parsedResult.teamName || "").toUpperCase().trim();
+  const espnIdentity = ESPN_TEAM_IDS[upperTeamName];
+  if (espnIdentity && espnIdentity.league) {
+    standardizedSport = espnIdentity.league.toUpperCase();
+    console.log(`[Gemini] Standardized sport to league: ${standardizedSport}`);
+  }
+
   return {
     teamName: parsedResult.teamName || (isNocMode ? "Unknown NOC" : "Unknown Team"),
-    sport: parsedResult.sport || "General",
+    sport: standardizedSport,
     seasonYear: extractedSeason,
     isNocMode: isNocMode,
     athletes: athletesWithJerseys,
