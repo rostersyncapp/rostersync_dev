@@ -139,17 +139,17 @@ export async function processRosterRawText(
   const brandingInstruction = findBranding
     ? `BRANDING DISCOVERY: 
 LOGO SOURCES (in priority order):
-1. US SPORTS (NFL/NHL/NBA/MLB/MLS): ESPN CDN https://a.espncdn.com/combiner/i?img=/i/teamlogos/{league}/500/{teamcode}.png&h=200&w=200
-2. SOCCER/FOOTBALL: ESPN Soccer CDN https://a.espncdn.com/combiner/i?img=/i/teamlogos/soccer/500/{team_id}.png or Wikipedia Commons
-3. ALL TEAMS: Wikipedia Commons (search for "{team name} logo" - use the official SVG/PNG from upload.wikimedia.org)
-4. FALLBACK: Official team website logo or thesportsdb.com
+1. ESPN CDN for SOCCER: https://a.espncdn.com/combiner/i?img=/i/teamlogos/soccer/500/{TEAM_ID}.png&w=200
+   - Use Google Search to find "ESPN {team name} team id" to get the correct numeric ID
+   - KNOWN IDS: Liverpool FC=364, Real Madrid=86, Barcelona=83, Manchester United=360, Manchester City=382, Arsenal=359, Chelsea=363, Bayern Munich=132, PSG=160, Juventus=111
+2. ESPN CDN for US SPORTS: https://a.espncdn.com/combiner/i?img=/i/teamlogos/{league}/500/{code}.png&h=200&w=200
+   - NFL: ne, dal, gb, etc. | NHL: bos, nyr, chi | NBA: lal, bos, chi | MLB: nyy, bos, lad
+3. WIKIPEDIA: For any team, search Google for "{team name} logo site:upload.wikimedia.org" and use the official SVG/PNG
+4. FALLBACK: Use thesportsdb.com or official team website
 
-EXAMPLE LOGOS:
-- Liverpool FC: https://a.espncdn.com/combiner/i?img=/i/teamlogos/soccer/500/364.png&w=200
-- Boston Bruins: https://a.espncdn.com/combiner/i?img=/i/teamlogos/nhl/500/bos.png&h=200&w=200
-- Real Madrid: https://a.espncdn.com/combiner/i?img=/i/teamlogos/soccer/500/86.png&w=200
+CRITICAL: Never guess team IDs. If unsure, use Google Search to find the correct ESPN team ID or Wikipedia logo URL.
 
-COLORS: Search teamcolorcodes.com for complete color info including HEX, RGB, Pantone (PMS), and CMYK values.`
+COLORS: Search teamcolorcodes.com for HEX, RGB, Pantone (PMS), and CMYK values.`
     : "Use default branding colors (#5B5FFF and #1A1A1A).";
 
   const systemInstruction = `You are an expert broadcast metadata extractor.
