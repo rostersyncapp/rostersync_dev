@@ -914,14 +914,18 @@ COLORS: Search teamcolorcodes.com for HEX, RGB, Pantone (PMS), and CMYK values.`
   let knownTeam = KNOWN_TEAM_LOGOS[teamNameUpper];
 
   // If no exact match, try fuzzy matching (e.g. "Sacramento Republic" -> "SACRAMENTO REPUBLIC FC")
+  // SMART MATCHING: Prefer the LONGEST match to avoid "KINGS" matching LA Kings over "SACRAMENTO KINGS"
   if (!knownTeam && teamNameUpper.length > 3) {
-    const potentialKey = Object.keys(KNOWN_TEAM_LOGOS).find(key =>
-      // check if one contains the other
+    const allMatchingKeys = Object.keys(KNOWN_TEAM_LOGOS).filter(key =>
       key.includes(teamNameUpper) || teamNameUpper.includes(key)
     );
-    if (potentialKey) {
-      console.log(`[Gemini] Fuzzy match found: "${teamNameUpper}" -> "${potentialKey}"`);
-      knownTeam = KNOWN_TEAM_LOGOS[potentialKey];
+
+    if (allMatchingKeys.length > 0) {
+      // Sort by length descending - longer keys are more specific
+      allMatchingKeys.sort((a, b) => b.length - a.length);
+      const bestMatch = allMatchingKeys[0];
+      console.log(`[Gemini] Fuzzy match found: "${teamNameUpper}" -> "${bestMatch}" (from ${allMatchingKeys.length} candidates)`);
+      knownTeam = KNOWN_TEAM_LOGOS[bestMatch];
     }
   }
 
