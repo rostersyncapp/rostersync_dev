@@ -879,6 +879,7 @@ COLORS: Search teamcolorcodes.com for HEX, RGB, Pantone (PMS), and CMYK values.`
 
   // PRIORITY: Check hardcoded known teams first (most reliable)
   const teamNameUpper = (parsedResult.teamName || "").toUpperCase().trim();
+  console.log('[Gemini] Checking KNOWN_TEAM_LOGOS for:', teamNameUpper);
   const knownTeam = KNOWN_TEAM_LOGOS[teamNameUpper];
   if (knownTeam) {
     console.log('[Gemini] Using hardcoded branding for known team:', teamNameUpper);
