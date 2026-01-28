@@ -318,7 +318,7 @@ export const Dashboard: React.FC<Props> = ({
                     <div className="flex items-center gap-4 mt-2 text-gray-500 text-sm font-medium">
                       <span className="flex items-center gap-1.5"><Calendar size={16} /> {selectedRoster.seasonYear}</span>
                       <span className="flex items-center gap-1.5"><Users size={16} /> {selectedRoster.athleteCount} Athletes</span>
-                      <span className="px-3 py-1 bg-[#5B5FFF] dark:bg-[#4A4EDD] text-white rounded-full text-[10px] font-black uppercase tracking-widest">{selectedRoster.sport}</span>
+                      <span className="px-3 py-1 bg-[#5B5FFF] dark:bg-[#4A4EDD] text-white rounded-full text-[10px] font-black uppercase tracking-widest">{selectedRoster.league || selectedRoster.sport}</span>
                     </div>
                   </>
                 )}
