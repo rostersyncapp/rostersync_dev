@@ -158,6 +158,8 @@ export const Engine: React.FC<Props> = ({
     setLogoUrl(team.logoUrl);
     setPrimaryColor(team.primaryColor);
     setSecondaryColor(team.secondaryColor);
+    // Preserve sport metadata (league is shown in UI but not stored separately)
+    if (team.sport) setSport(team.sport);
     setShowTeamSelection(false);
   };
 

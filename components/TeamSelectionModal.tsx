@@ -6,6 +6,8 @@ interface CandidateTeam {
     logoUrl: string;
     primaryColor: string;
     secondaryColor: string;
+    sport?: string;
+    league?: string;
 }
 
 interface TeamSelectionModalProps {
@@ -73,6 +75,11 @@ export const TeamSelectionModal: React.FC<TeamSelectionModalProps> = ({
                                 <div className="font-bold text-gray-900 dark:text-white group-hover:text-[#5B5FFF] transition-colors">
                                     {team.name}
                                 </div>
+                                {team.league && (
+                                    <div className="text-xs text-gray-500 dark:text-gray-400 font-medium uppercase mt-0.5">
+                                        {team.league}
+                                    </div>
+                                )}
                                 <div className="flex items-center gap-2 mt-1">
                                     <div
                                         className="w-4 h-4 rounded-full border border-gray-200 dark:border-gray-600"
