@@ -1072,6 +1072,23 @@ const ESPN_TEAM_IDS: Record<string, { id: number; sport: string; league: string 
   "UCONN HUSKIES (BB)": { id: 41, sport: "basketball", league: "mens-college-basketball" },
   "UCONN": { id: 41, sport: "basketball", league: "mens-college-basketball" },
   "VILLANOVA WILDCATS": { id: 222, sport: "basketball", league: "mens-college-basketball" },
+  // IPL (Cricket) - IDs are placeholders/unofficial
+  "CHENNAI SUPER KINGS": { id: 0, sport: "cricket", league: "ipl" },
+  "CSK": { id: 0, sport: "cricket", league: "ipl" },
+  "DELHI CAPITALS": { id: 0, sport: "cricket", league: "ipl" },
+  "GUJARAT TITANS": { id: 0, sport: "cricket", league: "ipl" },
+  "KOLKATA KNIGHT RIDERS": { id: 0, sport: "cricket", league: "ipl" },
+  "KKR": { id: 0, sport: "cricket", league: "ipl" },
+  "LUCKNOW SUPER GIANTS": { id: 0, sport: "cricket", league: "ipl" },
+  "LSG": { id: 0, sport: "cricket", league: "ipl" },
+  "MUMBAI INDIANS": { id: 0, sport: "cricket", league: "ipl" },
+  "PUNJAB KINGS": { id: 0, sport: "cricket", league: "ipl" },
+  "PBKS": { id: 0, sport: "cricket", league: "ipl" },
+  "RAJASTHAN ROYALS": { id: 0, sport: "cricket", league: "ipl" },
+  "ROYAL CHALLENGERS BENGALURU": { id: 0, sport: "cricket", league: "ipl" },
+  "RCB": { id: 0, sport: "cricket", league: "ipl" },
+  "SUNRISERS HYDERABAD": { id: 0, sport: "cricket", league: "ipl" },
+  "SRH": { id: 0, sport: "cricket", league: "ipl" },
 };
 
 const LEAGUE_DISPLAY_NAMES: Record<string, string> = {
@@ -1091,7 +1108,8 @@ const LEAGUE_DISPLAY_NAMES: Record<string, string> = {
   "wnba": "WNBA",
   "college-football": "NCAA Football",
   "mens-college-basketball": "NCAA Men's Basketball",
-  "f1": "Formula 1"
+  "f1": "Formula 1",
+  "ipl": "IPL (Cricket)"
 };
 
 /**
