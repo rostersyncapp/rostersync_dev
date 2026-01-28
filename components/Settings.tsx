@@ -35,7 +35,7 @@ interface Props {
 const ACTIVITY_ICONS: Record<ActivityType, React.ReactNode> = {
   LOGIN: <LogIn size={16} className="text-green-500" />,
   LOGOUT: <LogOut size={16} className="text-gray-500" />,
-  ROSTER_SAVE: <Save size={16} className="text-emerald-500" />,
+  ROSTER_SAVE: <Save size={16} className="text-yellow-500" />,
   ROSTER_DELETE: <Trash2 size={16} className="text-red-500" />,
   ROSTER_EXPORT: <Download size={16} className="text-blue-500" />,
   PLAYER_ADD: <UserPlus size={16} className="text-cyan-500" />,
