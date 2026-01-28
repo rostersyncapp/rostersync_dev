@@ -1,13 +1,13 @@
 
 import React from 'react';
-import { 
-  LayoutDashboard, 
-  Cpu, 
-  Settings, 
-  LogOut, 
-  ChevronRight, 
-  Download, 
-  CheckCircle2, 
+import {
+  LayoutDashboard,
+  Cpu,
+  Settings,
+  LogOut,
+  ChevronRight,
+  Download,
+  CheckCircle2,
   AlertCircle,
   FileJson,
   FileCode,
@@ -45,7 +45,7 @@ export const PRICING_TIERS = [
     monthlyCredits: 10,
     description: 'Perfect for testing and small local clubs.',
     features: ['10 AI Credits / Month', 'Standard CSV Export', 'Basic Normalization', 'Community Support'],
-    polarCheckoutUrl: '#' 
+    polarCheckoutUrl: '#'
   },
   {
     name: 'Pro',
@@ -54,7 +54,7 @@ export const PRICING_TIERS = [
     monthlyCredits: 250,
     description: 'High volume processing for media houses.',
     features: ['250 AI Credits / Month', 'Adobe Premiere (MOGRT)', 'Iconik MAM JSON', 'Unlimited Storage', 'Phonetic Guides'],
-    polarCheckoutUrl: 'https://polar.sh/rostersync/products/pro-tier' 
+    polarCheckoutUrl: 'https://polar.sh/rostersync/products/pro-tier'
   },
   {
     name: 'Network',
@@ -63,7 +63,7 @@ export const PRICING_TIERS = [
     monthlyCredits: 3000,
     description: 'Full broadcast integration for networks.',
     features: ['3,000 AI Credits / Month', 'Ross DataLinq XML', 'Localization (EN/ES/ZH)', 'Priority 24/7 Support', 'API Access'],
-    polarCheckoutUrl: 'https://polar.sh/rostersync/products/network-tier' 
+    polarCheckoutUrl: 'https://polar.sh/rostersync/products/network-tier'
   }
 ];
 

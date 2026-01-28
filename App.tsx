@@ -489,13 +489,13 @@ const App: React.FC = () => {
   const [teamSelectionCandidates, setTeamSelectionCandidates] = useState<{ name: string; logoUrl: string; primaryColor: string; secondaryColor: string }[]>([]);
   const [pendingRosterWithCandidates, setPendingRosterWithCandidates] = useState<ProcessedRoster | null>(null);
 
-  const handleStartProcessing = async (text: string, isNocMode: boolean = false, seasonYear: string = '', findBranding: boolean = false) => {
+  const handleStartProcessing = async (text: string, isNocMode: boolean = false, seasonYear: string = '', findBranding: boolean = false, league?: string) => {
     const limit = getTierLimit(profile.subscriptionTier);
     if (profile.creditsUsed >= limit) { alert(`Limit Reached! ${profile.creditsUsed}/${limit}`); return; }
     setIsProcessing(true);
     handleSetView('engine');
     try {
-      const result = await processRosterRawText(text, profile.subscriptionTier, isNocMode, seasonYear, findBranding, profile.id);
+      const result = await processRosterRawText(text, profile.subscriptionTier, isNocMode, seasonYear, findBranding, profile.id, league);
 
       // Check if there are multiple team candidates
       if (result.candidateTeams && result.candidateTeams.length > 1) {

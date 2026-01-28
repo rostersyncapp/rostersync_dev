@@ -39,7 +39,7 @@ interface Props {
   creditsUsed: number;
   maxCredits: number;
   onSave: (roster: Roster) => void;
-  onStartProcessing: (text: string, isNocMode: boolean, seasonYear: string, findBranding: boolean) => void;
+  onStartProcessing: (text: string, isNocMode: boolean, seasonYear: string, findBranding: boolean, league?: string) => void;
   isProcessing: boolean;
   pendingRoster: ProcessedRoster | null;
   onClearPending: () => void;
@@ -116,7 +116,7 @@ export const Engine: React.FC<Props> = ({
     const inputWithTeam = manualTeamName.trim()
       ? `Team: ${manualTeamName.trim()}\n\n${rawInput}`
       : rawInput;
-    onStartProcessing(inputWithTeam, isNocMode, seasonYear, true);
+    onStartProcessing(inputWithTeam, isNocMode, seasonYear, true, league);
   };
 
   const handleSaveToLibrary = () => {
@@ -269,10 +269,13 @@ export const Engine: React.FC<Props> = ({
                       'premier-league': 'Premier League', 'la-liga': 'La Liga', 'serie-a': 'Serie A',
                       'bundesliga': 'Bundesliga', 'ligue-1': 'Ligue 1', 'mls': 'MLS', 'liga-mx': 'Liga MX',
                       'eredivisie': 'Eredivisie', 'usl': 'USL Championship',
-                      'ipl': 'IPL', 'bbl': 'Big Bash League', 'the-hundred': 'The Hundred', 'cpl': 'Caribbean Premier League',
-                      'nhl': 'NHL', 'ahl': 'AHL',
-                      'mlb': 'MLB', 'milb': 'Minor League Baseball',
-                      'f1': 'Formula 1', 'nascar': 'NASCAR', 'indycar': 'IndyCar'
+                      'ipl': 'IPL',
+                      'nhl': 'NHL',
+                      'mlb': 'MLB',
+                      'milb-aaa': 'Triple-A',
+                      'milb-aa': 'Double-A',
+                      'milb-higha': 'High-A',
+                      'milb-a': 'Single-A'
                     };
 
                     if (selectedLeague && leagueToSport[selectedLeague]) {
@@ -314,7 +317,10 @@ export const Engine: React.FC<Props> = ({
                   </optgroup>
                   <optgroup label="⚾ Baseball">
                     <option value="mlb">MLB</option>
-                    <option value="milb">Minor League Baseball</option>
+                    <option value="milb-aaa">MiLB Triple-A</option>
+                    <option value="milb-aa">MiLB Double-A</option>
+                    <option value="milb-higha">MiLB High-A</option>
+                    <option value="milb-a">MiLB Single-A</option>
                   </optgroup>
                 </select>
                 <p className="text-[10px] text-gray-400 mt-1">Selecting a league reduces AI processing costs by ~80%</p>

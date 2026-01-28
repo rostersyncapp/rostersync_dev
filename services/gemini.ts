@@ -1171,7 +1171,18 @@ const LEAGUE_DISPLAY_NAMES: Record<string, string> = {
   "college-football": "NCAA Football",
   "mens-college-basketball": "NCAA Men's Basketball",
   "f1": "Formula 1",
-  "ipl": "IPL (Cricket)"
+  "ipl": "IPL (Cricket)",
+  "milb-aaa": "Triple-A",
+  "milb-aa": "Double-A",
+  "milb-higha": "High-A",
+  "milb-a": "Single-A"
+};
+
+const MILB_SPORT_IDS: Record<string, number> = {
+  "milb-aaa": 11,
+  "milb-aa": 12,
+  "milb-higha": 13,
+  "milb-a": 14
 };
 
 /**
@@ -1224,23 +1235,80 @@ async function fetchESPNRoster(teamName: string): Promise<Map<string, string> | 
 }
 
 /**
- * Fill in missing jersey numbers by matching against ESPN roster
+ * Fetch team roster from MLB Stats API (for MiLB)
  */
-async function fillMissingJerseyNumbers(athletes: any[], teamName: string): Promise<any[]> {
-  console.log(`[ESPN] fillMissingJerseyNumbers called with team: "${teamName}", athletes: ${athletes.length}`);
+async function fetchMilbRoster(teamName: string, league: string): Promise<Map<string, string> | null> {
+  const sportId = MILB_SPORT_IDS[league];
+  if (!sportId) return null;
+
+  try {
+    // Stage 1: Find Team ID
+    const searchUrl = `https://statsapi.mlb.com/api/v1/teams?sportId=${sportId}`;
+    console.log(`[MiLB] Searching for team "${teamName}" in sportId ${sportId}: ${searchUrl}`);
+    const searchResponse = await fetch(searchUrl);
+    if (!searchResponse.ok) return null;
+
+    const searchData = await searchResponse.json();
+    const upperTeamName = teamName.toUpperCase().trim();
+
+    const team = searchData.teams?.find((t: any) =>
+      t.name.toUpperCase().includes(upperTeamName) ||
+      upperTeamName.includes(t.teamName.toUpperCase())
+    );
+
+    if (!team) {
+      console.log(`[MiLB] Team "${teamName}" not found in Level ${league}`);
+      return null;
+    }
+
+    // Stage 2: Fetch Roster
+    const rosterUrl = `https://statsapi.mlb.com/api/v1/teams/${team.id}/roster`;
+    console.log(`[MiLB] Fetching roster for ${team.name} (ID: ${team.id}): ${rosterUrl}`);
+    const rosterResponse = await fetch(rosterUrl);
+    if (!rosterResponse.ok) return null;
+
+    const rosterData = await rosterResponse.json();
+    const rosterMap = new Map<string, string>();
+
+    if (rosterData.roster && Array.isArray(rosterData.roster)) {
+      for (const entry of rosterData.roster) {
+        if (entry.person?.fullName && entry.jerseyNumber) {
+          rosterMap.set(normalizePlayerName(entry.person.fullName), entry.jerseyNumber);
+        }
+      }
+    }
+
+    console.log(`[MiLB] Loaded ${rosterMap.size} players with jersey numbers`);
+    return rosterMap;
+  } catch (error) {
+    console.error('[MiLB] Failed to fetch roster:', error);
+    return null;
+  }
+}
+
+/**
+ * Fill in missing jersey numbers by matching against external roster data (ESPN or MiLB)
+ */
+async function fillMissingJerseyNumbers(athletes: any[], teamName: string, league?: string): Promise<any[]> {
+  console.log(`[Roster Sync] fillMissingJerseyNumbers called with team: "${teamName}", league: ${league || 'unknown'}, athletes: ${athletes.length}`);
 
   const missingJerseys = athletes.filter(a => !a.jerseyNumber || a.jerseyNumber === '00' || a.jerseyNumber === '');
 
   if (missingJerseys.length === 0) {
-    console.log('[ESPN] All athletes have jersey numbers, skipping lookup');
+    console.log('[Roster Sync] All athletes have jersey numbers, skipping lookup');
     return athletes;
   }
 
-  console.log(`[ESPN] ${missingJerseys.length} athlete(s) missing jersey numbers:`, missingJerseys.map(a => a.fullName));
-  const espnRoster = await fetchESPNRoster(teamName);
+  let externalRoster: Map<string, string> | null = null;
 
-  if (!espnRoster || espnRoster.size === 0) {
-    console.log('[ESPN] No roster data available - returning original athletes');
+  if (league && MILB_SPORT_IDS[league]) {
+    externalRoster = await fetchMilbRoster(teamName, league);
+  } else {
+    externalRoster = await fetchESPNRoster(teamName);
+  }
+
+  if (!externalRoster || externalRoster.size === 0) {
+    console.log('[Roster Sync] No external roster data available - returning original athletes');
     return athletes;
   }
 
@@ -1248,36 +1316,19 @@ async function fillMissingJerseyNumbers(athletes: any[], teamName: string): Prom
   const updatedAthletes = athletes.map(athlete => {
     if (!athlete.jerseyNumber || athlete.jerseyNumber === '00' || athlete.jerseyNumber === '') {
       const normalizedName = normalizePlayerName(athlete.fullName || '');
-      console.log(`[ESPN] Looking up: "${athlete.fullName}" -> normalized: "${normalizedName}"`);
-      const jerseyNumber = espnRoster.get(normalizedName);
+      const jerseyNumber = externalRoster?.get(normalizedName);
 
       if (jerseyNumber) {
-        console.log(`[ESPN] ✓ Found jersey for ${athlete.fullName}: #${jerseyNumber}`);
+        console.log(`[Roster Sync] ✓ Found jersey for ${athlete.fullName}: #${jerseyNumber}`);
         filledCount++;
         return { ...athlete, jerseyNumber: formatJerseyNumber(jerseyNumber) };
-      } else {
-        console.log(`[ESPN] ✗ No match found in ESPN roster for: "${normalizedName}"`);
       }
     }
     return athlete;
   });
 
-  console.log(`[ESPN] Filled ${filledCount} missing jersey numbers`);
+  console.log(`[Roster Sync] Filled ${filledCount} missing jersey numbers`);
   return updatedAthletes;
-}
-
-/**
- * Ensures jersey numbers are at least two digits.
- * e.g. "3" -> "03", "12" -> "12", "0" -> "00"
- */
-function formatJerseyNumber(num: any): string {
-  if (num === undefined || num === null || num === "") return "00";
-  const str = num.toString().replace(/#/g, '').trim();
-  // If it's a single digit, pad with 0
-  if (/^\d$/.test(str)) {
-    return `0${str}`;
-  }
-  return str;
 }
 
 function getSchemaForTier(tier: SubscriptionTier, isNocMode: boolean, findBranding: boolean): any {
@@ -1348,13 +1399,26 @@ function getSchemaForTier(tier: SubscriptionTier, isNocMode: boolean, findBrandi
   };
 }
 
+/**
+ * Ensure jersey numbers are at least two digits.
+ */
+function formatJerseyNumber(num: any): string {
+  if (num === undefined || num === null || num === "") return "00";
+  const str = num.toString().replace(/#/g, '').trim();
+  if (/^\d$/.test(str)) {
+    return `0${str}`;
+  }
+  return str;
+}
+
 export async function processRosterRawText(
   text: string,
   tier: SubscriptionTier = 'BASIC',
   isNocMode: boolean = false,
   overrideSeason: string = '',
   findBranding: boolean = false,
-  userId?: string
+  userId?: string,
+  league?: string
 ): Promise<ProcessedRoster> {
   const apiKey = getApiKey();
   if (!apiKey) {
@@ -1617,37 +1681,43 @@ COLORS: Search teamcolorcodes.com for HEX, RGB, Pantone (PMS), and CMYK values.`
     }
   }
 
-  // Fill missing jersey numbers from ESPN roster data
+  // Fill missing jersey numbers from ESPN or MiLB roster data
   const teamNameForLookup = parsedResult.teamName || "";
-  const athletesWithJerseys = await fillMissingJerseyNumbers(athletes, teamNameForLookup);
+  const athletesWithJerseys = await fillMissingJerseyNumbers(athletes, teamNameForLookup, league);
 
-  // Standardize Sport/League from ESPN ID Mapping
+  // Standardize Sport/League from MiLB or ESPN ID Mapping
   // IMPORTANT: Only do this if there are NO candidate teams (no ambiguity)
   // If candidateTeams exist, the user will select from the modal and that selection
   // will have the correct sport/league metadata already attached
   let standardizedSport = parsedResult.sport || "General";
 
   if (candidateTeams.length <= 1) {
-    const upperTeamName = (parsedResult.teamName || "").toUpperCase().trim();
+    // PRIORITY 1: Check if a MiLB league was explicitly selected
+    if (league && LEAGUE_DISPLAY_NAMES[league]) {
+      standardizedSport = LEAGUE_DISPLAY_NAMES[league];
+      console.log(`[Gemini] Standardized sport from user-selected league: ${standardizedSport}`);
+    } else {
+      // PRIORITY 2: Try ESPN team matching
+      const upperTeamName = (parsedResult.teamName || "").toUpperCase().trim();
 
-    let espnIdentity = ESPN_TEAM_IDS[upperTeamName];
+      let espnIdentity = ESPN_TEAM_IDS[upperTeamName];
 
-    // If no direct match, try fuzzy match
-    if (!espnIdentity) {
-      // Sort keys by length descending to match specific "San Jose Earthquakes" before generic "Earthquakes" if both existed (though strict keys prevent that usually)
-      const fuzzyKey = Object.keys(ESPN_TEAM_IDS).find(key =>
-        upperTeamName.includes(key) || key.includes(upperTeamName)
-      );
-      if (fuzzyKey) {
-        console.log(`[Gemini] Fuzzy matched team for sport lookup: "${upperTeamName}" -> "${fuzzyKey}"`);
-        espnIdentity = ESPN_TEAM_IDS[fuzzyKey];
+      // If no direct match, try fuzzy match
+      if (!espnIdentity) {
+        const fuzzyKey = Object.keys(ESPN_TEAM_IDS).find(key =>
+          upperTeamName.includes(key) || key.includes(upperTeamName)
+        );
+        if (fuzzyKey) {
+          console.log(`[Gemini] Fuzzy matched team for sport lookup: "${upperTeamName}" -> "${fuzzyKey}"`);
+          espnIdentity = ESPN_TEAM_IDS[fuzzyKey];
+        }
       }
-    }
 
-    if (espnIdentity && espnIdentity.league) {
-      const rawLeague = espnIdentity.league.toLowerCase();
-      standardizedSport = LEAGUE_DISPLAY_NAMES[rawLeague] || rawLeague.toUpperCase();
-      console.log(`[Gemini] Standardized sport to league: ${standardizedSport}`);
+      if (espnIdentity && espnIdentity.league) {
+        const rawLeague = espnIdentity.league.toLowerCase();
+        standardizedSport = LEAGUE_DISPLAY_NAMES[rawLeague] || rawLeague.toUpperCase();
+        console.log(`[Gemini] Standardized sport to league: ${standardizedSport}`);
+      }
     }
   } else {
     console.log(`[Gemini] Skipping sport standardization - user will select from ${candidateTeams.length} candidates`);
