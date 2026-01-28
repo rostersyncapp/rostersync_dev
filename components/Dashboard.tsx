@@ -460,13 +460,7 @@ export const Dashboard: React.FC<Props> = ({
       {/* Assemblies Section */}
       <div>
         <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.25em] mb-4 font-mono ml-1">Assemblies</h3>
-        {isLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 animate-pulse">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="bg-gray-100 dark:bg-gray-800 rounded-2xl h-48 border border-gray-200 dark:border-gray-700"></div>
-            ))}
-          </div>
-        ) : filteredRosters.length === 0 ? (
+        {!isLoading && filteredRosters.length === 0 ? (
           <div className="text-center py-20 bg-gray-50 dark:bg-gray-800/30 rounded-xl border border-dashed border-gray-200 dark:border-gray-700">
             <FolderOpen size={48} className="mx-auto mb-4 text-gray-300" />
             <p className="text-xs text-gray-500 dark:text-gray-400 font-medium uppercase tracking-widest">Empty Library</p>
