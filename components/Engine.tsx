@@ -119,6 +119,7 @@ export const Engine: React.FC<Props> = ({
   };
 
   const handleSaveToLibrary = () => {
+    console.log('[Engine] handleSaveToLibrary called - current sport state:', sport);
     setIsSaving(true);
     const newRoster: Roster = {
       id: Math.random().toString(36).substr(2, 9),
@@ -141,6 +142,8 @@ export const Engine: React.FC<Props> = ({
         countryCode: pendingRoster?.teamMetadata?.countryCode
       }
     };
+
+    console.log('[Engine] Roster being saved:', { teamName: newRoster.teamName, sport: newRoster.sport });
 
     setTimeout(() => {
       onSave(newRoster);
