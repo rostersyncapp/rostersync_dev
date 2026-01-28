@@ -668,21 +668,22 @@ const App: React.FC = () => {
             <div className="max-w-[1400px] mx-auto h-full">
               {view === 'dashboard' && <Dashboard userId={profile.id} rosters={rosters} projects={projects} activeProjectId={activeProjectId} onNewRoster={() => handleSetView('engine')} onDeleteRoster={async (id) => {
                 const roster = rosters.find(r => r.id === id);
-                if (roster) {
-                  await logActivity(profile.id, 'ROSTER_DELETE', `Deleted roster for ${roster.teamName}.`);
-                }
-                if (roster && roster.projectId) {
-                  const updated = { ...roster, projectId: undefined };
-                  if (user && isSupabaseConfigured) {
-                    await supabase.from('rosters').update({ project_id: null }).eq('id', id);
+                if (!roster) return;
+
+                // Always delete from database first
+                if (user && isSupabaseConfigured) {
+                  const { error } = await supabase.from('rosters').delete().eq('id', id);
+                  if (error) {
+                    console.error("Delete Error:", error);
+                    alert(`Failed to delete roster: ${error.message}`);
+                    return; // Don't update local state if DB delete failed
                   }
-                  setRosters(prev => prev.map(r => r.id === id ? updated : r));
-                } else {
-                  if (user && isSupabaseConfigured) {
-                    await supabase.from('rosters').delete().eq('id', id);
-                  }
-                  setRosters(prev => prev.filter(r => r.id !== id));
                 }
+
+                // Log activity and update local state only after successful delete
+                await logActivity(profile.id, 'ROSTER_DELETE', `Deleted roster for ${roster.teamName}.`);
+                setRosters(prev => prev.filter(r => r.id !== id));
+                setSelectedRosterId(null); // Clear selection after delete
               }} onUpdateRoster={async (r) => {
                 await logActivity(profile.id, 'ROSTER_UPDATE', `Updated metadata for ${r.teamName}.`);
 
