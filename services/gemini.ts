@@ -98,6 +98,26 @@ const KNOWN_TEAM_LOGOS: Record<string, { logoUrl: string; primaryColor: string; 
   // Ligue 1
   "PSG": { logoUrl: "https://a.espncdn.com/i/teamlogos/soccer/500/160.png", primaryColor: "#004170", secondaryColor: "#DA291C" },
   "PARIS SAINT-GERMAIN": { logoUrl: "https://a.espncdn.com/i/teamlogos/soccer/500/160.png", primaryColor: "#004170", secondaryColor: "#DA291C" },
+  // Additional European Aliases
+  "BARCA": { logoUrl: "https://a.espncdn.com/i/teamlogos/soccer/500/83.png", primaryColor: "#A50044", secondaryColor: "#004D98" },
+  "REAL": { logoUrl: "https://a.espncdn.com/i/teamlogos/soccer/500/86.png", primaryColor: "#FEBE10", secondaryColor: "#00529F" },
+  "ATLETI": { logoUrl: "https://a.espncdn.com/i/teamlogos/soccer/500/1068.png", primaryColor: "#CB3524", secondaryColor: "#26468D" },
+  "BAYERN": { logoUrl: "https://a.espncdn.com/i/teamlogos/soccer/500/132.png", primaryColor: "#DC052D", secondaryColor: "#0066B2" },
+  "BVB": { logoUrl: "https://a.espncdn.com/i/teamlogos/soccer/500/124.png", primaryColor: "#FDE100", secondaryColor: "#000000" },
+  "JUVE": { logoUrl: "https://a.espncdn.com/i/teamlogos/soccer/500/111.png", primaryColor: "#000000", secondaryColor: "#FFFFFF" },
+  "ROSSONERI": { logoUrl: "https://a.espncdn.com/i/teamlogos/soccer/500/103.png", primaryColor: "#FB090B", secondaryColor: "#000000" },
+  "NERAZZURRI": { logoUrl: "https://a.espncdn.com/i/teamlogos/soccer/500/110.png", primaryColor: "#010E80", secondaryColor: "#000000" },
+  "GUNNERS": { logoUrl: "https://a.espncdn.com/i/teamlogos/soccer/500/359.png", primaryColor: "#e20520", secondaryColor: "#132257" },
+  "RED DEVILS": { logoUrl: "https://a.espncdn.com/i/teamlogos/soccer/500/360.png", primaryColor: "#da020e", secondaryColor: "#144992" },
+  "CITIZENS": { logoUrl: "https://a.espncdn.com/i/teamlogos/soccer/500/382.png", primaryColor: "#99c5ea", secondaryColor: "#e6ff00" },
+  "MAGPIES": { logoUrl: "https://a.espncdn.com/i/teamlogos/soccer/500/361.png", primaryColor: "#000000", secondaryColor: "#cd1937" },
+  "HAMMERS": { logoUrl: "https://a.espncdn.com/i/teamlogos/soccer/500/371.png", primaryColor: "#7c2c3b", secondaryColor: "#000000" },
+  "VILLANS": { logoUrl: "https://a.espncdn.com/i/teamlogos/soccer/500/362.png", primaryColor: "#660e36", secondaryColor: "#ffffff" },
+  "TOFFEES": { logoUrl: "https://a.espncdn.com/i/teamlogos/soccer/500/368.png", primaryColor: "#0606fa", secondaryColor: "#132257" },
+  "SEAGULLS": { logoUrl: "https://a.espncdn.com/i/teamlogos/soccer/500/331.png", primaryColor: "#0606fa", secondaryColor: "#ffdd00" },
+  "COTTAGERS": { logoUrl: "https://a.espncdn.com/i/teamlogos/soccer/500/370.png", primaryColor: "#ffffff", secondaryColor: "#d11317" },
+  "OM": { logoUrl: "https://a.espncdn.com/i/teamlogos/soccer/500/176.png", primaryColor: "#ffffff", secondaryColor: "#011F68" },
+  "OL": { logoUrl: "https://a.espncdn.com/i/teamlogos/soccer/500/167.png", primaryColor: "#ffffff", secondaryColor: "#1a1a1a" },
 
   // ==================== NHL (ESPN) ====================
   "ANAHEIM DUCKS": { logoUrl: "https://a.espncdn.com/i/teamlogos/nhl/500/ana.png", primaryColor: "#fc4c02", secondaryColor: "#000000" },
