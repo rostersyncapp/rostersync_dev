@@ -770,8 +770,9 @@ COLORS: Search teamcolorcodes.com for HEX, RGB, Pantone (PMS), and CMYK values.`
 
   const systemInstruction = `You are an expert broadcast metadata extractor.
     - ${brandingInstruction}
-    - TEAM NAME EXTRACTION: Look for the team name in headers, titles, or the first few lines. If the team name is not explicitly stated, INFER it from the context or file name if available.
-    - REVERSE LOOKUP: If the team name is still unknown, use Google Search to search for a unique combination of 3-4 athlete names (e.g. "John Smith Jane Doe soccer roster") to identify the team. Do NOT return "Unspecified Team" unless this search fails.
+    - TEAM NAME EXTRACTION: Look for the team name in headers, titles, or the first few lines. If the team name is not explicitly stated, INFER it from the context.
+    - REVERSE LOOKUP (CRITICAL): If the team name is NOT found in the text, you MUST use the 'googleSearch' tool. Search for a query like "Daniel Vitiello Jared Mazzola Jack Gurr roster" (using 3-4 distinct player names from the list) to find the team. Use the search result to fill 'teamName'.
+    - CLEANING INPUT: The input text may have artifacts like "Daniel Vitiello1" (name + jersey number). You MUST separate them -> Name: "Daniel Vitiello", Jersey: "01".
     - NORMALIZE: Convert all athlete names to UPPERCASE and strip accents.
     - JERSEY NUMBERS: Always use at least two digits. Pad single digits with a leading zero (e.g., '3' becomes '03', '0' becomes '00').
     - SPORT INFERENCE: If the sport is not explicitly named, INFER it from the positions (e.g. GK/FWD -> Soccer, QB/WR -> Football, G/F -> Basketball).
