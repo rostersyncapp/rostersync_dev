@@ -40,6 +40,42 @@ function toSafeName(name: string): string {
 }
 
 /**
+ * Known team logo URLs - these override AI results for reliability
+ */
+const KNOWN_TEAM_LOGOS: Record<string, { logoUrl: string; primaryColor: string; secondaryColor: string }> = {
+  // Premier League
+  "LIVERPOOL FC": { logoUrl: "https://a.espncdn.com/combiner/i?img=/i/teamlogos/soccer/500/364.png&w=200", primaryColor: "#C8102E", secondaryColor: "#00B2A9" },
+  "LIVERPOOL": { logoUrl: "https://a.espncdn.com/combiner/i?img=/i/teamlogos/soccer/500/364.png&w=200", primaryColor: "#C8102E", secondaryColor: "#00B2A9" },
+  "MANCHESTER UNITED": { logoUrl: "https://a.espncdn.com/combiner/i?img=/i/teamlogos/soccer/500/360.png&w=200", primaryColor: "#DA291C", secondaryColor: "#FBE122" },
+  "MANCHESTER CITY": { logoUrl: "https://a.espncdn.com/combiner/i?img=/i/teamlogos/soccer/500/382.png&w=200", primaryColor: "#6CABDD", secondaryColor: "#1C2C5B" },
+  "ARSENAL": { logoUrl: "https://a.espncdn.com/combiner/i?img=/i/teamlogos/soccer/500/359.png&w=200", primaryColor: "#EF0107", secondaryColor: "#063672" },
+  "CHELSEA": { logoUrl: "https://a.espncdn.com/combiner/i?img=/i/teamlogos/soccer/500/363.png&w=200", primaryColor: "#034694", secondaryColor: "#DBA111" },
+  "TOTTENHAM": { logoUrl: "https://a.espncdn.com/combiner/i?img=/i/teamlogos/soccer/500/367.png&w=200", primaryColor: "#132257", secondaryColor: "#FFFFFF" },
+  // La Liga
+  "REAL MADRID": { logoUrl: "https://a.espncdn.com/combiner/i?img=/i/teamlogos/soccer/500/86.png&w=200", primaryColor: "#FEBE10", secondaryColor: "#00529F" },
+  "BARCELONA": { logoUrl: "https://a.espncdn.com/combiner/i?img=/i/teamlogos/soccer/500/83.png&w=200", primaryColor: "#A50044", secondaryColor: "#004D98" },
+  "FC BARCELONA": { logoUrl: "https://a.espncdn.com/combiner/i?img=/i/teamlogos/soccer/500/83.png&w=200", primaryColor: "#A50044", secondaryColor: "#004D98" },
+  // Bundesliga
+  "BAYERN MUNICH": { logoUrl: "https://a.espncdn.com/combiner/i?img=/i/teamlogos/soccer/500/132.png&w=200", primaryColor: "#DC052D", secondaryColor: "#0066B2" },
+  "BORUSSIA DORTMUND": { logoUrl: "https://a.espncdn.com/combiner/i?img=/i/teamlogos/soccer/500/124.png&w=200", primaryColor: "#FDE100", secondaryColor: "#000000" },
+  // Serie A
+  "JUVENTUS": { logoUrl: "https://a.espncdn.com/combiner/i?img=/i/teamlogos/soccer/500/111.png&w=200", primaryColor: "#000000", secondaryColor: "#FFFFFF" },
+  "AC MILAN": { logoUrl: "https://a.espncdn.com/combiner/i?img=/i/teamlogos/soccer/500/103.png&w=200", primaryColor: "#FB090B", secondaryColor: "#000000" },
+  "INTER MILAN": { logoUrl: "https://a.espncdn.com/combiner/i?img=/i/teamlogos/soccer/500/110.png&w=200", primaryColor: "#010E80", secondaryColor: "#000000" },
+  // Ligue 1
+  "PSG": { logoUrl: "https://a.espncdn.com/combiner/i?img=/i/teamlogos/soccer/500/160.png&w=200", primaryColor: "#004170", secondaryColor: "#DA291C" },
+  "PARIS SAINT-GERMAIN": { logoUrl: "https://a.espncdn.com/combiner/i?img=/i/teamlogos/soccer/500/160.png&w=200", primaryColor: "#004170", secondaryColor: "#DA291C" },
+  // NHL
+  "BOSTON BRUINS": { logoUrl: "https://a.espncdn.com/combiner/i?img=/i/teamlogos/nhl/500/bos.png&h=200&w=200", primaryColor: "#FFB81C", secondaryColor: "#000000" },
+  "NEW YORK RANGERS": { logoUrl: "https://a.espncdn.com/combiner/i?img=/i/teamlogos/nhl/500/nyr.png&h=200&w=200", primaryColor: "#0038A8", secondaryColor: "#CE1126" },
+  "CHICAGO BLACKHAWKS": { logoUrl: "https://a.espncdn.com/combiner/i?img=/i/teamlogos/nhl/500/chi.png&h=200&w=200", primaryColor: "#CF0A2C", secondaryColor: "#000000" },
+  // NFL  
+  "NEW ENGLAND PATRIOTS": { logoUrl: "https://a.espncdn.com/combiner/i?img=/i/teamlogos/nfl/500/ne.png&h=200&w=200", primaryColor: "#002244", secondaryColor: "#C60C30" },
+  "DALLAS COWBOYS": { logoUrl: "https://a.espncdn.com/combiner/i?img=/i/teamlogos/nfl/500/dal.png&h=200&w=200", primaryColor: "#003594", secondaryColor: "#869397" },
+  "GREEN BAY PACKERS": { logoUrl: "https://a.espncdn.com/combiner/i?img=/i/teamlogos/nfl/500/gb.png&h=200&w=200", primaryColor: "#203731", secondaryColor: "#FFB612" },
+};
+
+/**
  * Ensures jersey numbers are at least two digits.
  * e.g. "3" -> "03", "12" -> "12", "0" -> "00"
  */
@@ -260,6 +296,16 @@ COLORS: Search teamcolorcodes.com for HEX, RGB, Pantone (PMS), and CMYK values.`
     countryCode: parsedResult.countryCode,
     logoUrl: parsedResult.logoUrl
   };
+
+  // PRIORITY: Check hardcoded known teams first (most reliable)
+  const teamNameUpper = (parsedResult.teamName || "").toUpperCase().trim();
+  const knownTeam = KNOWN_TEAM_LOGOS[teamNameUpper];
+  if (knownTeam) {
+    console.log('[Gemini] Using hardcoded branding for known team:', teamNameUpper);
+    finalBranding.logoUrl = knownTeam.logoUrl;
+    finalBranding.primaryColor = knownTeam.primaryColor;
+    finalBranding.secondaryColor = knownTeam.secondaryColor;
+  }
 
   if (findBranding && parsedResult.teamName && parsedResult.sport) {
     // Try to get cached branding
