@@ -147,6 +147,12 @@ export const Dashboard: React.FC<Props> = ({
   const [editSport, setEditSport] = useState('');
   const [editSeason, setEditSeason] = useState('');
 
+  // Add Player Form State
+  const [showAddPlayerForm, setShowAddPlayerForm] = useState(false);
+  const [newPlayerName, setNewPlayerName] = useState('');
+  const [newPlayerJersey, setNewPlayerJersey] = useState('');
+  const [newPlayerPosition, setNewPlayerPosition] = useState('');
+
   const selectedRoster = rosters.find(r => r.id === selectedRosterId) || null;
 
   useEffect(() => {
@@ -155,6 +161,7 @@ export const Dashboard: React.FC<Props> = ({
       setEditSport(selectedRoster.sport || '');
       setEditSeason(selectedRoster.seasonYear || '');
       setIsEditingMetadata(false);
+      setShowAddPlayerForm(false);
     }
   }, [selectedRosterId]);
 
@@ -167,6 +174,43 @@ export const Dashboard: React.FC<Props> = ({
       seasonYear: editSeason
     });
     setIsEditingMetadata(false);
+  };
+
+  const handleAddPlayer = () => {
+    if (!selectedRoster || !newPlayerName.trim()) return;
+    const sanitizeName = (name: string) => name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase();
+    const newAthlete: Athlete = {
+      id: `manual-${Date.now()}`,
+      originalName: newPlayerName,
+      fullName: newPlayerName.toUpperCase(),
+      displayNameSafe: sanitizeName(newPlayerName),
+      jerseyNumber: newPlayerJersey.padStart(2, '0').replace(/#/g, ''),
+      position: newPlayerPosition.toUpperCase().replace(/#/g, ''),
+      phoneticIPA: '',
+      phoneticSimplified: '',
+      nilStatus: 'Active',
+      seasonYear: selectedRoster.seasonYear
+    };
+    const updatedRosterData = [...selectedRoster.rosterData, newAthlete];
+    onUpdateRoster({
+      ...selectedRoster,
+      rosterData: updatedRosterData,
+      athleteCount: updatedRosterData.length
+    });
+    setNewPlayerName('');
+    setNewPlayerJersey('');
+    setNewPlayerPosition('');
+    setShowAddPlayerForm(false);
+  };
+
+  const handleDeletePlayer = (athleteId: string) => {
+    if (!selectedRoster) return;
+    const updatedRosterData = selectedRoster.rosterData.filter((a: Athlete) => a.id !== athleteId);
+    onUpdateRoster({
+      ...selectedRoster,
+      rosterData: updatedRosterData,
+      athleteCount: updatedRosterData.length
+    });
   };
 
   const filteredRosters = rosters.filter(r => {
@@ -279,6 +323,24 @@ export const Dashboard: React.FC<Props> = ({
               <Download size={18} /> Export Data
             </button>
           </div>
+
+          {/* Add Player Button/Form */}
+          <div className="px-8 py-4 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
+            {showAddPlayerForm ? (
+              <div className="flex items-center gap-3 w-full animate-in slide-in-from-left duration-200">
+                <input type="text" placeholder="Name" value={newPlayerName} onChange={(e) => setNewPlayerName(e.target.value)} className="px-3 py-2 text-sm bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg flex-1 font-semibold" />
+                <input type="text" placeholder="Jersey" value={newPlayerJersey} onChange={(e) => setNewPlayerJersey(e.target.value)} className="px-3 py-2 text-sm bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg w-20 font-bold text-center" />
+                <input type="text" placeholder="Position" value={newPlayerPosition} onChange={(e) => setNewPlayerPosition(e.target.value)} className="px-3 py-2 text-sm bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg w-24 font-bold text-center uppercase" />
+                <button onClick={handleAddPlayer} className="px-4 py-2 bg-emerald-600 text-white rounded-lg text-xs font-bold hover:bg-emerald-500 transition-colors"><Plus size={14} /></button>
+                <button onClick={() => setShowAddPlayerForm(false)} className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-lg text-xs font-bold hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"><X size={14} /></button>
+              </div>
+            ) : (
+              <button onClick={() => setShowAddPlayerForm(true)} className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-[#5B5FFF] hover:bg-[#5B5FFF]/5 rounded-lg transition-colors">
+                <Plus size={14} /> Add Player
+              </button>
+            )}
+          </div>
+
           <div className="overflow-x-auto">
             <table className="w-full text-left">
               <thead>
@@ -288,11 +350,12 @@ export const Dashboard: React.FC<Props> = ({
                   <th className="px-8 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] text-center">{selectedRoster.isNocMode ? 'Event' : 'Position'}</th>
                   <th className="px-8 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] text-center">Hardware Safe</th>
                   <th className="px-8 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] text-left">Colors</th>
+                  <th className="px-4 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] text-center w-16"></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                 {selectedRoster.rosterData.map((a: Athlete) => (
-                  <tr key={a.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors">
+                  <tr key={a.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors group">
                     <td className="px-8 py-4 text-sm font-semibold text-gray-900 dark:text-white tracking-tight">
                       {a.fullName}
                       {a.countryCode && <span className="ml-2 text-[10px] bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded font-mono font-bold text-gray-400 uppercase tracking-wider">{a.countryCode}</span>}
@@ -301,6 +364,11 @@ export const Dashboard: React.FC<Props> = ({
                     <td className="px-8 py-4 text-center"><span className="inline-block px-3 py-1 rounded-lg bg-purple-600 dark:bg-purple-700 text-white text-[10px] font-black uppercase tracking-widest shadow-sm">{a.position}</span></td>
                     <td className="px-8 py-4 text-center"><span className="bg-emerald-600 dark:bg-emerald-700 px-3 py-1 rounded-lg text-[10px] font-black text-white tracking-widest font-mono shadow-sm">{a.displayNameSafe}</span></td>
                     <td className="px-8 py-4 text-left"><div className="flex gap-2"><div className="w-3.5 h-3.5 rounded-full border border-gray-200 shadow-sm" style={{ backgroundColor: selectedRoster.teamMetadata?.primaryColor || '#000' }}></div><div className="w-3.5 h-3.5 rounded-full border border-gray-200 shadow-sm" style={{ backgroundColor: selectedRoster.teamMetadata?.secondaryColor || '#fff' }}></div></div></td>
+                    <td className="px-4 py-4 text-center">
+                      <button onClick={() => handleDeletePlayer(a.id)} className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg opacity-0 group-hover:opacity-100 transition-all">
+                        <Trash2 size={14} />
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
