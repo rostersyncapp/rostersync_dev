@@ -7,6 +7,7 @@ import LandingPage from './components/LandingPage.tsx';
 import SupportCard from './components/SupportCard.tsx';
 import { Roster, Profile, Project } from './types.ts';
 import { processRosterRawText, ProcessedRoster } from './services/gemini.ts';
+import { TeamSelectionModal } from './components/TeamSelectionModal.tsx';
 import { supabase, isSupabaseConfigured, getMonthlyUsage, getSiteConfig, SiteConfig, logActivity, setSupabaseToken } from './services/supabase.ts';
 import { useUser, useAuth, useClerk, SignedIn, SignedOut, SignInButton, SignUpButton, UserButton, UserProfile } from '@clerk/clerk-react';
 import { dark } from '@clerk/themes';
@@ -474,6 +475,10 @@ const App: React.FC = () => {
     await signOut();
   };
 
+  // State for team selection modal
+  const [teamSelectionCandidates, setTeamSelectionCandidates] = useState<{ name: string; logoUrl: string; primaryColor: string; secondaryColor: string }[]>([]);
+  const [pendingRosterWithCandidates, setPendingRosterWithCandidates] = useState<ProcessedRoster | null>(null);
+
   const handleStartProcessing = async (text: string, isNocMode: boolean = false, seasonYear: string = '', findBranding: boolean = false) => {
     const limit = getTierLimit(profile.subscriptionTier);
     if (profile.creditsUsed >= limit) { alert(`Limit Reached! ${profile.creditsUsed}/${limit}`); return; }
@@ -481,12 +486,41 @@ const App: React.FC = () => {
     handleSetView('engine');
     try {
       const result = await processRosterRawText(text, profile.subscriptionTier, isNocMode, seasonYear, findBranding);
-      setPendingRoster(result);
+
+      // Check if there are multiple team candidates
+      if (result.candidateTeams && result.candidateTeams.length > 1) {
+        setPendingRosterWithCandidates(result);
+        setTeamSelectionCandidates(result.candidateTeams);
+      } else {
+        setPendingRoster(result);
+      }
       setProfile(prev => ({ ...prev, creditsUsed: prev.creditsUsed + 1 }));
     } catch (error: any) {
       alert(`Processing Failed: ${error.message}`);
     } finally {
       setIsProcessing(false);
+    }
+  };
+
+  const handleTeamSelection = (selectedTeam: { name: string; logoUrl: string; primaryColor: string; secondaryColor: string }) => {
+    if (pendingRosterWithCandidates) {
+      // Apply selected team branding
+      const updatedRoster: ProcessedRoster = {
+        ...pendingRosterWithCandidates,
+        teamName: selectedTeam.name,
+        candidateTeams: undefined, // Clear candidates
+        teamMetadata: {
+          ...pendingRosterWithCandidates.teamMetadata,
+          logoUrl: selectedTeam.logoUrl,
+          primaryColor: selectedTeam.primaryColor,
+          secondaryColor: selectedTeam.secondaryColor,
+          conference: pendingRosterWithCandidates.teamMetadata?.conference || 'General',
+          abbreviation: pendingRosterWithCandidates.teamMetadata?.abbreviation || 'UNK'
+        }
+      };
+      setPendingRoster(updatedRoster);
+      setPendingRosterWithCandidates(null);
+      setTeamSelectionCandidates([]);
     }
   };
 
@@ -852,6 +886,17 @@ const App: React.FC = () => {
             </div>
           )}
         </div>
+
+        {/* Team Selection Modal */}
+        <TeamSelectionModal
+          isOpen={teamSelectionCandidates.length > 0}
+          candidates={teamSelectionCandidates}
+          onSelect={handleTeamSelection}
+          onClose={() => {
+            setTeamSelectionCandidates([]);
+            setPendingRosterWithCandidates(null);
+          }}
+        />
       </SignedIn>
     </>
   );

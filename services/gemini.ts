@@ -17,6 +17,7 @@ interface ProcessedRoster {
   athletes: Athlete[];
   isNocMode?: boolean;
   verificationSources?: { title: string; uri: string }[];
+  candidateTeams?: { name: string; logoUrl: string; primaryColor: string; secondaryColor: string }[];
   teamMetadata?: {
     primaryColor: string;
     secondaryColor: string;
@@ -915,17 +916,36 @@ COLORS: Search teamcolorcodes.com for HEX, RGB, Pantone (PMS), and CMYK values.`
 
   // If no exact match, try fuzzy matching (e.g. "Sacramento Republic" -> "SACRAMENTO REPUBLIC FC")
   // SMART MATCHING: Prefer the LONGEST match to avoid "KINGS" matching LA Kings over "SACRAMENTO KINGS"
+  let candidateTeams: { name: string; logoUrl: string; primaryColor: string; secondaryColor: string }[] = [];
+
   if (!knownTeam && teamNameUpper.length > 3) {
     const allMatchingKeys = Object.keys(KNOWN_TEAM_LOGOS).filter(key =>
       key.includes(teamNameUpper) || teamNameUpper.includes(key)
     );
 
     if (allMatchingKeys.length > 0) {
-      // Sort by length descending - longer keys are more specific
-      allMatchingKeys.sort((a, b) => b.length - a.length);
-      const bestMatch = allMatchingKeys[0];
-      console.log(`[Gemini] Fuzzy match found: "${teamNameUpper}" -> "${bestMatch}" (from ${allMatchingKeys.length} candidates)`);
-      knownTeam = KNOWN_TEAM_LOGOS[bestMatch];
+      // Deduplicate by logoUrl (same logo = same team, different aliases)
+      const uniqueTeams = new Map<string, { name: string; logoUrl: string; primaryColor: string; secondaryColor: string }>();
+      for (const key of allMatchingKeys) {
+        const team = KNOWN_TEAM_LOGOS[key];
+        if (!uniqueTeams.has(team.logoUrl)) {
+          uniqueTeams.set(team.logoUrl, { name: key, ...team });
+        }
+      }
+
+      // If multiple DISTINCT teams match, return them as candidates for user selection
+      if (uniqueTeams.size > 1) {
+        candidateTeams = Array.from(uniqueTeams.values());
+        console.log(`[Gemini] Multiple teams match "${teamNameUpper}": ${candidateTeams.map(t => t.name).join(', ')}`);
+        // Still pick the longest match as default, but flag that there are alternatives
+        allMatchingKeys.sort((a, b) => b.length - a.length);
+        knownTeam = KNOWN_TEAM_LOGOS[allMatchingKeys[0]];
+      } else if (uniqueTeams.size === 1) {
+        // Single team (possibly with aliases) - use it directly
+        const bestMatch = allMatchingKeys.sort((a, b) => b.length - a.length)[0];
+        console.log(`[Gemini] Fuzzy match found: "${teamNameUpper}" -> "${bestMatch}"`);
+        knownTeam = KNOWN_TEAM_LOGOS[bestMatch];
+      }
     }
   }
 
@@ -979,6 +999,7 @@ COLORS: Search teamcolorcodes.com for HEX, RGB, Pantone (PMS), and CMYK values.`
     isNocMode: isNocMode,
     athletes: athletes,
     verificationSources,
+    candidateTeams: candidateTeams.length > 1 ? candidateTeams : undefined,
     teamMetadata: finalBranding
   };
 }
