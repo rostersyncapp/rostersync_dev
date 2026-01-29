@@ -141,6 +141,7 @@ export const Dashboard: React.FC<Props> = ({
   const [showExportDrawer, setShowExportDrawer] = useState(false);
   const [exportLanguage, setExportLanguage] = useState('EN');
   const [movingRosterId, setMovingRosterId] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<'card' | 'list'>('card');
 
   const SPORT_NAME_MAP: Record<string, string> = {
     'MLB': 'Baseball',
@@ -537,10 +538,26 @@ export const Dashboard: React.FC<Props> = ({
         </div>
       </div>
 
-      {/* Search */}
-      <div className="relative group">
-        <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-        <input type="text" placeholder="Search library..." value={search} onChange={(e) => setSearch(e.target.value)} className="w-full pl-12 pr-6 py-4 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-lg outline-none focus:ring-2 focus:ring-[#5B5FFF]/10 transition-all text-sm font-medium shadow-sm" />
+      {/* Search & View Toggle */}
+      <div className="flex gap-4">
+        <div className="relative group flex-1">
+          <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+          <input type="text" placeholder="Search library..." value={search} onChange={(e) => setSearch(e.target.value)} className="w-full pl-12 pr-6 py-4 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-lg outline-none focus:ring-2 focus:ring-[#5B5FFF]/10 transition-all text-sm font-medium shadow-sm" />
+        </div>
+        <div className="bg-white dark:bg-gray-900 p-1.5 rounded-lg border border-gray-100 dark:border-gray-800 flex items-center shadow-sm h-[58px]">
+          <button
+            onClick={() => setViewMode('card')}
+            className={`p-3 rounded-md transition-all ${viewMode === 'card' ? 'bg-gray-100 dark:bg-gray-800 text-[#5B5FFF] shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}
+          >
+            <Layers size={20} />
+          </button>
+          <button
+            onClick={() => setViewMode('list')}
+            className={`p-3 rounded-md transition-all ${viewMode === 'list' ? 'bg-gray-100 dark:bg-gray-800 text-[#5B5FFF] shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}
+          >
+            <Table size={20} />
+          </button>
+        </div>
       </div>
 
       {/* Sub-folders Section */}
@@ -577,53 +594,113 @@ export const Dashboard: React.FC<Props> = ({
             <p className="text-xs text-gray-500 dark:text-gray-400 font-medium uppercase tracking-widest">Empty Library</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {filteredRosters.map(roster => {
-              const primaryColor = roster.teamMetadata?.primaryColor || '#5B5FFF';
-              return (
-                <div key={roster.id} onClick={() => onSelectRoster(roster.id)} className="group bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-6 cursor-pointer hover:shadow-lg transition-all relative overflow-hidden flex flex-col">
-                  <div className="absolute top-0 left-0 w-full h-1" style={{ backgroundColor: primaryColor }}></div>
-                  <div className="flex justify-between items-start mb-4">
-                    <TeamLogo url={roster.teamMetadata?.logoUrl} name={roster.teamName} abbreviation={roster.teamMetadata?.abbreviation} primaryColor={primaryColor} size="md" />
-                    <div className="flex gap-1 relative z-10">
-                      <button onClick={(e) => { e.stopPropagation(); setMovingRosterId(roster.id); }} className="p-1.5 text-gray-300 hover:text-[#5B5FFF] opacity-0 group-hover:opacity-100"><Move size={16} /></button>
-                      <button onClick={(e) => { e.stopPropagation(); handleQuickDeleteRoster(e, roster); }} className="p-1.5 text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100"><Trash2 size={16} /></button>
+          viewMode === 'card' ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {filteredRosters.map(roster => {
+                const primaryColor = roster.teamMetadata?.primaryColor || '#5B5FFF';
+                return (
+                  <div key={roster.id} onClick={() => onSelectRoster(roster.id)} className="group bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-6 cursor-pointer hover:shadow-lg transition-all relative overflow-hidden flex flex-col">
+                    <div className="absolute top-0 left-0 w-full h-1" style={{ backgroundColor: primaryColor }}></div>
+                    <div className="flex justify-between items-start mb-4">
+                      <TeamLogo url={roster.teamMetadata?.logoUrl} name={roster.teamName} abbreviation={roster.teamMetadata?.abbreviation} primaryColor={primaryColor} size="md" />
+                      <div className="flex gap-1 relative z-10">
+                        <button onClick={(e) => { e.stopPropagation(); setMovingRosterId(roster.id); }} className="p-1.5 text-gray-300 hover:text-[#5B5FFF] opacity-0 group-hover:opacity-100"><Move size={16} /></button>
+                        <button onClick={(e) => { e.stopPropagation(); handleQuickDeleteRoster(e, roster); }} className="p-1.5 text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100"><Trash2 size={16} /></button>
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <h3 className="text-base font-extrabold text-gray-900 dark:text-white truncate pr-1">{roster.teamName || 'Unnamed'}</h3>
-                    {roster.isNocMode && <span className="text-[8px] bg-amber-500 text-white px-1.5 py-0.5 rounded-md font-black uppercase tracking-widest">NOC</span>}
-                  </div>
-                  <div className="flex items-center gap-2 mb-4">
-                    <span className="text-[9px] font-black text-[#5B5FFF] bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/10 px-2 py-0.5 rounded-lg uppercase tracking-widest">{getSportDisplayName(roster.sport)}</span>
-                    {roster.league && (
-                      <span className="text-[9px] font-black text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 px-2 py-0.5 rounded-lg uppercase tracking-widest">{roster.league}</span>
-                    )}
-                    <span className="text-[10px] font-bold text-gray-400 font-mono">{roster.seasonYear}</span>
-                  </div>
-                  <div className="mt-auto pt-4 border-t border-gray-50 dark:border-gray-800 flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-xs font-bold text-gray-400"><Users size={14} /> {roster.athleteCount} Athletes</div>
-                    {roster.isSynced && <Cloud size={14} className="text-[#5B5FFF]" />}
-                  </div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="text-base font-extrabold text-gray-900 dark:text-white truncate pr-1">{roster.teamName || 'Unnamed'}</h3>
+                      {roster.isNocMode && <span className="text-[8px] bg-amber-500 text-white px-1.5 py-0.5 rounded-md font-black uppercase tracking-widest">NOC</span>}
+                    </div>
+                    <div className="flex items-center gap-2 mb-4">
+                      <span className="text-[9px] font-black text-[#5B5FFF] bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/10 px-2 py-0.5 rounded-lg uppercase tracking-widest">{getSportDisplayName(roster.sport)}</span>
+                      {roster.league && (
+                        <span className="text-[9px] font-black text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 px-2 py-0.5 rounded-lg uppercase tracking-widest">{roster.league}</span>
+                      )}
+                      <span className="text-[10px] font-bold text-gray-400 font-mono">{roster.seasonYear}</span>
+                    </div>
+                    <div className="mt-auto pt-4 border-t border-gray-50 dark:border-gray-800 flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-xs font-bold text-gray-400"><Users size={14} /> {roster.athleteCount} Athletes</div>
+                      {roster.isSynced && <Cloud size={14} className="text-[#5B5FFF]" />}
+                    </div>
 
-                  {movingRosterId === roster.id && (
-                    <div className="absolute inset-0 bg-white dark:bg-gray-900 p-4 z-20 flex flex-col animate-in fade-in duration-200" onClick={(e) => e.stopPropagation()}>
-                      <div className="flex items-center justify-between mb-3">
-                        <h4 className="text-[9px] font-bold uppercase tracking-widest text-gray-400 font-mono">Move Target</h4>
-                        <button onClick={() => setMovingRosterId(null)} className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"><X size={16} /></button>
+                    {movingRosterId === roster.id && (
+                      <div className="absolute inset-0 bg-white dark:bg-gray-900 p-4 z-20 flex flex-col animate-in fade-in duration-200" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-center justify-between mb-3">
+                          <h4 className="text-[9px] font-bold uppercase tracking-widest text-gray-400 font-mono">Move Target</h4>
+                          <button onClick={() => setMovingRosterId(null)} className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"><X size={16} /></button>
+                        </div>
+                        <div className="flex-1 overflow-y-auto space-y-1 custom-scrollbar">
+                          <button onClick={() => handleMoveRoster(undefined)} className="w-full text-left p-2.5 text-xs font-bold hover:bg-[#5B5FFF]/5 hover:text-[#5B5FFF] rounded-lg transition-all flex items-center gap-3"><FolderOpen size={14} /> Root</button>
+                          {projects.map(p => (
+                            <button key={p.id} onClick={() => handleMoveRoster(p.id)} className="w-full text-left p-2.5 text-xs font-bold hover:bg-[#5B5FFF]/5 hover:text-[#5B5FFF] rounded-lg transition-all flex items-center gap-3"><FolderOpen size={14} /> {p.name}</button>
+                          ))}
+                        </div>
                       </div>
-                      <div className="flex-1 overflow-y-auto space-y-1 custom-scrollbar">
-                        <button onClick={() => handleMoveRoster(undefined)} className="w-full text-left p-2.5 text-xs font-bold hover:bg-[#5B5FFF]/5 hover:text-[#5B5FFF] rounded-lg transition-all flex items-center gap-3"><FolderOpen size={14} /> Root</button>
-                        {projects.map(p => (
-                          <button key={p.id} onClick={() => handleMoveRoster(p.id)} className="w-full text-left p-2.5 text-xs font-bold hover:bg-[#5B5FFF]/5 hover:text-[#5B5FFF] rounded-lg transition-all flex items-center gap-3"><FolderOpen size={14} /> {p.name}</button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
+              <table className="w-full text-left">
+                <thead>
+                  <tr className="bg-gray-50/50 dark:bg-gray-800/50 border-b border-gray-100 dark:border-gray-800">
+                    <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] w-20">Logo</th>
+                    <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">Team Name</th>
+                    <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] text-center">Sport</th>
+                    <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] text-center">League</th>
+                    <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] text-center">Season</th>
+                    <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] text-center">Athletes</th>
+                    <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] text-right w-24">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                  {filteredRosters.map(roster => {
+                    const primaryColor = roster.teamMetadata?.primaryColor || '#5B5FFF';
+                    return (
+                      <tr
+                        key={roster.id}
+                        onClick={() => onSelectRoster(roster.id)}
+                        className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer group"
+                      >
+                        <td className="px-6 py-4">
+                          <TeamLogo url={roster.teamMetadata?.logoUrl} name={roster.teamName} abbreviation={roster.teamMetadata?.abbreviation} primaryColor={primaryColor} size="sm" />
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="font-extrabold text-sm text-gray-900 dark:text-white flex items-center gap-2">
+                            {roster.teamName || 'Unnamed'}
+                            {roster.isNocMode && <span className="text-[8px] bg-amber-500 text-white px-1.5 py-0.5 rounded-md font-black uppercase tracking-widest">NOC</span>}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-center">
+                          <span className="text-[9px] font-black text-[#5B5FFF] bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/10 px-2 py-1 rounded-lg uppercase tracking-widest">{getSportDisplayName(roster.sport)}</span>
+                        </td>
+                        <td className="px-6 py-4 text-center">
+                          {roster.league ? (
+                            <span className="text-[9px] font-black text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 px-2 py-1 rounded-lg uppercase tracking-widest">{roster.league}</span>
+                          ) : <span className="text-gray-300">-</span>}
+                        </td>
+                        <td className="px-6 py-4 text-center text-sm font-bold text-gray-500">
+                          {roster.seasonYear}
+                        </td>
+                        <td className="px-6 py-4 text-center text-sm font-bold text-gray-500">
+                          {roster.athleteCount}
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button onClick={(e) => { e.stopPropagation(); setMovingRosterId(roster.id); }} className="p-2 text-gray-300 hover:text-[#5B5FFF] bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-700 rounded-lg shadow-sm hover:shadow-md"><Move size={14} /></button>
+                            <button onClick={(e) => { e.stopPropagation(); handleQuickDeleteRoster(e, roster); }} className="p-2 text-gray-300 hover:text-red-500 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-700 rounded-lg shadow-sm hover:shadow-md"><Trash2 size={14} /></button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )
         )}
       </div>
     </div>
