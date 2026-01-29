@@ -348,7 +348,7 @@ export const Engine: React.FC<Props> = ({
 
             <div className="space-y-6">
               <div className="space-y-2">
-                <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest font-mono flex items-center gap-2">
+                <label className="text-xs font-bold text-gray-400 uppercase tracking-widest font-mono flex items-center gap-2">
                   <Trophy size={12} /> Team Name <span className="text-gray-300 dark:text-gray-600">(optional)</span>
                 </label>
                 <input
@@ -361,7 +361,7 @@ export const Engine: React.FC<Props> = ({
               </div>
 
               <div className="space-y-2">
-                <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest font-mono flex items-center gap-2">
+                <label className="text-xs font-bold text-gray-400 uppercase tracking-widest font-mono flex items-center gap-2">
                   <Trophy size={12} /> League <span className="text-gray-300 dark:text-gray-600">(optional)</span>
                 </label>
                 <div className="relative league-dropdown-container">
@@ -406,21 +406,21 @@ export const Engine: React.FC<Props> = ({
             </div>
 
             <div className="space-y-2">
-              <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest font-mono flex items-center gap-2">
+              <label className="text-xs font-bold text-gray-400 uppercase tracking-widest font-mono flex items-center gap-2">
                 <Calendar size={12} /> Season Year
               </label>
               <input
                 type="text"
                 value={seasonYear}
                 onChange={(e) => setSeasonYear(e.target.value)}
-                className="w-full px-5 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl text-lg font-bold outline-none focus:ring-2 focus:ring-[#5B5FFF]/20 text-center"
+                className="w-full px-5 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl text-base font-medium outline-none focus:ring-2 focus:ring-[#5B5FFF]/20"
                 onKeyDown={(e) => e.key === 'Enter' && handleProcess()}
               />
             </div>
 
             <button
               onClick={handleProcess}
-              className="w-full py-4 rounded-xl primary-gradient text-white font-bold text-base shadow-lg shadow-[#5B5FFF]/20 hover:scale-[1.02] active:scale-[0.98] transition-all uppercase tracking-widest flex items-center justify-center gap-2"
+              className="w-full mt-4 py-4 rounded-xl primary-gradient text-white font-bold text-base shadow-lg shadow-[#5B5FFF]/20 hover:scale-[1.02] active:scale-[0.98] transition-all uppercase tracking-widest flex items-center justify-center gap-2"
             >
               <Cpu size={20} /> Confirm & Process
             </button>
