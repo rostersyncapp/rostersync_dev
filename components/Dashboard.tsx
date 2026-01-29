@@ -326,7 +326,10 @@ export const Dashboard: React.FC<Props> = ({
                     <div className="flex items-center gap-4 mt-2 text-gray-500 text-sm font-medium">
                       <span className="flex items-center gap-1.5"><Calendar size={16} /> {selectedRoster.seasonYear}</span>
                       <span className="flex items-center gap-1.5"><Users size={16} /> {selectedRoster.athleteCount} Athletes</span>
-                      <span className="px-3 py-1 bg-[#5B5FFF] dark:bg-[#4A4EDD] text-white rounded-full text-[10px] font-black uppercase tracking-widest">{selectedRoster.league || selectedRoster.sport}</span>
+                      <span className="px-3 py-1 bg-[#5B5FFF] dark:bg-[#4A4EDD] text-white rounded-full text-[10px] font-black uppercase tracking-widest">{selectedRoster.sport || 'General'}</span>
+                      {selectedRoster.league && selectedRoster.league !== selectedRoster.sport && (
+                        <span className="px-3 py-1 bg-emerald-600 text-white rounded-full text-[10px] font-black uppercase tracking-widest">{selectedRoster.league}</span>
+                      )}
                     </div>
                   </>
                 )}
@@ -576,7 +579,7 @@ export const Dashboard: React.FC<Props> = ({
                   </div>
                   <div className="flex items-center gap-2 mb-4">
                     <span className="text-[9px] font-black text-[#5B5FFF] bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/10 px-2 py-0.5 rounded-lg uppercase tracking-widest">{roster.sport || 'General'}</span>
-                    {roster.league && (
+                    {roster.league && roster.league !== roster.sport && (
                       <span className="text-[9px] font-black text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 px-2 py-0.5 rounded-lg uppercase tracking-widest">{roster.league}</span>
                     )}
                     <span className="text-[10px] font-bold text-gray-400 font-mono">{roster.seasonYear}</span>
