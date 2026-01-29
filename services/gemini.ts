@@ -1752,10 +1752,35 @@ COLORS: Search teamcolorcodes.com for HEX, RGB, Pantone (PMS), and CMYK values.`
     console.log(`[Gemini] Skipping sport standardization - user will select from ${candidateTeams.length} candidates`);
   }
 
+  // Determine final league name:
+  // 1. AI explictly returned league (highest priority for non-standard leagues)
+  // 2. We found an ESPN identity (fuzzy or exact) that has a league attached
+  let finalLeague = parsedResult.league;
+
+  if (!finalLeague && candidateTeams.length <= 1) {
+    // Re-resolve identity if needed (to be safe/clean access) or just use the logic flow.
+    // Since we scoped espnIdentity inside the `else` block above, we need to re-access or restructure.
+    // A cleaner way is to compute `finalLeague` where we computed `espnIdentity`.
+    // Let's refactor slightly to just re-grab it here for the return object since exact match is cheap.
+    // Actually, we can just grab it again with fuzzy logic if we want to be 100% sure for the return:
+    const upperTeamName = (parsedResult.teamName || "").toUpperCase().trim();
+    let espnIdentity = ESPN_TEAM_IDS[upperTeamName];
+    if (!espnIdentity) {
+      const fuzzyKey = Object.keys(ESPN_TEAM_IDS).find(key =>
+        upperTeamName.includes(key) || key.includes(upperTeamName)
+      );
+      if (fuzzyKey) espnIdentity = ESPN_TEAM_IDS[fuzzyKey];
+    }
+
+    if (espnIdentity && espnIdentity.league) {
+      finalLeague = LEAGUE_DISPLAY_NAMES[espnIdentity.league] || espnIdentity.league;
+    }
+  }
+
   return {
     teamName: parsedResult.teamName || (isNocMode ? "Unknown NOC" : "Unknown Team"),
     sport: standardizedSport,
-    league: parsedResult.league || (ESPN_TEAM_IDS[(parsedResult.teamName || "").toUpperCase().trim()]?.league ? (LEAGUE_DISPLAY_NAMES[ESPN_TEAM_IDS[(parsedResult.teamName || "").toUpperCase().trim()]?.league] || ESPN_TEAM_IDS[(parsedResult.teamName || "").toUpperCase().trim()]?.league) : undefined) || undefined,
+    league: finalLeague || undefined,
     seasonYear: extractedSeason,
     isNocMode: isNocMode,
     athletes: athletesWithJerseys,
