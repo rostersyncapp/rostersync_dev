@@ -1135,6 +1135,30 @@ const ESPN_TEAM_IDS: Record<string, { id: number; sport: string; league: string 
   "UCONN HUSKIES (BB)": { id: 41, sport: "basketball", league: "mens-college-basketball" },
   "UCONN": { id: 41, sport: "basketball", league: "mens-college-basketball" },
   "VILLANOVA WILDCATS": { id: 222, sport: "basketball", league: "mens-college-basketball" },
+
+  // NWSL (National Women's Soccer League)
+  "ANGEL CITY FC": { id: 20305, sport: "soccer", league: "nwsl" }, // ID is approx/placeholder if strict ESPN ID needed
+  "ACFC": { id: 20305, sport: "soccer", league: "nwsl" },
+  "BAY FC": { id: 20857, sport: "soccer", league: "nwsl" },
+  "CHICAGO RED STARS": { id: 9993, sport: "soccer", league: "nwsl" },
+  "HOUSTON DASH": { id: 11130, sport: "soccer", league: "nwsl" },
+  "KANSAS CITY CURRENT": { id: 19356, sport: "soccer", league: "nwsl" },
+  "NJ/NY GOTHAM FC": { id: 9995, sport: "soccer", league: "nwsl" },
+  "GOTHAM FC": { id: 9995, sport: "soccer", league: "nwsl" },
+  "NORTH CAROLINA COURAGE": { id: 17290, sport: "soccer", league: "nwsl" },
+  "NC COURAGE": { id: 17290, sport: "soccer", league: "nwsl" },
+  "ORLANDO PRIDE": { id: 17904, sport: "soccer", league: "nwsl" },
+  "PORTLAND THORNS FC": { id: 9996, sport: "soccer", league: "nwsl" },
+  "PORTLAND THORNS": { id: 9996, sport: "soccer", league: "nwsl" },
+  "RACING LOUISVILLE FC": { id: 19354, sport: "soccer", league: "nwsl" },
+  "RACING LOUISVILLE": { id: 19354, sport: "soccer", league: "nwsl" },
+  "SAN DIEGO WAVE FC": { id: 20306, sport: "soccer", league: "nwsl" },
+  "SAN DIEGO WAVE": { id: 20306, sport: "soccer", league: "nwsl" },
+  "SEATTLE REIGN FC": { id: 9997, sport: "soccer", league: "nwsl" },
+  "SEATTLE REIGN": { id: 9997, sport: "soccer", league: "nwsl" },
+  "UTAH ROYALS": { id: 20858, sport: "soccer", league: "nwsl" },
+  "WASHINGTON SPIRIT": { id: 9999, sport: "soccer", league: "nwsl" },
+
   // IPL (Cricket) - IDs are placeholders/unofficial
   "CHENNAI SUPER KINGS": { id: 0, sport: "cricket", league: "ipl" },
   "CSK": { id: 0, sport: "cricket", league: "ipl" },
