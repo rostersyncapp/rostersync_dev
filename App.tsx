@@ -259,6 +259,25 @@ const App: React.FC = () => {
     localStorage.setItem('lastView', newView);
   };
 
+  /**
+   * Helper to retrieve Supabase token with retry logic
+   * Helps mitigate "JWT failed to load" errors from Clerk
+   */
+  const getSupabaseTokenWithRetry = async (retries = 3): Promise<string | null> => {
+    for (let i = 0; i < retries; i++) {
+      try {
+        return await getToken({ template: 'supabase' });
+      } catch (err: any) {
+        console.warn(`[Auth] Token fetch attempt ${i + 1} failed:`, err);
+        // If it's the last attempt, throw
+        if (i === retries - 1) throw err;
+        // Exponential backoff: 500ms, 1000ms, 1500ms...
+        await new Promise(r => setTimeout(r, 500 * (i + 1)));
+      }
+    }
+    return null;
+  };
+
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
   const [expandedFolderIds, setExpandedFolderIds] = useState<string[]>([]);
   const [siteConfig, setSiteConfig] = useState<SiteConfig>({ site_name: 'rosterSync', logo_url: null });
@@ -302,7 +321,7 @@ const App: React.FC = () => {
     const syncToken = async () => {
       if (user) {
         try {
-          const token = await getToken({ template: 'supabase', forceRefresh: true } as any);
+          const token = await getSupabaseTokenWithRetry();
           await setSupabaseToken(token);
           await logActivity(user.id, 'LOGIN', 'Signed in to production workspace.');
           fetchData(user);
@@ -324,7 +343,7 @@ const App: React.FC = () => {
       console.log('Token expired event received, refreshing...');
       if (user) {
         try {
-          const token = await getToken({ template: 'supabase', forceRefresh: true } as any);
+          const token = await getSupabaseTokenWithRetry();
           await setSupabaseToken(token);
           console.log('Token refreshed successfully');
         } catch (err) {
@@ -540,7 +559,7 @@ const App: React.FC = () => {
     if (user && isSupabaseConfigured) {
       // Force refresh token before save to prevent JWT expired errors
       try {
-        const token = await getToken({ template: 'supabase' });
+        const token = await getSupabaseTokenWithRetry();
         await setSupabaseToken(token);
       } catch (tokenErr) {
         console.warn("Token auto-refresh failed, attempting save anyway...", tokenErr);
