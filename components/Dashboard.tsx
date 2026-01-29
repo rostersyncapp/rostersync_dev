@@ -540,23 +540,23 @@ export const Dashboard: React.FC<Props> = ({
 
       {/* Search & View Toggle */}
       <div className="flex gap-4">
-        <div className="relative group flex-1">
-          <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-          <input type="text" placeholder="Search library..." value={search} onChange={(e) => setSearch(e.target.value)} className="w-full pl-12 pr-6 py-4 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-lg outline-none focus:ring-2 focus:ring-[#5B5FFF]/10 transition-all text-sm font-medium shadow-sm" />
-        </div>
-        <div className="bg-white dark:bg-gray-900 p-1.5 rounded-lg border border-gray-100 dark:border-gray-800 flex items-center shadow-sm h-[58px]">
+        <div className="bg-white dark:bg-gray-900 p-1.5 rounded-lg border border-gray-100 dark:border-gray-800 flex items-center shadow-sm">
           <button
             onClick={() => setViewMode('card')}
-            className={`p-3 rounded-md transition-all ${viewMode === 'card' ? 'bg-gray-100 dark:bg-gray-800 text-[#5B5FFF] shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}
+            className={`p-2.5 rounded-md transition-all ${viewMode === 'card' ? 'bg-gray-100 dark:bg-gray-800 text-[#5B5FFF] shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}
           >
             <Layers size={20} />
           </button>
           <button
             onClick={() => setViewMode('list')}
-            className={`p-3 rounded-md transition-all ${viewMode === 'list' ? 'bg-gray-100 dark:bg-gray-800 text-[#5B5FFF] shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}
+            className={`p-2.5 rounded-md transition-all ${viewMode === 'list' ? 'bg-gray-100 dark:bg-gray-800 text-[#5B5FFF] shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}
           >
             <Table size={20} />
           </button>
+        </div>
+        <div className="relative group flex-1">
+          <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+          <input type="text" placeholder="Search library..." value={search} onChange={(e) => setSearch(e.target.value)} className="w-full pl-12 pr-6 py-4 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-lg outline-none focus:ring-2 focus:ring-[#5B5FFF]/10 transition-all text-sm font-medium shadow-sm" />
         </div>
       </div>
 
