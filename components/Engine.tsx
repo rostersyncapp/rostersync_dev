@@ -284,7 +284,7 @@ export const Engine: React.FC<Props> = ({
                   }}
                   className="w-full px-5 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl text-base font-medium outline-none focus:ring-2 focus:ring-[#5B5FFF]/20"
                 >
-                  <option value="">Auto-detect from team name</option>
+                  <option value="">Select League</option>
                   <optgroup label="🏀 Basketball">
                     <option value="nba">NBA</option>
                     <option value="wnba">WNBA</option>
