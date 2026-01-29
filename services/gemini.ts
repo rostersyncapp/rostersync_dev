@@ -1478,7 +1478,8 @@ COLORS: Search teamcolorcodes.com for HEX, RGB, Pantone (PMS), and CMYK values.`
 
   const model = genAI.getGenerativeModel(modelParams);
 
-  const result = await model.generateContent(`Tier: ${tier}. Mode: ${isNocMode ? 'NOC' : 'Standard'}. Data: ${text}`);
+  const context = league ? `Context: League is ${league}.` : '';
+  const result = await model.generateContent(`Tier: ${tier}. Mode: ${isNocMode ? 'NOC' : 'Standard'}. ${context} Data: ${text}`);
   const response = await result.response;
   const usage = response.usageMetadata;
   const textResponse = response.text();
