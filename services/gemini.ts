@@ -1497,18 +1497,27 @@ CRITICAL: Never guess team IDs. If unsure, use Google Search to find the correct
 COLORS: Search teamcolorcodes.com for HEX, RGB, Pantone (PMS), and CMYK values.`
     : "Use default branding colors (#5B5FFF and #1A1A1A).";
 
-  const systemInstruction = `You are an expert broadcast metadata extractor.
-    - ${brandingInstruction}
-    - TEAM NAME EXTRACTION: Look for the team name in headers, titles, or the first few lines. If the team name is not explicitly stated, INFER it from the context.
-    - REVERSE LOOKUP (CRITICAL): If the team name is NOT explicitly found in the text, you MUST use the 'googleSearch' tool. Search for a query like "Daniel Vitiello Jared Mazzola Jack Gurr roster" (using 3-4 distinct player names from the list) to find the team. DO NOT return "Unknown Team" without attempting a search. Use the search result to fill 'teamName'.
+  const systemInstruction = `You are an expert broadcast metadata extractor. Your PRIMARY GOAL is to identify the team and extract the roster.
+    
+    1. TEAM IDENTIFICATION (HIGHEST PRIORITY):
+    - Look for the team name in headers, titles, or the first few lines.
+    - REVERSE LOOKUP (CRITICAL): If the team name is NOT explicitly found in the text, you MUST use the 'googleSearch' tool. Search for a query like "Daniel Vitiello Jared Mazzola Jack Gurr roster" (using 3-4 distinct player names from the list) to find the team.
+    - DO NOT return "Unknown Team" without attempting a search. You MUST Populate 'teamName' with the real team name found via search.
+
+    2. ROSTER EXTRACTION:
     - CLEANING INPUT: The input text may have artifacts like "Daniel Vitiello1" (name + jersey number). You MUST separate them -> Name: "Daniel Vitiello", Jersey: "01".
     - NORMALIZE: Convert all athlete names to UPPERCASE and strip accents.
     - JERSEY NUMBERS: Always use at least two digits. Pad single digits with a leading zero (e.g., '3' becomes '03', '0' becomes '00').
     - SPORT INFERENCE: If the sport is not explicitly named, INFER it from the positions (e.g. GK/FWD -> Soccer, QB/WR -> Football, G/F -> Basketball).
+
+    3. BRANDING & METADATA:
+    - ${brandingInstruction}
     - ABBREVIATION: If a 3-letter team code is not found in the text, GENERATE one based on the Team Name (e.g. "Liverpool FC" -> "LIV").
-    - STRUCTURE: The output MUST be a JSON object with this exact structure: { "teamName": string, "athletes": [ { "fullName": string, "jerseyNumber": string, "position": string, "nilStatus": string } ], ... }.
-    ${findBranding ? `- SCHEMA DEFINITION: ${JSON.stringify(schema.properties)}` : ''}
-    - OUTPUT: Valid JSON matching the schema provided.`;
+
+    4. OUTPUT FORMAT:
+    - The output MUST be a strict VALID JSON object. Do not include markdown keys (like \`\`\`json).
+    - Structure: { "teamName": string, "athletes": [ { "fullName": string, "jerseyNumber": string, "position": string, "nilStatus": string } ], ... }.
+    ${findBranding ? `- SCHEMA PROPERTIES: ${JSON.stringify(schema.properties)}` : ''}`;
 
   const modelParams: any = {
     model: "gemini-2.0-flash-001",
