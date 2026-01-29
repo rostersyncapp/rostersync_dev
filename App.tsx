@@ -737,8 +737,12 @@ const App: React.FC = () => {
                 if (roster.projectId) {
                   // Roster is in a folder - just remove from folder (keep in library)
                   if (user && isSupabaseConfigured) {
-                    const { error } = await supabase.from('rosters').update({ project_id: null }).eq('id', id);
-                    if (error) {
+                    try {
+                      const token = await getSupabaseTokenWithRetry();
+                      await setSupabaseToken(token);
+                      const { error } = await supabase.from('rosters').update({ project_id: null }).eq('id', id);
+                      if (error) throw error;
+                    } catch (error: any) {
                       console.error("Unassign Error:", error);
                       alert(`Failed to remove from folder: ${error.message}`);
                       return;
@@ -750,8 +754,12 @@ const App: React.FC = () => {
                 } else {
                   // Roster not in folder - permanently delete
                   if (user && isSupabaseConfigured) {
-                    const { error } = await supabase.from('rosters').delete().eq('id', id);
-                    if (error) {
+                    try {
+                      const token = await getSupabaseTokenWithRetry();
+                      await setSupabaseToken(token);
+                      const { error } = await supabase.from('rosters').delete().eq('id', id);
+                      if (error) throw error;
+                    } catch (error: any) {
                       console.error("Delete Error:", error);
                       alert(`Failed to delete roster: ${error.message}`);
                       return;
