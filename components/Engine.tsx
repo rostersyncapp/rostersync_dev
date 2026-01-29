@@ -346,7 +346,7 @@ export const Engine: React.FC<Props> = ({
               <p className="text-sm text-gray-500 font-medium mt-2">Specify season and team details</p>
             </div>
 
-            <div className="space-y-6">
+            <div className="space-y-7">
               <div className="space-y-2">
                 <label className="text-xs font-bold text-gray-400 uppercase tracking-widest font-mono flex items-center gap-2">
                   <Trophy size={12} /> Team Name <span className="text-gray-300 dark:text-gray-600">(optional)</span>
@@ -356,7 +356,7 @@ export const Engine: React.FC<Props> = ({
                   type="text"
                   value={manualTeamName}
                   onChange={(e) => setManualTeamName(e.target.value)}
-                  className="w-full px-5 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl text-base font-medium outline-none focus:ring-2 focus:ring-[#5B5FFF]/20"
+                  className="w-full h-14 px-5 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl text-base font-medium outline-none focus:ring-2 focus:ring-[#5B5FFF]/20 flex items-center"
                 />
               </div>
 
@@ -367,7 +367,7 @@ export const Engine: React.FC<Props> = ({
                 <div className="relative league-dropdown-container">
                   <button
                     onClick={() => setIsLeagueDropdownOpen(!isLeagueDropdownOpen)}
-                    className="w-full px-5 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl text-base font-medium outline-none focus:ring-2 focus:ring-[#5B5FFF]/20 text-gray-900 dark:text-white flex items-center justify-between"
+                    className="w-full h-14 px-5 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl text-base font-medium outline-none focus:ring-2 focus:ring-[#5B5FFF]/20 text-gray-900 dark:text-white flex items-center justify-between"
                   >
                     <span className={!league ? "text-gray-500" : ""}>{getLeagueLabel(league)}</span>
                     <ChevronDown size={16} className={`text-gray-400 transition-transform duration-200 ${isLeagueDropdownOpen ? 'rotate-180' : ''}`} />
@@ -413,14 +413,14 @@ export const Engine: React.FC<Props> = ({
                 type="text"
                 value={seasonYear}
                 onChange={(e) => setSeasonYear(e.target.value)}
-                className="w-full px-5 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl text-base font-medium outline-none focus:ring-2 focus:ring-[#5B5FFF]/20"
+                className="w-full h-14 px-5 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl text-base font-medium outline-none focus:ring-2 focus:ring-[#5B5FFF]/20"
                 onKeyDown={(e) => e.key === 'Enter' && handleProcess()}
               />
             </div>
 
             <button
               onClick={handleProcess}
-              className="w-full mt-4 py-4 rounded-xl primary-gradient text-white font-bold text-base shadow-lg shadow-[#5B5FFF]/20 hover:scale-[1.02] active:scale-[0.98] transition-all uppercase tracking-widest flex items-center justify-center gap-2"
+              className="w-full mt-8 h-14 rounded-xl primary-gradient text-white font-bold text-base shadow-lg shadow-[#5B5FFF]/20 hover:scale-[1.02] active:scale-[0.98] transition-all uppercase tracking-widest flex items-center justify-center gap-2"
             >
               <Cpu size={20} /> Confirm & Process
             </button>
