@@ -374,13 +374,13 @@ export const Engine: React.FC<Props> = ({
               </div>
             </div>
             {isProcessing ? (
-              <div className="w-full h-96 bg-gray-950 rounded-2xl p-6 font-mono text-sm relative overflow-hidden flex flex-col border border-gray-800 shadow-inner">
+              <div className="w-full h-96 bg-white dark:bg-gray-950 rounded-2xl p-6 font-mono text-sm relative overflow-hidden flex flex-col border border-gray-200 dark:border-gray-800 shadow-inner">
                 {/* Scanline Effect */}
-                <div className="absolute inset-0 bg-[linear-gradient(transparent_50%,rgba(0,0,0,0.5)_50%)] bg-[length:100%_4px] pointer-events-none opacity-20"></div>
+                <div className="absolute inset-0 bg-[linear-gradient(transparent_50%,rgba(0,0,0,0.5)_50%)] bg-[length:100%_4px] pointer-events-none opacity-5 dark:opacity-20"></div>
 
                 {/* Header */}
-                <div className="flex items-center justify-between border-b border-gray-800 pb-4 mb-4 z-10">
-                  <div className="flex items-center gap-2 text-emerald-500 font-bold uppercase tracking-widest text-xs">
+                <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-4 mb-4 z-10">
+                  <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-500 font-bold uppercase tracking-widest text-xs">
                     <Terminal size={14} />
                     <span>Live Processing Node: 0xA4F...92</span>
                   </div>
@@ -394,18 +394,18 @@ export const Engine: React.FC<Props> = ({
                 {/* Logs */}
                 <div className="flex-1 overflow-y-auto space-y-2 z-10 custom-scrollbar pb-10">
                   {terminalLogs.map((log, i) => (
-                    <div key={i} className="text-emerald-500/80 font-medium animate-in slide-in-from-left-2 duration-300">
+                    <div key={i} className="text-emerald-600/80 dark:text-emerald-500/80 font-medium animate-in slide-in-from-left-2 duration-300">
                       {log}
                     </div>
                   ))}
-                  <div className="text-emerald-500 animate-pulse">_</div>
+                  <div className="text-emerald-600 dark:text-emerald-500 animate-pulse">_</div>
                 </div>
 
                 {/* Floating Tip Pill */}
                 <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 w-fit">
-                  <div className="bg-gray-900/90 backdrop-blur border border-gray-700 rounded-full px-5 py-2.5 flex items-center gap-3 shadow-xl animate-in slide-in-from-bottom-4 duration-500">
+                  <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur border border-gray-200 dark:border-gray-700 rounded-full px-5 py-2.5 flex items-center gap-3 shadow-xl animate-in slide-in-from-bottom-4 duration-500">
                     <Sparkles size={14} className="text-[#5B5FFF]" />
-                    <span className="text-xs font-bold text-gray-300 tracking-wide">{TIPS[currentTipIndex]}</span>
+                    <span className="text-xs font-bold text-gray-500 dark:text-gray-300 tracking-wide">{TIPS[currentTipIndex]}</span>
                   </div>
                 </div>
               </div>
