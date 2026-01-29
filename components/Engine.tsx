@@ -199,18 +199,18 @@ export const Engine: React.FC<Props> = ({
 
     // Auto-set sport based on league
     const leagueToSport: Record<string, string> = {
-      'nba': 'NBA', 'wnba': 'WNBA', 'ncaa-basketball': 'NCAA Basketball', 'euroleague': 'EuroLeague',
-      'nfl': 'NFL', 'ncaa-football': 'NCAA Football',
-      'premier-league': 'Premier League', 'la-liga': 'La Liga', 'serie-a': 'Serie A',
-      'bundesliga': 'Bundesliga', 'ligue-1': 'Ligue 1', 'mls': 'MLS', 'liga-mx': 'Liga MX',
-      'eredivisie': 'Eredivisie', 'usl': 'USL Championship',
-      'ipl': 'IPL',
-      'nhl': 'NHL',
-      'mlb': 'MLB',
-      'milb-aaa': 'Triple-A',
-      'milb-aa': 'Double-A',
-      'milb-higha': 'High-A',
-      'milb-a': 'Single-A'
+      'nba': 'Basketball', 'wnba': 'Basketball', 'ncaa-basketball': 'Basketball', 'euroleague': 'Basketball',
+      'nfl': 'Football', 'ncaa-football': 'Football',
+      'premier-league': 'Soccer', 'la-liga': 'Soccer', 'serie-a': 'Soccer',
+      'bundesliga': 'Soccer', 'ligue-1': 'Soccer', 'mls': 'Soccer', 'liga-mx': 'Soccer',
+      'eredivisie': 'Soccer', 'usl': 'Soccer',
+      'ipl': 'Cricket',
+      'nhl': 'Hockey',
+      'mlb': 'Baseball',
+      'milb-aaa': 'Baseball',
+      'milb-aa': 'Baseball',
+      'milb-higha': 'Baseball',
+      'milb-a': 'Baseball'
     };
 
     if (selectedLeague && leagueToSport[selectedLeague]) {

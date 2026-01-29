@@ -1734,7 +1734,7 @@ COLORS: Search teamcolorcodes.com for HEX, RGB, Pantone (PMS), and CMYK values.`
   return {
     teamName: parsedResult.teamName || (isNocMode ? "Unknown NOC" : "Unknown Team"),
     sport: standardizedSport,
-    league: parsedResult.league || (ESPN_TEAM_IDS[(parsedResult.teamName || "").toUpperCase().trim()]?.league) || undefined,
+    league: parsedResult.league || (ESPN_TEAM_IDS[(parsedResult.teamName || "").toUpperCase().trim()]?.league ? (LEAGUE_DISPLAY_NAMES[ESPN_TEAM_IDS[(parsedResult.teamName || "").toUpperCase().trim()]?.league] || ESPN_TEAM_IDS[(parsedResult.teamName || "").toUpperCase().trim()]?.league) : undefined) || undefined,
     seasonYear: extractedSeason,
     isNocMode: isNocMode,
     athletes: athletesWithJerseys,
