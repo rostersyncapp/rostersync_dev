@@ -1179,6 +1179,21 @@ const LEAGUE_DISPLAY_NAMES: Record<string, string> = {
   "milb-a": "Single-A"
 };
 
+const LEAGUE_TO_SPORT: Record<string, string> = {
+  'nba': 'Basketball', 'wnba': 'Basketball', 'ncaa-basketball': 'Basketball', 'euroleague': 'Basketball',
+  'nfl': 'Football', 'ncaa-football': 'Football',
+  'premier-league': 'Soccer', 'la-liga': 'Soccer', 'serie-a': 'Soccer',
+  'bundesliga': 'Soccer', 'ligue-1': 'Soccer', 'mls': 'Soccer', 'liga-mx': 'Soccer',
+  'eredivisie': 'Soccer', 'usl': 'Soccer',
+  'ipl': 'Cricket',
+  'nhl': 'Hockey',
+  'mlb': 'Baseball',
+  'milb-aaa': 'Baseball',
+  'milb-aa': 'Baseball',
+  'milb-higha': 'Baseball',
+  'milb-a': 'Baseball'
+};
+
 const MILB_SPORT_IDS: Record<string, number> = {
   "milb-aaa": 11,
   "milb-aa": 12,
@@ -1701,8 +1716,8 @@ COLORS: Search teamcolorcodes.com for HEX, RGB, Pantone (PMS), and CMYK values.`
 
   if (candidateTeams.length <= 1) {
     // PRIORITY 1: Check if a MiLB league was explicitly selected
-    if (league && LEAGUE_DISPLAY_NAMES[league]) {
-      standardizedSport = LEAGUE_DISPLAY_NAMES[league];
+    if (league && LEAGUE_TO_SPORT[league]) {
+      standardizedSport = LEAGUE_TO_SPORT[league];
       console.log(`[Gemini] Standardized sport from user-selected league: ${standardizedSport}`);
     } else {
       // PRIORITY 2: Try ESPN team matching
@@ -1721,10 +1736,16 @@ COLORS: Search teamcolorcodes.com for HEX, RGB, Pantone (PMS), and CMYK values.`
         }
       }
 
-      if (espnIdentity && espnIdentity.league) {
-        const rawLeague = espnIdentity.league.toLowerCase();
-        standardizedSport = LEAGUE_DISPLAY_NAMES[rawLeague] || rawLeague.toUpperCase();
-        console.log(`[Gemini] Standardized sport to league: ${standardizedSport}`);
+      if (espnIdentity) {
+        // Use the SPORT from ESPN (capitalized)
+        if (espnIdentity.sport) {
+          standardizedSport = espnIdentity.sport.charAt(0).toUpperCase() + espnIdentity.sport.slice(1);
+          console.log(`[Gemini] Standardized sport from ESPN ID: ${standardizedSport}`);
+        } else if (espnIdentity.league) {
+          // Fallback to league inferrence if sport is missing (rare)
+          const rawLeague = espnIdentity.league.toLowerCase();
+          standardizedSport = LEAGUE_TO_SPORT[rawLeague] || LEAGUE_DISPLAY_NAMES[rawLeague] || rawLeague.toUpperCase();
+        }
       }
     }
   } else {
