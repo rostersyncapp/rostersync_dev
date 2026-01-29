@@ -348,19 +348,6 @@ export const Engine: React.FC<Props> = ({
             <div className="space-y-7">
               <div className="space-y-2">
                 <label className="text-xs font-bold text-gray-400 uppercase tracking-widest font-mono flex items-center gap-2">
-                  <Trophy size={12} /> Team Name <span className="text-gray-300 dark:text-gray-600">(optional)</span>
-                </label>
-                <input
-                  autoFocus
-                  type="text"
-                  value={manualTeamName}
-                  onChange={(e) => setManualTeamName(e.target.value)}
-                  className="w-full h-14 px-5 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl text-base font-medium outline-none focus:ring-2 focus:ring-[#5B5FFF]/20 flex items-center"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-gray-400 uppercase tracking-widest font-mono flex items-center gap-2">
                   <Trophy size={12} /> League <span className="text-[#5B5FFF]">*</span>
                 </label>
                 <div className="relative league-dropdown-container">
@@ -373,7 +360,7 @@ export const Engine: React.FC<Props> = ({
                   </button>
 
                   {isLeagueDropdownOpen && (
-                    <div className="absolute top-full left-0 w-full mt-2 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl shadow-xl z-50 max-h-60 overflow-y-auto">
+                    <div className="absolute top-full left-0 w-full mt-2 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl shadow-xl z-50 max-h-96 overflow-y-auto">
                       <div className="py-2">
                         <button
                           onClick={() => handleLeagueSelect("")}
@@ -401,18 +388,31 @@ export const Engine: React.FC<Props> = ({
                     </div>
                   )}
                 </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-bold text-gray-400 uppercase tracking-widest font-mono flex items-center gap-2">
-                    <Calendar size={12} /> Season Year
-                  </label>
-                  <input
-                    type="text"
-                    value={seasonYear}
-                    onChange={(e) => setSeasonYear(e.target.value)}
-                    className="w-full h-14 px-5 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl text-base font-medium outline-none focus:ring-2 focus:ring-[#5B5FFF]/20"
-                    onKeyDown={(e) => e.key === 'Enter' && handleProcess()}
-                  />
-                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-gray-400 uppercase tracking-widest font-mono flex items-center gap-2">
+                  <Trophy size={12} /> Team Name <span className="text-gray-300 dark:text-gray-600">(optional)</span>
+                </label>
+                <input
+                  type="text"
+                  value={manualTeamName}
+                  onChange={(e) => setManualTeamName(e.target.value)}
+                  className="w-full h-14 px-5 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl text-base font-medium outline-none focus:ring-2 focus:ring-[#5B5FFF]/20 flex items-center"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-gray-400 uppercase tracking-widest font-mono flex items-center gap-2">
+                  <Calendar size={12} /> Season Year
+                </label>
+                <input
+                  type="text"
+                  value={seasonYear}
+                  onChange={(e) => setSeasonYear(e.target.value)}
+                  className="w-full h-14 px-5 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl text-base font-medium outline-none focus:ring-2 focus:ring-[#5B5FFF]/20"
+                  onKeyDown={(e) => e.key === 'Enter' && handleProcess()}
+                />
               </div>
             </div>
 
