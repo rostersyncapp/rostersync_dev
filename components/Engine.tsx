@@ -209,7 +209,7 @@ export const Engine: React.FC<Props> = ({
                 </div>
               </div>
             </div>
-            <textarea className={`w-full h-96 px-6 py-6 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl outline-none transition-all text-base leading-relaxed font-mono text-gray-900 dark:text-gray-200 placeholder:text-gray-400 dark:placeholder:text-gray-600 ${isProcessing ? 'opacity-50 pointer-events-none' : 'focus:ring-2 focus:ring-[#5B5FFF]/20'}`} placeholder="Help me, Obi-Wan Kenobi. You're my only hope... to paste this data" value={rawInput} onChange={(e) => setRawInput(e.target.value)} />
+            <textarea className={`w-full h-96 px-6 py-6 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl outline-none transition-all text-base leading-relaxed font-mono text-gray-900 dark:text-gray-200 placeholder:text-gray-400 dark:placeholder:text-gray-600 ${isProcessing ? 'opacity-50 pointer-events-none' : 'focus:ring-2 focus:ring-[#5B5FFF]/20'}`} value={rawInput} onChange={(e) => setRawInput(e.target.value)} />
             <div className="flex items-center gap-4 mt-4 justify-end">
               <button
                 onClick={() => setShowSeasonModal(true)}
@@ -247,9 +247,7 @@ export const Engine: React.FC<Props> = ({
                   value={manualTeamName}
                   onChange={(e) => setManualTeamName(e.target.value)}
                   className="w-full px-5 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl text-base font-medium outline-none focus:ring-2 focus:ring-[#5B5FFF]/20"
-                  placeholder="e.g. Sacramento Republic FC"
                 />
-                <p className="text-[10px] text-gray-400 mt-1">Helps identify branding if not in the pasted data</p>
               </div>
 
               <div className="space-y-2">
@@ -322,7 +320,6 @@ export const Engine: React.FC<Props> = ({
                     <option value="milb-a">MiLB Single-A</option>
                   </optgroup>
                 </select>
-                <p className="text-[10px] text-gray-400 mt-1">Selecting a league reduces AI processing costs by ~80%</p>
               </div>
 
               <div className="space-y-2">
@@ -334,7 +331,6 @@ export const Engine: React.FC<Props> = ({
                   value={seasonYear}
                   onChange={(e) => setSeasonYear(e.target.value)}
                   className="w-full px-5 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl text-lg font-bold outline-none focus:ring-2 focus:ring-[#5B5FFF]/20 text-center"
-                  placeholder="e.g. 2025"
                   onKeyDown={(e) => e.key === 'Enter' && handleProcess()}
                 />
               </div>
