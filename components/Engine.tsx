@@ -31,7 +31,9 @@ import {
   Hash,
   Trophy,
   Search,
-  Check
+  Check,
+  Terminal,
+  Code2
 } from 'lucide-react';
 
 interface Props {
@@ -87,6 +89,59 @@ export const Engine: React.FC<Props> = ({
   const [candidateTeams, setCandidateTeams] = useState<any[]>([]);
 
   const [isSaving, setIsSaving] = useState(false);
+
+  // Terminal Logic
+  const [terminalLogs, setTerminalLogs] = useState<string[]>([]);
+  const [currentTipIndex, setCurrentTipIndex] = useState(0);
+
+  const PROCESSING_LOGS = [
+    "> INITIALIZING_NEURAL_NETWORKS...",
+    "> LOADING_CONTEXT_MODELS...",
+    "> TOKENIZING_INPUT_STREAM [Batch Size: 128]...",
+    "> DETECTING_ENTITIES [Confidence: 94%]",
+    "> CONNECTING_TO_KNOWLEDGE_BASE...",
+    "> SEARCHING_GLOBAL_INDICES...",
+    "> EXTRACTING_ROSTER_METADATA...",
+    "> NORMALIZING_PLAYER_NAMES...",
+    "> INFERRING_JERSEY_NUMBERS...",
+    "> VALIDATING_SPORT_SPECIFIC_CONTEXT...",
+    "> OPTIMIZING_FOR_BROADCAST_OUTPUT...",
+    "> FINALIZING_OUTPUT_BUFFER..."
+  ];
+
+  const TIPS = [
+    "Tip: RosterSync interprets 100+ formats without manual mapping.",
+    "Did you know? You can paste raw HTML directly from team websites.",
+    "Pro Tip: Selecting the correct League boosts accuracy by 45%.",
+    "Fact: This engine processes rosters 600x faster than humans.",
+    "Suggestion: Use 'NOC Mode' for Olympic/International events."
+  ];
+
+  useEffect(() => {
+    if (isProcessing) {
+      setTerminalLogs([]);
+      let logIndex = 0;
+
+      const logInterval = setInterval(() => {
+        if (logIndex < PROCESSING_LOGS.length) {
+          setTerminalLogs(prev => [...prev, PROCESSING_LOGS[logIndex]]);
+          logIndex++;
+          // Randomize speed for realism
+        }
+      }, 800);
+
+      const tipInterval = setInterval(() => {
+        setCurrentTipIndex(prev => (prev + 1) % TIPS.length);
+      }, 4000);
+
+      return () => {
+        clearInterval(logInterval);
+        clearInterval(tipInterval);
+      };
+    } else {
+      setTerminalLogs([]);
+    }
+  }, [isProcessing]);
 
   useEffect(() => {
     if (pendingRoster) {
@@ -318,7 +373,45 @@ export const Engine: React.FC<Props> = ({
                 </div>
               </div>
             </div>
-            <textarea className={`w-full h-96 px-6 py-6 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl outline-none transition-all text-base leading-relaxed font-mono text-gray-900 dark:text-gray-200 placeholder:text-gray-400 dark:placeholder:text-gray-600 ${isProcessing ? 'opacity-50 pointer-events-none' : 'focus:ring-2 focus:ring-[#5B5FFF]/20'}`} value={rawInput} onChange={(e) => setRawInput(e.target.value)} />
+            {isProcessing ? (
+              <div className="w-full h-96 bg-gray-950 rounded-2xl p-6 font-mono text-sm relative overflow-hidden flex flex-col border border-gray-800 shadow-inner">
+                {/* Scanline Effect */}
+                <div className="absolute inset-0 bg-[linear-gradient(transparent_50%,rgba(0,0,0,0.5)_50%)] bg-[length:100%_4px] pointer-events-none opacity-20"></div>
+
+                {/* Header */}
+                <div className="flex items-center justify-between border-b border-gray-800 pb-4 mb-4 z-10">
+                  <div className="flex items-center gap-2 text-emerald-500 font-bold uppercase tracking-widest text-xs">
+                    <Terminal size={14} />
+                    <span>Live Processing Node: 0xA4F...92</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-2.5 h-2.5 rounded-full bg-red-500/20"></div>
+                    <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/20"></div>
+                    <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></div>
+                  </div>
+                </div>
+
+                {/* Logs */}
+                <div className="flex-1 overflow-y-auto space-y-2 z-10 custom-scrollbar pb-10">
+                  {terminalLogs.map((log, i) => (
+                    <div key={i} className="text-emerald-500/80 font-medium animate-in slide-in-from-left-2 duration-300">
+                      {log}
+                    </div>
+                  ))}
+                  <div className="text-emerald-500 animate-pulse">_</div>
+                </div>
+
+                {/* Floating Tip Pill */}
+                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 w-fit">
+                  <div className="bg-gray-900/90 backdrop-blur border border-gray-700 rounded-full px-5 py-2.5 flex items-center gap-3 shadow-xl animate-in slide-in-from-bottom-4 duration-500">
+                    <Sparkles size={14} className="text-[#5B5FFF]" />
+                    <span className="text-xs font-bold text-gray-300 tracking-wide">{TIPS[currentTipIndex]}</span>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <textarea className={`w-full h-96 px-6 py-6 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl outline-none transition-all text-base leading-relaxed font-mono text-gray-900 dark:text-gray-200 placeholder:text-gray-400 dark:placeholder:text-gray-600 focus:ring-2 focus:ring-[#5B5FFF]/20`} value={rawInput} onChange={(e) => setRawInput(e.target.value)} placeholder="Paste raw roster text here..." />
+            )}
             <div className="flex items-center gap-4 mt-4 justify-end">
               <button
                 onClick={() => setShowSeasonModal(true)}
