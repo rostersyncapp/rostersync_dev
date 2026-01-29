@@ -156,6 +156,7 @@ export const Engine: React.FC<Props> = ({
         { value: "bundesliga", label: "Bundesliga" },
         { value: "ligue-1", label: "Ligue 1" },
         { value: "mls", label: "MLS" },
+        { value: "nwsl", label: "NWSL" },
         { value: "liga-mx", label: "Liga MX" },
         { value: "eredivisie", label: "Eredivisie" },
         { value: "usl", label: "USL Championship" }
@@ -202,7 +203,7 @@ export const Engine: React.FC<Props> = ({
       'nba': 'Basketball', 'wnba': 'Basketball', 'ncaa-basketball': 'Basketball', 'euroleague': 'Basketball',
       'nfl': 'Football', 'ncaa-football': 'Football',
       'premier-league': 'Soccer', 'la-liga': 'Soccer', 'serie-a': 'Soccer',
-      'bundesliga': 'Soccer', 'ligue-1': 'Soccer', 'mls': 'Soccer', 'liga-mx': 'Soccer',
+      'bundesliga': 'Soccer', 'ligue-1': 'Soccer', 'mls': 'Soccer', 'nwsl': 'Soccer', 'liga-mx': 'Soccer',
       'eredivisie': 'Soccer', 'usl': 'Soccer',
       'ipl': 'Cricket',
       'nhl': 'Hockey',
