@@ -663,7 +663,8 @@ export const Dashboard: React.FC<Props> = ({
                       <tr
                         key={roster.id}
                         onClick={() => onSelectRoster(roster.id)}
-                        className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer group"
+                        className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer group border-l-[6px]"
+                        style={{ borderLeftColor: primaryColor }}
                       >
                         <td className="px-6 py-4">
                           <TeamLogo url={roster.teamMetadata?.logoUrl} name={roster.teamName} abbreviation={roster.teamMetadata?.abbreviation} primaryColor={primaryColor} size="sm" />
