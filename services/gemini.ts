@@ -18,6 +18,7 @@ interface ProcessedRoster {
   isNocMode?: boolean;
   verificationSources?: { title: string; uri: string }[];
   candidateTeams?: { name: string; logoUrl: string; primaryColor: string; secondaryColor: string; sport?: string; league?: string }[];
+  league?: string;
   teamMetadata?: {
     primaryColor: string;
     secondaryColor: string;
@@ -1367,6 +1368,10 @@ function getSchemaForTier(tier: SubscriptionTier, isNocMode: boolean, findBrandi
       type: SchemaType.STRING,
       description: "The specific season year or range found in the text (e.g. '2025-26', '2024-25', '2026')."
     },
+    league: {
+      type: SchemaType.STRING,
+      description: "The specific league if inferable (e.g. NBA, WNBA, NFL, MLB, Premier League, NCAA)."
+    },
     athletes: {
       type: SchemaType.ARRAY,
       items: {
@@ -1452,6 +1457,7 @@ COLORS: Search teamcolorcodes.com for HEX, RGB, Pantone (PMS), and CMYK values.`
     - NORMALIZE: Convert all athlete names to UPPERCASE and strip accents.
     - JERSEY NUMBERS: Always use at least two digits. Pad single digits with a leading zero (e.g., '3' becomes '03', '0' becomes '00').
     - SPORT INFERENCE: If the sport is not explicitly named, INFER it from the positions (e.g. GK/FWD -> Soccer, QB/WR -> Football, G/F -> Basketball).
+    - LEAGUE INFERENCE: Infer the league if possible based on team fame or context (e.g. 'Lakers' -> 'NBA', 'Manchester United' -> 'Premier League').
     - ABBREVIATION: If a 3-letter team code is not found in the text, GENERATE one based on the Team Name (e.g. "Liverpool FC" -> "LIV").
     - STRUCTURE: The output MUST be a JSON object with this exact structure: { "teamName": string, "athletes": [ { "fullName": string, "jerseyNumber": string, "position": string, "nilStatus": string } ], ... }.
     ${findBranding ? `- SCHEMA DEFINITION: ${JSON.stringify(schema.properties)}` : ''}
@@ -1542,7 +1548,8 @@ COLORS: Search teamcolorcodes.com for HEX, RGB, Pantone (PMS), and CMYK values.`
       logoUrl: parsedResult.logoUrl,
       primaryColor: parsedResult.primaryColor,
       secondaryColor: parsedResult.secondaryColor,
-      abbreviation: parsedResult.abbreviation
+      abbreviation: parsedResult.abbreviation,
+      league: parsedResult.league
     });
   }
 
@@ -1727,6 +1734,7 @@ COLORS: Search teamcolorcodes.com for HEX, RGB, Pantone (PMS), and CMYK values.`
   return {
     teamName: parsedResult.teamName || (isNocMode ? "Unknown NOC" : "Unknown Team"),
     sport: standardizedSport,
+    league: parsedResult.league || (ESPN_TEAM_IDS[(parsedResult.teamName || "").toUpperCase().trim()]?.league) || undefined,
     seasonYear: extractedSeason,
     isNocMode: isNocMode,
     athletes: athletesWithJerseys,

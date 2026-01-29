@@ -93,6 +93,7 @@ export const Engine: React.FC<Props> = ({
       setStep(2);
       setTeamName(pendingRoster.teamName);
       setSport(pendingRoster.sport);
+      setLeague(pendingRoster.league || '');
       setSeasonYear(pendingRoster.seasonYear);
       setAbbreviation(pendingRoster.teamMetadata?.abbreviation || 'UNK');
       setPrimaryColor(pendingRoster.teamMetadata?.primaryColor || '#5B5FFF');
@@ -279,6 +280,9 @@ export const Engine: React.FC<Props> = ({
     if (team.sport) {
       console.log('[Engine] Setting sport to:', team.sport);
       setSport(team.sport);
+    }
+    if (team.league) {
+      setLeague(team.league);
     }
     setShowTeamSelection(false);
   };
