@@ -484,14 +484,35 @@ const App: React.FC = () => {
 
   const handleDeleteProject = async (projectId: string) => {
     const project = projects.find(p => p.id === projectId);
-    if (user && isSupabaseConfigured) {
-      await supabase.from('projects').delete().eq('id', projectId);
+
+    // Optimistic update for guest users
+    if (!user || !isSupabaseConfigured) {
+      setProjects(prev => prev.filter(p => p.id !== projectId));
+      setConfirmDeleteProject(null);
+      return;
+    }
+
+    try {
+      const { error } = await supabase.from('projects').delete().eq('id', projectId);
+
+      if (error) {
+        console.error("Delete Project Error:", error);
+        alert(`Failed to delete folder: ${error.message} (Likely contains items)`);
+        return; // Do not update state if delete failed
+      }
+
       if (project) {
         await logActivity(profile.id, 'PROJECT_FOLDER_DELETE', `Deleted folder "${project.name}".`);
       }
+
+      // Only clean up UI if backend delete succeeded
+      setProjects(prev => prev.filter(p => p.id !== projectId));
+      setConfirmDeleteProject(null);
+
+    } catch (err: any) {
+      console.error("Unexpected delete error:", err);
+      alert("An unexpected error occurred while deleting.");
     }
-    setProjects(prev => prev.filter(p => p.id !== projectId));
-    setConfirmDeleteProject(null);
   };
 
   const toggleExpand = (id: string) => setExpandedFolderIds(prev => prev.includes(id) ? prev.filter(fid => fid !== id) : [...prev, id]);
