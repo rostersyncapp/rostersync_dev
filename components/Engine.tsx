@@ -462,7 +462,16 @@ export const Engine: React.FC<Props> = ({
 
                   <div className="flex-1">
                     <div className="flex items-center gap-4 flex-wrap">
-                      <h2 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white">{teamName}</h2>
+                      <div className="flex items-center gap-3 flex-1 min-w-[200px]">
+                        <input
+                          type="text"
+                          value={teamName}
+                          onChange={(e) => setTeamName(e.target.value)}
+                          className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white bg-transparent border-b-2 border-transparent hover:border-gray-200 focus:border-[#5B5FFF] outline-none transition-all w-full placeholder:text-gray-300"
+                          placeholder="Team Name"
+                        />
+                        <Edit2 size={16} className="text-gray-400 shrink-0" />
+                      </div>
                       <span className="px-4 py-1.5 bg-[#5B5FFF]/10 text-[#5B5FFF] rounded-xl text-xs font-black uppercase tracking-[0.2em]">{sport}</span>
                     </div>
                     <div className="flex items-center gap-5 mt-3 text-gray-500 dark:text-gray-400 text-base font-medium">
