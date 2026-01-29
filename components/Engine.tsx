@@ -178,10 +178,7 @@ export const Engine: React.FC<Props> = ({
       category: "⚾ Baseball",
       options: [
         { value: "mlb", label: "MLB" },
-        { value: "milb-aaa", label: "MiLB Triple-A" },
-        { value: "milb-aa", label: "MiLB Double-A" },
-        { value: "milb-higha", label: "MiLB High-A" },
-        { value: "milb-a", label: "MiLB Single-A" }
+        { value: "milb", label: "MiLB" }
       ]
     }
   ];
@@ -208,10 +205,7 @@ export const Engine: React.FC<Props> = ({
       'ipl': 'Cricket',
       'nhl': 'Hockey',
       'mlb': 'Baseball',
-      'milb-aaa': 'Baseball',
-      'milb-aa': 'Baseball',
-      'milb-higha': 'Baseball',
-      'milb-a': 'Baseball'
+      'milb': 'Baseball'
     };
 
     if (selectedLeague && leagueToSport[selectedLeague]) {

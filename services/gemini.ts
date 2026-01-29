@@ -1146,6 +1146,33 @@ const ESPN_TEAM_IDS: Record<string, { id: number; sport: string; league: string 
   "UTAH ROYALS": { id: 20858, sport: "soccer", league: "nwsl" },
   "WASHINGTON SPIRIT": { id: 9999, sport: "soccer", league: "nwsl" },
 
+  // USL Championship (2025/2026 Season)
+  "BIRMINGHAM LEGION FC": { id: 20235, sport: "soccer", league: "usl" },
+  "BROOKLYN FC": { id: 25000, sport: "soccer", league: "usl" }, // Placeholder ID
+  "CHARLESTON BATTERY": { id: 70, sport: "soccer", league: "usl" },
+  "COLORADO SPRINGS SWITCHBACKS FC": { id: 17006, sport: "soccer", league: "usl" },
+  "DETROIT CITY FC": { id: 20658, sport: "soccer", league: "usl" },
+  "EL PASO LOCOMOTIVE FC": { id: 20237, sport: "soccer", league: "usl" },
+  "FC TULSA": { id: 17011, sport: "soccer", league: "usl" },
+  "HARTFORD ATHLETIC": { id: 20238, sport: "soccer", league: "usl" },
+  "INDY ELEVEN": { id: 6228, sport: "soccer", league: "usl" },
+  "LAS VEGAS LIGHTS FC": { id: 19183, sport: "soccer", league: "usl" },
+  "LEXINGTON SC": { id: 25001, sport: "soccer", league: "usl" }, // Placeholder ID
+  "LOUDOUN UNITED FC": { id: 20240, sport: "soccer", league: "usl" },
+  "LOUISVILLE CITY FC": { id: 17016, sport: "soccer", league: "usl" },
+  "MIAMI FC": { id: 18451, sport: "soccer", league: "usl" },
+  "MONTEREY BAY FC": { id: 20875, sport: "soccer", league: "usl" },
+  "NEW MEXICO UNITED": { id: 20242, sport: "soccer", league: "usl" },
+  "OAKLAND ROOTS SC": { id: 20659, sport: "soccer", league: "usl" },
+  "ORANGE COUNTY SC": { id: 6234, sport: "soccer", league: "usl" },
+  "PHOENIX RISING FC": { id: 17565, sport: "soccer", league: "usl" },
+  "PITTSBURGH RIVERHOUNDS SC": { id: 6230, sport: "soccer", league: "usl" },
+  "RHODE ISLAND FC": { id: 25002, sport: "soccer", league: "usl" }, // Placeholder ID
+  "SACRAMENTO REPUBLIC FC": { id: 17025, sport: "soccer", league: "usl" },
+  "SAN ANTONIO FC": { id: 18456, sport: "soccer", league: "usl" },
+  "SPORTING CLUB JACKSONVILLE": { id: 25003, sport: "soccer", league: "usl" }, // Placeholder ID
+  "TAMPA BAY ROWDIES": { id: 6232, sport: "soccer", league: "usl" },
+
   // IPL (Cricket) - IDs are placeholders/unofficial
   "CHENNAI SUPER KINGS": { id: 0, sport: "cricket", league: "ipl" },
   "CSK": { id: 0, sport: "cricket", league: "ipl" },
@@ -1198,11 +1225,9 @@ const LEAGUE_TO_SPORT: Record<string, string> = {
   'eredivisie': 'Soccer', 'usl': 'Soccer',
   'ipl': 'Cricket',
   'nhl': 'Hockey',
+
   'mlb': 'Baseball',
-  'milb-aaa': 'Baseball',
-  'milb-aa': 'Baseball',
-  'milb-higha': 'Baseball',
-  'milb-a': 'Baseball'
+  'milb': 'Baseball',
 };
 
 const MILB_SPORT_IDS: Record<string, number> = {
