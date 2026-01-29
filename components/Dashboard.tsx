@@ -249,7 +249,7 @@ export const Dashboard: React.FC<Props> = ({
     const matchesSearch = matchesTeamOrSport || matchesPlayerName;
     const matchesProject = activeProjectId === null || r.projectId === activeProjectId;
     return matchesSearch && matchesProject;
-  });
+  }).sort((a, b) => (a.teamName || '').localeCompare(b.teamName || ''));
 
   const subfolders = projects.filter(p => p.parentId === activeProjectId);
   const currentProject = projects.find(p => p.id === activeProjectId);
