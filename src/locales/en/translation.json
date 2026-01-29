@@ -1,0 +1,205 @@
+{
+    "common": {
+        "save": "Save",
+        "cancel": "Cancel",
+        "delete": "Delete",
+        "edit": "Edit",
+        "close": "Close",
+        "loading": "Loading...",
+        "error": "Error",
+        "success": "Success",
+        "confirm": "Confirm",
+        "back": "Back",
+        "next": "Next",
+        "finish": "Finish"
+    },
+    "nav": {
+        "dashboard": "Dashboard",
+        "engine": "Engine",
+        "settings": "Settings",
+        "about": "About",
+        "signIn": "Sign In",
+        "signUp": "Sign Up",
+        "signOut": "Sign Out",
+        "home": "Home"
+    },
+    "landing": {
+        "hero": {
+            "title": "Broadcast-Ready Metadata in Seconds",
+            "subtitle": "Transform messy rosters into production-ready athlete data with AI-powered normalization",
+            "cta": "Start Free Trial",
+            "demo": "Watch Demo"
+        },
+        "features": {
+            "title": "Built for High-Stakes Broadcast",
+            "aiNormalization": {
+                "title": "AI Normalization",
+                "desc": "Instantly parses messy text from PDF scrapes, websites, and emails with 99.9% accuracy."
+            },
+            "multiFormat": {
+                "title": "Multi-Format Export",
+                "desc": "Export to CSV, JSON, XML, or direct integrations with Ross, Vizrt, and Daktronics."
+            },
+            "teamBranding": {
+                "title": "Auto Team Branding",
+                "desc": "Automatically fetches logos and colors for 500+ pro/college teams."
+            },
+            "cloudSync": {
+                "title": "Cloud Sync",
+                "desc": "Push updates to Dropbox, Google Drive, or S3 buckets in real-time."
+            },
+            "versionControl": {
+                "title": "Version Control",
+                "desc": "Track every change with full audit trails and rollback capabilities."
+            },
+            "realtime": {
+                "title": "Real-time Sync",
+                "desc": "Push updates directly to your production folders or cloud buckets in seconds."
+            }
+        },
+        "pricing": {
+            "title": "Simple, Transparent Pricing",
+            "subtitle": "Choose the plan that fits your workflow",
+            "free": {
+                "name": "Free",
+                "price": "$0",
+                "period": "forever",
+                "features": [
+                    "5 rosters per month",
+                    "Basic CSV export",
+                    "Community support"
+                ],
+                "cta": "Get Started"
+            },
+            "pro": {
+                "name": "Pro",
+                "price": "$29",
+                "period": "per month",
+                "features": [
+                    "Unlimited rosters",
+                    "All export formats",
+                    "Priority support",
+                    "Cloud sync"
+                ],
+                "cta": "Start Trial"
+            },
+            "network": {
+                "name": "Network",
+                "price": "$99",
+                "period": "per month",
+                "features": [
+                    "Everything in Pro",
+                    "Ross/Vizrt integrations",
+                    "Dedicated support",
+                    "Custom branding"
+                ],
+                "cta": "Contact Sales"
+            }
+        },
+        "faq": {
+            "title": "Frequently Asked Questions",
+            "q1": {
+                "question": "How accurate is the AI extraction?",
+                "answer": "Our AI achieves 99.9% accuracy on standard roster formats. For edge cases, you can manually correct any fields before export."
+            },
+            "q2": {
+                "question": "What file formats can I import?",
+                "answer": "We support PDF, Word docs, Excel, plain text, and even screenshots. Just paste or upload, and we'll handle the rest."
+            },
+            "q3": {
+                "question": "Can I export for Ross Xpression or Vizrt?",
+                "answer": "Yes. Our Network tier includes direct exports for Ross DataLinq (XML/CSV) and Vizrt DataCenter, including automatic accent removal and case normalization."
+            },
+            "q4": {
+                "question": "Do you store my data?",
+                "answer": "All rosters are encrypted and stored securely. You can delete your data anytime from Settings."
+            }
+        }
+    },
+    "dashboard": {
+        "title": "Roster Library",
+        "empty": "No rosters yet",
+        "createFirst": "Create your first roster to get started",
+        "newRoster": "New Roster",
+        "athletes": "{{count}} athlete",
+        "athletes_plural": "{{count}} athletes",
+        "export": "Export",
+        "delete": "Delete Roster",
+        "confirmDelete": "Are you sure you want to delete this roster?",
+        "search": "Search rosters...",
+        "filter": "Filter",
+        "sort": "Sort by",
+        "lastModified": "Last modified",
+        "created": "Created",
+        "name": "Name"
+    },
+    "engine": {
+        "title": "Process Roster",
+        "uploadPrompt": "Upload or paste roster data",
+        "teamName": "Team Name",
+        "season": "Season",
+        "process": "Process",
+        "processing": "Processing...",
+        "success": "Roster processed successfully",
+        "error": "Error processing roster",
+        "cancel": "Cancel",
+        "retry": "Retry",
+        "preview": "Preview"
+    },
+    "settings": {
+        "title": "Settings",
+        "subscription": "Subscription",
+        "activity": "Activity Log",
+        "roi": "Performance ROI",
+        "currentUsage": "Current Usage",
+        "creditsUsed": "{{used}} / {{limit}} Credits Used",
+        "upgrade": "Upgrade Plan",
+        "manageSubscription": "Manage Subscription",
+        "roi": {
+            "totalSavings": "Total Cost Savings",
+            "timeSaved": "Time Saved",
+            "rostersProcessed": "Rosters Processed",
+            "costPerAthlete": "Cost Per Athlete",
+            "efficiency": "Efficiency",
+            "volume": "Volume",
+            "unitCost": "Unit Cost",
+            "timeSavedDesc": "Time saved vs manual entry",
+            "rostersDesc": "Rosters ({{count}} athletes)",
+            "costDesc": "Per athlete vs $3.00 manual",
+            "costBreakdown": "Cost Breakdown",
+            "manualEntry": "Manual Entry",
+            "manualDesc": "4 min/athlete @ $45/hr",
+            "rosterSync": "RosterSync",
+            "rosterSyncDesc": "$0.04/athlete automated",
+            "instantProcessing": "Instant processing",
+            "netSavings": "Net Savings",
+            "reduction": "reduction",
+            "insights": {
+                "title": "Optimization Insights",
+                "creditWarning": "You're using {{percent}}% of your credits. Consider upgrading to avoid hitting limits.",
+                "rosterSizeTip": "Avg {{avg}} athletes/roster. Larger rosters maximize your ROI.",
+                "perRosterSavings": "You're saving ${{amount}} per roster on average.",
+                "firstTime": "Process your first roster to see personalized ROI insights and savings calculations."
+            }
+        }
+    },
+    "auth": {
+        "signIn": "Sign In",
+        "signUp": "Sign Up",
+        "signOut": "Sign Out",
+        "welcome": "Welcome back",
+        "createAccount": "Create your account",
+        "email": "Email",
+        "password": "Password",
+        "forgotPassword": "Forgot password?",
+        "noAccount": "Don't have an account?",
+        "hasAccount": "Already have an account?"
+    },
+    "errors": {
+        "generic": "Something went wrong. Please try again.",
+        "network": "Network error. Please check your connection.",
+        "unauthorized": "You must be signed in to do that.",
+        "notFound": "Resource not found.",
+        "validation": "Please check your input and try again."
+    }
+}

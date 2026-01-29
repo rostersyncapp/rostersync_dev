@@ -68,11 +68,22 @@ const BrandLogo: React.FC<{ siteConfig: SiteConfig; size?: 'sm' | 'md' }> = ({ s
   );
 };
 
+import AboutPage from './AboutPage.tsx';
+
+// ... (keep existing imports)
+
+// ... (keep existing interfaces/constants)
+
 const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode, toggleDarkMode, siteConfig }) => {
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
   const [showDemoModal, setShowDemoModal] = useState(false);
   const [demoForm, setDemoForm] = useState({ name: '', email: '', organization: '', useCase: '' });
   const [demoStatus, setDemoStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
+
+  // Navigation State
+  const [currentPage, setCurrentPage] = useState<'home' | 'about'>('home');
+
+
 
   const handleDemoSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -140,6 +151,17 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
       setSignUpUrl(clerk.buildSignUpUrl());
     }
   }, [clerk?.loaded]);
+
+  // --- Render About Page if active ---
+  if (currentPage === 'about') {
+    return (
+      <AboutPage
+        onBack={() => setCurrentPage('home')}
+        siteConfig={siteConfig}
+        darkMode={darkMode}
+      />
+    );
+  }
 
   return (
     <div className={`min-h-screen font-sans selection:bg-[#5B5FFF]/30 ${darkMode ? 'dark' : ''} bg-[#FAFAFA] dark:bg-[#111827] text-gray-900 dark:text-gray-100 transition-colors duration-300`}>
@@ -373,6 +395,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
         </div>
       </section>
 
+
+
       {/* Footer */}
       <footer className="py-16 px-6 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900">
         <div className="max-w-6xl mx-auto space-y-16">
@@ -400,7 +424,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
             </div>
 
             <div className="md:col-span-7 flex flex-wrap gap-8 md:justify-end">
-              <a href="#" className="text-sm font-medium text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors">About</a>
+              <button onClick={() => setCurrentPage('about')} className="text-sm font-medium text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors">About</button>
               <a href="mailto:support@rostersync.io" className="text-sm font-medium text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors">Contact</a>
               <a href="#" className="text-sm font-medium text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors">Privacy</a>
               <a href="#" className="text-sm font-medium text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors">Terms</a>

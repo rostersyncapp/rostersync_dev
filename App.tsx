@@ -4,8 +4,10 @@ import { Dashboard } from './components/Dashboard.tsx';
 import Engine from './components/Engine.tsx';
 import Settings from './components/Settings.tsx';
 import LandingPage from './components/LandingPage.tsx';
+import SupportCard from './components/SupportCard.tsx';
 import { Roster, Profile, Project } from './types.ts';
 import { processRosterRawText, ProcessedRoster } from './services/gemini.ts';
+import { TeamSelectionModal } from './components/TeamSelectionModal.tsx';
 import { supabase, isSupabaseConfigured, getMonthlyUsage, getSiteConfig, SiteConfig, logActivity, setSupabaseToken } from './services/supabase.ts';
 import { useUser, useAuth, useClerk, SignedIn, SignedOut, SignInButton, SignUpButton, UserButton, UserProfile } from '@clerk/clerk-react';
 import { dark } from '@clerk/themes';
@@ -257,6 +259,25 @@ const App: React.FC = () => {
     localStorage.setItem('lastView', newView);
   };
 
+  /**
+   * Helper to retrieve Supabase token with retry logic
+   * Helps mitigate "JWT failed to load" errors from Clerk
+   */
+  const getSupabaseTokenWithRetry = async (retries = 3): Promise<string | null> => {
+    for (let i = 0; i < retries; i++) {
+      try {
+        return await getToken({ template: 'supabase' });
+      } catch (err: any) {
+        console.warn(`[Auth] Token fetch attempt ${i + 1} failed:`, err);
+        // If it's the last attempt, throw
+        if (i === retries - 1) throw err;
+        // Exponential backoff: 500ms, 1000ms, 1500ms...
+        await new Promise(r => setTimeout(r, 500 * (i + 1)));
+      }
+    }
+    return null;
+  };
+
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
   const [expandedFolderIds, setExpandedFolderIds] = useState<string[]>([]);
   const [siteConfig, setSiteConfig] = useState<SiteConfig>({ site_name: 'rosterSync', logo_url: null });
@@ -267,7 +288,7 @@ const App: React.FC = () => {
     return window.matchMedia('(prefers-color-scheme: dark)').matches;
   });
 
-  const [loadingData, setLoadingData] = useState(false);
+  const [loadingData, setLoadingData] = useState(true);
   const [showChangelog, setShowChangelog] = useState(false);
   const [releaseNotes, setReleaseNotes] = useState<any[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
@@ -284,6 +305,7 @@ const App: React.FC = () => {
   const [pendingRoster, setPendingRoster] = useState<ProcessedRoster | null>(null);
   const [confirmDeleteProject, setConfirmDeleteProject] = useState<Project | null>(null);
   const [showUserProfile, setShowUserProfile] = useState(false);
+  const [initializationError, setInitializationError] = useState<string | null>(null);
 
   useEffect(() => {
     if (darkMode) {
@@ -299,7 +321,7 @@ const App: React.FC = () => {
     const syncToken = async () => {
       if (user) {
         try {
-          const token = await getToken({ template: 'supabase', forceRefresh: true } as any);
+          const token = await getSupabaseTokenWithRetry();
           await setSupabaseToken(token);
           await logActivity(user.id, 'LOGIN', 'Signed in to production workspace.');
           fetchData(user);
@@ -321,7 +343,7 @@ const App: React.FC = () => {
       console.log('Token expired event received, refreshing...');
       if (user) {
         try {
-          const token = await getToken({ template: 'supabase', forceRefresh: true } as any);
+          const token = await getSupabaseTokenWithRetry();
           await setSupabaseToken(token);
           console.log('Token refreshed successfully');
         } catch (err) {
@@ -338,6 +360,15 @@ const App: React.FC = () => {
     const initApp = async () => {
       const config = await getSiteConfig();
       setSiteConfig(config);
+
+      // Dynamically update favicon
+      if (config.logo_url) {
+        const link = (document.querySelector("link[rel*='icon']") || document.createElement('link')) as HTMLLinkElement;
+        link.type = 'image/x-icon'; // Works for most image types in modern browsers
+        link.rel = 'icon';
+        link.href = config.logo_url;
+        document.getElementsByTagName('head')[0].appendChild(link);
+      }
 
       if (isSupabaseConfigured) {
         const { data } = await supabase.from('release_notes').select('*').order('created_at', { ascending: false });
@@ -399,12 +430,14 @@ const App: React.FC = () => {
       if (rosterError) console.error("[Auth Debug] Failed to fetch rosters:", rosterError.message);
 
       if (rosterData) {
+        console.log("Fetched Rosters Raw:", rosterData);
         setRosters(rosterData.map((r: any) => ({
           id: r.id,
           userId: r.user_id,
           projectId: r.project_id,
           teamName: r.team_name || 'Unknown Team',
           sport: r.sport || 'General',
+          league: r.league,
           seasonYear: r.season_year || '',
           isNocMode: r.is_noc_mode || false,
           athleteCount: r.athlete_count || 0,
@@ -471,14 +504,25 @@ const App: React.FC = () => {
     await signOut();
   };
 
-  const handleStartProcessing = async (text: string, isNocMode: boolean = false, seasonYear: string = '', findBranding: boolean = false) => {
+  // State for team selection modal
+  const [teamSelectionCandidates, setTeamSelectionCandidates] = useState<{ name: string; logoUrl: string; primaryColor: string; secondaryColor: string }[]>([]);
+  const [pendingRosterWithCandidates, setPendingRosterWithCandidates] = useState<ProcessedRoster | null>(null);
+
+  const handleStartProcessing = async (text: string, isNocMode: boolean = false, seasonYear: string = '', findBranding: boolean = false, league?: string) => {
     const limit = getTierLimit(profile.subscriptionTier);
     if (profile.creditsUsed >= limit) { alert(`Limit Reached! ${profile.creditsUsed}/${limit}`); return; }
     setIsProcessing(true);
     handleSetView('engine');
     try {
-      const result = await processRosterRawText(text, profile.subscriptionTier, isNocMode, seasonYear, findBranding);
-      setPendingRoster(result);
+      const result = await processRosterRawText(text, profile.subscriptionTier, isNocMode, seasonYear, findBranding, profile.id, league);
+
+      // Check if there are multiple team candidates
+      if (result.candidateTeams && result.candidateTeams.length > 1) {
+        setPendingRosterWithCandidates(result);
+        setTeamSelectionCandidates(result.candidateTeams);
+      } else {
+        setPendingRoster(result);
+      }
       setProfile(prev => ({ ...prev, creditsUsed: prev.creditsUsed + 1 }));
     } catch (error: any) {
       alert(`Processing Failed: ${error.message}`);
@@ -487,13 +531,52 @@ const App: React.FC = () => {
     }
   };
 
+  const handleTeamSelection = (selectedTeam: { name: string; logoUrl: string; primaryColor: string; secondaryColor: string }) => {
+    if (pendingRosterWithCandidates) {
+      // Apply selected team branding
+      const updatedRoster: ProcessedRoster = {
+        ...pendingRosterWithCandidates,
+        teamName: selectedTeam.name,
+        candidateTeams: undefined, // Clear candidates
+        teamMetadata: {
+          ...pendingRosterWithCandidates.teamMetadata,
+          logoUrl: selectedTeam.logoUrl,
+          primaryColor: selectedTeam.primaryColor,
+          secondaryColor: selectedTeam.secondaryColor,
+          conference: pendingRosterWithCandidates.teamMetadata?.conference || 'General',
+          abbreviation: pendingRosterWithCandidates.teamMetadata?.abbreviation || 'UNK'
+        }
+      };
+      setPendingRoster(updatedRoster);
+      setPendingRosterWithCandidates(null);
+      setTeamSelectionCandidates([]);
+    }
+  };
+
   const handleSaveRoster = async (newRoster: Roster) => {
+    console.log("Saving Roster...", { user: user?.id, isSupabaseConfigured });
+
     if (user && isSupabaseConfigured) {
-      const { data } = await supabase.from('rosters').insert({
+      // Force refresh token before save to prevent JWT expired errors
+      try {
+        const token = await getSupabaseTokenWithRetry();
+        await setSupabaseToken(token);
+      } catch (tokenErr) {
+        console.warn("Token auto-refresh failed, attempting save anyway...", tokenErr);
+      }
+
+      console.log("Saving Roster Payload:", {
+        teamName: newRoster.teamName,
+        metadata: newRoster.teamMetadata
+      });
+
+      console.log("Sending insert to Supabase:", newRoster);
+      const { data, error } = await supabase.from('rosters').insert({
         user_id: user.id,
         project_id: newRoster.projectId,
         team_name: newRoster.teamName,
         sport: newRoster.sport,
+        league: newRoster.league,
         season_year: newRoster.seasonYear,
         is_noc_mode: newRoster.isNocMode,
         athlete_count: newRoster.athleteCount,
@@ -501,7 +584,15 @@ const App: React.FC = () => {
         team_metadata: newRoster.teamMetadata,
         version_description: newRoster.versionDescription || ''
       }).select().single();
+
+      if (error) {
+        console.error("Save Error:", error);
+        alert(`Failed to save roster: ${error.message} (${error.code})`);
+        return;
+      }
+
       if (data) {
+        await logActivity(profile.id, 'ROSTER_SAVE', `Saved roster for ${newRoster.teamName} (${newRoster.rosterData?.length || 0} athletes).`);
         setRosters(prev => [{ ...newRoster, id: data.id, createdAt: data.created_at, isSynced: true }, ...prev]);
       }
     } else {
@@ -641,20 +732,42 @@ const App: React.FC = () => {
             <div className="max-w-[1400px] mx-auto h-full">
               {view === 'dashboard' && <Dashboard userId={profile.id} rosters={rosters} projects={projects} activeProjectId={activeProjectId} onNewRoster={() => handleSetView('engine')} onDeleteRoster={async (id) => {
                 const roster = rosters.find(r => r.id === id);
-                if (roster) {
-                  await logActivity(profile.id, 'ROSTER_DELETE', `Deleted roster for ${roster.teamName}.`);
-                }
-                if (roster && roster.projectId) {
+                if (!roster) return;
+
+                if (roster.projectId) {
+                  // Roster is in a folder - just remove from folder (keep in library)
+                  if (user && isSupabaseConfigured) {
+                    try {
+                      const token = await getSupabaseTokenWithRetry();
+                      await setSupabaseToken(token);
+                      const { error } = await supabase.from('rosters').update({ project_id: null }).eq('id', id);
+                      if (error) throw error;
+                    } catch (error: any) {
+                      console.error("Unassign Error:", error);
+                      alert(`Failed to remove from folder: ${error.message}`);
+                      return;
+                    }
+                  }
                   const updated = { ...roster, projectId: undefined };
-                  if (user && isSupabaseConfigured) {
-                    await supabase.from('rosters').update({ project_id: null }).eq('id', id);
-                  }
                   setRosters(prev => prev.map(r => r.id === id ? updated : r));
+                  setSelectedRosterId(null);
                 } else {
+                  // Roster not in folder - permanently delete
                   if (user && isSupabaseConfigured) {
-                    await supabase.from('rosters').delete().eq('id', id);
+                    try {
+                      const token = await getSupabaseTokenWithRetry();
+                      await setSupabaseToken(token);
+                      const { error } = await supabase.from('rosters').delete().eq('id', id);
+                      if (error) throw error;
+                    } catch (error: any) {
+                      console.error("Delete Error:", error);
+                      alert(`Failed to delete roster: ${error.message}`);
+                      return;
+                    }
                   }
+                  await logActivity(profile.id, 'ROSTER_DELETE', `Deleted roster for ${roster.teamName}.`);
                   setRosters(prev => prev.filter(r => r.id !== id));
+                  setSelectedRosterId(null);
                 }
               }} onUpdateRoster={async (r) => {
                 await logActivity(profile.id, 'ROSTER_UPDATE', `Updated metadata for ${r.teamName}.`);
@@ -680,7 +793,7 @@ const App: React.FC = () => {
 
                 // Update local state
                 setRosters(prev => prev.map(old => old.id === r.id ? r : old));
-              }} userTier={profile.subscriptionTier} creditsUsed={profile.creditsUsed} selectedRosterId={selectedRosterId} onSelectRoster={setSelectedRosterId} onSelectProject={setActiveProjectId} onCreateSubfolder={(pid) => { setCreatingFolderInId(pid || 'root'); setNewProjectName(''); }} />}
+              }} userTier={profile.subscriptionTier} creditsUsed={profile.creditsUsed} selectedRosterId={selectedRosterId} onSelectRoster={setSelectedRosterId} onSelectProject={setActiveProjectId} onCreateSubfolder={(pid) => { setCreatingFolderInId(pid || 'root'); setNewProjectName(''); }} isLoading={loadingData} />}
               {view === 'engine' && <Engine userTier={profile.subscriptionTier} projects={projects} creditsUsed={profile.creditsUsed} maxCredits={getTierLimit(profile.subscriptionTier)} onSave={handleSaveRoster} onStartProcessing={handleStartProcessing} isProcessing={isProcessing} pendingRoster={pendingRoster} onClearPending={() => setPendingRoster(null)} onDeletePlayer={async (athleteName) => {
                 await logActivity(profile.id, 'PLAYER_DELETE', `Removed player ${athleteName} from roster.`);
               }} />}
@@ -692,38 +805,8 @@ const App: React.FC = () => {
 
           {showSupportModal && (
             <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-300">
-              <div className="relative w-full max-w-md bg-white dark:bg-gray-900 rounded-xl p-8 shadow-2xl animate-in zoom-in duration-300">
-                <button onClick={() => setShowSupportModal(false)} className="absolute top-6 right-6 p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-all"><X size={20} /></button>
-                <div className="text-center mb-8">
-                  <div className="w-16 h-16 rounded-lg bg-[#5B5FFF]/10 text-[#5B5FFF] flex items-center justify-center mx-auto mb-4">
-                    <Headphones size={32} />
-                  </div>
-                  <h2 className="text-2xl font-extrabold text-gray-900 dark:text-white">Broadcast Support</h2>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-2 font-medium">Technical issues or hardware requests?</p>
-                </div>
-                <form onSubmit={handleSupportSubmit} className="space-y-4">
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1 font-mono">Your Name</label>
-                    <input type="text" required value={supportForm.name} onChange={(e) => setSupportForm({ ...supportForm, name: e.target.value })} className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border-none rounded-lg outline-none focus:ring-2 focus:ring-[#5B5FFF]/20 text-sm text-gray-900 dark:text-white" />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1 font-mono">Work Email</label>
-                    <input type="email" required value={supportForm.email} onChange={(e) => setSupportForm({ ...supportForm, email: e.target.value })} className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border-none rounded-lg outline-none focus:ring-2 focus:ring-[#5B5FFF]/20 text-sm text-gray-900 dark:text-white" />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1 font-mono">Message</label>
-                    <textarea required rows={4} value={supportForm.message} onChange={(e) => setSupportForm({ ...supportForm, message: e.target.value })} className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border-none rounded-lg outline-none focus:ring-2 focus:ring-[#5B5FFF]/20 text-sm text-gray-900 dark:text-white resize-none" />
-                  </div>
-                  {supportStatus === 'success' ? (
-                    <div className="p-4 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 rounded-lg text-center font-bold text-sm flex items-center justify-center gap-2">
-                      <CheckCircle2 size={18} /> Ticket Created!
-                    </div>
-                  ) : (
-                    <button type="submit" disabled={supportStatus === 'sending'} className="w-full py-4 rounded-lg primary-gradient text-white font-bold text-sm shadow-lg shadow-[#5B5FFF]/20 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2">
-                      {supportStatus === 'sending' ? <Loader2 className="animate-spin" size={18} /> : <><MessageSquare size={18} /> Send Ticket</>}
-                    </button>
-                  )}
-                </form>
+              <div className="relative w-full max-w-4xl animate-in zoom-in duration-300" onClick={(e) => e.stopPropagation()}>
+                <SupportCard darkMode={darkMode} onClose={() => setShowSupportModal(false)} />
               </div>
             </div>
           )}
@@ -815,23 +898,24 @@ const App: React.FC = () => {
 
           {showUserProfile && (
             <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-300">
-              <div className="relative w-full max-w-4xl bg-white dark:bg-gray-900 rounded-xl shadow-2xl animate-in zoom-in duration-300 overflow-hidden max-h-[90vh]">
-                <div className="flex items-center justify-between p-6 border-b border-gray-100 dark:border-gray-800">
-                  <h2 className="text-xl font-extrabold text-gray-900 dark:text-white">Account Settings</h2>
-                  <button onClick={() => setShowUserProfile(false)} className="p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-all">
-                    <X size={24} />
-                  </button>
-                </div>
-                <div className="flex-1 overflow-y-auto max-h-[calc(90vh-80px)]">
+              <div className="relative w-full max-w-[880px] h-[85vh] bg-white dark:bg-gray-900 rounded-xl shadow-2xl animate-in zoom-in duration-300 overflow-hidden flex flex-col">
+                <button
+                  onClick={() => setShowUserProfile(false)}
+                  className="absolute top-4 right-4 z-50 p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-all"
+                >
+                  <X size={24} />
+                </button>
+                <div className="flex-1 w-full h-full">
                   <UserProfile
                     appearance={{
                       baseTheme: darkMode ? dark : undefined,
                       elements: {
-                        rootBox: 'w-full',
-                        card: 'shadow-none bg-transparent',
-                        header: 'hidden',
+                        rootBox: 'w-full h-full',
+                        card: 'shadow-none bg-transparent w-full h-full',
+                        navbar: 'hidden md:flex', // Ensure navbar is visible on desktop
+                        navbarMobileMenuButton: 'md:hidden',
+                        scrollBox: 'rounded-none', // Fix corners
                         pageScrollBox: 'p-0',
-                        componentContainer: 'border-0 shadow-none'
                       }
                     }}
                   />
@@ -840,6 +924,17 @@ const App: React.FC = () => {
             </div>
           )}
         </div>
+
+        {/* Team Selection Modal */}
+        <TeamSelectionModal
+          isOpen={teamSelectionCandidates.length > 0}
+          candidates={teamSelectionCandidates}
+          onSelect={handleTeamSelection}
+          onClose={() => {
+            setTeamSelectionCandidates([]);
+            setPendingRosterWithCandidates(null);
+          }}
+        />
       </SignedIn>
     </>
   );
