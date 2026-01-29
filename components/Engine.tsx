@@ -9,6 +9,7 @@ import {
   CheckCircle2,
   ChevronRight,
   AlertCircle,
+  ChevronDown,
   Table,
   Download,
   Save,
@@ -60,6 +61,7 @@ export const Engine: React.FC<Props> = ({
   onDeletePlayer,
   initialText = ''
 }) => {
+  const [isLeagueDropdownOpen, setIsLeagueDropdownOpen] = useState(false);
   const [step, setStep] = useState(1);
   const [rawInput, setRawInput] = useState(initialText);
   const [selectedProjectId, setSelectedProjectId] = useState<string>('');
@@ -108,6 +110,114 @@ export const Engine: React.FC<Props> = ({
       setStep(1);
     }
   }, [pendingRoster, isProcessing]);
+
+  // Click outside handler for dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (!target.closest('.league-dropdown-container')) {
+        setIsLeagueDropdownOpen(false);
+      }
+    };
+
+    if (isLeagueDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isLeagueDropdownOpen]);
+
+  const LEAGUE_OPTIONS = [
+    {
+      category: "🏀 Basketball",
+      options: [
+        { value: "nba", label: "NBA" },
+        { value: "wnba", label: "WNBA" },
+        { value: "ncaa-basketball", label: "NCAA Basketball" },
+        { value: "euroleague", label: "EuroLeague" }
+      ]
+    },
+    {
+      category: "🏈 Football (American)",
+      options: [
+        { value: "nfl", label: "NFL" },
+        { value: "ncaa-football", label: "NCAA Football" }
+      ]
+    },
+    {
+      category: "⚽ Soccer",
+      options: [
+        { value: "premier-league", label: "Premier League" },
+        { value: "la-liga", label: "La Liga" },
+        { value: "serie-a", label: "Serie A" },
+        { value: "bundesliga", label: "Bundesliga" },
+        { value: "ligue-1", label: "Ligue 1" },
+        { value: "mls", label: "MLS" },
+        { value: "liga-mx", label: "Liga MX" },
+        { value: "eredivisie", label: "Eredivisie" },
+        { value: "usl", label: "USL Championship" }
+      ]
+    },
+    {
+      category: "🏏 Cricket",
+      options: [
+        { value: "ipl", label: "IPL" }
+      ]
+    },
+    {
+      category: "🏒 Hockey",
+      options: [
+        { value: "nhl", label: "NHL" }
+      ]
+    },
+    {
+      category: "⚾ Baseball",
+      options: [
+        { value: "mlb", label: "MLB" },
+        { value: "milb-aaa", label: "MiLB Triple-A" },
+        { value: "milb-aa", label: "MiLB Double-A" },
+        { value: "milb-higha", label: "MiLB High-A" },
+        { value: "milb-a", label: "MiLB Single-A" }
+      ]
+    }
+  ];
+
+  const getLeagueLabel = (value: string) => {
+    for (const group of LEAGUE_OPTIONS) {
+      const found = group.options.find(opt => opt.value === value);
+      if (found) return found.label;
+    }
+    return value || 'Select League';
+  };
+
+  const handleLeagueSelect = (selectedLeague: string) => {
+    setLeague(selectedLeague);
+    setIsLeagueDropdownOpen(false);
+
+    // Auto-set sport based on league
+    const leagueToSport: Record<string, string> = {
+      'nba': 'NBA', 'wnba': 'WNBA', 'ncaa-basketball': 'NCAA Basketball', 'euroleague': 'EuroLeague',
+      'nfl': 'NFL', 'ncaa-football': 'NCAA Football',
+      'premier-league': 'Premier League', 'la-liga': 'La Liga', 'serie-a': 'Serie A',
+      'bundesliga': 'Bundesliga', 'ligue-1': 'Ligue 1', 'mls': 'MLS', 'liga-mx': 'Liga MX',
+      'eredivisie': 'Eredivisie', 'usl': 'USL Championship',
+      'ipl': 'IPL',
+      'nhl': 'NHL',
+      'mlb': 'MLB',
+      'milb-aaa': 'Triple-A',
+      'milb-aa': 'Double-A',
+      'milb-higha': 'High-A',
+      'milb-a': 'Single-A'
+    };
+
+    if (selectedLeague && leagueToSport[selectedLeague]) {
+      setSport(leagueToSport[selectedLeague]);
+    } else if (!selectedLeague) {
+      setSport('');
+    }
+  };
 
   const handleProcess = () => {
     if (!rawInput || isProcessing) return;
@@ -254,97 +364,70 @@ export const Engine: React.FC<Props> = ({
                 <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest font-mono flex items-center gap-2">
                   <Trophy size={12} /> League <span className="text-gray-300 dark:text-gray-600">(optional)</span>
                 </label>
-                <select
-                  value={league}
-                  onChange={(e) => {
-                    const selectedLeague = e.target.value;
-                    setLeague(selectedLeague);
+                <div className="relative league-dropdown-container">
+                  <button
+                    onClick={() => setIsLeagueDropdownOpen(!isLeagueDropdownOpen)}
+                    className="w-full px-5 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl text-base font-medium outline-none focus:ring-2 focus:ring-[#5B5FFF]/20 text-gray-900 dark:text-white flex items-center justify-between"
+                  >
+                    <span className={!league ? "text-gray-500" : ""}>{getLeagueLabel(league)}</span>
+                    <ChevronDown size={16} className={`text-gray-400 transition-transform duration-200 ${isLeagueDropdownOpen ? 'rotate-180' : ''}`} />
+                  </button>
 
-                    // Auto-set sport based on league
-                    const leagueToSport: Record<string, string> = {
-                      'nba': 'NBA', 'wnba': 'WNBA', 'ncaa-basketball': 'NCAA Basketball', 'euroleague': 'EuroLeague',
-                      'nfl': 'NFL', 'ncaa-football': 'NCAA Football',
-                      'premier-league': 'Premier League', 'la-liga': 'La Liga', 'serie-a': 'Serie A',
-                      'bundesliga': 'Bundesliga', 'ligue-1': 'Ligue 1', 'mls': 'MLS', 'liga-mx': 'Liga MX',
-                      'eredivisie': 'Eredivisie', 'usl': 'USL Championship',
-                      'ipl': 'IPL',
-                      'nhl': 'NHL',
-                      'mlb': 'MLB',
-                      'milb-aaa': 'Triple-A',
-                      'milb-aa': 'Double-A',
-                      'milb-higha': 'High-A',
-                      'milb-a': 'Single-A'
-                    };
-
-                    if (selectedLeague && leagueToSport[selectedLeague]) {
-                      setSport(leagueToSport[selectedLeague]);
-                    } else if (!selectedLeague) {
-                      setSport(''); // Reset sport if auto-detect
-                    }
-                  }}
-                  className="w-full px-5 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl text-base font-medium outline-none focus:ring-2 focus:ring-[#5B5FFF]/20 text-gray-900 dark:text-white"
-                >
-                  <option value="">Select League</option>
-                  <optgroup label="🏀 Basketball" className="text-[#5B5FFF] font-extrabold not-italic bg-gray-50 dark:bg-gray-800">
-                    <option value="nba">NBA</option>
-                    <option value="wnba">WNBA</option>
-                    <option value="ncaa-basketball">NCAA Basketball</option>
-                    <option value="euroleague">EuroLeague</option>
-                  </optgroup>
-                  <optgroup label="🏈 Football (American)" className="text-[#5B5FFF] font-extrabold not-italic bg-gray-50 dark:bg-gray-800">
-                    <option value="nfl">NFL</option>
-                    <option value="ncaa-football">NCAA Football</option>
-                  </optgroup>
-                  <optgroup label="⚽ Soccer" className="text-[#5B5FFF] font-extrabold not-italic bg-gray-50 dark:bg-gray-800">
-                    <option value="premier-league">Premier League</option>
-                    <option value="la-liga">La Liga</option>
-                    <option value="serie-a">Serie A</option>
-                    <option value="bundesliga">Bundesliga</option>
-                    <option value="ligue-1">Ligue 1</option>
-                    <option value="mls">MLS</option>
-                    <option value="liga-mx">Liga MX</option>
-                    <option value="eredivisie">Eredivisie</option>
-                    <option value="usl">USL Championship</option>
-                  </optgroup>
-                  <optgroup label="🏏 Cricket" className="text-[#5B5FFF] font-extrabold not-italic bg-gray-50 dark:bg-gray-800">
-                    <option value="ipl">IPL</option>
-                  </optgroup>
-                  <optgroup label="🏒 Hockey" className="text-[#5B5FFF] font-extrabold not-italic bg-gray-50 dark:bg-gray-800">
-                    <option value="nhl">NHL</option>
-                  </optgroup>
-                  <optgroup label="⚾ Baseball" className="text-[#5B5FFF] font-extrabold not-italic bg-gray-50 dark:bg-gray-800">
-                    <option value="mlb">MLB</option>
-                    <option value="milb-aaa">MiLB Triple-A</option>
-                    <option value="milb-aa">MiLB Double-A</option>
-                    <option value="milb-higha">MiLB High-A</option>
-                    <option value="milb-a">MiLB Single-A</option>
-                  </optgroup>
-                </select>
+                  {isLeagueDropdownOpen && (
+                    <div className="absolute top-full left-0 w-full mt-2 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl shadow-xl z-50 max-h-60 overflow-y-auto">
+                      <div className="py-2">
+                        <button
+                          onClick={() => handleLeagueSelect("")}
+                          className="w-full text-left px-5 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-500"
+                        >
+                          Select League
+                        </button>
+                        {LEAGUE_OPTIONS.map((group, groupIdx) => (
+                          <div key={groupIdx}>
+                            <div className="px-5 py-2 text-xs font-extrabold uppercase tracking-widest text-[#5B5FFF] bg-gray-50/50 dark:bg-gray-900/50 mt-1 first:mt-0">
+                              {group.category}
+                            </div>
+                            {group.options.map((option) => (
+                              <button
+                                key={option.value}
+                                onClick={() => handleLeagueSelect(option.value)}
+                                className={`w-full text-left px-5 py-2.5 transition-colors text-sm font-medium ${league === option.value ? 'bg-[#5B5FFF]/10 text-[#5B5FFF]' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'}`}
+                              >
+                                {option.label}
+                              </button>
+                            ))}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
-
-              <div className="space-y-2">
-                <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest font-mono flex items-center gap-2">
-                  <Calendar size={12} /> Season Year
-                </label>
-                <input
-                  type="text"
-                  value={seasonYear}
-                  onChange={(e) => setSeasonYear(e.target.value)}
-                  className="w-full px-5 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl text-lg font-bold outline-none focus:ring-2 focus:ring-[#5B5FFF]/20 text-center"
-                  onKeyDown={(e) => e.key === 'Enter' && handleProcess()}
-                />
-              </div>
-
-              <button
-                onClick={handleProcess}
-                className="w-full py-4 rounded-xl primary-gradient text-white font-bold text-base shadow-lg shadow-[#5B5FFF]/20 hover:scale-[1.02] active:scale-[0.98] transition-all uppercase tracking-widest flex items-center justify-center gap-2"
-              >
-                <Cpu size={20} /> Confirm & Process
-              </button>
             </div>
+
+            <div className="space-y-2">
+              <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest font-mono flex items-center gap-2">
+                <Calendar size={12} /> Season Year
+              </label>
+              <input
+                type="text"
+                value={seasonYear}
+                onChange={(e) => setSeasonYear(e.target.value)}
+                className="w-full px-5 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl text-lg font-bold outline-none focus:ring-2 focus:ring-[#5B5FFF]/20 text-center"
+                onKeyDown={(e) => e.key === 'Enter' && handleProcess()}
+              />
+            </div>
+
+            <button
+              onClick={handleProcess}
+              className="w-full py-4 rounded-xl primary-gradient text-white font-bold text-base shadow-lg shadow-[#5B5FFF]/20 hover:scale-[1.02] active:scale-[0.98] transition-all uppercase tracking-widest flex items-center justify-center gap-2"
+            >
+              <Cpu size={20} /> Confirm & Process
+            </button>
           </div>
         </div>
-      )}
+      )
+      }
 
       {/* Ambiguous Team Selection Modal */}
       <TeamSelectionModal
