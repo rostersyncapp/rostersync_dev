@@ -265,7 +265,7 @@ export const Engine: React.FC<Props> = ({
                     // Auto-set sport based on league
                     const leagueToSport: Record<string, string> = {
                       'nba': 'NBA', 'wnba': 'WNBA', 'ncaa-basketball': 'NCAA Basketball', 'euroleague': 'EuroLeague',
-                      'nfl': 'NFL', 'ncaa-football': 'NCAA Football', 'cfl': 'CFL',
+                      'nfl': 'NFL', 'ncaa-football': 'NCAA Football',
                       'premier-league': 'Premier League', 'la-liga': 'La Liga', 'serie-a': 'Serie A',
                       'bundesliga': 'Bundesliga', 'ligue-1': 'Ligue 1', 'mls': 'MLS', 'liga-mx': 'Liga MX',
                       'eredivisie': 'Eredivisie', 'usl': 'USL Championship',
@@ -296,7 +296,6 @@ export const Engine: React.FC<Props> = ({
                   <optgroup label="🏈 Football (American)">
                     <option value="nfl">NFL</option>
                     <option value="ncaa-football">NCAA Football</option>
-                    <option value="cfl">CFL</option>
                   </optgroup>
                   <optgroup label="⚽ Soccer">
                     <option value="premier-league">Premier League</option>
