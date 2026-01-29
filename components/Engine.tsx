@@ -485,18 +485,6 @@ export const Engine: React.FC<Props> = ({
 
               <div className="space-y-2">
                 <label className="text-xs font-bold text-gray-400 uppercase tracking-widest font-mono flex items-center gap-2">
-                  <Trophy size={12} /> Team Name <span className="text-gray-300 dark:text-gray-600">(optional)</span>
-                </label>
-                <input
-                  type="text"
-                  value={manualTeamName}
-                  onChange={(e) => setManualTeamName(e.target.value)}
-                  className="w-full h-14 px-5 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl text-base font-medium outline-none focus:ring-2 focus:ring-[#5B5FFF]/20 flex items-center"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-gray-400 uppercase tracking-widest font-mono flex items-center gap-2">
                   <Calendar size={12} /> Season Year
                 </label>
                 <input
@@ -505,6 +493,18 @@ export const Engine: React.FC<Props> = ({
                   onChange={(e) => setSeasonYear(e.target.value)}
                   className="w-full h-14 px-5 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl text-base font-medium outline-none focus:ring-2 focus:ring-[#5B5FFF]/20"
                   onKeyDown={(e) => e.key === 'Enter' && handleProcess()}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-gray-400 uppercase tracking-widest font-mono flex items-center gap-2">
+                  <Trophy size={12} /> Team Name <span className="text-gray-300 dark:text-gray-600">(optional)</span>
+                </label>
+                <input
+                  type="text"
+                  value={manualTeamName}
+                  onChange={(e) => setManualTeamName(e.target.value)}
+                  className="w-full h-14 px-5 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl text-base font-medium outline-none focus:ring-2 focus:ring-[#5B5FFF]/20 flex items-center"
                 />
               </div>
             </div>
