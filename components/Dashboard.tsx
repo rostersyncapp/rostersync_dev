@@ -219,8 +219,16 @@ export const Dashboard: React.FC<Props> = ({
   };
 
   const filteredRosters = rosters.filter(r => {
-    const matchesSearch = (r.teamName || '').toLowerCase().includes(search.toLowerCase()) ||
-      (r.sport || '').toLowerCase().includes(search.toLowerCase());
+    const searchLower = search.toLowerCase();
+    const matchesTeamOrSport = (r.teamName || '').toLowerCase().includes(searchLower) ||
+      (r.sport || '').toLowerCase().includes(searchLower);
+
+    // Also check if any player name matches
+    const matchesPlayerName = r.rosterData?.some(athlete =>
+      (athlete.fullName || '').toLowerCase().includes(searchLower)
+    );
+
+    const matchesSearch = matchesTeamOrSport || matchesPlayerName;
     const matchesProject = activeProjectId === null || r.projectId === activeProjectId;
     return matchesSearch && matchesProject;
   });
@@ -553,7 +561,7 @@ export const Dashboard: React.FC<Props> = ({
             {filteredRosters.map(roster => {
               const primaryColor = roster.teamMetadata?.primaryColor || '#5B5FFF';
               return (
-                <div key={roster.id} onClick={() => onSelectRoster(roster.id)} className="group bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-6 cursor-pointer hover:shadow-lg hover:scale-[1.01] transition-all relative overflow-hidden flex flex-col">
+                <div key={roster.id} onClick={() => onSelectRoster(roster.id)} className="group bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-6 cursor-pointer hover:shadow-lg transition-all relative overflow-hidden flex flex-col">
                   <div className="absolute top-0 left-0 w-full h-1" style={{ backgroundColor: primaryColor }}></div>
                   <div className="flex justify-between items-start mb-4">
                     <TeamLogo url={roster.teamMetadata?.logoUrl} name={roster.teamName} abbreviation={roster.teamMetadata?.abbreviation} primaryColor={primaryColor} size="md" />
