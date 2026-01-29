@@ -402,20 +402,19 @@ export const Engine: React.FC<Props> = ({
                     </div>
                   )}
                 </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-gray-400 uppercase tracking-widest font-mono flex items-center gap-2">
+                    <Calendar size={12} /> Season Year
+                  </label>
+                  <input
+                    type="text"
+                    value={seasonYear}
+                    onChange={(e) => setSeasonYear(e.target.value)}
+                    className="w-full h-14 px-5 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl text-base font-medium outline-none focus:ring-2 focus:ring-[#5B5FFF]/20"
+                    onKeyDown={(e) => e.key === 'Enter' && handleProcess()}
+                  />
+                </div>
               </div>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-gray-400 uppercase tracking-widest font-mono flex items-center gap-2">
-                <Calendar size={12} /> Season Year
-              </label>
-              <input
-                type="text"
-                value={seasonYear}
-                onChange={(e) => setSeasonYear(e.target.value)}
-                className="w-full h-14 px-5 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl text-base font-medium outline-none focus:ring-2 focus:ring-[#5B5FFF]/20"
-                onKeyDown={(e) => e.key === 'Enter' && handleProcess()}
-              />
             </div>
 
             <button
