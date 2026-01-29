@@ -917,20 +917,7 @@ const ESPN_TEAM_IDS: Record<string, { id: number; sport: string; league: string 
   "PHOENIX MERCURY": { id: 14, sport: "basketball", league: "wnba" },
   "SEATTLE STORM": { id: 17, sport: "basketball", league: "wnba" },
   "WASHINGTON MYSTICS": { id: 20, sport: "basketball", league: "wnba" },
-  // NWSL
-  "ANGEL CITY FC": { id: 2, sport: "soccer", league: "usa.nwsl" },
-  "CHICAGO RED STARS": { id: 3, sport: "soccer", league: "usa.nwsl" },
-  "GOTHAM FC": { id: 9, sport: "soccer", league: "usa.nwsl" },
-  "HOUSTON DASH": { id: 5, sport: "soccer", league: "usa.nwsl" },
-  "KANSAS CITY CURRENT": { id: 6, sport: "soccer", league: "usa.nwsl" },
-  "NORTH CAROLINA COURAGE": { id: 7, sport: "soccer", league: "usa.nwsl" },
-  "OL REIGN": { id: 8, sport: "soccer", league: "usa.nwsl" },
-  "ORLANDO PRIDE": { id: 1, sport: "soccer", league: "usa.nwsl" },
-  "PORTLAND THORNS FC": { id: 4, sport: "soccer", league: "usa.nwsl" },
-  "RACING LOUISVILLE FC": { id: 10, sport: "soccer", league: "usa.nwsl" },
-  "SAN DIEGO WAVE FC": { id: 11, sport: "soccer", league: "usa.nwsl" },
-  "UTAH ROYALS FC": { id: 12, sport: "soccer", league: "usa.nwsl" },
-  "WASHINGTON SPIRIT": { id: 13, sport: "soccer", league: "usa.nwsl" },
+
   // Premier League
   "AFC BOURNEMOUTH": { id: 349, sport: "soccer", league: "eng.1" },
   "ARSENAL": { id: 359, sport: "soccer", league: "eng.1" },
