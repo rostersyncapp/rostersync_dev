@@ -361,7 +361,7 @@ export const Engine: React.FC<Props> = ({
 
               <div className="space-y-2">
                 <label className="text-xs font-bold text-gray-400 uppercase tracking-widest font-mono flex items-center gap-2">
-                  <Trophy size={12} /> League <span className="text-gray-300 dark:text-gray-600">(optional)</span>
+                  <Trophy size={12} /> League <span className="text-[#5B5FFF]">*</span>
                 </label>
                 <div className="relative league-dropdown-container">
                   <button
@@ -418,7 +418,8 @@ export const Engine: React.FC<Props> = ({
 
             <button
               onClick={handleProcess}
-              className="w-full mt-8 h-14 rounded-xl primary-gradient text-white font-bold text-base shadow-lg shadow-[#5B5FFF]/20 hover:scale-[1.02] active:scale-[0.98] transition-all uppercase tracking-widest flex items-center justify-center gap-2"
+              disabled={!league}
+              className={`w-full mt-8 h-14 rounded-xl font-bold text-base shadow-lg transition-all uppercase tracking-widest flex items-center justify-center gap-2 ${league ? 'primary-gradient text-white shadow-[#5B5FFF]/20 hover:scale-[1.02] active:scale-[0.98]' : 'bg-gray-100 dark:bg-gray-800 text-gray-400 cursor-not-allowed'}`}
             >
               <Cpu size={20} /> Confirm & Process
             </button>
