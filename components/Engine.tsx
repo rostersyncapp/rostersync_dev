@@ -282,20 +282,20 @@ export const Engine: React.FC<Props> = ({
                       setSport(''); // Reset sport if auto-detect
                     }
                   }}
-                  className="w-full px-5 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl text-base font-medium outline-none focus:ring-2 focus:ring-[#5B5FFF]/20"
+                  className="w-full px-5 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl text-base font-medium outline-none focus:ring-2 focus:ring-[#5B5FFF]/20 text-gray-900 dark:text-white"
                 >
                   <option value="">Select League</option>
-                  <optgroup label="🏀 Basketball">
+                  <optgroup label="🏀 Basketball" className="text-[#5B5FFF] font-extrabold not-italic bg-gray-50 dark:bg-gray-800">
                     <option value="nba">NBA</option>
                     <option value="wnba">WNBA</option>
                     <option value="ncaa-basketball">NCAA Basketball</option>
                     <option value="euroleague">EuroLeague</option>
                   </optgroup>
-                  <optgroup label="🏈 Football (American)">
+                  <optgroup label="🏈 Football (American)" className="text-[#5B5FFF] font-extrabold not-italic bg-gray-50 dark:bg-gray-800">
                     <option value="nfl">NFL</option>
                     <option value="ncaa-football">NCAA Football</option>
                   </optgroup>
-                  <optgroup label="⚽ Soccer">
+                  <optgroup label="⚽ Soccer" className="text-[#5B5FFF] font-extrabold not-italic bg-gray-50 dark:bg-gray-800">
                     <option value="premier-league">Premier League</option>
                     <option value="la-liga">La Liga</option>
                     <option value="serie-a">Serie A</option>
@@ -306,13 +306,13 @@ export const Engine: React.FC<Props> = ({
                     <option value="eredivisie">Eredivisie</option>
                     <option value="usl">USL Championship</option>
                   </optgroup>
-                  <optgroup label="🏏 Cricket">
+                  <optgroup label="🏏 Cricket" className="text-[#5B5FFF] font-extrabold not-italic bg-gray-50 dark:bg-gray-800">
                     <option value="ipl">IPL</option>
                   </optgroup>
-                  <optgroup label="🏒 Hockey">
+                  <optgroup label="🏒 Hockey" className="text-[#5B5FFF] font-extrabold not-italic bg-gray-50 dark:bg-gray-800">
                     <option value="nhl">NHL</option>
                   </optgroup>
-                  <optgroup label="⚾ Baseball">
+                  <optgroup label="⚾ Baseball" className="text-[#5B5FFF] font-extrabold not-italic bg-gray-50 dark:bg-gray-800">
                     <option value="mlb">MLB</option>
                     <option value="milb-aaa">MiLB Triple-A</option>
                     <option value="milb-aa">MiLB Double-A</option>
