@@ -1193,7 +1193,12 @@ const ESPN_TEAM_IDS: Record<string, { id: number; sport: string; league: string 
 
   // MiLB (Minor League Baseball) - AAA
   "SACRAMENTO RIVER CATS": { id: 416, sport: "baseball", league: "milb-aaa" },
-  "RIVER CATS": { id: 416, sport: "baseball", league: "milb-aaa" }
+  "RIVER CATS": { id: 416, sport: "baseball", league: "milb-aaa" },
+  "SALT LAKE BEES": { id: 489, sport: "baseball", league: "milb-aaa" },
+  "BEES": { id: 489, sport: "baseball", league: "milb-aaa" },
+  "IOWA CUBS": { id: 451, sport: "baseball", league: "milb-aaa" },
+  "LEHIGH VALLEY IRONPIGS": { id: 2507, sport: "baseball", league: "milb-aaa" },
+  "IRONPIGS": { id: 2507, sport: "baseball", league: "milb-aaa" }
 };
 
 const LEAGUE_DISPLAY_NAMES: Record<string, string> = {
@@ -1524,11 +1529,11 @@ CRITICAL: Never guess team IDs. If unsure, prioritize milb.com for verification.
     1. TEAM IDENTIFICATION (HIGHEST PRIORITY):
     - ${leagueHint}Look for the team name in headers, titles, or the first few lines.
     - REVERSE LOOKUP (CRITICAL): If the team name is NOT explicitly found in the text, you MUST use the 'googleSearch' tool. 
-    - MiLB SEARCH (PRIORITY): If league is MiLB, search specifically on milb.com and prioritize Triple-A results (e.g., "site:milb.com {players} roster").
+    - MiLB SEARCH (PRIORITY): If league is MiLB, search specifically on milb.com and prioritize Triple-A results (e.g., "site:milb.com {3-4 distinct player names from the text} roster").
     - DO NOT return "Unknown Team" without attempting a search. You MUST Populate 'teamName' with the real team name found via search.
 
     2. ROSTER EXTRACTION:
-    - CLEANING INPUT: The input text may have artifacts like "Daniel Vitiello1" (name + jersey number). You MUST separate them -> Name: "Daniel Vitiello", Jersey: "01".
+    - CLEANING INPUT: The input text may have artifacts like "NAME01" (name + jersey number). You MUST separate them -> Name: "NAME", Jersey: "01".
     - NORMALIZE: Convert all athlete names to UPPERCASE and strip accents.
     - JERSEY NUMBERS: Always use at least two digits. Pad single digits with a leading zero (e.g., '3' becomes '03', '0' becomes '00').
     - SPORT INFERENCE: If the sport is not explicitly named, INFER it from the positions.
@@ -1579,10 +1584,10 @@ CRITICAL: Never guess team IDs. If unsure, prioritize milb.com for verification.
       const fallbackModel = genAI.getGenerativeModel(fallbackParams);
       const fallbackPrompt = `
       SEARCH_FAILED_FALLBACK: The search tool is unavailable. 
-      CRITICAL: You must identify the team name purely from the text provided. 
+      CRITICAL: You must identify the team name purely from the literal text provided in the first 20 lines. 
       LEAGUE_HINT: The user says this is a ${LEAGUE_DISPLAY_NAMES[league || ''] || 'Standard'} roster. 
-      If league is MiLB, prioritize Triple-A teams like Sacramento River Cats, Lehigh Valley IronPigs, etc.
-      Do NOT return "Unknown Team" if any team name is identifiable in the first 20 lines.
+      If league is MiLB, look specifically for Triple-A team names (e.g., Beers, Cats, IronPigs, etc.) in the text.
+      Do NOT return "Unknown Team" if any team name is identifiable. NEVER guess a team name that is not present in the text.
       
       DATA: ${text}`;
       result = await fallbackModel.generateContent(fallbackPrompt);
