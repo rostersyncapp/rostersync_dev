@@ -1592,7 +1592,8 @@ CRITICAL: Never guess team IDs. If unsure, prioritize milb.com for verification.
     1. TEAM IDENTIFICATION (HIGHEST PRIORITY):
     - ${leagueHint}Look for the team name in headers, titles, or the first few lines.
     - REVERSE LOOKUP (CRITICAL): If the team name is NOT explicitly found in the text, you MUST use the 'googleSearch' tool. 
-    - MiLB SEARCH (CRITICAL): If the specified league starts with 'milb-' (MiLB rosters), you MUST start your search on milb.com using the 'googleSearch' tool (e.g., "site:milb.com {3-4 distinct player names} roster").
+    - MiLB SEARCH (CRITICAL): If the specified league includes 'milb' (MiLB rosters), you MUST start your search on milb.com using the 'googleSearch' tool (e.g., "site:milb.com {3-4 distinct player names} roster").
+    - VALIDATION: After identifying a candidate team, verify that at least 3 names from the input exist on that team's official roster.
     - DO NOT return "Unknown Team" without attempting a search. You MUST Populate 'teamName' with the real team name found via search.
 
     2. ROSTER EXTRACTION:
