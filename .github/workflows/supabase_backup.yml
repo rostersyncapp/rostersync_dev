@@ -2,8 +2,8 @@ name: Supabase to Backblaze Backup
 
 on:
   schedule:
-    - cron: '0 0 * * *'
-  workflow_dispatch:
+    - cron: '0 0 * * *'  # Runs every night at midnight
+  workflow_dispatch:      # Allows manual trigger
 
 jobs:
   backup:
@@ -20,13 +20,16 @@ jobs:
 
       - name: Dump and Compress Database
         env:
+          # In the env block, YAML usually doesn't need quotes for secrets
+          PGHOST: ${{ secrets.SUPABASE_POOLER_HOST }}
+          PGPORT: 5432
+          PGUSER: postgres.${{ secrets.SUPABASE_PROJECT_ID }}
           PGPASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+          PGDATABASE: postgres
         run: |
-          # The quotes around "${{ ... }}" are the secret to preventing argument errors
-          pg_dump -h "${{ secrets.SUPABASE_POOLER_HOST }}" \
-                  -p 5432 \
-                  -U "postgres.${{ secrets.SUPABASE_PROJECT_ID }}" \
-                  -d postgres > backup.sql
+          # Here we use shell-style variables ($NAME) with quotes 
+          # This is the safest way to handle special characters like * or @
+          pg_dump -h "$PGHOST" -p "$PGPORT" -U "$PGUSER" -d "$PGDATABASE" > backup.sql
           gzip backup.sql
 
       - name: Upload to Backblaze B2
@@ -34,7 +37,9 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.B2_APPLICATION_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.B2_APPLICATION_KEY }}
           AWS_DEFAULT_REGION: us-west-004 
+          B2_BUCKET: ${{ secrets.B2_BUCKET_NAME }}
+          B2_URL: ${{ secrets.B2_ENDPOINT }}
         run: |
           FILENAME="rostersync_db_$(date +'%Y-%m-%d_%H-%M').sql.gz"
-          aws s3 cp backup.sql.gz s3://${{ secrets.B2_BUCKET_NAME }}/$FILENAME \
-            --endpoint-url ${{ secrets.B2_ENDPOINT }}
+          # Using quotes around shell variables to handle any weird characters
+          aws s3 cp backup.sql.gz "s3://$B2_BUCKET/$FILENAME" --endpoint-url "$B2_URL"
