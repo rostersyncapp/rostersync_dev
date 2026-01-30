@@ -22,12 +22,8 @@ jobs:
         env:
           PGPASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
         run: |
-          # We use the Shared Pooler Host and Port 5432 (Session Mode)
-          # The username must be postgres.[PROJECT_ID]
-          pg_dump -h ${{ secrets.SUPABASE_POOLER_HOST }} \
-                  -p 5432 \
-                  -U postgres.${{ secrets.SUPABASE_PROJECT_ID }} \
-                  -d postgres > backup.sql
+          # All on one line to prevent "too many arguments" errors
+          pg_dump -h ${{ secrets.SUPABASE_POOLER_HOST }} -p 5432 -U postgres.${{ secrets.SUPABASE_PROJECT_ID }} -d postgres > backup.sql
           gzip backup.sql
 
       - name: Upload to Backblaze B2
