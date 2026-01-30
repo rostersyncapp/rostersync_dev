@@ -1190,6 +1190,10 @@ const ESPN_TEAM_IDS: Record<string, { id: number; sport: string; league: string 
   "RCB": { id: 0, sport: "cricket", league: "ipl" },
   "SUNRISERS HYDERABAD": { id: 0, sport: "cricket", league: "ipl" },
   "SRH": { id: 0, sport: "cricket", league: "ipl" },
+
+  // MiLB (Minor League Baseball) - AAA
+  "SACRAMENTO RIVER CATS": { id: 416, sport: "baseball", league: "milb-aaa" },
+  "RIVER CATS": { id: 416, sport: "baseball", league: "milb-aaa" }
 };
 
 const LEAGUE_DISPLAY_NAMES: Record<string, string> = {
@@ -1246,6 +1250,7 @@ const LEAGUE_TO_SPORT: Record<string, string> = {
 };
 
 const MILB_SPORT_IDS: Record<string, number> = {
+  "milb": 11, // Default to AAA if generic
   "milb-aaa": 11,
   "milb-aa": 12,
   "milb-higha": 13,
@@ -1501,21 +1506,22 @@ export async function processRosterRawText(
 LOGO SOURCES (in priority order):
 1. ESPN CDN for SOCCER: https://a.espncdn.com/combiner/i?img=/i/teamlogos/soccer/500/{TEAM_ID}.png&w=200
    - Use Google Search to find "ESPN {team name} team id" to get the correct numeric ID
-   - KNOWN IDS: Liverpool FC=364, Real Madrid=86, Barcelona=83, Manchester United=360, Manchester City=382, Arsenal=359, Chelsea=363, Bayern Munich=132, PSG=160, Juventus=111
 2. ESPN CDN for US SPORTS: https://a.espncdn.com/combiner/i?img=/i/teamlogos/{league}/500/{code}.png&h=200&w=200
    - NFL: ne, dal, gb, etc. | NHL: bos, nyr, chi | NBA: lal, bos, chi | MLB: nyy, bos, lad
-3. WIKIPEDIA: For any team, search Google for "{team name} logo site:upload.wikimedia.org" and use the official SVG/PNG
-4. FALLBACK: Use thesportsdb.com or official team website
+3. ESPN CDN for MiLB: https://a.espncdn.com/combiner/i?img=/i/teamlogos/milb/500/{TEAM_ID}.png&w=200
+   - Use Google Search to find "{team name} MiLB team ID"
+4. WIKIPEDIA: For any team, search Google for "{team name} logo site:upload.wikimedia.org" and use the official SVG/PNG
+5. FALLBACK: Use thesportsdb.com or official team website
 
-CRITICAL: Never guess team IDs. If unsure, use Google Search to find the correct ESPN team ID or Wikipedia logo URL.
-
-COLORS: Search teamcolorcodes.com for HEX, RGB, Pantone (PMS), and CMYK values.`
+CRITICAL: Never guess team IDs. If unsure, use Google Search to find the correct ESPN team ID or Wikipedia logo URL.`
     : "Use default branding colors (#5B5FFF and #1A1A1A).";
+
+  const leagueHint = league ? `The user has indicated this is likely a roster for the ${LEAGUE_DISPLAY_NAMES[league] || league} league. ` : '';
 
   const systemInstruction = `You are an expert broadcast metadata extractor. Your PRIMARY GOAL is to identify the team and extract the roster.
     
     1. TEAM IDENTIFICATION (HIGHEST PRIORITY):
-    - Look for the team name in headers, titles, or the first few lines.
+    - ${leagueHint}Look for the team name in headers, titles, or the first few lines.
     - REVERSE LOOKUP (CRITICAL): If the team name is NOT explicitly found in the text, you MUST use the 'googleSearch' tool. Search for a query like "Daniel Vitiello Jared Mazzola Jack Gurr roster" (using 3-4 distinct player names from the list) to find the team.
     - DO NOT return "Unknown Team" without attempting a search. You MUST Populate 'teamName' with the real team name found via search.
 
@@ -1523,14 +1529,14 @@ COLORS: Search teamcolorcodes.com for HEX, RGB, Pantone (PMS), and CMYK values.`
     - CLEANING INPUT: The input text may have artifacts like "Daniel Vitiello1" (name + jersey number). You MUST separate them -> Name: "Daniel Vitiello", Jersey: "01".
     - NORMALIZE: Convert all athlete names to UPPERCASE and strip accents.
     - JERSEY NUMBERS: Always use at least two digits. Pad single digits with a leading zero (e.g., '3' becomes '03', '0' becomes '00').
-    - SPORT INFERENCE: If the sport is not explicitly named, INFER it from the positions (e.g. GK/FWD -> Soccer, QB/WR -> Football, G/F -> Basketball).
+    - SPORT INFERENCE: If the sport is not explicitly named, INFER it from the positions.
 
     3. BRANDING & METADATA:
     - ${brandingInstruction}
-    - ABBREVIATION: If a 3-letter team code is not found in the text, GENERATE one based on the Team Name (e.g. "Liverpool FC" -> "LIV").
+    - ABBREVIATION: Always generate a 3-letter team code (e.g. "Liverpool FC" -> "LIV").
 
     4. OUTPUT FORMAT:
-    - The output MUST be a strict VALID JSON object. Do not include markdown keys (like \`\`\`json).
+    - The output MUST be a strict VALID JSON object.
     - Structure: { "teamName": string, "athletes": [ { "fullName": string, "jerseyNumber": string, "position": string, "nilStatus": string } ], ... }.
     ${findBranding ? `- SCHEMA PROPERTIES: ${JSON.stringify(schema.properties)}` : ''}`;
 
@@ -1569,7 +1575,15 @@ COLORS: Search teamcolorcodes.com for HEX, RGB, Pantone (PMS), and CMYK values.`
         responseSchema: schema,
       };
       const fallbackModel = genAI.getGenerativeModel(fallbackParams);
-      result = await fallbackModel.generateContent(`Tier: ${tier}. Mode: ${isNocMode ? 'NOC' : 'Standard'}. ${context} Data: ${text}`);
+      const fallbackPrompt = `
+      SEARCH_FAILED_FALLBACK: The search tool is unavailable. 
+      CRITICAL: You must identify the team name purely from the text provided. 
+      LEAGUE_HINT: The user says this is a ${LEAGUE_DISPLAY_NAMES[league || ''] || 'Standard'} roster. 
+      If you see names like "Sacramento" or "River Cats", use that. 
+      Do NOT return "Unknown Team" if any team name is identifiable in the first 20 lines.
+      
+      DATA: ${text}`;
+      result = await fallbackModel.generateContent(fallbackPrompt);
     } else {
       throw error;
     }
