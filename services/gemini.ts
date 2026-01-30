@@ -1522,14 +1522,14 @@ function getSchemaForTier(tier: SubscriptionTier, isNocMode: boolean, findBrandi
   if (findBranding) {
     rootProperties.primaryColor = { type: SchemaType.STRING, description: "The official primary HEX color code for the team (e.g. #FFB81C)." };
     rootProperties.secondaryColor = { type: SchemaType.STRING, description: "The official secondary HEX color code for the team." };
-    rootProperties.logoUrl = { type: SchemaType.STRING, description: "Direct URL to the official team logo (preferably from ESPN CDN)." };
+    rootProperties.logoUrl = { type: SchemaType.STRING, description: "Direct URL to the official team logo. If unavailable on ESPN, YOU MUST USE a Wikipedia/Wikimedia upload.wikimedia.org URL." };
     rootProperties.primaryRgb = { type: SchemaType.STRING, description: "Primary color in RGB format (e.g. '255, 184, 28')." };
     rootProperties.secondaryRgb = { type: SchemaType.STRING, description: "Secondary color in RGB format." };
     rootProperties.primaryPantone = { type: SchemaType.STRING, description: "Primary color Pantone code (e.g. 'PMS 130 C')." };
     rootProperties.secondaryPantone = { type: SchemaType.STRING, description: "Secondary color Pantone code." };
     rootProperties.primaryCmyk = { type: SchemaType.STRING, description: "Primary color in CMYK format (e.g. '0, 28, 89, 0')." };
     rootProperties.secondaryCmyk = { type: SchemaType.STRING, description: "Secondary color in CMYK format." };
-    rootRequired.push("primaryColor", "secondaryColor");
+    rootRequired.push("primaryColor", "secondaryColor", "logoUrl");
   }
 
   return {
