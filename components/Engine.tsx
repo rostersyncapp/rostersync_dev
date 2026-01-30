@@ -15,7 +15,6 @@ import {
   Save,
   Loader2,
   X,
-  Sparkles,
   Edit2,
   UserMinus,
   Calendar,
@@ -92,30 +91,7 @@ export const Engine: React.FC<Props> = ({
 
   // Terminal Logic
   const [terminalLogs, setTerminalLogs] = useState<string[]>([]);
-  const [currentTipIndex, setCurrentTipIndex] = useState(0);
 
-  const PROCESSING_LOGS = [
-    "> INITIALIZING_NEURAL_NETWORKS...",
-    "> LOADING_CONTEXT_MODELS...",
-    "> TOKENIZING_INPUT_STREAM [Batch Size: 128]...",
-    "> DETECTING_ENTITIES [Confidence: 94%]",
-    "> CONNECTING_TO_KNOWLEDGE_BASE...",
-    "> SEARCHING_GLOBAL_INDICES...",
-    "> EXTRACTING_ROSTER_METADATA...",
-    "> NORMALIZING_PLAYER_NAMES...",
-    "> INFERRING_JERSEY_NUMBERS...",
-    "> VALIDATING_SPORT_SPECIFIC_CONTEXT...",
-    "> OPTIMIZING_FOR_BROADCAST_OUTPUT...",
-    "> FINALIZING_OUTPUT_BUFFER..."
-  ];
-
-  const TIPS = [
-    "Tip: RosterSync interprets 100+ formats without manual mapping.",
-    "Did you know? You can paste raw HTML directly from team websites.",
-    "Pro Tip: Selecting the correct League boosts accuracy by 45%.",
-    "Fact: This engine processes rosters 600x faster than humans.",
-    "Suggestion: Use 'NOC Mode' for Olympic/International events."
-  ];
 
   useEffect(() => {
     if (isProcessing) {
@@ -130,13 +106,8 @@ export const Engine: React.FC<Props> = ({
         }
       }, 800);
 
-      const tipInterval = setInterval(() => {
-        setCurrentTipIndex(prev => (prev + 1) % TIPS.length);
-      }, 4000);
-
       return () => {
         clearInterval(logInterval);
-        clearInterval(tipInterval);
       };
     } else {
       setTerminalLogs([]);
@@ -401,18 +372,19 @@ export const Engine: React.FC<Props> = ({
                   <div className="text-emerald-600 dark:text-emerald-500 animate-pulse">_</div>
                 </div>
 
-                {/* Floating Tip Pill */}
-                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 w-fit">
-                  <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur border border-gray-200 dark:border-gray-700 rounded-full px-5 py-2.5 flex items-center gap-3 shadow-xl animate-in slide-in-from-bottom-4 duration-500">
-                    <Sparkles size={14} className="text-[#5B5FFF]" />
-                    <span className="text-xs font-bold text-gray-500 dark:text-gray-300 tracking-wide">{TIPS[currentTipIndex]}</span>
-                  </div>
-                </div>
               </div>
             ) : (
               <textarea className={`w-full h-96 px-6 py-6 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl outline-none transition-all text-base leading-relaxed font-mono text-gray-900 dark:text-gray-200 placeholder:text-gray-400 dark:placeholder:text-gray-600 focus:ring-2 focus:ring-[#5B5FFF]/20`} value={rawInput} onChange={(e) => setRawInput(e.target.value)} placeholder="Paste raw roster text here..." />
             )}
-            <div className="flex items-center gap-4 mt-4 justify-end">
+            <div className="flex items-center justify-between mt-8 gap-4">
+              <div className="flex-1 flex justify-center">
+                {isProcessing && (
+                  <div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-full px-5 py-2 flex items-center gap-3 shadow-sm animate-in fade-in slide-in-from-bottom-2 duration-500">
+                    <Sparkles size={14} className="text-[#5B5FFF]" />
+                    <span className="text-xs font-bold text-gray-400 dark:text-gray-500 tracking-wide">{TIPS[currentTipIndex]}</span>
+                  </div>
+                )}
+              </div>
               <button
                 onClick={() => setShowSeasonModal(true)}
                 disabled={isProcessing || !rawInput || !hasCredits}
