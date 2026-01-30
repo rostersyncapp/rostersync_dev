@@ -20,13 +20,17 @@ jobs:
 
       - name: Dump and Compress Database
         env:
-          DB_PASS: ${{ secrets.SUPABASE_DB_PASSWORD }}
-          PROJECT_ID: rddqcxfalrlmlvirjlca
-          HOST: aws-1-us-east-2.pooler.supabase.com
+          # Standard PG variables are the safest way to handle credentials
+          PGHOST: aws-1-us-east-2.pooler.supabase.com
+          PGPORT: 5432
+          PGDATABASE: postgres
+          PGUSER: postgres.rddqcxfalrlmlvirjlca
+          PGPASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+          # This is the "Magic" variable that tells the pooler which project to use
+          PGOPTIONS: "-c project=rddqcxfalrlmlvirjlca"
         run: |
-          # We pass the project ID via the 'options' parameter. 
-          # This is the most explicit way to route through the Supabase pooler.
-          pg_dump "postgres://postgres.$PROJECT_ID:$DB_PASS@$HOST:5432/postgres?sslmode=require&options=-c%20project=$PROJECT_ID" > backup.sql
+          # With the environment variables set above, we don't need ANY arguments
+          pg_dump > backup.sql
           gzip backup.sql
 
       - name: Upload to Backblaze B2
