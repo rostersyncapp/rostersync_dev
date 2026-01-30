@@ -157,7 +157,7 @@ export const Dashboard: React.FC<Props> = ({
 
   const getSportDisplayName = (sport: string) => {
     const normalized = sport?.toUpperCase() || '';
-    return SPORT_NAME_MAP[normalized] || sport || 'General';
+    return SPORT_NAME_MAP[normalized] || sport || '';
   };
 
   const [isEditingMetadata, setIsEditingMetadata] = useState(false);
@@ -612,12 +612,14 @@ export const Dashboard: React.FC<Props> = ({
                       <h3 className="text-base font-extrabold text-gray-900 dark:text-white truncate pr-1">{roster.teamName || 'Unnamed'}</h3>
                       {roster.isNocMode && <span className="text-[8px] bg-amber-500 text-white px-1.5 py-0.5 rounded-md font-black uppercase tracking-widest">NOC</span>}
                     </div>
-                    <div className="flex items-center gap-2 mb-4">
-                      <span className="text-[9px] font-black text-[#5B5FFF] bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/10 px-2 py-0.5 rounded-lg uppercase tracking-widest">{getSportDisplayName(roster.sport)}</span>
-                      {roster.league && (
-                        <span className="text-[9px] font-black text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 px-2 py-0.5 rounded-lg uppercase tracking-widest">{roster.league}</span>
+                    <div className="flex flex-wrap items-center gap-2 mb-4">
+                      {getSportDisplayName(roster.sport) && (
+                        <span className="text-[9px] font-black text-[#5B5FFF] bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/10 px-2 py-0.5 rounded-lg uppercase tracking-widest border border-[#5B5FFF]/10">{getSportDisplayName(roster.sport)}</span>
                       )}
-                      <span className="text-[10px] font-bold text-gray-400 font-mono">{roster.seasonYear}</span>
+                      {roster.league && (
+                        <span className="text-[9px] font-black text-emerald-600 bg-emerald-50 dark:bg-emerald-900/10 px-2 py-0.5 rounded-lg uppercase tracking-widest border border-emerald-500/20">{roster.league}</span>
+                      )}
+                      <span className="text-[10px] font-bold text-gray-400 font-mono ml-auto">{roster.seasonYear}</span>
                     </div>
                     <div className="mt-auto pt-4 border-t border-gray-50 dark:border-gray-800 flex items-center justify-between">
                       <div className="flex items-center gap-2 text-xs font-bold text-gray-400"><Users size={14} /> {roster.athleteCount} Athletes</div>
@@ -676,11 +678,13 @@ export const Dashboard: React.FC<Props> = ({
                           </div>
                         </td>
                         <td className="px-6 py-4 text-center">
-                          <span className="text-[9px] font-black text-[#5B5FFF] bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/10 px-2 py-1 rounded-lg uppercase tracking-widest">{getSportDisplayName(roster.sport)}</span>
+                          {getSportDisplayName(roster.sport) ? (
+                            <span className="text-[9px] font-black text-[#5B5FFF] bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/10 px-2 py-1 rounded-lg uppercase tracking-widest border border-[#5B5FFF]/10">{getSportDisplayName(roster.sport)}</span>
+                          ) : <span className="text-gray-300">-</span>}
                         </td>
                         <td className="px-6 py-4 text-center">
                           {roster.league ? (
-                            <span className="text-[9px] font-black text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 px-2 py-1 rounded-lg uppercase tracking-widest">{roster.league}</span>
+                            <span className="text-[9px] font-black text-emerald-600 bg-emerald-50 dark:bg-emerald-900/10 px-2 py-1 rounded-lg uppercase tracking-widest border border-emerald-500/20">{roster.league}</span>
                           ) : <span className="text-gray-300">-</span>}
                         </td>
                         <td className="px-6 py-4 text-center text-sm font-bold text-gray-500">

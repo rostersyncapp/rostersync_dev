@@ -1214,7 +1214,22 @@ const LEAGUE_DISPLAY_NAMES: Record<string, string> = {
   "milb-aaa": "Triple-A",
   "milb-aa": "Double-A",
   "milb-higha": "High-A",
-  "milb-a": "Single-A"
+  "milb-a": "Single-A",
+  // Map internal modal keys to display names
+  "mls": "MLS",
+  "nwsl": "NWSL",
+  "premier-league": "Premier League",
+  "la-liga": "La Liga",
+  "serie-a": "Serie A",
+  "bundesliga": "Bundesliga",
+  "ligue-1": "Ligue 1",
+  "liga-mx": "Liga MX",
+  "eredivisie": "Eredivisie",
+  "usl": "USL Championship",
+  "ncaa-basketball": "NCAA Basketball",
+  "ncaa-football": "NCAA Football",
+  "euroleague": "EuroLeague",
+  "milb": "MiLB"
 };
 
 const LEAGUE_TO_SPORT: Record<string, string> = {
@@ -1753,7 +1768,7 @@ COLORS: Search teamcolorcodes.com for HEX, RGB, Pantone (PMS), and CMYK values.`
   // IMPORTANT: Only do this if there are NO candidate teams (no ambiguity)
   // If candidateTeams exist, the user will select from the modal and that selection
   // will have the correct sport/league metadata already attached
-  let standardizedSport = parsedResult.sport || "General";
+  let standardizedSport = parsedResult.sport || "";
 
   if (candidateTeams.length <= 1) {
     // PRIORITY 1: Check if a MiLB league was explicitly selected
@@ -1796,7 +1811,8 @@ COLORS: Search teamcolorcodes.com for HEX, RGB, Pantone (PMS), and CMYK values.`
   // Determine final league name:
   // 1. AI explictly returned league (highest priority for non-standard leagues)
   // 2. We found an ESPN identity (fuzzy or exact) that has a league attached
-  let finalLeague = parsedResult.league;
+  // 3. User manual selection from modal (fallback)
+  let finalLeague = parsedResult.league || (league ? (LEAGUE_DISPLAY_NAMES[league] || league) : undefined);
 
   if (!finalLeague && candidateTeams.length <= 1) {
     // Re-resolve identity if needed (to be safe/clean access) or just use the logic flow.

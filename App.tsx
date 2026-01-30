@@ -436,7 +436,7 @@ const App: React.FC = () => {
           userId: r.user_id,
           projectId: r.project_id,
           teamName: r.team_name || 'Unknown Team',
-          sport: r.sport || 'General',
+          sport: r.sport,
           league: r.league,
           seasonYear: r.season_year || '',
           isNocMode: r.is_noc_mode || false,
