@@ -38,6 +38,8 @@ import {
   Clock,
   Zap,
   FolderOpen,
+  TrendingUp,
+  TrendingDown,
   FolderPlus,
   MoreVertical,
   Move,
@@ -507,34 +509,64 @@ export const Dashboard: React.FC<Props> = ({
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-[#5B5FFF] flex items-center justify-center"><Users size={18} /></div>
-            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest font-mono">Athletes</span>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+        {/* Athletes Card */}
+        <div className="group relative bg-white/40 dark:bg-gray-900/40 backdrop-blur-xl p-6 rounded-3xl border border-white/20 dark:border-gray-800/50 shadow-xl transition-all hover:scale-[1.02] hover:shadow-blue-500/10 overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 blur-3xl -mr-16 -mt-16 group-hover:bg-blue-500/20 transition-colors"></div>
+          <div className="flex items-center justify-between mb-4">
+            <div className="w-10 h-10 rounded-2xl bg-blue-500/10 text-blue-500 flex items-center justify-center shadow-inner"><Users size={20} /></div>
+            <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-emerald-500/10 text-emerald-500 text-[10px] font-black uppercase tracking-wider">
+              <TrendingUp size={10} /> +8%
+            </div>
           </div>
-          <div className="text-2xl font-extrabold text-gray-900 dark:text-white">{totalAthletes}</div>
+          <div className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em] font-mono mb-1">Total Athletes</div>
+          <div className="text-3xl font-black text-gray-900 dark:text-white tracking-tight">{totalAthletes.toLocaleString()}</div>
         </div>
-        <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 flex items-center justify-center"><Activity size={18} /></div>
-            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest font-mono">Health</span>
+
+        {/* Health Card */}
+        <div className="group relative bg-white/40 dark:bg-gray-900/40 backdrop-blur-xl p-6 rounded-3xl border border-white/20 dark:border-gray-800/50 shadow-xl transition-all hover:scale-[1.02] hover:shadow-emerald-500/10 overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 blur-3xl -mr-16 -mt-16 group-hover:bg-emerald-500/20 transition-colors"></div>
+          <div className="flex items-center justify-between mb-4">
+            <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center shadow-inner"><Activity size={20} /></div>
+            <div className="text-[10px] font-black text-emerald-500 uppercase tracking-widest bg-emerald-500/5 px-2 py-1 rounded-full border border-emerald-500/10">Stable</div>
           </div>
-          <div className="text-2xl font-extrabold text-emerald-500">{healthScore}%</div>
+          <div className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em] font-mono mb-1">System Health</div>
+          <div className="flex items-baseline gap-2">
+            <div className="text-3xl font-black text-emerald-500 tracking-tight">{healthScore}%</div>
+            <div className="w-12 h-1 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+              <div className="h-full bg-emerald-500" style={{ width: `${healthScore}%` }}></div>
+            </div>
+          </div>
         </div>
-        <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-8 h-8 rounded-lg bg-purple-50 dark:bg-purple-900/20 text-purple-600 flex items-center justify-center"><Clock size={18} /></div>
-            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest font-mono">Saved</span>
+
+        {/* Time Saved Card */}
+        <div className="group relative bg-white/40 dark:bg-gray-900/40 backdrop-blur-xl p-6 rounded-3xl border border-white/20 dark:border-gray-800/50 shadow-xl transition-all hover:scale-[1.02] hover:shadow-purple-500/10 overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 blur-3xl -mr-16 -mt-16 group-hover:bg-purple-500/20 transition-colors"></div>
+          <div className="flex items-center justify-between mb-4">
+            <div className="w-10 h-10 rounded-2xl bg-purple-500/10 text-purple-500 flex items-center justify-center shadow-inner"><Clock size={20} /></div>
+            <div className="text-[10px] font-black text-purple-400 uppercase tracking-widest font-mono">+2.4h today</div>
           </div>
-          <div className="text-2xl font-extrabold text-gray-900 dark:text-white">{timeSavedHours} <span className="text-xs text-gray-400">h</span></div>
+          <div className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em] font-mono mb-1">Time Saved</div>
+          <div className="text-3xl font-black text-gray-900 dark:text-white tracking-tight">{timeSavedHours}<span className="text-lg text-gray-400 ml-1">h</span></div>
         </div>
-        <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 text-[#5B5FFF] flex items-center justify-center"><Zap size={18} /></div>
-            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest font-mono">Usage</span>
+
+        {/* Usage Card */}
+        <div className="group relative bg-white/40 dark:bg-gray-900/40 backdrop-blur-xl p-6 rounded-3xl border border-white/20 dark:border-gray-800/50 shadow-xl transition-all hover:scale-[1.02] hover:shadow-indigo-500/10 overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 blur-3xl -mr-16 -mt-16 group-hover:bg-indigo-500/20 transition-colors"></div>
+          <div className="flex items-center justify-between mb-4">
+            <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center shadow-inner"><Zap size={20} /></div>
+            <div className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest font-mono">{tierLimit - creditsUsed} left</div>
           </div>
-          <div className="text-2xl font-extrabold text-gray-900 dark:text-white">{creditsUsed}<span className="text-xs text-gray-400 font-bold">/{tierLimit}</span></div>
+          <div className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em] font-mono mb-1">Credits Used</div>
+          <div className="flex items-center gap-3">
+            <div className="text-3xl font-black text-gray-900 dark:text-white tracking-tight">{creditsUsed}</div>
+            <div className="flex-1 h-2 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden border border-gray-100 dark:border-gray-700">
+              <div
+                className="h-full bg-gradient-to-r from-indigo-500 to-blue-500 transition-all duration-1000 ease-out"
+                style={{ width: `${(creditsUsed / tierLimit) * 100}%` }}
+              ></div>
+            </div>
+          </div>
         </div>
       </div>
 
