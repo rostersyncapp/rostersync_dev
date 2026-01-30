@@ -1578,6 +1578,7 @@ LOGO SOURCES (in priority order):
 3. MiLB.com & ESPN: Use https://a.espncdn.com/combiner/i?img=/i/teamlogos/milb/500/{TEAM_ID}.png&w=200
    - Use Google Search focusing on "site:milb.com {team name} roster" or "{team name} MiLB team ID"
    - TARGET: Triple-A (PCL or International League)
+   - TIP: On milb.com team pages, the official logo is always in the top navbar/header.
 4. WIKIPEDIA: For any team, search Google for "{team name} logo site:upload.wikimedia.org" and use the official SVG/PNG
 5. FALLBACK: Use thesportsdb.com or official team website
 
