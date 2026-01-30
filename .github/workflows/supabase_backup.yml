@@ -20,17 +20,12 @@ jobs:
 
       - name: Dump and Compress Database
         env:
-          # Standard PG variables are the safest way to handle credentials
-          PGHOST: aws-1-us-east-2.pooler.supabase.com
-          PGPORT: 5432
-          PGDATABASE: postgres
-          PGUSER: postgres.rddqcxfalrlmlvirjlca
           PGPASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
-          # This is the "Magic" variable that tells the pooler which project to use
-          PGOPTIONS: "-c project=rddqcxfalrlmlvirjlca"
         run: |
-          # With the environment variables set above, we don't need ANY arguments
-          pg_dump > backup.sql
+          # We use the PROJECT-SPECIFIC host. 
+          # This usually bypasses the "Tenant not found" error because the ID is in the URL.
+          # We also add sslmode=verify-full to force a proper handshake.
+          pg_dump "postgres://postgres.rddqcxfalrlmlvirjlca:${PGPASSWORD}@db.rddqcxfalrlmlvirjlca.supabase.co:5432/postgres?sslmode=require" > backup.sql
           gzip backup.sql
 
       - name: Upload to Backblaze B2
