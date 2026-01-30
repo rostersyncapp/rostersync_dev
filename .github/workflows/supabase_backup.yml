@@ -20,14 +20,15 @@ jobs:
 
       - name: Dump and Compress Database
         env:
-          PGHOST: aws-1-us-east-2.pooler.supabase.com
-          PGPORT: 5432
-          PGDATABASE: postgres
-          # The double quotes around the ID are the key to stopping the 'split'
-          PGUSER: 'postgres."rddqcxfalrlmlvirjlca"'
           PGPASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
         run: |
-          pg_dump > backup.sql
+          # We use the DIRECT host (db.rddqcxfalrlmlvirjlca.supabase.co)
+          # Note: We use the '-h' flag with the 'db.' prefix
+          # This avoids the "Tenant or user not found" pooler error entirely
+          pg_dump -h db.rddqcxfalrlmlvirjlca.supabase.co \
+                  -p 5432 \
+                  -U postgres \
+                  -d postgres > backup.sql
           gzip backup.sql
 
       - name: Upload to Backblaze B2
