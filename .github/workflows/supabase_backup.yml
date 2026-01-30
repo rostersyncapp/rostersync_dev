@@ -2,9 +2,8 @@ name: Supabase to Backblaze Backup
 
 on:
   schedule:
-    # This runs at Midnight UTC every day
     - cron: '0 0 * * *'
-  workflow_dispatch: # This adds a "Run Workflow" button for manual backups
+  workflow_dispatch:
 
 jobs:
   backup:
@@ -20,9 +19,14 @@ jobs:
           sudo apt-get install -y postgresql-client
 
       - name: Dump and Compress Database
+        env:
+          PGPASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
         run: |
-          # The -v ON_ERROR_STOP=1 ensures the script fails if the DB connection fails
-          pg_dump "${{ secrets.SUPABASE_DB_URL }}" > backup.sql
+          # We use the -h, -p, and -U flags separately to avoid URL parsing errors
+          pg_dump -h aws-0-us-west-1.pooler.supabase.com \
+                  -p 6543 \
+                  -U postgres.${{ secrets.SUPABASE_PROJECT_ID }} \
+                  -d postgres > backup.sql
           gzip backup.sql
 
       - name: Upload to Backblaze B2
@@ -32,6 +36,5 @@ jobs:
           AWS_DEFAULT_REGION: us-west-004 
         run: |
           FILENAME="rostersync_db_$(date +'%Y-%m-%d_%H-%M').sql.gz"
-          
           aws s3 cp backup.sql.gz s3://${{ secrets.B2_BUCKET_NAME }}/$FILENAME \
             --endpoint-url ${{ secrets.B2_ENDPOINT }}
