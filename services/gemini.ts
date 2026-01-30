@@ -1580,7 +1580,7 @@ LOGO SOURCES (in priority order):
    - TARGET: Triple-A (PCL or International League)
    - TIP: On milb.com team pages, the official logo is always in the top navbar/header.
 4. WIKIPEDIA (HIGH RELIABILITY): Search Google for "{team name} logo png" or "{team name} logo wikipedia".
-   - PREFER `upload.wikimedia.org` URLs as they are stable and high quality.
+   - PREFER 'upload.wikimedia.org' URLs as they are stable and high quality.
 5. FALLBACK: Use thesportsdb.com or official team website
 
 CRITICAL: Never guess team IDs. If unsure, prioritize Wikipedia or official sites for logo URLs.`
