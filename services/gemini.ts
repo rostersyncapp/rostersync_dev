@@ -1196,6 +1196,8 @@ const ESPN_TEAM_IDS: Record<string, { id: number; sport: string; league: string 
   "RIVER CATS": { id: 416, sport: "baseball", league: "milb-aaa" },
   "SALT LAKE BEES": { id: 489, sport: "baseball", league: "milb-aaa" },
   "BEES": { id: 489, sport: "baseball", league: "milb-aaa" },
+  "LAS VEGAS AVIATORS": { id: 400, sport: "baseball", league: "milb-aaa" },
+  "AVIATORS": { id: 400, sport: "baseball", league: "milb-aaa" },
   "IOWA CUBS": { id: 451, sport: "baseball", league: "milb-aaa" },
   "LEHIGH VALLEY IRONPIGS": { id: 2507, sport: "baseball", league: "milb-aaa" },
   "IRONPIGS": { id: 2507, sport: "baseball", league: "milb-aaa" }
@@ -1529,7 +1531,7 @@ CRITICAL: Never guess team IDs. If unsure, prioritize milb.com for verification.
     1. TEAM IDENTIFICATION (HIGHEST PRIORITY):
     - ${leagueHint}Look for the team name in headers, titles, or the first few lines.
     - REVERSE LOOKUP (CRITICAL): If the team name is NOT explicitly found in the text, you MUST use the 'googleSearch' tool. 
-    - MiLB SEARCH (PRIORITY): If league is MiLB, search specifically on milb.com and prioritize Triple-A results (e.g., "site:milb.com {3-4 distinct player names from the text} roster").
+    - MiLB SEARCH (CRITICAL): If the specified league starts with 'milb-' (MiLB rosters), you MUST start your search on milb.com using the 'googleSearch' tool (e.g., "site:milb.com {3-4 distinct player names} roster").
     - DO NOT return "Unknown Team" without attempting a search. You MUST Populate 'teamName' with the real team name found via search.
 
     2. ROSTER EXTRACTION:
@@ -1586,8 +1588,8 @@ CRITICAL: Never guess team IDs. If unsure, prioritize milb.com for verification.
       SEARCH_FAILED_FALLBACK: The search tool is unavailable. 
       CRITICAL: You must identify the team name purely from the literal text provided in the first 20 lines. 
       LEAGUE_HINT: The user says this is a ${LEAGUE_DISPLAY_NAMES[league || ''] || 'Standard'} roster. 
-      If league is MiLB, look specifically for Triple-A team names (e.g., Beers, Cats, IronPigs, etc.) in the text.
-      Do NOT return "Unknown Team" if any team name is identifiable. NEVER guess a team name that is not present in the text.
+      If league is MiLB, look specifically for Triple-A team names (e.g., "River Cats", "Aviators", "IronPigs") in the text.
+      Do NOT return "Unknown Team" if any team name is identifiable. NEVER guess a team name that is not present in the text or one from another city.
       
       DATA: ${text}`;
       result = await fallbackModel.generateContent(fallbackPrompt);
