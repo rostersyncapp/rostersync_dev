@@ -20,14 +20,13 @@ jobs:
 
       - name: Dump and Compress Database
         env:
-          # Use your new clean password here
           DB_PASS: ${{ secrets.SUPABASE_DB_PASSWORD }}
           PROJECT_ID: rddqcxfalrlmlvirjlca
           HOST: aws-1-us-east-2.pooler.supabase.com
         run: |
-          # Using the full URI forces the pooler to recognize the project ID
-          # We use port 5432 for the Session Pooler
-          pg_dump "postgres://postgres.$PROJECT_ID:$DB_PASS@$HOST:5432/postgres?sslmode=require" > backup.sql
+          # We pass the project ID via the 'options' parameter. 
+          # This is the most explicit way to route through the Supabase pooler.
+          pg_dump "postgres://postgres.$PROJECT_ID:$DB_PASS@$HOST:5432/postgres?sslmode=require&options=-c%20project=$PROJECT_ID" > backup.sql
           gzip backup.sql
 
       - name: Upload to Backblaze B2
