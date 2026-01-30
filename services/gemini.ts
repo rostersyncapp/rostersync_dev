@@ -42,6 +42,40 @@ function toSafeName(name: string): string {
 }
 
 /**
+ * Robustly extract JSON from AI response text
+ */
+function extractJSON(text: string): any {
+  // 1. Try to extract content between triple backticks
+  const codeBlockRegex = /```(?:json)?\s*([\s\S]*?)```/i;
+  const match = text.match(codeBlockRegex);
+  const candidate = match ? match[1].trim() : text.trim();
+
+  try {
+    return JSON.parse(candidate);
+  } catch (e) {
+    // 2. If literal parse fails, try to find the first '{' and last '}'
+    const firstOpen = candidate.indexOf('{');
+    const lastClose = candidate.lastIndexOf('}');
+    if (firstOpen !== -1 && lastClose !== -1 && lastClose > firstOpen) {
+      const braceJson = candidate.substring(firstOpen, lastClose + 1);
+      try {
+        return JSON.parse(braceJson);
+      } catch (e2) {
+        console.error("[Gemini] Extraction failed at brace level:", e2);
+      }
+    }
+
+    // 3. Last ditch effort: strip any markdown-style headers or common artifacts
+    const cleaned = candidate.replace(/^(?:JSON|Output|Result):\s*/i, "").trim();
+    try {
+      return JSON.parse(cleaned);
+    } catch (e3) {
+      throw new Error(`Failed to parse AI response as JSON: ${e3.message}. Content: ${text.substring(0, 100)}...`);
+    }
+  }
+}
+
+/**
  * Known team logo URLs - these override AI results for reliability
  */
 const KNOWN_TEAM_LOGOS: Record<string, { logoUrl: string; primaryColor: string; secondaryColor: string }> = {
@@ -1586,10 +1620,13 @@ CRITICAL: Never guess team IDs. If unsure, prioritize milb.com for verification.
       const fallbackModel = genAI.getGenerativeModel(fallbackParams);
       const fallbackPrompt = `
       SEARCH_FAILED_FALLBACK: The search tool is unavailable. 
-      CRITICAL: You must identify the team name purely from the literal text provided in the first 20 lines. 
+      CRITICAL: You must identify the team name purely from the literal text provided. 
       LEAGUE_HINT: The user says this is a ${LEAGUE_DISPLAY_NAMES[league || ''] || 'Standard'} roster. 
       If league is MiLB, look specifically for Triple-A team names (e.g., "River Cats", "Aviators", "IronPigs") in the text.
       Do NOT return "Unknown Team" if any team name is identifiable. NEVER guess a team name that is not present in the text or one from another city.
+      
+      OUTPUT_FORMAT: Return a valid JSON object matching this structure:
+      { "teamName": string, "athletes": [ { "fullName": string, "jerseyNumber": string, "position": string, "nilStatus": string } ] }
       
       DATA: ${text}`;
       result = await fallbackModel.generateContent(fallbackPrompt);
@@ -1633,17 +1670,7 @@ CRITICAL: Never guess team IDs. If unsure, prioritize milb.com for verification.
 
   console.log("Raw AI Response (Full):", textResponse);
 
-  // Robust JSON extraction: Find the outer-most braces
-  const firstOpen = textResponse.indexOf('{');
-  const lastClose = textResponse.lastIndexOf('}');
-
-  let cleanJson = textResponse;
-  if (firstOpen !== -1 && lastClose !== -1 && lastClose > firstOpen) {
-    cleanJson = textResponse.substring(firstOpen, lastClose + 1);
-  }
-
-  console.log("Candidate JSON:", cleanJson);
-  const parsedResult = JSON.parse(cleanJson);
+  const parsedResult = extractJSON(textResponse);
 
   // VERBOSE DEBUG: What did the AI extract for teamName?
   console.log('[Gemini] ==== TEAM IDENTIFICATION DEBUG ====');
