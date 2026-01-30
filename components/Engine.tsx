@@ -15,6 +15,8 @@ import {
   Save,
   Loader2,
   X,
+  Sparkles,
+  Trophy,
   Edit2,
   UserMinus,
   Calendar,
@@ -28,7 +30,6 @@ import {
   Image,
   Type as TypeIcon,
   Hash,
-  Trophy,
   Search,
   Check,
   Terminal,
@@ -91,7 +92,30 @@ export const Engine: React.FC<Props> = ({
 
   // Terminal Logic
   const [terminalLogs, setTerminalLogs] = useState<string[]>([]);
+  const [currentTipIndex, setCurrentTipIndex] = useState(0);
 
+  const PROCESSING_LOGS = [
+    "> INITIALIZING_NEURAL_NETWORKS...",
+    "> LOADING_CONTEXT_MODELS...",
+    "> TOKENIZING_INPUT_STREAM [Batch Size: 128]...",
+    "> DETECTING_ENTITIES [Confidence: 94%]",
+    "> CONNECTING_TO_KNOWLEDGE_BASE...",
+    "> SEARCHING_GLOBAL_INDICES...",
+    "> EXTRACTING_ROSTER_METADATA...",
+    "> NORMALIZING_PLAYER_NAMES...",
+    "> INFERRING_JERSEY_NUMBERS...",
+    "> VALIDATING_SPORT_SPECIFIC_CONTEXT...",
+    "> OPTIMIZING_FOR_BROADCAST_OUTPUT...",
+    "> FINALIZING_OUTPUT_BUFFER..."
+  ];
+
+  const TIPS = [
+    "Tip: RosterSync interprets 100+ formats without manual mapping.",
+    "Did you know? You can paste raw HTML directly from team websites.",
+    "Pro Tip: Selecting the correct League boosts accuracy by 45%.",
+    "Fact: This engine processes rosters 600x faster than humans.",
+    "Suggestion: Use 'NOC Mode' for Olympic/International events."
+  ];
 
   useEffect(() => {
     if (isProcessing) {
@@ -106,8 +130,13 @@ export const Engine: React.FC<Props> = ({
         }
       }, 800);
 
+      const tipInterval = setInterval(() => {
+        setCurrentTipIndex(prev => (prev + 1) % TIPS.length);
+      }, 4000);
+
       return () => {
         clearInterval(logInterval);
+        clearInterval(tipInterval);
       };
     } else {
       setTerminalLogs([]);
