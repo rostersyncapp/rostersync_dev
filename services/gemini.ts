@@ -1579,10 +1579,11 @@ LOGO SOURCES (in priority order):
    - Use Google Search focusing on "site:milb.com {team name} roster" or "{team name} MiLB team ID"
    - TARGET: Triple-A (PCL or International League)
    - TIP: On milb.com team pages, the official logo is always in the top navbar/header.
-4. WIKIPEDIA: For any team, search Google for "{team name} logo site:upload.wikimedia.org" and use the official SVG/PNG
+4. WIKIPEDIA (HIGH RELIABILITY): Search Google for "{team name} logo png" or "{team name} logo wikipedia".
+   - PREFER `upload.wikimedia.org` URLs as they are stable and high quality.
 5. FALLBACK: Use thesportsdb.com or official team website
 
-CRITICAL: Never guess team IDs. If unsure, prioritize milb.com for verification.`
+CRITICAL: Never guess team IDs. If unsure, prioritize Wikipedia or official sites for logo URLs.`
     : "Use default branding colors (#5B5FFF and #1A1A1A).";
 
   const leagueHint = league ? `The user has indicated this is likely a roster for the ${LEAGUE_DISPLAY_NAMES[league] || league} league. ` : '';
