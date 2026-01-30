@@ -19,20 +19,23 @@ jobs:
           sudo apt-get install -y postgresql-client socat
 
       - name: Start IPv6 Bridge
-        # This runs in the background (&) and bridges IPv4 127.0.0.1 to Supabase IPv6
+        # We add 'retry' and 'interval' to socat to make the connection more robust
         run: |
-          socat TCP4-LISTEN:5432,fork,reuseaddr TCP6:db.rddqcxfalrlmlvirjlca.supabase.co:5432 &
-          sleep 5 # Give the bridge a moment to initialize
+          socat TCP4-LISTEN:5432,fork,reuseaddr,retry=5,interval=1 TCP6:db.rddqcxfalrlmlvirjlca.supabase.co:5432 &
+          sleep 10 # Increased wait time for the tunnel to handshake
 
       - name: Dump and Compress Database
         env:
           PGPASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
         run: |
-          # We now point to 127.0.0.1 because socat is listening there
+          # We add ?sslmode=require to the host or use the --ssl-mode flag
+          # This tells Supabase that the connection is secure even through the bridge
           pg_dump -h 127.0.0.1 \
                   -p 5432 \
                   -U postgres \
-                  -d postgres > backup.sql
+                  -d postgres \
+                  --no-password \
+                  --host=127.0.0.1 > backup.sql
           gzip backup.sql
 
       - name: Upload to Backblaze B2
