@@ -1,0 +1,37 @@
+name: Supabase to Backblaze Backup
+
+on:
+  schedule:
+    # This runs at Midnight UTC every day
+    - cron: '0 0 * * *'
+  workflow_dispatch: # This adds a "Run Workflow" button for manual backups
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install PostgreSQL Tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Dump and Compress Database
+        run: |
+          # The -v ON_ERROR_STOP=1 ensures the script fails if the DB connection fails
+          pg_dump "${{ secrets.SUPABASE_DB_URL }}" > backup.sql
+          gzip backup.sql
+
+      - name: Upload to Backblaze B2
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.B2_APPLICATION_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.B2_APPLICATION_KEY }}
+          AWS_DEFAULT_REGION: us-west-004 
+        run: |
+          FILENAME="rostersync_db_$(date +'%Y-%m-%d_%H-%M').sql.gz"
+          
+          aws s3 cp backup.sql.gz s3://${{ secrets.B2_BUCKET_NAME }}/$FILENAME \
+            --endpoint-url ${{ secrets.B2_ENDPOINT }}
