@@ -1535,7 +1535,7 @@ COLORS: Search teamcolorcodes.com for HEX, RGB, Pantone (PMS), and CMYK values.`
     ${findBranding ? `- SCHEMA PROPERTIES: ${JSON.stringify(schema.properties)}` : ''}`;
 
   const modelParams: any = {
-    model: "gemini-2.0-flash-001",
+    model: "gemini-2.0-flash", // Use stable alias
     systemInstruction,
   };
 
@@ -1553,10 +1553,28 @@ COLORS: Search teamcolorcodes.com for HEX, RGB, Pantone (PMS), and CMYK values.`
 
 
 
-  const model = genAI.getGenerativeModel(modelParams);
-
   const context = league ? `Context: League is ${league}.` : '';
-  const result = await model.generateContent(`Tier: ${tier}. Mode: ${isNocMode ? 'NOC' : 'Standard'}. ${context} Data: ${text}`);
+  let result;
+  try {
+    const model = genAI.getGenerativeModel(modelParams);
+    result = await model.generateContent(`Tier: ${tier}. Mode: ${isNocMode ? 'NOC' : 'Standard'}. ${context} Data: ${text}`);
+  } catch (error: any) {
+    if (findBranding && (error.message?.includes('fetch') || error.message?.includes('googleSearch'))) {
+      console.warn("[Gemini] Fetch failed with search tool, retrying without search...", error);
+      const fallbackParams = { ...modelParams };
+      delete fallbackParams.tools;
+      // Re-enable JSON mode for fallback if needed (since search was the only thing preventing it)
+      fallbackParams.generationConfig = {
+        responseMimeType: "application/json",
+        responseSchema: schema,
+      };
+      const fallbackModel = genAI.getGenerativeModel(fallbackParams);
+      result = await fallbackModel.generateContent(`Tier: ${tier}. Mode: ${isNocMode ? 'NOC' : 'Standard'}. ${context} Data: ${text}`);
+    } else {
+      throw error;
+    }
+  }
+
   const response = await result.response;
   const usage = response.usageMetadata;
   const textResponse = response.text();
