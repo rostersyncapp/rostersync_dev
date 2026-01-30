@@ -18,22 +18,16 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y postgresql-client
 
-      - name: Create pgpass file
-        # This creates a hidden file that pg_dump looks for automatically
-        # Format is hostname:port:database:username:password
-        run: |
-          echo "aws-1-us-east-2.pooler.supabase.com:6543:postgres:postgres.rddqcxfalrlmlvirjlca:${{ secrets.SUPABASE_DB_PASSWORD }}" > ~/.pgpass
-          chmod 0600 ~/.pgpass
-
       - name: Dump and Compress Database
+        env:
+          # Use your new clean password here
+          DB_PASS: ${{ secrets.SUPABASE_DB_PASSWORD }}
+          PROJECT_ID: rddqcxfalrlmlvirjlca
+          HOST: aws-1-us-east-2.pooler.supabase.com
         run: |
-          # We don't pass the password or URL here; pg_dump pulls it from ~/.pgpass
-          # We use -w to tell it "never prompt for a password"
-          pg_dump -h aws-1-us-east-2.pooler.supabase.com \
-                  -p 6543 \
-                  -U postgres.rddqcxfalrlmlvirjlca \
-                  -d postgres \
-                  -w > backup.sql
+          # Using the full URI forces the pooler to recognize the project ID
+          # We use port 5432 for the Session Pooler
+          pg_dump "postgres://postgres.$PROJECT_ID:$DB_PASS@$HOST:5432/postgres?sslmode=require" > backup.sql
           gzip backup.sql
 
       - name: Upload to Backblaze B2
