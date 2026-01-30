@@ -1508,12 +1508,13 @@ LOGO SOURCES (in priority order):
    - Use Google Search to find "ESPN {team name} team id" to get the correct numeric ID
 2. ESPN CDN for US SPORTS: https://a.espncdn.com/combiner/i?img=/i/teamlogos/{league}/500/{code}.png&h=200&w=200
    - NFL: ne, dal, gb, etc. | NHL: bos, nyr, chi | NBA: lal, bos, chi | MLB: nyy, bos, lad
-3. ESPN CDN for MiLB: https://a.espncdn.com/combiner/i?img=/i/teamlogos/milb/500/{TEAM_ID}.png&w=200
-   - Use Google Search to find "{team name} MiLB team ID"
+3. MiLB.com & ESPN: Use https://a.espncdn.com/combiner/i?img=/i/teamlogos/milb/500/{TEAM_ID}.png&w=200
+   - Use Google Search focusing on "site:milb.com {team name} roster" or "{team name} MiLB team ID"
+   - TARGET: Triple-A (PCL or International League)
 4. WIKIPEDIA: For any team, search Google for "{team name} logo site:upload.wikimedia.org" and use the official SVG/PNG
 5. FALLBACK: Use thesportsdb.com or official team website
 
-CRITICAL: Never guess team IDs. If unsure, use Google Search to find the correct ESPN team ID or Wikipedia logo URL.`
+CRITICAL: Never guess team IDs. If unsure, prioritize milb.com for verification.`
     : "Use default branding colors (#5B5FFF and #1A1A1A).";
 
   const leagueHint = league ? `The user has indicated this is likely a roster for the ${LEAGUE_DISPLAY_NAMES[league] || league} league. ` : '';
@@ -1522,7 +1523,8 @@ CRITICAL: Never guess team IDs. If unsure, use Google Search to find the correct
     
     1. TEAM IDENTIFICATION (HIGHEST PRIORITY):
     - ${leagueHint}Look for the team name in headers, titles, or the first few lines.
-    - REVERSE LOOKUP (CRITICAL): If the team name is NOT explicitly found in the text, you MUST use the 'googleSearch' tool. Search for a query like "Daniel Vitiello Jared Mazzola Jack Gurr roster" (using 3-4 distinct player names from the list) to find the team.
+    - REVERSE LOOKUP (CRITICAL): If the team name is NOT explicitly found in the text, you MUST use the 'googleSearch' tool. 
+    - MiLB SEARCH (PRIORITY): If league is MiLB, search specifically on milb.com and prioritize Triple-A results (e.g., "site:milb.com {players} roster").
     - DO NOT return "Unknown Team" without attempting a search. You MUST Populate 'teamName' with the real team name found via search.
 
     2. ROSTER EXTRACTION:
@@ -1579,7 +1581,7 @@ CRITICAL: Never guess team IDs. If unsure, use Google Search to find the correct
       SEARCH_FAILED_FALLBACK: The search tool is unavailable. 
       CRITICAL: You must identify the team name purely from the text provided. 
       LEAGUE_HINT: The user says this is a ${LEAGUE_DISPLAY_NAMES[league || ''] || 'Standard'} roster. 
-      If you see names like "Sacramento" or "River Cats", use that. 
+      If league is MiLB, prioritize Triple-A teams like Sacramento River Cats, Lehigh Valley IronPigs, etc.
       Do NOT return "Unknown Team" if any team name is identifiable in the first 20 lines.
       
       DATA: ${text}`;
@@ -1610,7 +1612,7 @@ CRITICAL: Never guess team IDs. If unsure, use Google Search to find the correct
     // Fire and forget usage recording
     recordUsage(userId, {
       operationType: 'ROSTER_IMPORT',
-      modelName: 'gemini-2.0-flash-001',
+      modelName: 'gemini-2.0-flash',
       inputTokens,
       outputTokens,
       searchQueries: 0, // Search tool accounting would go here if we tracked it separately
