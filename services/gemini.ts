@@ -108,6 +108,9 @@ const KNOWN_TEAM_LOGOS: Record<string, { logoUrl: string; primaryColor: string; 
   // ==================== ENGLISH PREMIER LEAGUE (ESPN) ====================
   "AFC BOURNEMOUTH": { logoUrl: "https://a.espncdn.com/i/teamlogos/soccer/500/349.png", primaryColor: "#f42727", secondaryColor: "#ffffff" },
   "BOURNEMOUTH": { logoUrl: "https://a.espncdn.com/i/teamlogos/soccer/500/349.png", primaryColor: "#f42727", secondaryColor: "#ffffff" },
+  // ==================== MiLB (Specific Overrides) ====================
+  "BUFFALO BISONS": { logoUrl: "https://www.mlbstatic.com/team-logos/422.svg", primaryColor: "#00529b", secondaryColor: "#BF0D3E" },
+  "BUFFALO": { logoUrl: "https://www.mlbstatic.com/team-logos/422.svg", primaryColor: "#00529b", secondaryColor: "#BF0D3E" },
   "ARSENAL": { logoUrl: "https://a.espncdn.com/i/teamlogos/soccer/500/359.png", primaryColor: "#e20520", secondaryColor: "#132257" },
   "ASTON VILLA": { logoUrl: "https://a.espncdn.com/i/teamlogos/soccer/500/362.png", primaryColor: "#660e36", secondaryColor: "#ffffff" },
   "BRENTFORD": { logoUrl: "https://a.espncdn.com/i/teamlogos/soccer/500/337.png", primaryColor: "#f42727", secondaryColor: "#f8ced9" },
@@ -1593,6 +1596,10 @@ CRITICAL: Never guess team IDs. For MiLB, finding the Team ID and using mlbstati
     
     1. TEAM IDENTIFICATION (HIGHEST PRIORITY):
     - ${leagueHint}Look for the team name in headers, titles, or the first few lines.
+    - AMBIGUITY RULES:
+      * "Buffalo" -> "Buffalo Bisons" (Triple-A). Never confuse with Boston.
+      * "Salt Lake" -> "Salt Lake Bees".
+      * "Las Vegas" -> "Las Vegas Aviators".
     - REVERSE LOOKUP (CRITICAL): If the team name is NOT explicitly found in the text, you MUST use the 'googleSearch' tool. 
     - MiLB SEARCH (CRITICAL): If the specified league includes 'milb' (MiLB rosters), you MUST start your search on milb.com using the 'googleSearch' tool (e.g., "site:milb.com {3-4 distinct player names} roster").
     - VALIDATION: After identifying a candidate team, verify that at least 3 names from the input exist on that team's official roster.
