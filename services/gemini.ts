@@ -45,35 +45,61 @@ function toSafeName(name: string): string {
  * Robustly extract JSON from AI response text
  */
 function extractJSON(text: string): any {
-  // 1. Try to extract content between triple backticks
-  const codeBlockRegex = /```(?:json)?\s*([\s\S]*?)```/i;
-  const match = text.match(codeBlockRegex);
-  const candidate = match ? match[1].trim() : text.trim();
+  if (!text) throw new Error("Empty AI response");
 
-  try {
-    return JSON.parse(candidate);
-  } catch (e) {
-    // 2. If literal parse fails, try to find the first '{' and last '}'
-    const firstOpen = candidate.indexOf('{');
-    const lastClose = candidate.lastIndexOf('}');
-    if (firstOpen !== -1 && lastClose !== -1 && lastClose > firstOpen) {
-      const braceJson = candidate.substring(firstOpen, lastClose + 1);
+  // Helper to try parsing a string and handle common AI JSON malformations
+  const tryParse = (str: string) => {
+    try {
+      return JSON.parse(str);
+    } catch (e) {
+      // Last-ditch: try to strip common artifacts if it's almost valid
+      const cleaned = str
+        .replace(/\/\*[\s\S]*?\*\/|([^\\:]|^)\/\/.*$/gm, '$1') // Remove comments
+        .replace(/,\s*([}\]])/g, '$1') // Remove trailing commas
+        .trim();
       try {
-        return JSON.parse(braceJson);
+        return JSON.parse(cleaned);
       } catch (e2) {
-        console.error("[Gemini] Extraction failed at brace level:", e2);
+        return null;
       }
     }
+  };
 
-    // 3. Last ditch effort: strip any markdown-style headers or common artifacts
-    const cleaned = candidate.replace(/^(?:JSON|Output|Result):\s*/i, "").trim();
-    try {
-      return JSON.parse(cleaned);
-    } catch (e3) {
-      throw new Error(`Failed to parse AI response as JSON: ${e3.message}. Content: ${text.substring(0, 100)}...`);
+  // 1. STRATEGY A: Find the outer-most curly braces in the whole text
+  const firstOpen = text.indexOf('{');
+  const lastClose = text.lastIndexOf('}');
+
+  if (firstOpen !== -1 && lastClose !== -1 && lastClose > firstOpen) {
+    const candidate = text.substring(firstOpen, lastClose + 1);
+    const result = tryParse(candidate);
+    if (result) return result;
+  }
+
+  // 2. STRATEGY B: Try markdown code block extraction (fallback)
+  const codeBlockRegex = /```(?:json)?\s*([\s\S]*?)```/i;
+  const match = text.match(codeBlockRegex);
+  if (match) {
+    const candidate = match[1].trim();
+    const result = tryParse(candidate);
+    if (result) return result;
+
+    // If that failed, try finding braces INSIDE the code block
+    const innerOpen = candidate.indexOf('{');
+    const innerClose = candidate.lastIndexOf('}');
+    if (innerOpen !== -1 && innerClose !== -1 && innerClose > innerOpen) {
+      const innerResult = tryParse(candidate.substring(innerOpen, innerClose + 1));
+      if (innerResult) return innerResult;
     }
   }
+
+  // 3. STRATEGY C: Literal trim (final attempt)
+  const finalCandidate = text.trim();
+  const finalResult = tryParse(finalCandidate);
+  if (finalResult) return finalResult;
+
+  throw new Error(`Failed to parse AI response as JSON. Content: ${text.substring(0, 100)}`);
 }
+
 
 /**
  * Known team logo URLs - these override AI results for reliability
@@ -1580,8 +1606,9 @@ CRITICAL: Never guess team IDs. If unsure, prioritize milb.com for verification.
 
     4. OUTPUT FORMAT:
     - The output MUST be a strict VALID JSON object.
-    - Structure: { "teamName": string, "athletes": [ { "fullName": string, "jerseyNumber": string, "position": string, "nilStatus": string } ], ... }.
-    ${findBranding ? `- SCHEMA PROPERTIES: ${JSON.stringify(schema.properties)}` : ''}`;
+    - IMPORTANT: Do NOT wrap the JSON in markdown code blocks unless explicitly asked. Return ONLY the JSON object.
+  - Structure: { "teamName": string, "athletes": [{ "fullName": string, "jerseyNumber": string, "position": string, "nilStatus": string }], ... }.
+    ${findBranding ? `- SCHEMA PROPERTIES: ${JSON.stringify(schema.properties)}` : ''} `;
 
   const modelParams: any = {
     model: "gemini-2.0-flash", // Use stable alias
@@ -1606,7 +1633,7 @@ CRITICAL: Never guess team IDs. If unsure, prioritize milb.com for verification.
   let result;
   try {
     const model = genAI.getGenerativeModel(modelParams);
-    result = await model.generateContent(`Tier: ${tier}. Mode: ${isNocMode ? 'NOC' : 'Standard'}. ${context} Data: ${text}`);
+    result = await model.generateContent(`Tier: ${tier}.Mode: ${isNocMode ? 'NOC' : 'Standard'}. ${context} Data: ${text} `);
   } catch (error: any) {
     if (findBranding && (error.message?.includes('fetch') || error.message?.includes('googleSearch'))) {
       console.warn("[Gemini] Fetch failed with search tool, retrying without search...", error);
@@ -1619,16 +1646,16 @@ CRITICAL: Never guess team IDs. If unsure, prioritize milb.com for verification.
       };
       const fallbackModel = genAI.getGenerativeModel(fallbackParams);
       const fallbackPrompt = `
-      SEARCH_FAILED_FALLBACK: The search tool is unavailable. 
-      CRITICAL: You must identify the team name purely from the literal text provided. 
+  SEARCH_FAILED_FALLBACK: The search tool is unavailable.
+    CRITICAL: You must identify the team name purely from the literal text provided.
       LEAGUE_HINT: The user says this is a ${LEAGUE_DISPLAY_NAMES[league || ''] || 'Standard'} roster. 
-      If league is MiLB, look specifically for Triple-A team names (e.g., "River Cats", "Aviators", "IronPigs") in the text.
-      Do NOT return "Unknown Team" if any team name is identifiable. NEVER guess a team name that is not present in the text or one from another city.
-      
-      OUTPUT_FORMAT: Return a valid JSON object matching this structure:
-      { "teamName": string, "athletes": [ { "fullName": string, "jerseyNumber": string, "position": string, "nilStatus": string } ] }
-      
-      DATA: ${text}`;
+      If league is MiLB, look specifically for Triple - A team names(e.g., "River Cats", "Aviators", "IronPigs") in the text.
+      Do NOT return "Unknown Team" if any team name is identifiable.NEVER guess a team name that is not present in the text or one from another city.
+
+    OUTPUT_FORMAT: Return a valid JSON object matching this structure:
+  { "teamName": string, "athletes": [{ "fullName": string, "jerseyNumber": string, "position": string, "nilStatus": string }] }
+
+  DATA: ${text} `;
       result = await fallbackModel.generateContent(fallbackPrompt);
     } else {
       throw error;
@@ -1651,7 +1678,7 @@ CRITICAL: Never guess team IDs. If unsure, prioritize milb.com for verification.
     const outputCost = (outputTokens / 1000000) * 0.40;
     const totalCost = inputCost + outputCost;
 
-    console.log(`[Gemini Usage] Input: ${inputTokens}, Output: ${outputTokens}, Cost: $${totalCost.toFixed(6)}`);
+    console.log(`[Gemini Usage]Input: ${inputTokens}, Output: ${outputTokens}, Cost: $${totalCost.toFixed(6)} `);
 
     // Fire and forget usage recording
     recordUsage(userId, {
@@ -1709,7 +1736,7 @@ CRITICAL: Never guess team IDs. If unsure, prioritize milb.com for verification.
   }
 
   const athletes: Athlete[] = (parsedResult.athletes || []).map((a: any, idx: number) => ({
-    id: `athlete-${idx}-${Date.now()}`,
+    id: `athlete - ${idx} -${Date.now()} `,
     originalName: a.fullName || "",
     fullName: a.fullName || "",
     displayNameSafe: toSafeName(a.fullName || ""),
@@ -1758,7 +1785,7 @@ CRITICAL: Never guess team IDs. If unsure, prioritize milb.com for verification.
       for (const key of allMatchingKeys) {
         const team = KNOWN_TEAM_LOGOS[key];
         const espnData = ESPN_TEAM_IDS[key]; // Look up sport/league metadata
-        console.log(`[Gemini] Team "${key}": sport=${espnData?.sport}, league=${espnData?.league}`);
+        console.log(`[Gemini] Team "${key}": sport = ${espnData?.sport}, league = ${espnData?.league} `);
         if (!uniqueTeams.has(team.logoUrl)) {
           uniqueTeams.set(team.logoUrl, {
             name: key,
@@ -1772,7 +1799,7 @@ CRITICAL: Never guess team IDs. If unsure, prioritize milb.com for verification.
       // If multiple DISTINCT teams match, return them as candidates for user selection
       if (uniqueTeams.size > 1) {
         candidateTeams = Array.from(uniqueTeams.values());
-        console.log(`[Gemini] AMBIGUITY DETECTED for "${teamNameUpper}": ${candidateTeams.map(t => t.name).join(', ')}`);
+        console.log(`[Gemini] AMBIGUITY DETECTED for "${teamNameUpper}": ${candidateTeams.map(t => t.name).join(', ')} `);
         // Pick the longest match as default
         allMatchingKeys.sort((a, b) => b.length - a.length);
         knownTeam = KNOWN_TEAM_LOGOS[allMatchingKeys[0]];
@@ -1842,7 +1869,7 @@ CRITICAL: Never guess team IDs. If unsure, prioritize milb.com for verification.
     // PRIORITY 1: Check if a MiLB league was explicitly selected
     if (league && LEAGUE_TO_SPORT[league]) {
       standardizedSport = LEAGUE_TO_SPORT[league];
-      console.log(`[Gemini] Standardized sport from user-selected league: ${standardizedSport}`);
+      console.log(`[Gemini] Standardized sport from user - selected league: ${standardizedSport} `);
     } else {
       // PRIORITY 2: Try ESPN team matching
       const upperTeamName = (parsedResult.teamName || "").toUpperCase().trim();
@@ -1864,7 +1891,7 @@ CRITICAL: Never guess team IDs. If unsure, prioritize milb.com for verification.
         // Use the SPORT from ESPN (capitalized)
         if (espnIdentity.sport) {
           standardizedSport = espnIdentity.sport.charAt(0).toUpperCase() + espnIdentity.sport.slice(1);
-          console.log(`[Gemini] Standardized sport from ESPN ID: ${standardizedSport}`);
+          console.log(`[Gemini] Standardized sport from ESPN ID: ${standardizedSport} `);
         } else if (espnIdentity.league) {
           // Fallback to league inferrence if sport is missing (rare)
           const rawLeague = espnIdentity.league.toLowerCase();
@@ -1884,7 +1911,7 @@ CRITICAL: Never guess team IDs. If unsure, prioritize milb.com for verification.
 
   if (!finalLeague && candidateTeams.length <= 1) {
     // Re-resolve identity if needed (to be safe/clean access) or just use the logic flow.
-    // Since we scoped espnIdentity inside the `else` block above, we need to re-access or restructure.
+    // Since we scoped espnIdentity inside the `else ` block above, we need to re-access or restructure.
     // A cleaner way is to compute `finalLeague` where we computed `espnIdentity`.
     // Let's refactor slightly to just re-grab it here for the return object since exact match is cheap.
     // Actually, we can just grab it again with fuzzy logic if we want to be 100% sure for the return:
