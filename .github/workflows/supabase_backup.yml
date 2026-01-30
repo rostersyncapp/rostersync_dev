@@ -20,12 +20,16 @@ jobs:
 
       - name: Dump and Compress Database
         env:
-          DB_PASS: ${{ secrets.SUPABASE_DB_PASSWORD }}
-          DB_USER: postgres.rddqcxfalrlmlvirjlca
-          DB_HOST: aws-1-us-east-2.pooler.supabase.com
+          # We use the official PG variables. pg_dump looks for these automatically.
+          PGHOST: aws-1-us-east-2.pooler.supabase.com
+          PGPORT: 5432
+          PGDATABASE: postgres
+          PGUSER: postgres.rddqcxfalrlmlvirjlca
+          PGPASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
         run: |
-          # Now that the password is clean, we can use a standard URI string
-          pg_dump "postgresql://$DB_USER:$DB_PASS@$DB_HOST:5432/postgres" > backup.sql
+          # No arguments are passed to pg_dump; it pulls directly from the env above.
+          # This prevents the shell from misreading the dot or the password.
+          pg_dump > backup.sql
           gzip backup.sql
 
       - name: Upload to Backblaze B2
