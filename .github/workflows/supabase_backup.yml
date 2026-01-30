@@ -13,19 +13,23 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install PostgreSQL Tools
+      - name: Install PostgreSQL Tools and Socat
         run: |
           sudo apt-get update
-          sudo apt-get install -y postgresql-client
+          sudo apt-get install -y postgresql-client socat
+
+      - name: Start IPv6 Bridge
+        # This runs in the background (&) and bridges IPv4 127.0.0.1 to Supabase IPv6
+        run: |
+          socat TCP4-LISTEN:5432,fork,reuseaddr TCP6:db.rddqcxfalrlmlvirjlca.supabase.co:5432 &
+          sleep 5 # Give the bridge a moment to initialize
 
       - name: Dump and Compress Database
         env:
           PGPASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
         run: |
-          # We use the DIRECT host (db.rddqcxfalrlmlvirjlca.supabase.co)
-          # Note: We use the '-h' flag with the 'db.' prefix
-          # This avoids the "Tenant or user not found" pooler error entirely
-          pg_dump -h db.rddqcxfalrlmlvirjlca.supabase.co \
+          # We now point to 127.0.0.1 because socat is listening there
+          pg_dump -h 127.0.0.1 \
                   -p 5432 \
                   -U postgres \
                   -d postgres > backup.sql
