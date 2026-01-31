@@ -1605,7 +1605,8 @@ CRITICAL: Never guess team IDs. For MiLB, finding the Team ID and using mlbstati
     - MiLB VALIDATION LIST (Reference these EXACT names):
       [Buffalo Bisons, Charlotte Knights, Columbus Clippers, Durham Bulls, Gwinnett Stripers, Indianapolis Indians, Iowa Cubs, Jacksonville Jumbo Shrimp, Lehigh Valley IronPigs, Louisville Bats, Memphis Redbirds, Nashville Sounds, Norfolk Tides, Omaha Storm Chasers, Rochester Red Wings, Scranton/Wilkes-Barre RailRiders, St. Paul Saints, Syracuse Mets, Toledo Mud Hens, Worcester Red Sox, Albuquerque Isotopes, El Paso Chihuahuas, Las Vegas Aviators, Oklahoma City Comets, Reno Aces, Round Rock Express, Sacramento River Cats, Salt Lake Bees, Sugar Land Space Cowboys, Tacoma Rainiers]
     - REVERSE LOOKUP (CRITICAL): If the team name is NOT explicitly found in the text, you MUST use the 'googleSearch' tool. 
-    - MiLB SEARCH (CRITICAL): If the specified league includes 'milb' (MiLB rosters), you MUST start your search on milb.com using the 'googleSearch' tool (e.g., "site:milb.com {3-4 distinct player names} roster").
+    - MiLB SEARCH (CRITICAL): If the specified league includes 'milb' (MiLB rosters), you MUST start your search on milb.com using the 'googleSearch' tool.
+      * SEARCH TIP: Use "site:milb.com {player names}" OR specifically "site:milb.com/{team-slug}/roster" (e.g., "site:milb.com/buffalo-bisons/roster").
     - VALIDATION: After identifying a candidate team, verify that at least 3 names from the input exist on that team's official roster.
     - DO NOT return "Unknown Team" without attempting a search. You MUST Populate 'teamName' with the real team name found via search.
 
