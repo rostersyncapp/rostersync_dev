@@ -408,7 +408,25 @@ export async function processRosterRawText(
     logosCount: Object.keys(KNOWN_TEAM_LOGOS || {}).length
   });
 
-  const brandingInstruction = findBranding
+
+  // Optimization: If the user selected a Major League that we have fully seeded in Supabase,
+  // we do NOT need to ask the AI to find branding. We can just look it up.
+  // This saves:
+  // 1. Tool Use Latency (2-5s)
+  // 2. Search Quota
+  // 3. Input Tokens (simpler prompt)
+  const FULLY_SEEDED_LEAGUES = [
+    'nba', 'wnba', 'nfl', 'nhl', 'mlb',
+    'premier-league', 'la-liga', 'bundesliga', 'serie-a', 'ligue-1', 'eredivisie', 'liga-mx', 'mls', 'nwsl',
+    'college-football', 'mens-college-basketball', 'ncaa-football', 'ncaa-basketball'
+  ];
+
+  const isMajorLeague = league && FULLY_SEEDED_LEAGUES.includes(league);
+
+  // Force disable branding search if we know we have the data
+  const shouldSearchForBranding = findBranding && !isMajorLeague;
+
+  const brandingInstruction = shouldSearchForBranding
     ? `BRANDING DISCOVERY: 
 1. MiLB (Triple-A): 
    - Rule: Identification only. Do NOT search for logo or colors. 
@@ -422,7 +440,7 @@ export async function processRosterRawText(
 4. Soccer:
    - Logo URL Template: https://a.espncdn.com/combiner/i?img=/i/teamlogos/soccer/500/{TEAM_ID}.png&w=200
 5. Wikipedia: Use upload.wikimedia.org URLs if ESPN is missing.`
-    : "Use default colors #5B5FFF and #1A1A1A.";
+    : "Branding (Logos/Colors) will be handled downstream. Do not output logoUrl or colors.";
 
   const leagueHint = league ? `The user has indicated this is likely a roster for the ${LEAGUE_DISPLAY_NAMES[league] || league} league. ` : '';
 
@@ -477,13 +495,14 @@ export async function processRosterRawText(
     maxOutputTokens: 8192, // Allow for large rosters + search logs
   };
 
-  if (!findBranding) {
+  if (!shouldSearchForBranding) {
     generationConfig.responseMimeType = "application/json";
     generationConfig.responseSchema = schema;
   }
   modelParams.generationConfig = generationConfig;
 
-  if (findBranding) {
+  // Only enable tools if we REALLY need to search for branding, or if checking a completely unknown league/NOC
+  if (shouldSearchForBranding) {
     modelParams.tools = [{ googleSearch: {} }];
   }
 
