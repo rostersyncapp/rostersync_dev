@@ -418,7 +418,6 @@ export async function processRosterRawText(
    - Logo URL Template: https://a.espncdn.com/combiner/i?img=/i/teamlogos/soccer/500/{TEAM_ID}.png&w=200
 5. Wikipedia: Use upload.wikimedia.org URLs if ESPN is missing.`
     : "Use default colors #5B5FFF and #1A1A1A.";
-    : "Use default branding colors (#5B5FFF and #1A1A1A).";
 
   const leagueHint = league ? `The user has indicated this is likely a roster for the ${LEAGUE_DISPLAY_NAMES[league] || league} league. ` : '';
 
