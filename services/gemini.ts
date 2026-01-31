@@ -565,6 +565,24 @@ export async function processRosterRawText(
 
   let parsedResult = extractJSON(textResponse);
 
+  // ROBUSTNESS FIX: Normalize athletes to handle AI schema drift (e.g. "name" vs "fullName")
+  if (parsedResult && parsedResult.athletes && Array.isArray(parsedResult.athletes)) {
+    parsedResult.athletes = parsedResult.athletes.map((a: any) => {
+      // If fullName is missing, check for common alternatives
+      const normalizedName = a.fullName || a.name || a.player || "Unknown Athlete";
+      const normalizedJersey = (a.jerseyNumber || a.jersey || "00").toString();
+      const normalizedPos = a.position || a.pos || "UNK";
+
+      return {
+        ...a,
+        fullName: normalizedName,
+        jerseyNumber: normalizedJersey,
+        position: normalizedPos
+      };
+    });
+    console.log(`[Gemini] Normalized ${parsedResult.athletes.length} athletes. Sample:`, parsedResult.athletes[0]);
+  }
+
   // FAILSAFE: If AI returns empty athletes list (common when search tool distracts it), retry without search
   if (findBranding && (!parsedResult.athletes || parsedResult.athletes.length === 0)) {
     console.warn("[Gemini] AI returned empty athletes list with search enabled. Retrying without search...");
