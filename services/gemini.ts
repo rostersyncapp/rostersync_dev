@@ -1,7 +1,7 @@
 
 import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
 import { Athlete, NILStatus, SubscriptionTier } from "../types.ts";
-import { getBrandingCache, saveBrandingCache, recordUsage } from "./supabase.ts";
+import { getBrandingCache, saveBrandingCache, recordUsage, supabase } from "./supabase.ts";
 
 // Helper to get the key even if the build tool is doing static analysis on process.env.API_KEY
 const getApiKey = () => {
@@ -108,6 +108,41 @@ function extractJSON(text: string): any {
   if (finalResult) return finalResult;
 
   throw new Error(`Failed to parse AI response as JSON. Content: ${text.substring(0, 100)}`);
+}
+
+// Helper: Fetch authoritative logo from Supabase 'teams' table
+async function fetchLogoFromDB(name: string, league: string): Promise<string | null> {
+  if (!name || !supabase) return null;
+
+  // 1. Try exact match first
+  const { data, error } = await supabase
+    .from('teams')
+    .select('logo_url')
+    .eq('league', league.toLowerCase()) // Ensure league matches
+    .ilike('name', name) // Case-insensitive on name
+    .limit(1)
+    .single();
+
+  if (data?.logo_url) {
+    console.log(`[Supabase] Found authoritative logo for ${name}: ${data.logo_url}`);
+    return data.logo_url;
+  }
+
+  // 2. Try looking in alt_names array if exact match fails
+  const { data: altData } = await supabase
+    .from('teams')
+    .select('logo_url')
+    .eq('league', league.toLowerCase())
+    .contains('alt_names', [name]) // Check if 'name' exists in the alt_names array
+    .limit(1)
+    .single();
+
+  if (altData?.logo_url) {
+    console.log(`[Supabase] Found authoritative logo via alt_name for ${name}: ${altData.logo_url}`);
+    return altData.logo_url;
+  }
+
+  return null;
 }
 
 
@@ -1590,11 +1625,11 @@ LOGO SOURCES (in priority order):
    - Use Google Search to find "ESPN {team name} team id" (e.g., 333 for Alabama, 57 for Florida)
 3. ESPN CDN for US SPORTS (Professional): https://a.espncdn.com/combiner/i?img=/i/teamlogos/{league}/500/{code}.png&h=200&w=200
    - NFL: ne, dal, gb | NHL: bos, nyr, chi | NBA: lal, bos, chi | MLB: nyy, bos, lad
-4. MiLB.com & ESPN: Use https://a.espncdn.com/combiner/i?img=/i/teamlogos/milb/500/{TEAM_ID}.png&w=200
-   - Use Google Search focusing on "site:milb.com {team name} roster" or "{team name} MiLB team ID"
-   - TARGET: Triple-A (PCL or International League)
-   - TIP: On milb.com team pages, the official logo is always in the top navbar/header.
-   - MLB/MiLB STATIC (BEST): Use 'https://www.mlbstatic.com/team-logos/{TEAM_ID}.svg'. Search for "MiLB team ID {team name}" to find the ID.
+   - Use Google Search to find "ESPN {team name} team id" (e.g., 333 for Alabama, 57 for Florida)
+3. MiLB (Triple-A):
+   - JUST EXTRACT THE TEAM NAME. The system will auto-fetch the authoritative logo from the database.
+   - DO NOT search for MiLB Team IDs.
+4. ESPN CDN for US SPORTS (Professional): https://a.espncdn.com/combiner/i?img=/i/teamlogos/{league}/500/{code}.png&h=200&w=200
 5. WIKIPEDIA (HIGH RELIABILITY): Search Google for "{team name} logo png" or "{team name} logo wikipedia".
    - PREFER 'upload.wikimedia.org' URLs as they are stable and high quality.
 6. FALLBACK: Use thesportsdb.com or official team website
@@ -1629,39 +1664,6 @@ CRITICAL: Never guess team IDs. For MiLB, finding the Team ID and using mlbstati
     - MiLB VALIDATION LIST (Reference these EXACT names):
       [Buffalo Bisons, Charlotte Knights, Columbus Clippers, Durham Bulls, Gwinnett Stripers, Indianapolis Indians, Iowa Cubs, Jacksonville Jumbo Shrimp, Lehigh Valley IronPigs, Louisville Bats, Memphis Redbirds, Nashville Sounds, Norfolk Tides, Omaha Storm Chasers, Rochester Red Wings, Scranton/Wilkes-Barre RailRiders, St. Paul Saints, Syracuse Mets, Toledo Mud Hens, Worcester Red Sox, Albuquerque Isotopes, El Paso Chihuahuas, Las Vegas Aviators, Oklahoma City Comets, Reno Aces, Round Rock Express, Sacramento River Cats, Salt Lake Bees, Sugar Land Space Cowboys, Tacoma Rainiers]
     
-    - MiLB ID LOOKUP (MANDATORY):
-      If you identify one of these teams, you MUST use the provided ID for the mlbstatic URL:
-      * Albuquerque Isotopes: 342
-      * Buffalo Bisons: 422
-      * Charlotte Knights: 494
-      * Columbus Clippers: 445
-      * Durham Bulls: 234
-      * El Paso Chihuahuas: 4904
-      * Gwinnett Stripers: 431
-      * Indianapolis Indians: 484
-      * Iowa Cubs: 451
-      * Jacksonville Jumbo Shrimp: 564
-      * Las Vegas Aviators: 400
-      * Lehigh Valley IronPigs: 1410
-      * Louisville Bats: 416
-      * Memphis Redbirds: 235
-      * Nashville Sounds: 556
-      * Norfolk Tides: 568
-      * Oklahoma City Comets: 238
-      * Omaha Storm Chasers: 541
-      * Reno Aces: 2310
-      * Rochester Red Wings: 534
-      * Round Rock Express: 102
-      * Sacramento River Cats: 105
-      * Salt Lake Bees: 561
-      * Scranton/Wilkes-Barre RailRiders: 531
-      * St. Paul Saints: 1960
-      * Sugar Land Space Cowboys: 5434
-      * Syracuse Mets: 552
-      * Tacoma Rainiers: 529
-      * Toledo Mud Hens: 512
-      * Worcester Red Sox: 533
-
     - REVERSE LOOKUP (CRITICAL): If the team name is NOT explicitly found in the text, you MUST use the 'googleSearch' tool. 
     - MiLB SEARCH (CRITICAL): If the specified league includes 'milb' (MiLB rosters), you MUST start your search on milb.com using the 'googleSearch' tool.
       * SEARCH TIP: Use "site:milb.com {player names}" OR specifically "site:milb.com/{team-slug}/roster" (e.g., "site:milb.com/buffalo-bisons/roster").
@@ -1777,6 +1779,15 @@ CRITICAL: Never guess team IDs. For MiLB, finding the Team ID and using mlbstati
   console.log("Raw AI Response (Full):", textResponse);
 
   const parsedResult = extractJSON(textResponse);
+
+  // --- NEW: Try to fetch authoritative logo from Supabase ---
+  if (parsedResult.teamName) {
+    const dbLogo = await fetchLogoFromDB(parsedResult.teamName, league || 'milb');
+    if (dbLogo) {
+      console.log(`[Gemini] Overriding AI logo with DB logo: ${dbLogo}`);
+      parsedResult.logoUrl = dbLogo;
+    }
+  }
 
   // VERBOSE DEBUG: What did the AI extract for teamName?
   console.log('[Gemini] ==== TEAM IDENTIFICATION DEBUG ====');
