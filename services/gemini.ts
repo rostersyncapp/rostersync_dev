@@ -1680,14 +1680,17 @@ CRITICAL: Never guess team IDs. For MiLB, finding the Team ID and using mlbstati
       * "River Cats" / "Sacramento" -> "Sacramento River Cats".
     - MiLB CONSTRAINT: If the league is 'milb', you MUST NOT select an MLB parent team.
     
-    - REVERSE LOOKUP (CRITICAL): If the team name is NOT explicitly found in the text, you MUST use the 'googleSearch' tool to find the Team Name and Roster.
-    - MiLB SEARCH (CRITICAL): If the specified league includes 'milb' (MiLB rosters), you MUST start your search on milb.com using the 'googleSearch' tool.
-      * SEARCH TIP: Use "site:milb.com {player names}" OR specifically "site:milb.com/{team-slug}/roster" (e.g., "site:milb.com/buffalo-bisons/roster").
-      * PARENT ORG WARNING: You will see "Affiliate of [MLB Team]" (e.g. "Affiliate of the Giants"). IGNORE the MLB Team.
-      * MANDATORY: You MUST return the MiLB Team Name (e.g., "Sacramento River Cats"). NEVER RETURN "Unknown Team" if an MiLB name is visible.
-    - BRANDING NOTE: Once you identify the Team Name (e.g. "Sacramento River Cats"), STOP. Do not use 'googleSearch' to find colors or logos for MiLB. The system will handle it.
+    - REVERSE LOOKUP (CRITICAL): If the team name is NOT explicitly found in the text, you MUST use the 'googleSearch' tool.
+    - SEARCH STRATEGY (ATHLETE FINGERPRINTING):
+      * If the team is unknown, pick 3 distinct athlete names from the list.
+      * Search Google for: "{Name 1}" "{Name 2}" "{Name 3}" roster.
+      * Look for a common team name in the results. This is how you identify teams without a header.
+    - MiLB SEARCH (CRITICAL): If the specified league includes 'milb', you MUST start your search on milb.com.
+      * Search for the specific player names on milb.com to pinpoint the Triple-A affiliate.
+      * MANDATORY: Do not give up until you have attempted at least one athlete-focused search.
+    - BRANDING NOTE: Once you identify the Team Name (e.g. "Sacramento River Cats"), STOP. Do not use 'googleSearch' for MiLB logos/colors. The system will handle it.
     - VALIDATION: After identifying a candidate team, verify that at least 3 names from the input exist on that team's official roster.
-    - DO NOT return "Unknown Team" without attempting a search. You MUST Populate 'teamName' with the real team name found via search.
+    - DO NOT return "Unknown Team" without attempting an athlete-focused search. You MUST Populate 'teamName' with the real team name found via search.
 
     2. ROSTER EXTRACTION:
     - CLEANING INPUT: The input text may have artifacts like "NAME01" (name + jersey number). You MUST separate them -> Name: "NAME", Jersey: "01".
@@ -1712,11 +1715,13 @@ CRITICAL: Never guess team IDs. For MiLB, finding the Team ID and using mlbstati
     systemInstruction,
   };
 
-  // Use strict JSON mode and schema enforcement
-  modelParams.generationConfig = {
-    responseMimeType: "application/json",
-    responseSchema: schema,
-  };
+  // Controlled generation (JSON mode/Schema) is NOT compatible with Search tools in Gemini 2.0
+  if (!findBranding) {
+    modelParams.generationConfig = {
+      responseMimeType: "application/json",
+      responseSchema: schema,
+    };
+  }
 
   if (findBranding) {
     modelParams.tools = [{ googleSearch: {} }];
