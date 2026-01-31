@@ -1692,7 +1692,10 @@ CRITICAL: Never guess team IDs. For MiLB, finding the Team ID and using mlbstati
     - VALIDATION: After identifying a candidate team, verify that at least 3 names from the input exist on that team's official roster.
     - DO NOT return "Unknown Team" without attempting an athlete-focused search. You MUST Populate 'teamName' with the real team name found via search.
 
-    2. ROSTER EXTRACTION:
+    2. ROSTER EXTRACTION (MANDATORY):
+    - SOURCE DATA: You MUST extract the athletes from the literal 'DATA' provided in the user message, NOT from your search tool results.
+    - SEARCH VS EXTRACTION: The 'googleSearch' tool is ONLY for identifying the 'teamName'. Once identified, you MUST go back to the 'DATA' and extract every athlete listed.
+    - DO NOT return an empty 'athletes' array if there are names listed in the input.
     - CLEANING INPUT: The input text may have artifacts like "NAME01" (name + jersey number). You MUST separate them -> Name: "NAME", Jersey: "01".
     - NORMALIZE: Convert all athlete names to UPPERCASE and strip accents.
     - JERSEY NUMBERS: Always use at least two digits. Pad single digits with a leading zero (e.g., '3' becomes '03', '0' becomes '00').
@@ -1715,25 +1718,34 @@ CRITICAL: Never guess team IDs. For MiLB, finding the Team ID and using mlbstati
     systemInstruction,
   };
 
-  // Controlled generation (JSON mode/Schema) is NOT compatible with Search tools in Gemini 2.0
+  // Ensure high output limit and focus
+  const generationConfig: any = {
+    temperature: 0.1, // Keep it precise
+    maxOutputTokens: 8192, // Allow for large rosters + search logs
+  };
+
   if (!findBranding) {
-    modelParams.generationConfig = {
-      responseMimeType: "application/json",
-      responseSchema: schema,
-    };
+    generationConfig.responseMimeType = "application/json";
+    generationConfig.responseSchema = schema;
   }
+  modelParams.generationConfig = generationConfig;
 
   if (findBranding) {
     modelParams.tools = [{ googleSearch: {} }];
   }
 
 
-
   const context = league ? `Context: League is ${league}.` : '';
   let result;
   try {
     const model = genAI.getGenerativeModel(modelParams);
-    result = await model.generateContent(`Tier: ${tier}. Mode: ${isNocMode ? 'NOC' : 'Standard'}. ${context} Data: ${text}\n\nIMPORTANT: Return ONLY the valid JSON object. Do not include markdown code blocks or any other text.`);
+    const userPrompt = `DATA: ${text}\n\n${context}\nTier: ${tier}. Mode: ${isNocMode ? 'NOC' : 'Standard'}.\n\n` +
+      `INSTRUCTIONS:\n` +
+      `1. Use 'googleSearch' ONLY to identify the team from the players in 'DATA'.\n` +
+      `2. Once identified, extract EVERY single athlete from 'DATA' into the JSON.\n` +
+      `3. Return ONLY valid JSON. No markdown. No intro.`;
+
+    result = await model.generateContent(userPrompt);
   } catch (error: any) {
     if (findBranding && (error.message?.includes('fetch') || error.message?.includes('googleSearch'))) {
       console.warn("[Gemini] Fetch failed with search tool, retrying without search...", error);
