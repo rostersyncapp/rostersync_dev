@@ -1629,25 +1629,19 @@ export async function processRosterRawText(
 
   const brandingInstruction = findBranding
     ? `BRANDING DISCOVERY: 
-LOGO SOURCES (in priority order):
-1. ESPN CDN for SOCCER: https://a.espncdn.com/combiner/i?img=/i/teamlogos/soccer/500/{TEAM_ID}.png&w=200
-   - Use Google Search to find "ESPN {team name} team id" to get the correct numeric ID
-2. ESPN CDN for NCAA (Football/Basketball): https://a.espncdn.com/combiner/i?img=/i/teamlogos/ncaa/500/{TEAM_ID}.png&w=200
-   - Use Google Search to find "ESPN {team name} team id" (e.g., 333 for Alabama, 57 for Florida)
-3. ESPN CDN for US SPORTS (Professional): https://a.espncdn.com/combiner/i?img=/i/teamlogos/{league}/500/{code}.png&h=200&w=200
-   - NFL: ne, dal, gb | NHL: bos, nyr, chi | NBA: lal, bos, chi | MLB: nyy, bos, lad
-   - Use Google Search to find "ESPN {team name} team id" (e.g., 333 for Alabama, 57 for Florida)
-3. MiLB (Triple-A):
-   - JUST EXTRACT THE TEAM NAME. The system will auto-fetch the authoritative logo from the database.
-   - DO NOT search for MiLB Team IDs.
-   - DO NOT use the 'googleSearch' tool for MiLB logos. If the league is 'milb', skip the branding search entirely.
-4. ESPN CDN for US SPORTS (Professional): https://a.espncdn.com/combiner/i?img=/i/teamlogos/{league}/500/{code}.png&h=200&w=200
-5. WIKIPEDIA (HIGH RELIABILITY): Search Google for "{team name} logo png" or "{team name} logo wikipedia".
-   - PREFER 'upload.wikimedia.org' URLs as they are stable and high quality.
-6. FALLBACK: Use thesportsdb.com or official team website
-   - WARNING: AVOID 'images.ctfassets.net' URLs if possible. They often point to articles or parent club logos. Always prefer 'mlbstatic' or 'wikipedia'.
-
-CRITICAL: Never guess team IDs. For MiLB, finding the Team ID and using mlbstatic.com is the most reliable method.`
+1. MiLB (Triple-A): 
+   - Rule: Identification only. Do NOT search for logo or colors. 
+   - Database has these teams: [Sacramento River Cats, Buffalo Bisons, Charlotte Knights, etc.]
+2. US Pro (NFL, NHL, NBA, MLB): 
+   - Logo URL Template: https://a.espncdn.com/combiner/i?img=/i/teamlogos/{league}/500/{code}.png&w=200
+   - Use Google to find the 2-3 letter team code (e.g. "ne" for Patriots).
+3. NCAA:
+   - Logo URL Template: https://a.espncdn.com/combiner/i?img=/i/teamlogos/ncaa/500/{TEAM_ID}.png&w=200
+   - Use Google to find the ESPN Team ID.
+4. Soccer:
+   - Logo URL Template: https://a.espncdn.com/combiner/i?img=/i/teamlogos/soccer/500/{TEAM_ID}.png&w=200
+5. Wikipedia: Use upload.wikimedia.org URLs if ESPN is missing.`
+    : "Use default colors #5B5FFF and #1A1A1A.";
     : "Use default branding colors (#5B5FFF and #1A1A1A).";
 
   const leagueHint = league ? `The user has indicated this is likely a roster for the ${LEAGUE_DISPLAY_NAMES[league] || league} league. ` : '';
@@ -1789,7 +1783,53 @@ CRITICAL: Never guess team IDs. For MiLB, finding the Team ID and using mlbstati
 
   console.log("Raw AI Response (Full):", textResponse);
 
-  const parsedResult = extractJSON(textResponse);
+  let parsedResult = extractJSON(textResponse);
+
+  // FAILSAFE: If AI returns empty athletes list (common when search tool distracts it), retry without search
+  if (findBranding && (!parsedResult.athletes || parsedResult.athletes.length === 0)) {
+    console.warn("[Gemini] AI returned empty athletes list with search enabled. Retrying without search...");
+
+    try {
+      const fallbackParams = { ...modelParams };
+      delete fallbackParams.tools;
+      fallbackParams.generationConfig = {
+        responseMimeType: "application/json",
+        responseSchema: schema,
+      };
+
+      const fallbackModel = genAI.getGenerativeModel(fallbackParams);
+      const fallbackPrompt = `
+      IDENTIFY TEAM AND EXTRACT ROSTER
+      INSTRUCTIONS:
+      1. Identify the team name from the DATA provided.
+      2. Extract EVERY athlete listed in the DATA.
+      3. Return ONLY valid JSON matching the schema.
+
+      DATA: ${text}`;
+
+      const fallbackResult = await fallbackModel.generateContent(fallbackPrompt);
+      const fbResponse = await fallbackResult.response;
+      const fbText = fbResponse.text();
+      console.log("[Gemini] Fallback Response:", fbText);
+      const fbParsed = extractJSON(fbText);
+
+      // If fallback successfully extracted athletes, use it
+      if (fbParsed.athletes && fbParsed.athletes.length > 0) {
+        // preserve any branding info from the first run if available, 
+        // but prioritized fallback for core data
+        parsedResult = {
+          ...parsedResult,
+          ...fbParsed,
+          // If fallback lacks team name but first run had it, keep first run's team name? 
+          // Usually fallback is better for data, first run better for branding. 
+          // But input text extraction should yield team name too.
+        };
+        console.log(`[Gemini] Recovered ${parsedResult.athletes.length} athletes via fallback.`);
+      }
+    } catch (fbError) {
+      console.error("[Gemini] Fallback retry failed:", fbError);
+    }
+  }
 
   // --- NEW: Try to fetch authoritative logo from Supabase ---
   if (parsedResult.teamName) {
