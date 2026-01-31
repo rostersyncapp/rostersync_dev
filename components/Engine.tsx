@@ -216,7 +216,8 @@ export const Engine: React.FC<Props> = ({
         { value: "eredivisie", label: "Eredivisie" },
         { value: "usl", label: "USL Championship" },
         { value: "efl-championship", label: "EFL Championship" },
-        { value: "scottish-premiership", label: "Scottish Premiership" }
+        { value: "scottish-premiership", label: "Scottish Premiership" },
+        { value: "wsl", label: "Women's Super League (WSL)" }
       ]
     },
     {
