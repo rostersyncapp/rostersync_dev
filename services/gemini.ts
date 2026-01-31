@@ -403,6 +403,11 @@ export async function processRosterRawText(
   const genAI = new GoogleGenerativeAI(apiKey);
   const schema = getSchemaForTier(tier, isNocMode, findBranding);
 
+  console.log("[Gemini] processRosterRawText called. TeamData loaded?", {
+    espnIdsCount: Object.keys(ESPN_TEAM_IDS || {}).length,
+    logosCount: Object.keys(KNOWN_TEAM_LOGOS || {}).length
+  });
+
   const brandingInstruction = findBranding
     ? `BRANDING DISCOVERY: 
 1. MiLB (Triple-A): 
@@ -563,6 +568,7 @@ export async function processRosterRawText(
   // FAILSAFE: If AI returns empty athletes list (common when search tool distracts it), retry without search
   if (findBranding && (!parsedResult.athletes || parsedResult.athletes.length === 0)) {
     console.warn("[Gemini] AI returned empty athletes list with search enabled. Retrying without search...");
+    console.log("[Gemini] First pass result:", JSON.stringify(parsedResult, null, 2));
 
     try {
       const fallbackParams = { ...modelParams };
