@@ -1626,6 +1626,40 @@ CRITICAL: Never guess team IDs. For MiLB, finding the Team ID and using mlbstati
     - MiLB CONSTRAINT: If the league is 'milb', you MUST NOT select an MLB parent team (e.g., "Chicago White Sox" is INVALID; "Charlotte Knights" is VALID).
     - MiLB VALIDATION LIST (Reference these EXACT names):
       [Buffalo Bisons, Charlotte Knights, Columbus Clippers, Durham Bulls, Gwinnett Stripers, Indianapolis Indians, Iowa Cubs, Jacksonville Jumbo Shrimp, Lehigh Valley IronPigs, Louisville Bats, Memphis Redbirds, Nashville Sounds, Norfolk Tides, Omaha Storm Chasers, Rochester Red Wings, Scranton/Wilkes-Barre RailRiders, St. Paul Saints, Syracuse Mets, Toledo Mud Hens, Worcester Red Sox, Albuquerque Isotopes, El Paso Chihuahuas, Las Vegas Aviators, Oklahoma City Comets, Reno Aces, Round Rock Express, Sacramento River Cats, Salt Lake Bees, Sugar Land Space Cowboys, Tacoma Rainiers]
+    
+    - MiLB ID LOOKUP (MANDATORY):
+      If you identify one of these teams, you MUST use the provided ID for the mlbstatic URL:
+      * Albuquerque Isotopes: 342
+      * Buffalo Bisons: 422
+      * Charlotte Knights: 494
+      * Columbus Clippers: 445
+      * Durham Bulls: 234
+      * El Paso Chihuahuas: 4904
+      * Gwinnett Stripers: 431
+      * Indianapolis Indians: 484
+      * Iowa Cubs: 451
+      * Jacksonville Jumbo Shrimp: 564
+      * Las Vegas Aviators: 400
+      * Lehigh Valley IronPigs: 1410
+      * Louisville Bats: 416
+      * Memphis Redbirds: 235
+      * Nashville Sounds: 556
+      * Norfolk Tides: 568
+      * Oklahoma City Comets: 238
+      * Omaha Storm Chasers: 541
+      * Reno Aces: 2310
+      * Rochester Red Wings: 534
+      * Round Rock Express: 102
+      * Sacramento River Cats: 105
+      * Salt Lake Bees: 561
+      * Scranton/Wilkes-Barre RailRiders: 531
+      * St. Paul Saints: 1960
+      * Sugar Land Space Cowboys: 5434
+      * Syracuse Mets: 552
+      * Tacoma Rainiers: 529
+      * Toledo Mud Hens: 512
+      * Worcester Red Sox: 533
+
     - REVERSE LOOKUP (CRITICAL): If the team name is NOT explicitly found in the text, you MUST use the 'googleSearch' tool. 
     - MiLB SEARCH (CRITICAL): If the specified league includes 'milb' (MiLB rosters), you MUST start your search on milb.com using the 'googleSearch' tool.
       * SEARCH TIP: Use "site:milb.com {player names}" OR specifically "site:milb.com/{team-slug}/roster" (e.g., "site:milb.com/buffalo-bisons/roster").
