@@ -1596,6 +1596,7 @@ LOGO SOURCES (in priority order):
 5. WIKIPEDIA (HIGH RELIABILITY): Search Google for "{team name} logo png" or "{team name} logo wikipedia".
    - PREFER 'upload.wikimedia.org' URLs as they are stable and high quality.
 6. FALLBACK: Use thesportsdb.com or official team website
+   - WARNING: AVOID 'images.ctfassets.net' URLs if possible. They often point to articles or parent club logos. Always prefer 'mlbstatic' or 'wikipedia'.
 
 CRITICAL: Never guess team IDs. For MiLB, finding the Team ID and using mlbstatic.com is the most reliable method.`
     : "Use default branding colors (#5B5FFF and #1A1A1A).";
