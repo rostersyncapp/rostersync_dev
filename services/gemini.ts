@@ -1682,10 +1682,12 @@ CRITICAL: Never guess team IDs. For MiLB, finding the Team ID and using mlbstati
     - ABBREVIATION: Always generate a 3-letter team code (e.g. "Liverpool FC" -> "LIV").
 
     4. OUTPUT FORMAT:
-    - The output MUST be a strict VALID JSON object.
-    - IMPORTANT: Do NOT wrap the JSON in markdown code blocks (\`\`\`json). Return RAW JSON text only.
-  - Structure: { "teamName": string, "athletes": [{ "fullName": string, "jerseyNumber": string, "position": string, "nilStatus": string }], ... }.
-    ${findBranding ? `- SCHEMA PROPERTIES: ${JSON.stringify(schema.properties)}` : ''} `;
+    - You MUST return a single valid JSON object.
+    - DO NOT include markdown formatting (like \`\`\`json).
+    - DO NOT include any introductory text.
+    - JUST RETURN THE RAW JSON STRING.
+    - Structure: { "teamName": string, "athletes": [...] }
+    ${findBranding ? `- EXPECTED PROPERTIES: ${JSON.stringify(Object.keys(schema.properties))}` : ''} `;
 
   const modelParams: any = {
     model: "gemini-2.0-flash", // Use stable alias
