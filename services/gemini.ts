@@ -1698,13 +1698,11 @@ CRITICAL: Never guess team IDs. For MiLB, finding the Team ID and using mlbstati
     systemInstruction,
   };
 
-  // Controlled generation (JSON mode/Schema) is NOT compatible with Search tools in Gemini 2.0
-  if (!findBranding) {
-    modelParams.generationConfig = {
-      responseMimeType: "application/json",
-      responseSchema: schema,
-    };
-  }
+  // Use strict JSON mode and schema enforcement
+  modelParams.generationConfig = {
+    responseMimeType: "application/json",
+    responseSchema: schema,
+  };
 
   if (findBranding) {
     modelParams.tools = [{ googleSearch: {} }];
