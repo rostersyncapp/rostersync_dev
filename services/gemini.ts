@@ -1662,16 +1662,17 @@ CRITICAL: Never guess team IDs. For MiLB, finding the Team ID and using mlbstati
       * "Jumbo Shrimp" -> "Jacksonville Jumbo Shrimp".
       * "Trashandas" -> "Rocket City Trash Pandas".
       * "Yard Goats" -> "Hartford Yard Goats".
+      * "River Cats" / "Sacramento" -> "Sacramento River Cats".
     - MiLB CONSTRAINT: If the league is 'milb', you MUST NOT select an MLB parent team (e.g., "Chicago White Sox" is INVALID; "Charlotte Knights" is VALID).
     - MiLB VALIDATION LIST (Reference these EXACT names):
       [Buffalo Bisons, Charlotte Knights, Columbus Clippers, Durham Bulls, Gwinnett Stripers, Indianapolis Indians, Iowa Cubs, Jacksonville Jumbo Shrimp, Lehigh Valley IronPigs, Louisville Bats, Memphis Redbirds, Nashville Sounds, Norfolk Tides, Omaha Storm Chasers, Rochester Red Wings, Scranton/Wilkes-Barre RailRiders, St. Paul Saints, Syracuse Mets, Toledo Mud Hens, Worcester Red Sox, Albuquerque Isotopes, El Paso Chihuahuas, Las Vegas Aviators, Oklahoma City Comets, Reno Aces, Round Rock Express, Sacramento River Cats, Salt Lake Bees, Sugar Land Space Cowboys, Tacoma Rainiers]
     
-    - REVERSE LOOKUP (CRITICAL): If the team name is NOT explicitly found in the text, you MUST use the 'googleSearch' tool. 
+    - REVERSE LOOKUP (CRITICAL): If the team name is NOT explicitly found in the text, you MUST use the 'googleSearch' tool to find the Team Name and Roster.
     - MiLB SEARCH (CRITICAL): If the specified league includes 'milb' (MiLB rosters), you MUST start your search on milb.com using the 'googleSearch' tool.
       * SEARCH TIP: Use "site:milb.com {player names}" OR specifically "site:milb.com/{team-slug}/roster" (e.g., "site:milb.com/buffalo-bisons/roster").
-      * PARENT ORG WARNING: MiLB pages often list the Major League affiliate (e.g. "Triple-A Affiliate of the Chicago White Sox"). YOU MUST IGNORE THE PARENT ORG.
-      * FOCUS: Look for the specific city/team name of the Triple-A club (e.g. "Charlotte Knights", NOT "Chicago White Sox").
-      * HINT: The correct team name and logo are almost alway in the TOPMOST NAVBAR or Header of the page text. Trust the header over the body text.
+      * PARENT ORG WARNING: You will see "Affiliate of [MLB Team]" (e.g. "Affiliate of the Giants"). IGNORE the MLB Team.
+      * MANDATORY: You MUST return the MiLB Team Name (e.g., "Sacramento River Cats"). NEVER RETURN "Unknown Team" if an MiLB name is visible.
+    - BRANDING NOTE: Once you identify the Team Name (e.g. "Sacramento River Cats"), STOP. Do not use 'googleSearch' to find colors or logos for MiLB. The system will handle it.
     - VALIDATION: After identifying a candidate team, verify that at least 3 names from the input exist on that team's official roster.
     - DO NOT return "Unknown Team" without attempting a search. You MUST Populate 'teamName' with the real team name found via search.
 
