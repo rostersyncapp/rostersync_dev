@@ -1667,6 +1667,7 @@ CRITICAL: Never guess team IDs. For MiLB, finding the Team ID and using mlbstati
       * SEARCH TIP: Use "site:milb.com {player names}" OR specifically "site:milb.com/{team-slug}/roster" (e.g., "site:milb.com/buffalo-bisons/roster").
       * PARENT ORG WARNING: MiLB pages often list the Major League affiliate (e.g. "Triple-A Affiliate of the Chicago White Sox"). YOU MUST IGNORE THE PARENT ORG.
       * FOCUS: Look for the specific city/team name of the Triple-A club (e.g. "Charlotte Knights", NOT "Chicago White Sox").
+      * HINT: The correct team name and logo are almost alway in the TOPMOST NAVBAR or Header of the page text. Trust the header over the body text.
     - VALIDATION: After identifying a candidate team, verify that at least 3 names from the input exist on that team's official roster.
     - DO NOT return "Unknown Team" without attempting a search. You MUST Populate 'teamName' with the real team name found via search.
 
