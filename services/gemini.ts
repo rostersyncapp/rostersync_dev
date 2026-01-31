@@ -107,6 +107,7 @@ function extractJSON(text: string): any {
   const finalResult = tryParse(text.trim());
   if (finalResult) return finalResult;
 
+  console.error("[Gemini] FAILED TO PARSE JSON. Full response was:", text);
   throw new Error(`Failed to parse AI response as JSON. Content: ${text.substring(0, 100)}`);
 }
 
@@ -1629,6 +1630,7 @@ LOGO SOURCES (in priority order):
 3. MiLB (Triple-A):
    - JUST EXTRACT THE TEAM NAME. The system will auto-fetch the authoritative logo from the database.
    - DO NOT search for MiLB Team IDs.
+   - DO NOT use the 'googleSearch' tool for MiLB logos. If the league is 'milb', skip the branding search entirely.
 4. ESPN CDN for US SPORTS (Professional): https://a.espncdn.com/combiner/i?img=/i/teamlogos/{league}/500/{code}.png&h=200&w=200
 5. WIKIPEDIA (HIGH RELIABILITY): Search Google for "{team name} logo png" or "{team name} logo wikipedia".
    - PREFER 'upload.wikimedia.org' URLs as they are stable and high quality.
@@ -1714,7 +1716,7 @@ CRITICAL: Never guess team IDs. For MiLB, finding the Team ID and using mlbstati
   let result;
   try {
     const model = genAI.getGenerativeModel(modelParams);
-    result = await model.generateContent(`Tier: ${tier}.Mode: ${isNocMode ? 'NOC' : 'Standard'}. ${context} Data: ${text} `);
+    result = await model.generateContent(`Tier: ${tier}. Mode: ${isNocMode ? 'NOC' : 'Standard'}. ${context} Data: ${text}\n\nIMPORTANT: Return ONLY the valid JSON object. Do not include markdown code blocks or any other text.`);
   } catch (error: any) {
     if (findBranding && (error.message?.includes('fetch') || error.message?.includes('googleSearch'))) {
       console.warn("[Gemini] Fetch failed with search tool, retrying without search...", error);
