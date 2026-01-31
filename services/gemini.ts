@@ -65,17 +65,8 @@ function extractJSON(text: string): any {
     }
   };
 
-  // 1. STRATEGY A: Find the outer-most curly braces in the whole text
-  const firstOpen = text.indexOf('{');
-  const lastClose = text.lastIndexOf('}');
-
-  if (firstOpen !== -1 && lastClose !== -1 && lastClose > firstOpen) {
-    const candidate = text.substring(firstOpen, lastClose + 1);
-    const result = tryParse(candidate);
-    if (result) return result;
-  }
-
-  // 2. STRATEGY B: Try markdown code block extraction (fallback)
+  // 1. STRATEGY A: Try markdown code block extraction (PRIORITY)
+  // If the AI explicitly wraps code, we should trust that block first.
   const codeBlockRegex = /```(?:json)?\s*([\s\S]*?)```/i;
   const match = text.match(codeBlockRegex);
   if (match) {
@@ -90,6 +81,17 @@ function extractJSON(text: string): any {
       const innerResult = tryParse(candidate.substring(innerOpen, innerClose + 1));
       if (innerResult) return innerResult;
     }
+  }
+
+  // 2. STRATEGY B: Find the outer-most curly braces in the whole text (FALLBACK)
+  // Warning: This can capture text between two separate JSON objects. Use with caution.
+  const firstOpen = text.indexOf('{');
+  const lastClose = text.lastIndexOf('}');
+
+  if (firstOpen !== -1 && lastClose !== -1 && lastClose > firstOpen) {
+    const candidate = text.substring(firstOpen, lastClose + 1);
+    const result = tryParse(candidate);
+    if (result) return result;
   }
 
   // 3. STRATEGY C: Strip markdown markers manually (handle truncated/malformed blocks)
