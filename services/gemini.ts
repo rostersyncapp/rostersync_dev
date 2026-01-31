@@ -1576,16 +1576,18 @@ export async function processRosterRawText(
 LOGO SOURCES (in priority order):
 1. ESPN CDN for SOCCER: https://a.espncdn.com/combiner/i?img=/i/teamlogos/soccer/500/{TEAM_ID}.png&w=200
    - Use Google Search to find "ESPN {team name} team id" to get the correct numeric ID
-2. ESPN CDN for US SPORTS: https://a.espncdn.com/combiner/i?img=/i/teamlogos/{league}/500/{code}.png&h=200&w=200
-   - NFL: ne, dal, gb, etc. | NHL: bos, nyr, chi | NBA: lal, bos, chi | MLB: nyy, bos, lad
-3. MiLB.com & ESPN: Use https://a.espncdn.com/combiner/i?img=/i/teamlogos/milb/500/{TEAM_ID}.png&w=200
+2. ESPN CDN for NCAA (Football/Basketball): https://a.espncdn.com/combiner/i?img=/i/teamlogos/ncaa/500/{TEAM_ID}.png&w=200
+   - Use Google Search to find "ESPN {team name} team id" (e.g., 333 for Alabama, 57 for Florida)
+3. ESPN CDN for US SPORTS (Professional): https://a.espncdn.com/combiner/i?img=/i/teamlogos/{league}/500/{code}.png&h=200&w=200
+   - NFL: ne, dal, gb | NHL: bos, nyr, chi | NBA: lal, bos, chi | MLB: nyy, bos, lad
+4. MiLB.com & ESPN: Use https://a.espncdn.com/combiner/i?img=/i/teamlogos/milb/500/{TEAM_ID}.png&w=200
    - Use Google Search focusing on "site:milb.com {team name} roster" or "{team name} MiLB team ID"
    - TARGET: Triple-A (PCL or International League)
    - TIP: On milb.com team pages, the official logo is always in the top navbar/header.
    - MLB/MiLB STATIC (BEST): Use 'https://www.mlbstatic.com/team-logos/{TEAM_ID}.svg'. Search for "MiLB team ID {team name}" to find the ID.
-4. WIKIPEDIA (HIGH RELIABILITY): Search Google for "{team name} logo png" or "{team name} logo wikipedia".
+5. WIKIPEDIA (HIGH RELIABILITY): Search Google for "{team name} logo png" or "{team name} logo wikipedia".
    - PREFER 'upload.wikimedia.org' URLs as they are stable and high quality.
-5. FALLBACK: Use thesportsdb.com or official team website
+6. FALLBACK: Use thesportsdb.com or official team website
 
 CRITICAL: Never guess team IDs. For MiLB, finding the Team ID and using mlbstatic.com is the most reliable method.`
     : "Use default branding colors (#5B5FFF and #1A1A1A).";
