@@ -1656,41 +1656,20 @@ CRITICAL: Never guess team IDs. For MiLB, finding the Team ID and using mlbstati
     
     1. TEAM IDENTIFICATION (HIGHEST PRIORITY):
     - ${leagueHint}
-    - MiLB IDENTIFICATION (CRITICAL): 
-      * If the input contains "River Cats", "Sacramento", or "Sacramento River Cats" -> Return "Sacramento River Cats".
-      * If the input contains "Affiliate of [MLB Team]" -> IGNORE the MLB Team (e.g. Giants, White Sox). Focus on the MiLB team name.
-      * MANDATORY VALIDATION LIST: [Buffalo Bisons, Charlotte Knights, Columbus Clippers, Durham Bulls, Gwinnett Stripers, Indianapolis Indians, Iowa Cubs, Jacksonville Jumbo Shrimp, Lehigh Valley IronPigs, Louisville Bats, Memphis Redbirds, Nashville Sounds, Norfolk Tides, Omaha Storm Chasers, Rochester Red Wings, Scranton/Wilkes-Barre RailRiders, St. Paul Saints, Syracuse Mets, Toledo Mud Hens, Worcester Red Sox, Albuquerque Isotopes, El Paso Chihuahuas, Las Vegas Aviators, Oklahoma City Comets, Reno Aces, Round Rock Express, Sacramento River Cats, Salt Lake Bees, Sugar Land Space Cowboys, Tacoma Rainiers]
+    - Identification Strategy:
+      * Use the 'googleSearch' tool ONLY if the team name is not obvious from the text.
+      * Look at the player names. If you see "Sacramento" or "River Cats" - this is ALWAYS the "Sacramento River Cats" baseball team.
+      * MANDATORY: Do not return "Unknown Team" if "River Cats" or "Sacramento" appears in the player names or header.
+      * IGNORE Major League affiliates (e.g. "Affiliate of the Giants"). Always pick the MiLB club name.
+    - MiLB VALIDATION LIST (Reference these EXACT names):
+      [Buffalo Bisons, Charlotte Knights, Columbus Clippers, Durham Bulls, Gwinnett Stripers, Indianapolis Indians, Iowa Cubs, Jacksonville Jumbo Shrimp, Lehigh Valley IronPigs, Louisville Bats, Memphis Redbirds, Nashville Sounds, Norfolk Tides, Omaha Storm Chasers, Rochester Red Wings, Scranton/Wilkes-Barre RailRiders, St. Paul Saints, Syracuse Mets, Toledo Mud Hens, Worcester Red Sox, Albuquerque Isotopes, El Paso Chihuahuas, Las Vegas Aviators, Oklahoma City Comets, Reno Aces, Round Rock Express, Sacramento River Cats, Salt Lake Bees, Sugar Land Space Cowboys, Tacoma Rainiers]
     
-    - AMBIGUITY RULES:
-      * "Buffalo" -> "Buffalo Bisons" (Triple-A).
-      * "Salt Lake" -> "Salt Lake Bees".
-      * "Las Vegas" -> "Las Vegas Aviators".
-      * "Sugar Land" -> "Sugar Land Space Cowboys".
-      * "Oklahoma City" -> "Oklahoma City Comets".
-      * "Gwinnet" / "Gwinnett" / "Stripers" -> "Gwinnett Stripers".
-      * "Knights" -> "Charlotte Knights".
-      * "Bulls" -> "Durham Bulls".
-      * "Redbirds" -> "Memphis Redbirds".
-      * "Sounds" -> "Nashville Sounds".
-      * "Tides" -> "Norfolk Tides".
-      * "IronPigs" -> "Lehigh Valley IronPigs".
-      * "Jumbo Shrimp" -> "Jacksonville Jumbo Shrimp".
-      * "Trashandas" -> "Rocket City Trash Pandas".
-      * "Yard Goats" -> "Hartford Yard Goats".
-      * "River Cats" / "Sacramento" -> "Sacramento River Cats".
-    - MiLB CONSTRAINT: If the league is 'milb', you MUST NOT select an MLB parent team.
-    
-    - REVERSE LOOKUP (CRITICAL): If the team name is NOT explicitly found in the text, you MUST use the 'googleSearch' tool.
-    - SEARCH STRATEGY (ATHLETE FINGERPRINTING):
-      * If the team is unknown, pick 3 distinct athlete names from the list.
-      * Search Google for: "{Name 1}" "{Name 2}" "{Name 3}" roster.
-      * Look for a common team name in the results. This is how you identify teams without a header.
-    - MiLB SEARCH (CRITICAL): If the specified league includes 'milb', you MUST start your search on milb.com.
-      * Search for the specific player names on milb.com to pinpoint the Triple-A affiliate.
-      * MANDATORY: Do not give up until you have attempted at least one athlete-focused search.
-    - BRANDING NOTE: Once you identify the Team Name (e.g. "Sacramento River Cats"), STOP. Do not use 'googleSearch' for MiLB logos/colors. The system will handle it.
-    - VALIDATION: After identifying a candidate team, verify that at least 3 names from the input exist on that team's official roster.
-    - DO NOT return "Unknown Team" without attempting an athlete-focused search. You MUST Populate 'teamName' with the real team name found via search.
+    - SEARCH STRATEGY:
+      * If unknown, pick 3 athletes. Search Google for: "{Name 1}" "{Name 2}" "{Name 3}" roster.
+      * Pinpoint the specific MiLB team. 
+      * Once identified, STOP searching. Do NOT search for logos or colors.
+    - VALIDATION: Ensure at least 3 names from the input match the identified team's official roster.
+    - DO NOT return "Unknown Team" without attempting a player-based search.
 
     2. ROSTER EXTRACTION (MANDATORY):
     - SOURCE DATA: You MUST extract the athletes from the literal 'DATA' provided in the user message, NOT from your search tool results.
@@ -1709,7 +1688,7 @@ CRITICAL: Never guess team IDs. For MiLB, finding the Team ID and using mlbstati
     - You MUST return a single valid JSON object.
     - DO NOT include markdown formatting (like \`\`\`json).
     - DO NOT include any introductory text.
-    - JUST RETURN THE RAW JSON STRING.
+    - JUST RETURN THE RAW JSON STRING. No reasoning, no search logs, and no preamble.
     - Structure: { "teamName": string, "athletes": [...] }
     ${findBranding ? `- EXPECTED PROPERTIES: ${JSON.stringify(Object.keys(schema.properties))}` : ''} `;
 
@@ -1739,11 +1718,11 @@ CRITICAL: Never guess team IDs. For MiLB, finding the Team ID and using mlbstati
   let result;
   try {
     const model = genAI.getGenerativeModel(modelParams);
-    const userPrompt = `DATA: ${text}\n\n${context}\nTier: ${tier}. Mode: ${isNocMode ? 'NOC' : 'Standard'}.\n\n` +
-      `INSTRUCTIONS:\n` +
-      `1. Use 'googleSearch' ONLY to identify the team from the players in 'DATA'.\n` +
-      `2. Once identified, extract EVERY single athlete from 'DATA' into the JSON.\n` +
-      `3. Return ONLY valid JSON. No markdown. No intro.`;
+    const userPrompt = `DATA:\n${text}\n\n${context}\nTier: ${tier}. Mode: ${isNocMode ? 'NOC' : 'Standard'}.\n\n` +
+      `FINAL INSTRUCTIONS:\n` +
+      `1. Identification: Use 'googleSearch' to identify the team name (e.g. "Sacramento River Cats") by searching for the athletes in 'DATA'.\n` +
+      `2. Extraction: CRITICAL - You MUST extract EVERY SINGLE athlete from the 'DATA' block into the JSON results. Do not return an empty athletes list.\n` +
+      `3. Return ONLY valid JSON. No conversational text.`;
 
     result = await model.generateContent(userPrompt);
   } catch (error: any) {
@@ -1758,16 +1737,13 @@ CRITICAL: Never guess team IDs. For MiLB, finding the Team ID and using mlbstati
       };
       const fallbackModel = genAI.getGenerativeModel(fallbackParams);
       const fallbackPrompt = `
-  SEARCH_FAILED_FALLBACK: The search tool is unavailable.
-    CRITICAL: You must identify the team name purely from the literal text provided.
-      LEAGUE_HINT: The user says this is a ${LEAGUE_DISPLAY_NAMES[league || ''] || 'Standard'} roster. 
-      If league is MiLB, look specifically for Triple - A team names(e.g., "River Cats", "Aviators", "IronPigs") in the text.
-      Do NOT return "Unknown Team" if any team name is identifiable.NEVER guess a team name that is not present in the text or one from another city.
+      IDENTIFY TEAM AND EXTRACT ROSTER
+      INSTRUCTIONS:
+      1. Identify the team name from the DATA provided.
+      2. Extract EVERY athlete listed in the DATA.
+      3. Return ONLY valid JSON matching the schema.
 
-    OUTPUT_FORMAT: Return a valid JSON object matching this structure:
-  { "teamName": string, "athletes": [{ "fullName": string, "jerseyNumber": string, "position": string, "nilStatus": string }] }
-
-  DATA: ${text} `;
+      DATA: ${text}`;
       result = await fallbackModel.generateContent(fallbackPrompt);
     } else {
       throw error;
@@ -1777,6 +1753,10 @@ CRITICAL: Never guess team IDs. For MiLB, finding the Team ID and using mlbstati
   const response = await result.response;
   const usage = response.usageMetadata;
   const textResponse = response.text();
+
+  if (findBranding) {
+    console.log(`[Gemini] Search Response Preview: ${textResponse.substring(0, 500)}...`);
+  }
 
   // Track Usage
   if (usage && userId) {
@@ -1816,7 +1796,7 @@ CRITICAL: Never guess team IDs. For MiLB, finding the Team ID and using mlbstati
     const branding = await fetchBrandingFromDB(parsedResult.teamName, league || 'milb');
     if (branding) {
       if (branding.logoUrl) {
-        console.log(`[Gemini] Overriding AI logo with DB logo: ${branding.logoUrl}`);
+        console.log(`[Gemini] Overriding AI logo with DB logo: ${branding.logoUrl} `);
         parsedResult.logoUrl = branding.logoUrl;
       }
       if (branding.primaryColor) parsedResult.primaryColor = branding.primaryColor;
