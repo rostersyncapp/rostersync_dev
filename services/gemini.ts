@@ -1612,6 +1612,7 @@ CRITICAL: Never guess team IDs. For MiLB, finding the Team ID and using mlbstati
       * "Las Vegas" -> "Las Vegas Aviators".
       * "Sugar Land" -> "Sugar Land Space Cowboys".
       * "Oklahoma City" -> "Oklahoma City Comets".
+    - MiLB CONSTRAINT: If the league is 'milb', you MUST NOT select an MLB parent team (e.g., "Chicago White Sox" is INVALID; "Charlotte Knights" is VALID).
     - MiLB VALIDATION LIST (Reference these EXACT names):
       [Buffalo Bisons, Charlotte Knights, Columbus Clippers, Durham Bulls, Gwinnett Stripers, Indianapolis Indians, Iowa Cubs, Jacksonville Jumbo Shrimp, Lehigh Valley IronPigs, Louisville Bats, Memphis Redbirds, Nashville Sounds, Norfolk Tides, Omaha Storm Chasers, Rochester Red Wings, Scranton/Wilkes-Barre RailRiders, St. Paul Saints, Syracuse Mets, Toledo Mud Hens, Worcester Red Sox, Albuquerque Isotopes, El Paso Chihuahuas, Las Vegas Aviators, Oklahoma City Comets, Reno Aces, Round Rock Express, Sacramento River Cats, Salt Lake Bees, Sugar Land Space Cowboys, Tacoma Rainiers]
     - REVERSE LOOKUP (CRITICAL): If the team name is NOT explicitly found in the text, you MUST use the 'googleSearch' tool. 
