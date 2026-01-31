@@ -47,15 +47,14 @@ function toSafeName(name: string): string {
 function extractJSON(text: string): any {
   if (!text) throw new Error("Empty AI response");
 
-  // Helper to try parsing a string and handle common AI JSON malformations
   const tryParse = (str: string) => {
     try {
       return JSON.parse(str);
     } catch (e) {
-      // Last-ditch: try to strip common artifacts if it's almost valid
       const cleaned = str
-        .replace(/\/\*[\s\S]*?\*\/|([^\\:]|^)\/\/.*$/gm, '$1') // Remove comments
-        .replace(/,\s*([}\]])/g, '$1') // Remove trailing commas
+        .replace(/\/\*[\s\S]*?\*\/|([^\\:]|^)\/\/.*$/gm, '$1')
+        .replace(/,\s*([}\]])/g, '$1')
+        .replace(/[\u201C\u201D]/g, '"') // Smart quotes
         .trim();
       try {
         return JSON.parse(cleaned);
@@ -65,45 +64,46 @@ function extractJSON(text: string): any {
     }
   };
 
-  // 1. STRATEGY A: Try markdown code block extraction (PRIORITY)
-  // If the AI explicitly wraps code, we should trust that block first.
-  const codeBlockRegex = /```(?:json)?\s*([\s\S]*?)```/i;
-  const match = text.match(codeBlockRegex);
-  if (match) {
+  // 1. Try finding blocks between backticks first
+  const codeBlockRegex = /```(?:json)?\s*([\s\S]*?)(?:```|$)/gi;
+  let match;
+  while ((match = codeBlockRegex.exec(text)) !== null) {
     const candidate = match[1].trim();
+    if (!candidate) continue;
+
     const result = tryParse(candidate);
     if (result) return result;
 
-    // If that failed, try finding braces INSIDE the code block
-    const innerOpen = candidate.indexOf('{');
-    const innerClose = candidate.lastIndexOf('}');
-    if (innerOpen !== -1 && innerClose !== -1 && innerClose > innerOpen) {
-      const innerResult = tryParse(candidate.substring(innerOpen, innerClose + 1));
-      if (innerResult) return innerResult;
+    // Search for braces INSIDE the unparsed code block
+    const firstBrace = candidate.indexOf('{');
+    const lastBrace = candidate.lastIndexOf('}');
+    if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+      const braceResult = tryParse(candidate.substring(firstBrace, lastBrace + 1));
+      if (braceResult) return braceResult;
     }
   }
 
-  // 2. STRATEGY B: Find the outer-most curly braces in the whole text (FALLBACK)
-  // Warning: This can capture text between two separate JSON objects. Use with caution.
+  // 2. Brute force: Find any {...} block in the whole text
   const firstOpen = text.indexOf('{');
   const lastClose = text.lastIndexOf('}');
+  if (firstOpen !== -1 && lastClose !== -1) {
+    // Try largest possible block
+    const fullCandidate = text.substring(firstOpen, lastClose + 1);
+    const fullResult = tryParse(fullCandidate);
+    if (fullResult) return fullResult;
 
-  if (firstOpen !== -1 && lastClose !== -1 && lastClose > firstOpen) {
-    const candidate = text.substring(firstOpen, lastClose + 1);
-    const result = tryParse(candidate);
-    if (result) return result;
+    // Try finding all balanced { } pairs and testing them (best for nested JSON)
+    const braceRegex = /\{(?:[^{}]|(\{(?:[^{}]|(\{[^{}]*\}))*\}))*\}/g;
+    const matches = text.match(braceRegex);
+    if (matches) {
+      for (const m of matches) {
+        const r = tryParse(m);
+        if (r) return r;
+      }
+    }
   }
 
-  // 3. STRATEGY C: Strip markdown markers manually (handle truncated/malformed blocks)
-  // If the regex failed (maybe missing closing backticks), we just strip the first ```json and any trailing ```
-  let stripped = text.trim();
-  if (stripped.startsWith('```')) {
-    stripped = stripped.replace(/^```(?:json)?/, '').replace(/```$/, '').trim();
-    const result = tryParse(stripped);
-    if (result) return result;
-  }
-
-  // 4. STRATEGY D: Literal trim (final attempt)
+  // 3. Last resort: just the trimmed text
   const finalResult = tryParse(text.trim());
   if (finalResult) return finalResult;
 
