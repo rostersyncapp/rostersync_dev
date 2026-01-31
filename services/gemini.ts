@@ -111,36 +111,46 @@ function extractJSON(text: string): any {
   throw new Error(`Failed to parse AI response as JSON. Content: ${text.substring(0, 100)}`);
 }
 
-// Helper: Fetch authoritative logo from Supabase 'teams' table
-async function fetchLogoFromDB(name: string, league: string): Promise<string | null> {
-  if (!name || !supabase) return null;
+// Helper: Fetch authoritative branding from Supabase 'teams' table
+async function fetchBrandingFromDB(name: string, league: string): Promise<{ logoUrl?: string; primaryColor?: string; secondaryColor?: string } | null> {
+  if (!name || !supabase || name === 'Unknown Team') return null;
+
+  const searchLeague = league.toLowerCase();
 
   // 1. Try exact match first
-  const { data, error } = await supabase
+  const { data } = await supabase
     .from('teams')
-    .select('logo_url')
-    .eq('league', league.toLowerCase()) // Ensure league matches
-    .ilike('name', name) // Case-insensitive on name
+    .select('logo_url, primary_color, secondary_color')
+    .eq('league', searchLeague)
+    .ilike('name', name)
     .limit(1)
-    .single();
+    .maybeSingle();
 
-  if (data?.logo_url) {
-    console.log(`[Supabase] Found authoritative logo for ${name}: ${data.logo_url}`);
-    return data.logo_url;
+  if (data) {
+    console.log(`[Supabase] Found authoritative branding for ${name}`);
+    return {
+      logoUrl: data.logo_url,
+      primaryColor: data.primary_color || undefined,
+      secondaryColor: data.secondary_color || undefined
+    };
   }
 
   // 2. Try looking in alt_names array if exact match fails
   const { data: altData } = await supabase
     .from('teams')
-    .select('logo_url')
-    .eq('league', league.toLowerCase())
-    .contains('alt_names', [name]) // Check if 'name' exists in the alt_names array
+    .select('logo_url, primary_color, secondary_color')
+    .eq('league', searchLeague)
+    .contains('alt_names', [name])
     .limit(1)
-    .single();
+    .maybeSingle();
 
-  if (altData?.logo_url) {
-    console.log(`[Supabase] Found authoritative logo via alt_name for ${name}: ${altData.logo_url}`);
-    return altData.logo_url;
+  if (altData) {
+    console.log(`[Supabase] Found authoritative branding via alt_name for ${name}`);
+    return {
+      logoUrl: altData.logo_url,
+      primaryColor: altData.primary_color || undefined,
+      secondaryColor: altData.secondary_color || undefined
+    };
   }
 
   return null;
@@ -1645,9 +1655,14 @@ CRITICAL: Never guess team IDs. For MiLB, finding the Team ID and using mlbstati
   const systemInstruction = `You are an expert broadcast metadata extractor. Your PRIMARY GOAL is to identify the team and extract the roster.
     
     1. TEAM IDENTIFICATION (HIGHEST PRIORITY):
-    - ${leagueHint}Look for the team name in headers, titles, or the first few lines.
+    - ${leagueHint}
+    - MiLB IDENTIFICATION (CRITICAL): 
+      * If the input contains "River Cats", "Sacramento", or "Sacramento River Cats" -> Return "Sacramento River Cats".
+      * If the input contains "Affiliate of [MLB Team]" -> IGNORE the MLB Team (e.g. Giants, White Sox). Focus on the MiLB team name.
+      * MANDATORY VALIDATION LIST: [Buffalo Bisons, Charlotte Knights, Columbus Clippers, Durham Bulls, Gwinnett Stripers, Indianapolis Indians, Iowa Cubs, Jacksonville Jumbo Shrimp, Lehigh Valley IronPigs, Louisville Bats, Memphis Redbirds, Nashville Sounds, Norfolk Tides, Omaha Storm Chasers, Rochester Red Wings, Scranton/Wilkes-Barre RailRiders, St. Paul Saints, Syracuse Mets, Toledo Mud Hens, Worcester Red Sox, Albuquerque Isotopes, El Paso Chihuahuas, Las Vegas Aviators, Oklahoma City Comets, Reno Aces, Round Rock Express, Sacramento River Cats, Salt Lake Bees, Sugar Land Space Cowboys, Tacoma Rainiers]
+    
     - AMBIGUITY RULES:
-      * "Buffalo" -> "Buffalo Bisons" (Triple-A). Never confuse with Boston.
+      * "Buffalo" -> "Buffalo Bisons" (Triple-A).
       * "Salt Lake" -> "Salt Lake Bees".
       * "Las Vegas" -> "Las Vegas Aviators".
       * "Sugar Land" -> "Sugar Land Space Cowboys".
@@ -1663,9 +1678,7 @@ CRITICAL: Never guess team IDs. For MiLB, finding the Team ID and using mlbstati
       * "Trashandas" -> "Rocket City Trash Pandas".
       * "Yard Goats" -> "Hartford Yard Goats".
       * "River Cats" / "Sacramento" -> "Sacramento River Cats".
-    - MiLB CONSTRAINT: If the league is 'milb', you MUST NOT select an MLB parent team (e.g., "Chicago White Sox" is INVALID; "Charlotte Knights" is VALID).
-    - MiLB VALIDATION LIST (Reference these EXACT names):
-      [Buffalo Bisons, Charlotte Knights, Columbus Clippers, Durham Bulls, Gwinnett Stripers, Indianapolis Indians, Iowa Cubs, Jacksonville Jumbo Shrimp, Lehigh Valley IronPigs, Louisville Bats, Memphis Redbirds, Nashville Sounds, Norfolk Tides, Omaha Storm Chasers, Rochester Red Wings, Scranton/Wilkes-Barre RailRiders, St. Paul Saints, Syracuse Mets, Toledo Mud Hens, Worcester Red Sox, Albuquerque Isotopes, El Paso Chihuahuas, Las Vegas Aviators, Oklahoma City Comets, Reno Aces, Round Rock Express, Sacramento River Cats, Salt Lake Bees, Sugar Land Space Cowboys, Tacoma Rainiers]
+    - MiLB CONSTRAINT: If the league is 'milb', you MUST NOT select an MLB parent team.
     
     - REVERSE LOOKUP (CRITICAL): If the team name is NOT explicitly found in the text, you MUST use the 'googleSearch' tool to find the Team Name and Roster.
     - MiLB SEARCH (CRITICAL): If the specified league includes 'milb' (MiLB rosters), you MUST start your search on milb.com using the 'googleSearch' tool.
@@ -1783,10 +1796,14 @@ CRITICAL: Never guess team IDs. For MiLB, finding the Team ID and using mlbstati
 
   // --- NEW: Try to fetch authoritative logo from Supabase ---
   if (parsedResult.teamName) {
-    const dbLogo = await fetchLogoFromDB(parsedResult.teamName, league || 'milb');
-    if (dbLogo) {
-      console.log(`[Gemini] Overriding AI logo with DB logo: ${dbLogo}`);
-      parsedResult.logoUrl = dbLogo;
+    const branding = await fetchBrandingFromDB(parsedResult.teamName, league || 'milb');
+    if (branding) {
+      if (branding.logoUrl) {
+        console.log(`[Gemini] Overriding AI logo with DB logo: ${branding.logoUrl}`);
+        parsedResult.logoUrl = branding.logoUrl;
+      }
+      if (branding.primaryColor) parsedResult.primaryColor = branding.primaryColor;
+      if (branding.secondaryColor) parsedResult.secondaryColor = branding.secondaryColor;
     }
   }
 
