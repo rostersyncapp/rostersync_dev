@@ -717,7 +717,6 @@ export const KNOWN_TEAM_LOGOS: Record<string, { logoUrl: string; primaryColor: s
   "IOWA CUBS": { logoUrl: "https://a.espncdn.com/i/teamlogos/milb/500/451.png", primaryColor: "#0E3386", secondaryColor: "#CC3433" },
   "LEHIGH VALLEY IRONPIGS": { logoUrl: "https://a.espncdn.com/i/teamlogos/milb/500/2507.png", primaryColor: "#333366", secondaryColor: "#CCCCCC" },
 
-  "BUFFALO BISONS": { logoUrl: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/milb/buffalo-bisons.svg", primaryColor: "null", secondaryColor: "null" },
   "CHARLOTTE KNIGHTS": { logoUrl: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/milb/charlotte-knights.svg", primaryColor: "null", secondaryColor: "null" },
   "COLUMBUS CLIPPERS": { logoUrl: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/milb/columbus-clippers.svg", primaryColor: "null", secondaryColor: "null" },
   "GWINNETT STRIPERS": { logoUrl: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/milb/gwinnett-stripers.svg", primaryColor: "null", secondaryColor: "null" },
