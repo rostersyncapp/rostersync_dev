@@ -175,8 +175,10 @@ function toTitleCase(str: string) {
         .replace(/\bPsg\b/g, 'PSG')
         .replace(/\bNyc\b/g, 'NYC')
         .replace(/\bNy\b/g, 'NY')
+        .replace(/\bNy\b/g, 'NY')
         .replace(/\bLa\b/g, 'LA')
-        .replace(/\bDc\b/g, 'DC');
+        .replace(/\bDc\b/g, 'DC')
+        .replace(/\s*\(Fb\)\s*$/i, ''); // Strip (FB) suffix
 }
 
 seedAllTeams().catch(console.error);
