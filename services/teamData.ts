@@ -557,8 +557,8 @@ export const KNOWN_TEAM_LOGOS: Record<string, { logoUrl: string; primaryColor: s
   "SUN": { logoUrl: "https://a.espncdn.com/i/teamlogos/wnba/500/con.png", primaryColor: "#f05023", secondaryColor: "#0a2240" },
   "DALLAS WINGS": { logoUrl: "https://a.espncdn.com/i/teamlogos/wnba/500/dal.png", primaryColor: "#002b5c", secondaryColor: "#c4d600" },
   "WINGS": { logoUrl: "https://a.espncdn.com/i/teamlogos/wnba/500/dal.png", primaryColor: "#002b5c", secondaryColor: "#c4d600" },
-  "GOLDEN STATE VALKYRIES": { logoUrl: "https://a.espncdn.com/i/teamlogos/wnba/500/gs.png", primaryColor: "#b38fcf", secondaryColor: "#000000" },
-  "VALKYRIES": { logoUrl: "https://a.espncdn.com/i/teamlogos/wnba/500/gs.png", primaryColor: "#b38fcf", secondaryColor: "#000000" },
+  "GOLDEN STATE VALKYRIES": { logoUrl: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/wnba/golden-state-valkyries.png", primaryColor: "#b38fcf", secondaryColor: "#000000" },
+  "VALKYRIES": { logoUrl: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/wnba/golden-state-valkyries.png", primaryColor: "#b38fcf", secondaryColor: "#000000" },
   "INDIANA FEVER": { logoUrl: "https://a.espncdn.com/i/teamlogos/wnba/500/ind.png", primaryColor: "#002d62", secondaryColor: "#e03a3e" },
   "FEVER": { logoUrl: "https://a.espncdn.com/i/teamlogos/wnba/500/ind.png", primaryColor: "#002d62", secondaryColor: "#e03a3e" },
   "LAS VEGAS ACES": { logoUrl: "https://a.espncdn.com/i/teamlogos/wnba/500/lv.png", primaryColor: "#a7a8aa", secondaryColor: "#000000" },
@@ -655,6 +655,7 @@ export const KNOWN_TEAM_LOGOS: Record<string, { logoUrl: string; primaryColor: s
   // ==================== EREDIVISIE (ESPN 2025-26) ====================
   "PSV EINDHOVEN": { logoUrl: "https://a.espncdn.com/i/teamlogos/soccer/500/148.png", primaryColor: "#ED1C24", secondaryColor: "#FFFFFF" },
   "PSV": { logoUrl: "https://a.espncdn.com/i/teamlogos/soccer/500/148.png", primaryColor: "#ED1C24", secondaryColor: "#FFFFFF" },
+  "RKC WAALWIJK": { logoUrl: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/eredivisie/rkc-waalwijk.png", primaryColor: "#0c57f2", secondaryColor: "#84aee7" },
   "FEYENOORD ROTTERDAM": { logoUrl: "https://a.espncdn.com/i/teamlogos/soccer/500/142.png", primaryColor: "#FF0000", secondaryColor: "#FFFFFF" },
   "FEYENOORD": { logoUrl: "https://a.espncdn.com/i/teamlogos/soccer/500/142.png", primaryColor: "#FF0000", secondaryColor: "#FFFFFF" },
   "AJAX AMSTERDAM": { logoUrl: "https://a.espncdn.com/i/teamlogos/soccer/500/139.png", primaryColor: "#D2162E", secondaryColor: "#FFFFFF" },
@@ -705,6 +706,62 @@ export const KNOWN_TEAM_LOGOS: Record<string, { logoUrl: string; primaryColor: s
   "RCB": { logoUrl: "https://upload.wikimedia.org/wikipedia/commons/2/2a/Royal_Challengers_Bangalore_2020.svg", primaryColor: "#EC1C24", secondaryColor: "#BFA36F" },
   "SUNRISERS HYDERABAD": { logoUrl: "https://upload.wikimedia.org/wikipedia/commons/8/81/Sunrisers_Hyderabad.svg", primaryColor: "#F7A721", secondaryColor: "#000000" },
   "SRH": { logoUrl: "https://upload.wikimedia.org/wikipedia/commons/8/81/Sunrisers_Hyderabad.svg", primaryColor: "#F7A721", secondaryColor: "#000000" },
+
+  // MiLB (Minor League Baseball) - AAA
+  "SACRAMENTO RIVER CATS": { logoUrl: "https://upload.wikimedia.org/wikipedia/commons/a/a2/SacramentoRiverCatsCap.png", primaryColor: "#b20000", secondaryColor: "#000000" },
+  "RIVER CATS": { logoUrl: "https://upload.wikimedia.org/wikipedia/commons/a/a2/SacramentoRiverCatsCap.png", primaryColor: "#b20000", secondaryColor: "#000000" },
+  "SALT LAKE BEES": { logoUrl: "https://brandeps.com/logo/S/Salt-Lake-Bees-logo-vector.svg", primaryColor: "#ffd700", secondaryColor: "#000000" },
+  "BEES": { logoUrl: "https://brandeps.com/logo/S/Salt-Lake-Bees-logo-vector.svg", primaryColor: "#ffd700", secondaryColor: "#000000" },
+  "LAS VEGAS AVIATORS": { logoUrl: "https://www.seeklogo.com/images/L/las-vegas-aviators-logo-28F88E28F8-seeklogo.com.png", primaryColor: "#FF6900", secondaryColor: "#002D62" },
+  "AVIATORS": { logoUrl: "https://www.seeklogo.com/images/L/las-vegas-aviators-logo-28F88E28F8-seeklogo.com.png", primaryColor: "#FF6900", secondaryColor: "#002D62" },
+  "IOWA CUBS": { logoUrl: "https://a.espncdn.com/i/teamlogos/milb/500/451.png", primaryColor: "#0E3386", secondaryColor: "#CC3433" },
+  "LEHIGH VALLEY IRONPIGS": { logoUrl: "https://a.espncdn.com/i/teamlogos/milb/500/2507.png", primaryColor: "#333366", secondaryColor: "#CCCCCC" },
+
+  "BUFFALO BISONS": { logoUrl: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/milb/buffalo-bisons.svg", primaryColor: "null", secondaryColor: "null" },
+  "CHARLOTTE KNIGHTS": { logoUrl: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/milb/charlotte-knights.svg", primaryColor: "null", secondaryColor: "null" },
+  "COLUMBUS CLIPPERS": { logoUrl: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/milb/columbus-clippers.svg", primaryColor: "null", secondaryColor: "null" },
+  "GWINNETT STRIPERS": { logoUrl: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/milb/gwinnett-stripers.svg", primaryColor: "null", secondaryColor: "null" },
+  "INDIANAPOLIS INDIANS": { logoUrl: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/milb/indianapolis-indians.svg", primaryColor: "null", secondaryColor: "null" },
+  "LOUISVILLE BATS": { logoUrl: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/milb/louisville-bats.svg", primaryColor: "null", secondaryColor: "null" },
+  "NASHVILLE SOUNDS": { logoUrl: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/milb/nashville-sounds.svg", primaryColor: "null", secondaryColor: "null" },
+  "NORFOLK TIDES": { logoUrl: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/milb/norfolk-tides.svg", primaryColor: "null", secondaryColor: "null" },
+  "OMAHA STORM CHASERS": { logoUrl: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/milb/omaha-storm-chasers.svg", primaryColor: "null", secondaryColor: "null" },
+  "SCRANTON/WILKES-BARRE RAILRIDERS": { logoUrl: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/milb/scranton-wilkes-barre-railriders.svg", primaryColor: "null", secondaryColor: "null" },
+  "ST. PAUL SAINTS": { logoUrl: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/milb/st-paul-saints.svg", primaryColor: "null", secondaryColor: "null" },
+  "SYRACUSE METS": { logoUrl: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/milb/syracuse-mets.svg", primaryColor: "null", secondaryColor: "null" },
+  "WORCESTER RED SOX": { logoUrl: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/milb/worcester-red-sox.svg", primaryColor: "null", secondaryColor: "null" },
+  "ALBUQUERQUE ISOTOPES": { logoUrl: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/milb/albuquerque-isotopes.svg", primaryColor: "null", secondaryColor: "null" },
+  "OKLAHOMA CITY COMETS": { logoUrl: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/milb/oklahoma-city-comets.svg", primaryColor: "null", secondaryColor: "null" },
+  "RENO ACES": { logoUrl: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/milb/reno-aces.svg", primaryColor: "null", secondaryColor: "null" },
+  "SUGAR LAND SPACE COWBOYS": { logoUrl: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/milb/sugar-land-space-cowboys.svg", primaryColor: "null", secondaryColor: "null" },
+  "TACOMA RAINIERS": { logoUrl: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/milb/tacoma-rainiers.svg", primaryColor: "null", secondaryColor: "null" },
+  "DURHAM BULLS": { logoUrl: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/milb/durham-bulls.svg", primaryColor: "null", secondaryColor: "null" },
+  "JACKSONVILLE JUMBO SHRIMP": { logoUrl: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/milb/jacksonville-jumbo-shrimp.svg", primaryColor: "null", secondaryColor: "null" },
+  "MEMPHIS REDBIRDS": { logoUrl: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/milb/memphis-redbirds.svg", primaryColor: "null", secondaryColor: "null" },
+  "ROCHESTER RED WINGS": { logoUrl: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/milb/rochester-red-wings.svg", primaryColor: "null", secondaryColor: "null" },
+  "TOLEDO MUD HENS": { logoUrl: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/milb/toledo-mud-hens.svg", primaryColor: "null", secondaryColor: "null" },
+  "EL PASO CHIHUAHUAS": { logoUrl: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/milb/el-paso-chihuahuas.svg", primaryColor: "null", secondaryColor: "null" },
+  "ROUND ROCK EXPRESS": { logoUrl: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/milb/round-rock-express.svg", primaryColor: "null", secondaryColor: "null" },
+
+  // NHL - Added Missing
+  "UTAH HOCKEY CLUB": { logoUrl: "https://upload.wikimedia.org/wikipedia/commons/e/ed/Utah_Hockey_Club_2024-25_Logo.svg", primaryColor: "#000000", secondaryColor: "#71AFE5" },
+
+  // MLS - Added Missing
+  "VANCOUVER WHITECAPS FC": { logoUrl: "https://upload.wikimedia.org/wikipedia/commons/6/6f/Vancouver_Whitecaps_logo.svg", primaryColor: "#00245E", secondaryColor: "#9CC2E5" },
+
+  // USL - Added Missing
+  "LEXINGTON SC": { logoUrl: "https://upload.wikimedia.org/wikipedia/en/e/e4/Lexington_Sporting_Club_logo.svg", primaryColor: "#2d9846", secondaryColor: "#000000" },
+  "MONTEREY BAY FC": { logoUrl: "https://upload.wikimedia.org/wikipedia/en/2/2f/Monterey_Bay_FC_logo.svg", primaryColor: "#005a9c", secondaryColor: "#a5acaf" },
+  "OAKLAND ROOTS SC": { logoUrl: "https://upload.wikimedia.org/wikipedia/en/c/c1/Oakland_Roots_SC_logo.svg", primaryColor: "#000000", secondaryColor: "#ffffff" },
+  "PITTSBURGH RIVERHOUNDS SC": { logoUrl: "https://upload.wikimedia.org/wikipedia/en/6/61/Pittsburgh_Riverhounds_SC_logo.svg", primaryColor: "#ffc72c", secondaryColor: "#000000" },
+  "SPORTING CLUB JACKSONVILLE": { logoUrl: "https://upload.wikimedia.org/wikipedia/commons/a/a5/Sporting_Club_Jacksonville_logo.png", primaryColor: "#002d62", secondaryColor: "#ffffff" },
+
+  // Premier League - Added Missing
+  "IPSWICH TOWN": { logoUrl: "https://worldvectorlogo.com/download/ipswich-town-fc-vector-logo.svg", primaryColor: "#0000FF", secondaryColor: "#FFFFFF" },
+  "LEICESTER CITY": { logoUrl: "https://upload.wikimedia.org/wikipedia/commons/2/2d/Leicester_City_crest.svg", primaryColor: "#0053A0", secondaryColor: "#FDBE11" },
+  "LUTON TOWN": { logoUrl: "https://www.seeklogo.com/images/L/luton-town-fc-logo-393282BA9A-seeklogo.com.png", primaryColor: "#F78F1E", secondaryColor: "#002147" },
+  "SHEFFIELD UNITED": { logoUrl: "https://worldvectorlogo.com/download/sheffield-united-fc-vector-logo.svg", primaryColor: "#EE2737", secondaryColor: "#000000" },
+  "SOUTHAMPTON": { logoUrl: "https://www.seeklogo.com/images/S/southampton-fc-logo-AD40C592C4-seeklogo.com.png", primaryColor: "#D71920", secondaryColor: "#130C0E" },
 
 };
 
@@ -1179,6 +1236,34 @@ export const ESPN_TEAM_IDS: Record<string, { id: number; sport: string; league: 
   "IOWA CUBS": { id: 451, sport: "baseball", league: "milb-aaa" },
   "LEHIGH VALLEY IRONPIGS": { id: 2507, sport: "baseball", league: "milb-aaa" },
   "IRONPIGS": { id: 2507, sport: "baseball", league: "milb-aaa" },
+
+  "BUFFALO BISONS": { id: 0, sport: "unknown", league: "milb" },
+  "CHARLOTTE KNIGHTS": { id: 0, sport: "unknown", league: "milb" },
+  "COLUMBUS CLIPPERS": { id: 0, sport: "unknown", league: "milb" },
+  "GWINNETT STRIPERS": { id: 0, sport: "unknown", league: "milb" },
+  "INDIANAPOLIS INDIANS": { id: 0, sport: "unknown", league: "milb" },
+  "LOUISVILLE BATS": { id: 0, sport: "unknown", league: "milb" },
+  "NASHVILLE SOUNDS": { id: 0, sport: "unknown", league: "milb" },
+  "NORFOLK TIDES": { id: 0, sport: "unknown", league: "milb" },
+  "OMAHA STORM CHASERS": { id: 0, sport: "unknown", league: "milb" },
+  "SCRANTON/WILKES-BARRE RAILRIDERS": { id: 0, sport: "unknown", league: "milb" },
+  "ST. PAUL SAINTS": { id: 0, sport: "unknown", league: "milb" },
+  "SYRACUSE METS": { id: 0, sport: "unknown", league: "milb" },
+  "WORCESTER RED SOX": { id: 0, sport: "unknown", league: "milb" },
+  "ALBUQUERQUE ISOTOPES": { id: 0, sport: "unknown", league: "milb" },
+  "OKLAHOMA CITY COMETS": { id: 0, sport: "unknown", league: "milb" },
+  "RENO ACES": { id: 0, sport: "unknown", league: "milb" },
+  "SUGAR LAND SPACE COWBOYS": { id: 0, sport: "unknown", league: "milb" },
+  "TACOMA RAINIERS": { id: 0, sport: "unknown", league: "milb" },
+  "GOLDEN STATE VALKYRIES": { id: 0, sport: "unknown", league: "wnba" },
+  "DURHAM BULLS": { id: 0, sport: "unknown", league: "milb" },
+  "JACKSONVILLE JUMBO SHRIMP": { id: 0, sport: "unknown", league: "milb" },
+  "MEMPHIS REDBIRDS": { id: 0, sport: "unknown", league: "milb" },
+  "ROCHESTER RED WINGS": { id: 0, sport: "unknown", league: "milb" },
+  "TOLEDO MUD HENS": { id: 0, sport: "unknown", league: "milb" },
+  "EL PASO CHIHUAHUAS": { id: 0, sport: "unknown", league: "milb" },
+  "ROUND ROCK EXPRESS": { id: 0, sport: "unknown", league: "milb" },
+  "RKC WAALWIJK": { id: 0, sport: "unknown", league: "eredivisie" },
 };
 
 export const LEAGUE_DISPLAY_NAMES: Record<string, string> = {
