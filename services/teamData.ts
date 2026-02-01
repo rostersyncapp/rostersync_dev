@@ -1758,6 +1758,8 @@ export const ESPN_TEAM_IDS: Record<string, { id: number; sport: string; league: 
   "CRYSTAL PALACE": { id: 384, sport: "soccer", league: "eng.1" },
   "EVERTON": { id: 368, sport: "soccer", league: "eng.1" },
   "FULHAM": { id: 370, sport: "soccer", league: "eng.1" },
+  "LEEDS UNITED": { id: 357, sport: "soccer", league: "eng.1" },
+  "SUNDERLAND": { id: 366, sport: "soccer", league: "eng.1" },
   "IPSWICH TOWN": { id: 373, sport: "soccer", league: "eng.1" },
   "LEICESTER CITY": { id: 375, sport: "soccer", league: "eng.1" },
   "LIVERPOOL": { id: 364, sport: "soccer", league: "eng.1" },
