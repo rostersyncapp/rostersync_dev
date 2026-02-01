@@ -100,7 +100,7 @@ const TeamLogo: React.FC<{
   const fallbackName = name || 'Untitled';
   const code = abbreviation || fallbackName.substring(0, 3).toUpperCase();
 
-  if (url && !error) {
+  if (url && url !== 'Unknown' && !error) {
     return (
       <div className={`${sizeClasses[size]} flex items-center justify-center shadow-sm overflow-hidden bg-white border border-gray-100 dark:border-gray-800 shrink-0`}>
         <img

@@ -299,6 +299,11 @@ export async function saveBrandingCache(branding: BrandingCache): Promise<void> 
     return;
   }
 
+  // Do not cache Unknown entries
+  if (branding.team_name === 'Unknown Team' || branding.team_name === 'Unknown') {
+    return;
+  }
+
   console.log('[BrandingCache] Attempting to save:', branding);
 
   try {

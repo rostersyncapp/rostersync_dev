@@ -1,4 +1,6 @@
 export const KNOWN_TEAM_LOGOS: Record<string, { logoUrl: string; primaryColor: string; secondaryColor: string }> = {
+  "ANGEL CITY": { logoUrl: "https://upload.wikimedia.org/wikipedia/en/1/1d/Angel_City_FC_logo.svg", primaryColor: "#010101", secondaryColor: "#F2D4D7" },
+  "ANGEL CITY FC": { logoUrl: "https://upload.wikimedia.org/wikipedia/en/1/1d/Angel_City_FC_logo.svg", primaryColor: "#010101", secondaryColor: "#F2D4D7" },
   // ==================== ENGLISH PREMIER LEAGUE (ESPN) ====================
   "AFC BOURNEMOUTH": { logoUrl: "https://a.espncdn.com/i/teamlogos/soccer/500/349.png", primaryColor: "#f42727", secondaryColor: "#ffffff" },
   "BOURNEMOUTH": { logoUrl: "https://a.espncdn.com/i/teamlogos/soccer/500/349.png", primaryColor: "#f42727", secondaryColor: "#ffffff" },

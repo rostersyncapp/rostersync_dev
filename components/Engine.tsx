@@ -153,7 +153,8 @@ export const Engine: React.FC<Props> = ({
       setAbbreviation(pendingRoster.teamMetadata?.abbreviation || 'UNK');
       setPrimaryColor(pendingRoster.teamMetadata?.primaryColor || '#5B5FFF');
       setSecondaryColor(pendingRoster.teamMetadata?.secondaryColor || '#1A1A1A');
-      setLogoUrl(pendingRoster.teamMetadata?.logoUrl || '');
+      const safeLogo = pendingRoster.teamMetadata?.logoUrl === 'Unknown' ? '' : pendingRoster.teamMetadata?.logoUrl || '';
+      setLogoUrl(safeLogo);
       setProcessedAthletes(pendingRoster.athletes);
       setIsNocMode(pendingRoster.isNocMode || false);
 
@@ -541,7 +542,7 @@ export const Engine: React.FC<Props> = ({
               <div className="p-10 border-b border-gray-100 dark:border-gray-800 flex flex-col md:flex-row md:items-start justify-between bg-gray-50/30 dark:bg-gray-800/30 gap-10">
                 <div className="flex-1 flex flex-col md:flex-row gap-6">
                   <div className="w-24 h-24 rounded-3xl text-white flex items-center justify-center shadow-lg shrink-0 overflow-hidden relative group bg-white border border-gray-100 dark:border-gray-700">
-                    {logoUrl ? (
+                    {logoUrl && logoUrl !== 'Unknown' ? (
                       <img src={logoUrl} alt={teamName} className="w-full h-full object-contain p-3" onError={() => setLogoUrl('')} />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-white font-mono font-black text-3xl" style={{ backgroundColor: primaryColor }}>

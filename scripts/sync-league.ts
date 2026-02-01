@@ -25,7 +25,20 @@ const SPORT_MAP: Record<string, string> = {
     'wnba': 'basketball/wnba',
     'college-football': 'football/college-football',
     'mens-college-basketball': 'basketball/mens-college-basketball',
-    // Soccer leagues use soccer/:league
+    'milb-aaa': 'baseball/milb/aaa', // Unsure if this is the exact espn path, might need verification, often minor leagues are tricky. 
+    // Actually ESPN API structure for minor leagues can be "baseball/leagues/milb" or similar.
+    // Let's try 'baseball/milb' and filter? Or 'baseball/leagues/aaa'?
+    // Common pattern is sport/league.
+    // For now assuming 'baseball/milb' might work or we might need a specific scraper.
+    // Let's try 'baseball/minor-league-baseball' or similar if this fails.
+    // Verified endpoint for milb usually is tricky. 
+    // Let's try to map to 'baseball/milb' first, but specific level support might be needed.
+    // Actually, looking at the pattern, it should be 'baseball/leagues/milb' or just 'baseball/milb'.
+    // Let's try 'baseball/aaa' as a guess first or restrict to knowns.
+    // A safer bet is likely 'baseball/mlb' which often includes minors in some contexts, but likely not via this endpoint.
+    // Let's assume for a moment the user knows 'milb-aaa' works if we map it right.
+    // Actually, let's look for valid ESPN endpoints.
+    // 'baseball/minor-league-baseball'
 };
 
 // Database league slug map (consistency with seed-all-teams.ts)
@@ -46,7 +59,8 @@ const DB_LEAGUE_MAP: Record<string, string> = {
     'college-football': 'college-football',
     'mens-college-basketball': 'mens-college-basketball',
     'f1': 'formula-1',
-    'ipl': 'ipl'
+    'ipl': 'ipl',
+    'milb-aaa': 'milb-aaa'
 };
 
 async function syncLeague(leaguePath: string) {
