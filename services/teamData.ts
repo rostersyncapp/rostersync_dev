@@ -577,8 +577,7 @@ export const KNOWN_TEAM_LOGOS: Record<string, { logoUrl: string; primaryColor: s
   "MYSTICS": { logoUrl: "https://a.espncdn.com/i/teamlogos/wnba/500/wsh.png", primaryColor: "#e03a3e", secondaryColor: "#002b5c" },
 
   // ==================== NWSL (ESPN 2026) ====================
-  "ANGEL CITY FC": { logoUrl: "https://a.espncdn.com/i/teamlogos/soccer/500/21422.png", primaryColor: "#202121", secondaryColor: "#898c8f" },
-  "ANGEL CITY": { logoUrl: "https://a.espncdn.com/i/teamlogos/soccer/500/21422.png", primaryColor: "#202121", secondaryColor: "#898c8f" },
+
   "BAY FC": { logoUrl: "https://a.espncdn.com/i/teamlogos/soccer/500/22187.png", primaryColor: "#0d2032", secondaryColor: "#dfdede" },
   "BOSTON LEGACY FC": { logoUrl: "https://static.cdnlogo.com/logos/b/95/boston-legacy-fc_800.png", primaryColor: "#39FF14", secondaryColor: "#000000" },
   "CHICAGO STARS FC": { logoUrl: "https://a.espncdn.com/i/teamlogos/soccer/500/15360.png", primaryColor: "#c7102e", secondaryColor: "#41b6e6" },
