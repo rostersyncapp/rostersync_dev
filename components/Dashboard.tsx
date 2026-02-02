@@ -173,6 +173,61 @@ export const Dashboard: React.FC<Props> = ({
   const [newPlayerJersey, setNewPlayerJersey] = useState('');
   const [newPlayerPosition, setNewPlayerPosition] = useState('');
 
+  // Iconik Sync State
+  const [isSyncingIconik, setIsSyncingIconik] = useState(false);
+  const [isSyncIconikSuccess, setIsSyncIconikSuccess] = useState(false);
+
+  const handleIconikSync = async () => {
+    if (!selectedRoster) return;
+    setIsSyncingIconik(true);
+    setIsSyncIconikSuccess(false);
+
+    try {
+      const savedConfig = localStorage.getItem('iconikConfig');
+      if (!savedConfig) {
+        alert('Please configure Iconik settings first.');
+        setIsSyncingIconik(false);
+        return;
+      }
+
+      const config = JSON.parse(savedConfig);
+      if (!config.appId || !config.authToken || !config.fieldLabel) {
+        alert('Missing Iconik credentials or Field Label in settings.');
+        setIsSyncingIconik(false);
+        return;
+      }
+
+      const uniqueNames = Array.from(new Set(selectedRoster.rosterData.map((a: Athlete) => a.fullName).filter(Boolean)));
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+
+      const response = await fetch(`${supabaseUrl}/functions/v1/iconik-proxy`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'sync_field_options',
+          appId: config.appId,
+          authToken: config.authToken,
+          fieldName: config.fieldLabel,
+          options: uniqueNames
+        })
+      });
+
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.error || response.statusText);
+      }
+
+      setIsSyncIconikSuccess(true);
+      setTimeout(() => setIsSyncIconikSuccess(false), 5000);
+
+    } catch (err: any) {
+      console.error('Iconik Sync Failed:', err);
+      alert(`Sync failed: ${err.message}`);
+    } finally {
+      setIsSyncingIconik(false);
+    }
+  };
+
   const selectedRoster = rosters.find(r => r.id === selectedRosterId) || null;
 
   useEffect(() => {
@@ -470,7 +525,25 @@ export const Dashboard: React.FC<Props> = ({
                   <div className="space-y-4">
                     <h4 className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-400 font-mono"><Layers size={14} className="text-[#5B5FFF]" /> Asset Management (MAM)</h4>
                     <div className="grid grid-cols-1 gap-3">
-                      <ExportItem icon={<Layers size={20} />} title="Iconik Metadata" desc="JSON field-mapping definition." onClick={() => handleExport('ICONIK_JSON')} />
+                      <ExportItem icon={<Layers size={20} />} title="Iconik Metadata (JSON)" desc="Download JSON file." onClick={() => handleExport('ICONIK_JSON')} />
+                      <button
+                        onClick={handleIconikSync}
+                        disabled={isSyncingIconik}
+                        className="w-full flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 hover:bg-[#5B5FFF]/5 dark:hover:bg-[#5B5FFF]/10 rounded-lg transition-all group border border-gray-100 dark:border-gray-800 hover:border-[#5B5FFF]/20"
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className={`w-12 h-12 rounded-lg flex items-center justify-center shadow-sm transition-colors group-hover:scale-110 ${isSyncIconikSuccess ? 'bg-green-100 text-green-600' : 'bg-white dark:bg-gray-800 text-gray-400 group-hover:text-[#5B5FFF]'}`}>
+                            {isSyncingIconik ? <Loader2 size={24} className="animate-spin" /> : isSyncIconikSuccess ? <Check size={24} /> : <Globe size={20} />}
+                          </div>
+                          <div className="text-left min-w-0">
+                            <div className="text-sm font-extrabold text-gray-900 dark:text-white truncate">Sync to Iconik</div>
+                            <div className="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-tight mt-0.5 truncate">
+                              {isSyncingIconik ? 'Syncing...' : isSyncIconikSuccess ? 'Synced Successfully!' : 'Push via API'}
+                            </div>
+                          </div>
+                        </div>
+                        <ArrowRight size={18} className="text-gray-300 group-hover:text-[#5B5FFF] group-hover:translate-x-1 transition-all shrink-0" />
+                      </button>
                       <ExportItem icon={<Cloud size={20} />} title="CatDV Schema" desc="JSON Picklist Definition." onClick={() => handleExport('CATDV_JSON')} />
                     </div>
                   </div>
