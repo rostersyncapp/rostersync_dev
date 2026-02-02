@@ -109,21 +109,50 @@ serve(async (req) => {
                 'Accept': 'application/json'
             };
 
-            // 1. GET current field definition
-            const getUrl = `https://app.iconik.io/API/metadata/v1/fields/${fieldName}/`;
+            // 1. Look up field by label/name to get the actual field ID
+            const searchUrl = `https://app.iconik.io/API/metadata/v1/fields/?name=${encodeURIComponent(fieldName)}`;
+            const searchRes = await fetch(searchUrl, { method: 'GET', headers });
+
+            if (!searchRes.ok) {
+                const errText = await searchRes.text();
+                return new Response(
+                    JSON.stringify({ error: `Failed to search for field '${fieldName}'`, details: errText }),
+                    { status: searchRes.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+                )
+            }
+
+            const fieldsData = await searchRes.json();
+            const fields = fieldsData.results || fieldsData;
+            const matchedField = Array.isArray(fields)
+                ? fields.find((f: any) => f.label === fieldName || f.name === fieldName)
+                : null;
+
+            if (!matchedField) {
+                const availableFields = Array.isArray(fields) ? fields.map((f: any) => f.label || f.name) : [];
+                return new Response(
+                    JSON.stringify({ error: `Field '${fieldName}' not found. Available fields: ${JSON.stringify(availableFields)}` }),
+                    { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+                )
+            }
+
+            const fieldId = matchedField.id;
+            console.log(`Found field '${fieldName}' with ID: ${fieldId}`);
+
+            // 2. GET field definition using the actual field ID
+            const getUrl = `https://app.iconik.io/API/metadata/v1/fields/${fieldId}/`;
             const getRes = await fetch(getUrl, { method: 'GET', headers });
 
             if (!getRes.ok) {
                 const errText = await getRes.text();
                 return new Response(
-                    JSON.stringify({ error: `Failed to fetch field '${fieldName}'`, details: errText }),
+                    JSON.stringify({ error: `Failed to fetch field '${fieldName}' (ID: ${fieldId})`, details: errText }),
                     { status: getRes.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
                 )
             }
 
             const fieldData = await getRes.json();
 
-            // 2. Merge options
+            // 3. Merge options
             // Iconik options can be plain strings or objects {label: "X", value: "Y"}
             // We will normalize to what we find.
             let updatedOptions = [...(fieldData.options || [])];
