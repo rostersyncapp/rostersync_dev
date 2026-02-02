@@ -661,6 +661,17 @@ export const Engine: React.FC<Props> = ({
                       </button>
 
                       <button
+                        onClick={() => {
+                          const { content, filename, mimeType } = generateExport(processedAthletes, 'ICONIK_JSON', teamName, 'EN', userTier);
+                          downloadFile(content, filename, mimeType);
+                        }}
+                        disabled={processedAthletes.length === 0}
+                        className="w-full flex items-center justify-center gap-3 px-6 py-3.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-bold text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-all uppercase tracking-widest"
+                      >
+                        <Download size={18} /> Download Iconik JSON
+                      </button>
+
+                      <button
                         onClick={handleIconikSync}
                         disabled={isSyncingIconik || processedAthletes.length === 0}
                         className={`w-full flex items-center justify-center gap-3 px-6 py-3.5 rounded-xl border font-bold text-sm transition-all uppercase tracking-widest ${isSyncIconikSuccess ? 'bg-green-50 text-green-600 border-green-200' : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'}`}
