@@ -190,16 +190,19 @@ const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
 
         if (response.ok && (data.token || data.auth_token)) {
           const newToken = data.token || data.auth_token;
-          setIconikConfig(prev => ({
-            ...prev,
-            appId: iconikConfig.appId,
+          const newConfig = {
+            ...iconikConfig,
             authToken: newToken
-          }));
+          };
+
+          setIconikConfig(newConfig);
+          localStorage.setItem('iconikConfig', JSON.stringify(newConfig));
 
           setConnectionStatus('success');
           setConnectionMessage(`Login successful! Token retrieved.`);
           return;
         }
+
 
         let errorMessage = data.detail || data.error || response.statusText;
         if (data.upstream_data && data.upstream_data.errors) {
