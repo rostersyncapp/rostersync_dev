@@ -158,8 +158,24 @@ const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
         setConnectionMessage('Connection successful! Settings saved.');
       } else {
         const errorData = await response.json().catch(() => ({}));
+        let errorMessage = errorData.detail || response.statusText;
+
+        // Handle Iconik specific error format
+        if (errorData.errors && Array.isArray(errorData.errors)) {
+          errorMessage = errorData.errors.join(', ');
+        }
+
+        // Provide user-friendly messages for common codes
+        if (response.status === 401) {
+          errorMessage = `Unauthorized (401): ${errorMessage || 'Invalid App ID or Auth Token'}`;
+        } else if (response.status === 404) {
+          errorMessage = `Not Found (404): ${errorMessage || 'Invalid App ID, Auth Token, or User Context'}`;
+        } else {
+          errorMessage = `${errorMessage} (${response.status})`;
+        }
+
         setConnectionStatus('error');
-        setConnectionMessage(`Connection failed: ${response.status} ${errorData.detail || response.statusText}`);
+        setConnectionMessage(`Connection failed: ${errorMessage}`);
       }
     } catch (error) {
       setConnectionStatus('error');
