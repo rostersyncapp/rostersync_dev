@@ -127,16 +127,64 @@ const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
 
   const handleSaveConfig = async () => {
     setConnectionStatus('testing');
-    setConnectionMessage('Testing connection to Iconik...');
+    setConnectionMessage('Connecting to Iconik...');
 
-    // Basic validation
+    // Scenario A: Login with Username/Password
+    if (iconikConfig.username && iconikConfig.password) {
+      try {
+        setConnectionMessage('Authenticating with Iconik...');
+        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://rddqcxfalrlmlvirjlca.supabase.co';
+        const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+        const response = await fetch(`${supabaseUrl}/functions/v1/iconik-proxy`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${supabaseAnonKey}`,
+          },
+          body: JSON.stringify({
+            action: 'login',
+            username: iconikConfig.username,
+            password: iconikConfig.password
+          })
+        });
+
+        const data = await response.json().catch(() => ({}));
+
+        if (response.ok && data.app_id && data.token) {
+          // Update state with credentials
+          setIconikConfig(prev => ({
+            ...prev,
+            appId: data.app_id,
+            authToken: data.token
+          }));
+
+          setConnectionStatus('success');
+          setConnectionMessage(`Login successful! App ID and Token retrieved.`);
+          return;
+        } else {
+          let errorMessage = data.detail || data.error || response.statusText;
+          if (data.upstream_data && data.upstream_data.errors) {
+            errorMessage = data.upstream_data.errors.join(', ');
+          }
+          throw new Error(errorMessage || 'Login failed');
+        }
+      } catch (error: any) {
+        setConnectionStatus('error');
+        setConnectionMessage(`Login failed: ${error.message}`);
+        return;
+      }
+    }
+
+    // Scenario B: Test existing App ID / Token
     if (!iconikConfig.appId || !iconikConfig.authToken) {
       setConnectionStatus('error');
-      setConnectionMessage('Connection failed: App ID and Auth Token are required.');
+      setConnectionMessage('Please provide Username/Password OR App ID/Auth Token.');
       return;
     }
 
     try {
+      setConnectionMessage('Verifying connection...');
       // Use Supabase Edge Function proxy to avoid CORS
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://rddqcxfalrlmlvirjlca.supabase.co';
       const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -158,10 +206,12 @@ const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
         setConnectionMessage('Connection successful! Settings saved.');
       } else {
         const errorData = await response.json().catch(() => ({}));
-        let errorMessage = errorData.detail || response.statusText;
+        let errorMessage = errorData.error || errorData.detail || response.statusText;
 
-        // Handle Iconik specific error format
-        if (errorData.errors && Array.isArray(errorData.errors)) {
+        // Handle Iconik specific error format from proxy wrapper
+        if (errorData.upstream_data && errorData.upstream_data.errors) {
+          errorMessage = errorData.upstream_data.errors.join(', ');
+        } else if (errorData.errors && Array.isArray(errorData.errors)) {
           errorMessage = errorData.errors.join(', ');
         }
 
@@ -177,9 +227,9 @@ const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
         setConnectionStatus('error');
         setConnectionMessage(`Connection failed: ${errorMessage}`);
       }
-    } catch (error) {
+    } catch (error: any) {
       setConnectionStatus('error');
-      setConnectionMessage('Connection failed: Network error or CORS issue.');
+      setConnectionMessage(`Network error: ${error.message}`);
     }
 
     // Clear success message after 5 seconds
