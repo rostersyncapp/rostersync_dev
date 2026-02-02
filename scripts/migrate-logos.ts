@@ -3,129 +3,110 @@ import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 
-// Load environment variables
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 dotenv.config();
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-    console.error('Error: Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY environment variables.');
-    console.error('Please ensure .env contains valid credentials.');
+    console.error('Error: Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY.');
     process.exit(1);
 }
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-
 const BUCKET_NAME = 'logos';
 
-async function migrateLogos() {
-    console.log('Starting logo migration...');
+async function migrateLogos(league: string) {
+    console.log(`\n--- Migrating Logos for League: ${league} ---`);
 
-    // 1. Fetch all teams
-    const { data: teams, error: fetchError } = await supabase
+    // 1. Fetch teams for the league
+    const { data: teams, error } = await supabase
         .from('teams')
-        .select('*');
+        .select('id, name, logo_url')
+        .eq('league', league);
 
-    if (fetchError) {
-        console.error('Error fetching teams:', fetchError);
+    if (error) {
+        console.error('Error fetching teams:', error.message);
         return;
     }
 
     console.log(`Found ${teams.length} teams.`);
 
-    let updatedCount = 0;
-    let errorCount = 0;
-    let skippedCount = 0;
+    const storagePrefix = `${SUPABASE_URL}/storage/v1/object/public/${BUCKET_NAME}`;
 
     for (const team of teams) {
-        const { id, name, league, logo_url } = team;
-
-        // Skip if no logo or already internal
-        if (!logo_url) {
-            console.log(`[SKIP] ${name}: No logo URL.`);
-            skippedCount++;
+        if (!team.logo_url) {
+            console.log(`[${team.name}] Skipping: No logo URL.`);
             continue;
         }
 
-        if (logo_url.includes('supabase.co') && logo_url.includes(`/storage/v1/object/public/${BUCKET_NAME}/`)) {
-            // Already migrated
-            console.log(`[SKIP] ${name}: Already migrated.`);
-            skippedCount++;
+        if (team.logo_url.startsWith(storagePrefix)) {
+            console.log(`[${team.name}] Skipping: Already in storage.`);
             continue;
         }
 
-        // Skip if not an external URL we want to migrate (e.g. only ESPN?)
-        // For now, migrate anything not in our bucket.
-
-        console.log(`[PROCESSING] ${name} (${league})...`);
+        console.log(`[${team.name}] Migrating: ${team.logo_url}`);
 
         try {
-            // 2. Download the image
-            const response = await fetch(logo_url);
-            if (!response.ok) {
-                throw new Error(`Failed to fetch image: ${response.statusText}`);
-            }
-
-            const arrayBuffer = await response.arrayBuffer();
+            // 2. Download logo
+            const response = await fetch(team.logo_url);
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const blob = await response.blob();
+            const arrayBuffer = await blob.arrayBuffer();
             const buffer = Buffer.from(arrayBuffer);
 
-            // Determine file extension
-            const contentType = response.headers.get('content-type');
-            let ext = 'png';
-            if (contentType === 'image/jpeg') ext = 'jpg';
-            else if (contentType === 'image/svg+xml') ext = 'svg';
+            // Determine extension
+            let ext = path.extname(new URL(team.logo_url).pathname) || '.png';
+            if (ext.includes('?')) ext = ext.split('?')[0];
 
-            // Sanitized filename: league/team_slug.ext
-            const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-            const filePath = `${league}/${slug}.${ext}`;
+            const fileName = `${team.name.toLowerCase().replace(/[^a-z0-9]/g, '-')}${ext}`;
+            const storagePath = `${league}/${fileName}`;
 
-            // 3. Upload to Storage
-            const { error: uploadError } = await supabase
-                .storage
+            // 3. Upload to Supabase Storage
+            const { data: uploadData, error: uploadError } = await supabase.storage
                 .from(BUCKET_NAME)
-                .upload(filePath, buffer, {
-                    contentType: contentType || 'image/png',
+                .upload(storagePath, buffer, {
+                    contentType: blob.type,
                     upsert: true
                 });
 
             if (uploadError) {
-                throw new Error(`Upload failed: ${uploadError.message}`);
+                console.error(`[${team.name}] Upload failed:`, uploadError.message);
+                continue;
             }
 
-            // 4. Get Public URL
-            const { data: publicUrlData } = supabase
-                .storage
-                .from(BUCKET_NAME)
-                .getPublicUrl(filePath);
+            const newUrl = `${storagePrefix}/${storagePath}`;
+            console.log(`[${team.name}] Uploaded successfully: ${newUrl}`);
 
-            const newUrl = publicUrlData.publicUrl;
-
-            // 5. Update Database
+            // 4. Update Database
             const { error: updateError } = await supabase
                 .from('teams')
                 .update({ logo_url: newUrl })
-                .eq('id', id);
+                .eq('id', team.id);
 
             if (updateError) {
-                throw new Error(`Database update failed: ${updateError.message}`);
+                console.error(`[${team.name}] DB update failed:`, updateError.message);
+            } else {
+                console.log(`[${team.name}] DB updated successfully.`);
             }
 
-            console.log(`[SUCCESS] ${name}: Updated to ${newUrl}`);
-            updatedCount++;
-
         } catch (err: any) {
-            console.error(`[ERROR] ${name}:`, err.message);
-            errorCount++;
+            console.error(`[${team.name}] Migration failed:`, err.message);
         }
     }
 
-    console.log('--------------------------------------------------');
-    console.log(`Migration complete.`);
-    console.log(`Updated: ${updatedCount}`);
-    console.log(`Skipped: ${skippedCount}`);
-    console.log(`Errors:  ${errorCount}`);
+    console.log('\n--- Migration Complete ---');
 }
 
-migrateLogos().catch(console.error);
+const league = process.argv[2];
+if (!league) {
+    console.error('Please specify a league (e.g. nfl, ita.1)');
+    process.exit(1);
+}
+
+migrateLogos(league).catch(console.error);
