@@ -114,6 +114,60 @@ const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
     setIsLoadingActivities(false);
   };
 
+  // Iconik Configuration State
+  const [iconikConfig, setIconikConfig] = useState({
+    username: '',
+    password: '',
+    appId: '',
+    authToken: '',
+    fieldLabel: ''
+  });
+  const [connectionStatus, setConnectionStatus] = useState<'idle' | 'testing' | 'success' | 'error'>('idle');
+  const [connectionMessage, setConnectionMessage] = useState('');
+
+  const handleSaveConfig = async () => {
+    setConnectionStatus('testing');
+    setConnectionMessage('Testing connection to Iconik...');
+
+    // Basic validation
+    if (!iconikConfig.appId || !iconikConfig.authToken) {
+      setConnectionStatus('error');
+      setConnectionMessage('Connection failed: App ID and Auth Token are required.');
+      return;
+    }
+
+    try {
+      const response = await fetch('https://app.iconik.io/API/users/current/', {
+        method: 'GET',
+        headers: {
+          'App-ID': iconikConfig.appId,
+          'Auth-Token': iconikConfig.authToken,
+          'Accept': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        setConnectionStatus('success');
+        setConnectionMessage('Connection successful! Settings saved.');
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        setConnectionStatus('error');
+        setConnectionMessage(`Connection failed: ${response.status} ${errorData.detail || response.statusText}`);
+      }
+    } catch (error) {
+      setConnectionStatus('error');
+      setConnectionMessage('Connection failed: Network error or CORS issue.');
+    }
+
+    // Clear success message after 5 seconds
+    setTimeout(() => {
+      if (connectionStatus === 'success') {
+        setConnectionStatus('idle');
+        setConnectionMessage('');
+      }
+    }, 5000);
+  };
+
   // ROI Stats
   const totalRosters = rosters.length;
   const totalAthletes = rosters.reduce((acc, r) => acc + r.athleteCount, 0);
@@ -502,28 +556,82 @@ const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                       <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Username</label>
-                      <input type="text" placeholder="Enter Username" className="w-full p-3.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-medium focus:ring-2 focus:ring-[#5B5FFF]/20 focus:border-[#5B5FFF] outline-none transition-all" />
+                      <input
+                        type="text"
+                        placeholder="Enter Username"
+                        value={iconikConfig.username}
+                        onChange={(e) => setIconikConfig(prev => ({ ...prev, username: e.target.value }))}
+                        className="w-full p-3.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-medium focus:ring-2 focus:ring-[#5B5FFF]/20 focus:border-[#5B5FFF] outline-none transition-all"
+                      />
                     </div>
                     <div className="space-y-2">
                       <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Password</label>
-                      <input type="password" placeholder="Enter Password" className="w-full p-3.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-medium focus:ring-2 focus:ring-[#5B5FFF]/20 focus:border-[#5B5FFF] outline-none transition-all" />
+                      <input
+                        type="password"
+                        placeholder="Enter Password"
+                        value={iconikConfig.password}
+                        onChange={(e) => setIconikConfig(prev => ({ ...prev, password: e.target.value }))}
+                        className="w-full p-3.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-medium focus:ring-2 focus:ring-[#5B5FFF]/20 focus:border-[#5B5FFF] outline-none transition-all"
+                      />
                     </div>
                     <div className="space-y-2">
                       <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Application ID</label>
-                      <input type="text" placeholder="Enter App ID" className="w-full p-3.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-medium focus:ring-2 focus:ring-[#5B5FFF]/20 focus:border-[#5B5FFF] outline-none transition-all" />
+                      <input
+                        type="text"
+                        placeholder="Enter App ID"
+                        value={iconikConfig.appId}
+                        onChange={(e) => setIconikConfig(prev => ({ ...prev, appId: e.target.value }))}
+                        className="w-full p-3.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-medium focus:ring-2 focus:ring-[#5B5FFF]/20 focus:border-[#5B5FFF] outline-none transition-all"
+                      />
                     </div>
                     <div className="space-y-2">
                       <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Auth Token</label>
-                      <input type="password" placeholder="Enter Auth Token" className="w-full p-3.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-medium focus:ring-2 focus:ring-[#5B5FFF]/20 focus:border-[#5B5FFF] outline-none transition-all" />
+                      <input
+                        type="password"
+                        placeholder="Enter Auth Token"
+                        value={iconikConfig.authToken}
+                        onChange={(e) => setIconikConfig(prev => ({ ...prev, authToken: e.target.value }))}
+                        className="w-full p-3.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-medium focus:ring-2 focus:ring-[#5B5FFF]/20 focus:border-[#5B5FFF] outline-none transition-all"
+                      />
                     </div>
                     <div className="space-y-2">
                       <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Field Label</label>
-                      <input type="text" placeholder="Enter Field Label" className="w-full p-3.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-medium focus:ring-2 focus:ring-[#5B5FFF]/20 focus:border-[#5B5FFF] outline-none transition-all" />
+                      <input
+                        type="text"
+                        placeholder="Enter Field Label"
+                        value={iconikConfig.fieldLabel}
+                        onChange={(e) => setIconikConfig(prev => ({ ...prev, fieldLabel: e.target.value }))}
+                        className="w-full p-3.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-medium focus:ring-2 focus:ring-[#5B5FFF]/20 focus:border-[#5B5FFF] outline-none transition-all"
+                      />
                     </div>
                   </div>
-                  <div className="mt-8 flex justify-end">
-                    <button className="px-8 py-3 bg-[#5B5FFF] text-white font-bold rounded-xl hover:bg-[#4a4eff] transition-all shadow-lg shadow-[#5B5FFF]/20 hover:scale-[1.02] active:scale-[0.98]">
-                      Save Configuration
+                  <div className="mt-8 flex items-center justify-between">
+                    <div className="flex-1 mr-4">
+                      {connectionStatus === 'error' && (
+                        <div className="flex items-center gap-2 text-red-500 text-sm font-bold animate-pulse">
+                          <AlertCircle size={16} />
+                          {connectionMessage}
+                        </div>
+                      )}
+                      {connectionStatus === 'success' && (
+                        <div className="flex items-center gap-2 text-emerald-500 text-sm font-bold">
+                          <CheckCircle2 size={16} />
+                          {connectionMessage}
+                        </div>
+                      )}
+                      {connectionStatus === 'testing' && (
+                        <div className="flex items-center gap-2 text-[#5B5FFF] text-sm font-bold">
+                          <Loader2 size={16} className="animate-spin" />
+                          Testing connection...
+                        </div>
+                      )}
+                    </div>
+                    <button
+                      onClick={handleSaveConfig}
+                      disabled={connectionStatus === 'testing'}
+                      className="px-8 py-3 bg-[#5B5FFF] text-white font-bold rounded-xl hover:bg-[#4a4eff] transition-all shadow-lg shadow-[#5B5FFF]/20 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-2"
+                    >
+                      {connectionStatus === 'testing' ? 'Testing...' : 'Save Configuration'}
                     </button>
                   </div>
                 </div>
