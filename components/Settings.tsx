@@ -137,7 +137,7 @@ const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
     }
 
     try {
-      const response = await fetch('https://app.iconik.io/API/users/current/', {
+      const response = await fetch('https://app.iconik.io/API/v1/users/current/', {
         method: 'GET',
         headers: {
           'App-ID': iconikConfig.appId,
