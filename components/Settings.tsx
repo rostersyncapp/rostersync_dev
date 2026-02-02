@@ -30,7 +30,8 @@ import {
   DollarSign,
   Users,
   Info,
-  AlertCircle
+  AlertCircle,
+  Database
 } from 'lucide-react';
 
 interface Props {
@@ -65,7 +66,7 @@ const formatTimeAgo = (dateString: string) => {
 const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
   const { user } = useUser();
   const { getToken } = useAuth();
-  const [activeTab, setActiveTab] = useState<'subscription' | 'roi' | 'activity'>('subscription');
+  const [activeTab, setActiveTab] = useState<'subscription' | 'roi' | 'activity' | 'api'>('subscription');
   const [activities, setActivities] = useState<any[]>([]);
   const [isLoadingActivities, setIsLoadingActivities] = useState(false);
 
@@ -143,6 +144,10 @@ const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
           <button onClick={() => setActiveTab('roi')} className={`w-full flex items-center justify-between px-5 py-3.5 rounded-lg text-base font-bold transition-all ${activeTab === 'roi' ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF]' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
             <div className="flex items-center gap-4"><BarChart4 size={20} /> Performance ROI</div>
             {activeTab === 'roi' && <ChevronRight size={18} />}
+          </button>
+          <button onClick={() => setActiveTab('api')} className={`w-full flex items-center justify-between px-5 py-3.5 rounded-lg text-base font-bold transition-all ${activeTab === 'api' ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF]' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
+            <div className="flex items-center gap-4"><Database size={20} /> MAM/DAM API</div>
+            {activeTab === 'api' && <ChevronRight size={18} />}
           </button>
         </aside>
 
@@ -473,10 +478,57 @@ const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
                 </div>
               </div>
             </div>
+            </div>
           )}
-        </div>
+
+        {activeTab === 'api' && (
+          <div className="space-y-8">
+            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-10 shadow-sm">
+              <h3 className="text-2xl font-extrabold flex items-center gap-4 text-gray-900 dark:text-white mb-8">
+                <Database size={24} className="text-[#5B5FFF]" /> MAM/DAM Configuration
+              </h3>
+
+              <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700 p-8">
+                <div className="flex items-center gap-4 mb-8">
+                  <div className="w-14 h-14 rounded-xl bg-[#5B5FFF]/10 flex items-center justify-center shrink-0">
+                    <Database size={28} className="text-[#5B5FFF]" />
+                  </div>
+                  <div>
+                    <h4 className="text-lg font-black text-gray-900 dark:text-white">Iconik</h4>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Configure connection to Iconik Media Gathering.</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Application ID</label>
+                    <input type="text" placeholder="Enter App ID" className="w-full p-3.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-medium focus:ring-2 focus:ring-[#5B5FFF]/20 focus:border-[#5B5FFF] outline-none transition-all" />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Auth Token</label>
+                    <input type="password" placeholder="Enter Auth Token" className="w-full p-3.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-medium focus:ring-2 focus:ring-[#5B5FFF]/20 focus:border-[#5B5FFF] outline-none transition-all" />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Username</label>
+                    <input type="text" placeholder="Enter Username" className="w-full p-3.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-medium focus:ring-2 focus:ring-[#5B5FFF]/20 focus:border-[#5B5FFF] outline-none transition-all" />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Password</label>
+                    <input type="password" placeholder="Enter Password" className="w-full p-3.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-medium focus:ring-2 focus:ring-[#5B5FFF]/20 focus:border-[#5B5FFF] outline-none transition-all" />
+                  </div>
+                </div>
+                <div className="mt-8 flex justify-end">
+                  <button className="px-8 py-3 bg-[#5B5FFF] text-white font-bold rounded-xl hover:bg-[#4a4eff] transition-all shadow-lg shadow-[#5B5FFF]/20 hover:scale-[1.02] active:scale-[0.98]">
+                    Save Configuration
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
+    </div >
   );
 };
 
