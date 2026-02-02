@@ -26,7 +26,8 @@ serve(async (req) => {
 
         console.log(`Proxying request to Iconik for AppID: ${appId.substring(0, 5)}...`);
 
-        const iconikUrl = 'https://app.iconik.io/API/v1/users/current/';
+        // Removed /v1/ prefix as it seems to cause 404s for some tenants
+        const iconikUrl = 'https://app.iconik.io/API/users/current/';
 
         // Explicitly construct headers object
         const headers = new Headers();
