@@ -418,7 +418,7 @@ export async function processRosterRawText(
   // 3. Input Tokens (simpler prompt)
   const FULLY_SEEDED_LEAGUES = [
     'nba', 'wnba', 'nfl', 'nhl', 'mlb',
-    'premier-league', 'la-liga', 'bundesliga', 'serie-a', 'ligue-1', 'eredivisie', 'liga-mx', 'mls', 'nwsl'
+    'premier-league', 'la-liga', 'bundesliga', 'serie-a', 'ligue-1', 'eredivisie', 'liga-mx', 'mls',
   ];
 
   const isMajorLeague = league && FULLY_SEEDED_LEAGUES.includes(league);
@@ -451,8 +451,9 @@ export async function processRosterRawText(
     - Identification Strategy:
       * Use the 'googleSearch' tool ONLY if the team name is not obvious from the text.
       * Look at the player names. If you see "Sacramento" or "River Cats" - this is ALWAYS the "Sacramento River Cats" baseball team.
-      * If you see "Sydney Leroux", "Christen Press", "Alyssa Thompson", or "Sarah Gorden" - this is ALWAYS "Angel City FC" (NWSL).
-      * If you see "Alex Morgan", "Marta", "Trinity Rodman", or "Rose Lavelle" - this is a professional women's soccer team (likely NWSL).
+      * If you see "Sydney Leroux", "Christen Press", "Alyssa Thompson", "Sarah Gorden", "Gisele Thompson", "Claire Emslie", or "M.A. Vignola" - this is ALWAYS "Angel City FC" (NWSL).
+      * If you see "Naomi Girma", "Jaedyn Shaw", "Kailen Sheridan", "Maria Sanchez", "Alex Morgan", "Abby Dahlkemper", or "Delphine Cascarino" - this is ALWAYS "San Diego Wave FC" (NWSL).
+      * If you see "Marta", "Trinity Rodman", or "Rose Lavelle" - this is a professional women's soccer team (likely NWSL).
       * MANDATORY: Do not return "Unknown Team" if "Angel City", "ACFC", "Gotham", "Thorns", "Wave", "Spirit", "Sacramento", or "River Cats" appears in the player names or header.
       * IGNORE Major League affiliates (e.g. "Affiliate of the Giants"). Always pick the MiLB club name.
     - MiLB VALIDATION LIST (Reference these EXACT names):
@@ -610,7 +611,7 @@ export async function processRosterRawText(
   const cleanStr = (val: any) => {
     if (typeof val !== 'string') return val;
     const low = val.toLowerCase().trim();
-    if (low === 'unknown' || low === 'unknown team' || low === 'null' || low === 'undefined' || low === 'unk' || low === 'logourl') return undefined;
+    if (low === 'unknown' || low === 'unknown team' || low === 'null' || low === 'undefined' || low === 'unk' || low === 'logourl' || low === 'string' || low === 'none' || low.includes('placeholder')) return undefined;
     return val;
   };
 
