@@ -471,7 +471,7 @@ export const Dashboard: React.FC<Props> = ({
                     <h4 className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-400 font-mono"><Layers size={14} className="text-[#5B5FFF]" /> Asset Management (MAM)</h4>
                     <div className="grid grid-cols-1 gap-3">
                       <ExportItem icon={<Layers size={20} />} title="Iconik Metadata" desc="JSON field-mapping definition." onClick={() => handleExport('ICONIK_JSON')} />
-                      <ExportItem icon={<Cloud size={20} />} title="CatDV Schema" desc="Semicolon delimited metadata." onClick={() => handleExport('CATDV_CSV')} />
+                      <ExportItem icon={<Cloud size={20} />} title="CatDV Schema" desc="JSON Picklist Definition." onClick={() => handleExport('CATDV_JSON')} />
                     </div>
                   </div>
                 </div>

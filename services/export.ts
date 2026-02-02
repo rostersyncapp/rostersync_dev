@@ -2,8 +2,8 @@
 import { Athlete, ExportFormat, SubscriptionTier } from "../types.ts";
 
 export function generateExport(
-  athletes: Athlete[], 
-  format: ExportFormat, 
+  athletes: Athlete[],
+  format: ExportFormat,
   teamName: string,
   language: string = 'EN',
   tier: SubscriptionTier = 'BASIC'
@@ -33,7 +33,7 @@ export function generateExport(
         filename: `${safeTeam}_roster_${langSuffix}_${timestamp}.csv`,
         mimeType: 'text/csv'
       };
-    
+
     case 'ICONIK_JSON':
       const slugTeam = teamName.replace(/\s+/g, '-').toLowerCase();
       const iconikMetadata = {
@@ -60,7 +60,7 @@ export function generateExport(
         "use_as_facet": true,
         "language": language
       };
-      
+
       return {
         content: JSON.stringify(iconikMetadata, null, 2),
         filename: `${safeTeam}_iconik_${langSuffix}_${timestamp}.json`,
@@ -86,14 +86,14 @@ export function generateExport(
     case 'ROSS_XP_CSV':
       const rossXPHeaders = ["ID", "NAME_CAPS", "JERSEY", "POS", "PHONETIC", "HEADSHOT"];
       const rossXPRows = athletes.map(a => [
-        a.jerseyNumber || a.id.split('-')[1] || "0", 
+        a.jerseyNumber || a.id.split('-')[1] || "0",
         a.displayNameSafe.toUpperCase(),
         a.jerseyNumber,
         a.position.toUpperCase(),
         a.phoneticSimplified || "",
         `C:\\Rosters\\Heads\\${a.jerseyNumber}.tga`
       ].map(val => `"${val}"`).join(","));
-      
+
       return {
         content: [rossXPHeaders.join(","), ...rossXPRows].join("\n"),
         filename: `${safeTeam}_ross_xpression_${langSuffix}_${timestamp}.csv`,
@@ -110,7 +110,7 @@ export function generateExport(
           handle: a.socialHandle || ""
         };
         return [
-          a.jerseyNumber, 
+          a.jerseyNumber,
           a.jerseyNumber,
           a.displayNameSafe.toUpperCase(),
           a.position.toUpperCase(),
@@ -167,7 +167,7 @@ export function generateExport(
         a.fullName,
         `${a.position} | #${a.jerseyNumber}`,
         a.bioStats || `${a.fullName} is an ${a.nilStatus} athlete for ${teamName}.`,
-        "" 
+        ""
       ].map(val => `"${val}"`).join(","));
 
       return {
@@ -176,21 +176,24 @@ export function generateExport(
         mimeType: 'text/csv'
       };
 
-    case 'CATDV_CSV':
-      const catdvHeaders = "id;name;display_name;jersey;position;tags;lang";
-      const catdvRows = athletes.map(a => [
-        a.id,
-        a.fullName,
-        a.displayNameSafe,
-        a.jerseyNumber,
-        a.position,
-        `${a.nilStatus};${a.seasonYear}`,
-        language
-      ].join(";"));
+    case 'CATDV_JSON':
+      const catdvData = {
+        "fieldGroupID": 1,
+        "memberOf": "clip",
+        "identifier": "player.names",
+        "name": "Player Names",
+        "fieldType": "picklist",
+        "values": athletes.map(a => a.fullName),
+        "isExtensible": true,
+        "isKeptSorted": true,
+        "savesValues": false,
+        "isLocked": false
+      };
+
       return {
-        content: [catdvHeaders, ...catdvRows].join("\n"),
-        filename: `${safeTeam}_catdv_${langSuffix}_${timestamp}.csv`,
-        mimeType: 'text/csv'
+        content: JSON.stringify(catdvData, null, 2),
+        filename: `${safeTeam}_catdv_${langSuffix}_${timestamp}.json`,
+        mimeType: 'application/json'
       };
 
     case 'ROSS_XML':
@@ -209,7 +212,7 @@ export function generateExport(
         filename: `${safeTeam}_ross_${langSuffix}_${timestamp}.xml`,
         mimeType: 'application/xml'
       };
-      
+
     case 'VIZRT_JSON':
       const vizrtData = {
         team: teamName,
