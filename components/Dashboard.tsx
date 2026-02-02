@@ -199,10 +199,14 @@ export const Dashboard: React.FC<Props> = ({
 
       const uniqueNames = Array.from(new Set(selectedRoster.rosterData.map((a: Athlete) => a.fullName).filter(Boolean)));
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
       const response = await fetch(`${supabaseUrl}/functions/v1/iconik-proxy`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${supabaseAnonKey}`,
+        },
         body: JSON.stringify({
           action: 'sync_field_options',
           appId: config.appId,
