@@ -212,9 +212,10 @@ export const Dashboard: React.FC<Props> = ({
         })
       });
 
+      const data = await response.json().catch(() => null);
+
       if (!response.ok) {
-        const err = await response.json();
-        throw new Error(err.error || response.statusText);
+        throw new Error(data?.error || response.statusText || 'Sync request failed');
       }
 
       setIsSyncIconikSuccess(true);
