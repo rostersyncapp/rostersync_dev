@@ -149,9 +149,11 @@ const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
         });
 
         if (response.ok) {
+          const userData = await response.json().catch(() => ({}));
+          const userEmail = userData.email || userData.first_name ? `${userData.first_name} ${userData.last_name} (${userData.email})` : 'User';
+
           setConnectionStatus('success');
-          setConnectionMessage('Connection successful! Settings saved.');
-          setTimeout(() => setConnectionMessage(''), 5000);
+          setConnectionMessage(`Connected successfully as ${userEmail}`);
           return;
         }
 
@@ -192,7 +194,6 @@ const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
 
           setConnectionStatus('success');
           setConnectionMessage(`Login successful! Token retrieved.`);
-          setTimeout(() => setConnectionMessage(''), 5000);
           return;
         }
 
