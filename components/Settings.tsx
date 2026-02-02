@@ -129,13 +129,43 @@ const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
     setConnectionStatus('testing');
     setConnectionMessage('Connecting to Iconik...');
 
-    // Scenario A: Login with Username/Password
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://rddqcxfalrlmlvirjlca.supabase.co';
+    const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+    // Scenario A: Test existing App ID / Token (Prioritize this if provided)
+    if (iconikConfig.appId && iconikConfig.authToken) {
+      try {
+        setConnectionMessage('Verifying connection...');
+        const response = await fetch(`${supabaseUrl}/functions/v1/iconik-proxy`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${supabaseAnonKey}`,
+          },
+          body: JSON.stringify({
+            appId: iconikConfig.appId,
+            authToken: iconikConfig.authToken
+          })
+        });
+
+        if (response.ok) {
+          setConnectionStatus('success');
+          setConnectionMessage('Connection successful! Settings saved.');
+          setTimeout(() => setConnectionMessage(''), 5000);
+          return;
+        }
+
+        // If verification fails, log it and continue to login attempt
+        console.log('Token verification failed, attempting login flow...');
+      } catch (error) {
+        console.log('Token verification network error, attempting login flow...');
+      }
+    }
+
+    // Scenario B: Login with Username/Password
     if (iconikConfig.username && iconikConfig.password) {
       try {
         setConnectionMessage('Authenticating with Iconik...');
-        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://rddqcxfalrlmlvirjlca.supabase.co';
-        const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
         const response = await fetch(`${supabaseUrl}/functions/v1/iconik-proxy`, {
           method: 'POST',
           headers: {
@@ -146,34 +176,33 @@ const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
             action: 'login',
             username: iconikConfig.username,
             password: iconikConfig.password,
-            appId: iconikConfig.appId // Required for login
+            appId: iconikConfig.appId
           })
         });
 
         const data = await response.json().catch(() => ({}));
 
-        // Iconik likely returns { token: "..." } or { auth_token: "..." } but maybe not app_id
         if (response.ok && (data.token || data.auth_token)) {
-          // Update state with credentials
           const newToken = data.token || data.auth_token;
           setIconikConfig(prev => ({
             ...prev,
-            appId: iconikConfig.appId, // We already have this from input
+            appId: iconikConfig.appId,
             authToken: newToken
           }));
 
           setConnectionStatus('success');
           setConnectionMessage(`Login successful! Token retrieved.`);
+          setTimeout(() => setConnectionMessage(''), 5000);
           return;
-        } else {
-          let errorMessage = data.detail || data.error || response.statusText;
-          if (data.upstream_data && data.upstream_data.errors) {
-            errorMessage = data.upstream_data.errors.join(', ');
-          }
-          // DEBUG: Show what keys we actually got
-          const receivedKeys = Object.keys(data).join(', ');
-          throw new Error(errorMessage || `Login failed: Invalid response format. Received keys: [${receivedKeys}]`);
         }
+
+        let errorMessage = data.detail || data.error || response.statusText;
+        if (data.upstream_data && data.upstream_data.errors) {
+          errorMessage = data.upstream_data.errors.join(', ');
+        }
+        const receivedKeys = Object.keys(data).join(', ');
+        throw new Error(errorMessage || `Login failed. Received keys: [${receivedKeys}]`);
+
       } catch (error: any) {
         setConnectionStatus('error');
         setConnectionMessage(`Login failed: ${error.message}`);
@@ -181,69 +210,9 @@ const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
       }
     }
 
-    // Scenario B: Test existing App ID / Token
-    if (!iconikConfig.appId || !iconikConfig.authToken) {
-      setConnectionStatus('error');
-      setConnectionMessage('Please provide Username/Password OR App ID/Auth Token.');
-      return;
-    }
-
-    try {
-      setConnectionMessage('Verifying connection...');
-      // Use Supabase Edge Function proxy to avoid CORS
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://rddqcxfalrlmlvirjlca.supabase.co';
-      const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-      const response = await fetch(`${supabaseUrl}/functions/v1/iconik-proxy`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${supabaseAnonKey}`,
-        },
-        body: JSON.stringify({
-          appId: iconikConfig.appId,
-          authToken: iconikConfig.authToken
-        })
-      });
-
-      if (response.ok) {
-        setConnectionStatus('success');
-        setConnectionMessage('Connection successful! Settings saved.');
-      } else {
-        const errorData = await response.json().catch(() => ({}));
-        let errorMessage = errorData.error || errorData.detail || response.statusText;
-
-        // Handle Iconik specific error format from proxy wrapper
-        if (errorData.upstream_data && errorData.upstream_data.errors) {
-          errorMessage = errorData.upstream_data.errors.join(', ');
-        } else if (errorData.errors && Array.isArray(errorData.errors)) {
-          errorMessage = errorData.errors.join(', ');
-        }
-
-        // Provide user-friendly messages for common codes
-        if (response.status === 401) {
-          errorMessage = `Unauthorized (401): ${errorMessage || 'Invalid App ID or Auth Token'}`;
-        } else if (response.status === 404) {
-          errorMessage = `Not Found (404): ${errorMessage || 'Invalid App ID, Auth Token, or User Context'}`;
-        } else {
-          errorMessage = `${errorMessage} (${response.status})`;
-        }
-
-        setConnectionStatus('error');
-        setConnectionMessage(`Connection failed: ${errorMessage}`);
-      }
-    } catch (error: any) {
-      setConnectionStatus('error');
-      setConnectionMessage(`Network error: ${error.message}`);
-    }
-
-    // Clear success message after 5 seconds
-    setTimeout(() => {
-      if (connectionStatus === 'success') {
-        setConnectionStatus('idle');
-        setConnectionMessage('');
-      }
-    }, 5000);
+    // Fallback if no scenarios matched or succeeded
+    setConnectionStatus('error');
+    setConnectionMessage('Connection failed. Please check your credentials.');
   };
 
   // ROI Stats
