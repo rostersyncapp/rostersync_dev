@@ -12,8 +12,55 @@ serve(async (req) => {
     }
 
     try {
-        const { appId, authToken } = await req.json()
+        const { action, username, password, appId, authToken } = await req.json()
 
+        if (action === 'login') {
+            if (!username || !password) {
+                return new Response(
+                    JSON.stringify({ error: 'Missing username or password' }),
+                    {
+                        status: 400,
+                        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                    }
+                )
+            }
+
+            console.log(`Proxying login request for user: ${username}`);
+            const response = await fetch('https://app.iconik.io/API/v1/auth/simple/login/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify({ email: username, password: password, app_name: 'RosterSync' })
+            });
+
+            const data = await response.json().catch(e => ({ error: 'Failed to parse JSON', details: e.message }));
+
+            if (!response.ok) {
+                return new Response(
+                    JSON.stringify({
+                        error: 'Iconik Login Failed',
+                        status: response.status,
+                        upstream_data: data
+                    }),
+                    {
+                        status: response.status,
+                        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                    }
+                )
+            }
+
+            return new Response(
+                JSON.stringify(data),
+                {
+                    status: 200,
+                    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                }
+            )
+        }
+
+        // Default: Check Connection (User Info)
         if (!appId || !authToken) {
             return new Response(
                 JSON.stringify({ error: 'Missing appId or authToken' }),
@@ -25,11 +72,7 @@ serve(async (req) => {
         }
 
         console.log(`Proxying request to Iconik for AppID: ${appId.substring(0, 5)}...`);
-
-        // Removed /v1/ prefix as it seems to cause 404s for some tenants
         const iconikUrl = 'https://app.iconik.io/API/users/current/';
-
-        // Explicitly construct headers object
         const headers = new Headers();
         headers.append('App-ID', appId);
         headers.append('Auth-Token', authToken);
@@ -41,8 +84,6 @@ serve(async (req) => {
         })
 
         const data = await response.json().catch(e => ({ error: 'Failed to parse JSON', details: e.message }));
-
-        console.log(`Iconik Response Status: ${response.status}`);
 
         if (!response.ok) {
             return new Response(
