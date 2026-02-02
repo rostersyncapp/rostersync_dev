@@ -299,8 +299,21 @@ export async function saveBrandingCache(branding: BrandingCache): Promise<void> 
     return;
   }
 
-  // Do not cache Unknown entries
-  if (branding.team_name === 'Unknown Team' || branding.team_name === 'Unknown') {
+  // Do not cache Unknown or poisoned entries
+  const nameLower = branding.team_name.toLowerCase();
+  const logoLower = branding.logo_url?.toLowerCase() || '';
+  const primaryLower = branding.primary_color?.toLowerCase() || '';
+
+  const isPoisoned = nameLower === 'unknown team' || nameLower === 'unknown' || nameLower === 'unknown noc' ||
+    logoLower === 'unknown' || logoLower === 'logourl' ||
+    primaryLower === 'unknown';
+
+  if (isPoisoned) {
+    console.log('[BrandingCache] Skipping save - data is placeholder/poisoned:', {
+      team: branding.team_name,
+      logo: branding.logo_url,
+      primary: branding.primary_color
+    });
     return;
   }
 

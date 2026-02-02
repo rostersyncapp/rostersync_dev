@@ -364,7 +364,8 @@ function getSchemaForTier(tier: SubscriptionTier, isNocMode: boolean, findBrandi
     rootProperties.secondaryPantone = { type: SchemaType.STRING, description: "Secondary color Pantone code." };
     rootProperties.primaryCmyk = { type: SchemaType.STRING, description: "Primary color in CMYK format (e.g. '0, 28, 89, 0')." };
     rootProperties.secondaryCmyk = { type: SchemaType.STRING, description: "Secondary color in CMYK format." };
-    rootRequired.push("primaryColor", "secondaryColor", "logoUrl");
+    // Branding fields are optional to avoid AI placeholders like "Unknown"
+    // rootRequired.push("primaryColor", "secondaryColor", "logoUrl");
   }
 
   return {
@@ -451,14 +452,18 @@ export async function processRosterRawText(
     - Identification Strategy:
       * Use the 'googleSearch' tool ONLY if the team name is not obvious from the text.
       * Look at the player names. If you see "Sacramento" or "River Cats" - this is ALWAYS the "Sacramento River Cats" baseball team.
-      * MANDATORY: Do not return "Unknown Team" if "River Cats" or "Sacramento" appears in the player names or header.
+      * If you see "Sydney Leroux", "Christen Press", "Alyssa Thompson", or "Sarah Gorden" - this is ALWAYS "Angel City FC" (NWSL).
+      * If you see "Alex Morgan", "Marta", "Trinity Rodman", or "Rose Lavelle" - this is a professional women's soccer team (likely NWSL).
+      * MANDATORY: Do not return "Unknown Team" if "Angel City", "ACFC", "Gotham", "Thorns", "Wave", "Spirit", "Sacramento", or "River Cats" appears in the player names or header.
       * IGNORE Major League affiliates (e.g. "Affiliate of the Giants"). Always pick the MiLB club name.
     - MiLB VALIDATION LIST (Reference these EXACT names):
       [Buffalo Bisons, Charlotte Knights, Columbus Clippers, Durham Bulls, Gwinnett Stripers, Indianapolis Indians, Iowa Cubs, Jacksonville Jumbo Shrimp, Lehigh Valley IronPigs, Louisville Bats, Memphis Redbirds, Nashville Sounds, Norfolk Tides, Omaha Storm Chasers, Rochester Red Wings, Scranton/Wilkes-Barre RailRiders, St. Paul Saints, Syracuse Mets, Toledo Mud Hens, Worcester Red Sox, Albuquerque Isotopes, El Paso Chihuahuas, Las Vegas Aviators, Oklahoma City Comets, Reno Aces, Round Rock Express, Sacramento River Cats, Salt Lake Bees, Sugar Land Space Cowboys, Tacoma Rainiers]
+    - NWSL VALIDATION LIST (Reference these EXACT names):
+      [Angel City FC, Bay FC, Boston Legacy FC, Chicago Stars FC, Denver Summit FC, Houston Dash, Kansas City Current, NJ/NY Gotham FC, North Carolina Courage, Orlando Pride, Portland Thorns FC, Racing Louisville FC, San Diego Wave FC, Seattle Reign FC, Utah Royals, Washington Spirit]
     
     - SEARCH STRATEGY:
       * If unknown, pick 3 athletes. Search Google for: "{Name 1}" "{Name 2}" "{Name 3}" roster.
-      * Pinpoint the specific MiLB team. 
+      * Pinpoint the specific professional team (MiLB, NWSL, USL, MLS, etc.). 
       * Once identified, STOP searching. Do NOT search for logos or colors.
     - VALIDATION: Ensure at least 3 names from the input match the identified team's official roster.
     - DO NOT return "Unknown Team" without attempting a player-based search.
@@ -600,6 +605,23 @@ export async function processRosterRawText(
       };
     });
     console.log(`[Gemini] Normalized ${parsedResult.athletes.length} athletes. Sample:`, parsedResult.athletes[0]);
+  }
+
+  // ROBUSTNESS FIX: Normalize root branding fields to handle "Unknown" or placeholder strings from AI
+  const cleanStr = (val: any) => {
+    if (typeof val !== 'string') return val;
+    const low = val.toLowerCase().trim();
+    if (low === 'unknown' || low === 'unknown team' || low === 'null' || low === 'undefined' || low === 'unk' || low === 'logourl') return undefined;
+    return val;
+  };
+
+  if (parsedResult) {
+    const keysToClean = ['teamName', 'logoUrl', 'primaryColor', 'secondaryColor', 'abbreviation', 'conference', 'sport'];
+    keysToClean.forEach(key => {
+      if (typeof parsedResult[key] === 'string') {
+        parsedResult[key] = cleanStr(parsedResult[key]);
+      }
+    });
   }
 
   // FAILSAFE: If AI returns empty athletes list (common when search tool distracts it), retry without search
