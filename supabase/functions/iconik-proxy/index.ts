@@ -112,62 +112,34 @@ serve(async (req) => {
                 'Accept': 'application/json'
             };
 
-            // 1. Try Direct Access first (Most common case where Name = ID)
+            // 1. Try Direct Access (Strict usage of Field Label as ID per user request)
             let getUrl = `https://app.iconik.io/API/metadata/v1/fields/${fieldName}/`;
-            console.log(`Attempting Direct Access: ${getUrl}`);
             let getRes = await fetch(getUrl, { method: 'GET', headers });
             let fieldData = null;
-            let getErrText = ''; // Declare here to be accessible later
 
             if (getRes.ok) {
                 console.log(`Direct access successful for '${fieldName}'`);
                 fieldData = await getRes.json();
             } else {
-                getErrText = await getRes.text();
+                const getErrText = await getRes.text();
                 console.log(`Direct access failed. Status: ${getRes.status}. Response: ${getErrText}`);
 
-                console.log(`Trying search by name/label...`);
-                // 2. If Direct Access fails (e.g. 404 because user provided Label, not Name), try Search
-                const searchUrl = `https://app.iconik.io/API/metadata/v1/fields/?name=${encodeURIComponent(fieldName)}`;
-                const searchRes = await fetch(searchUrl, { method: 'GET', headers });
+                // ABORTING Fallback Search to strictly follow user request:
+                // "we need to use https://app.iconik.io/API/metadata/v1/fields/{field_name}/"
+                // "{field_name} needs to come from the saved FIELD LABEL"
 
-                if (!searchRes.ok) {
-                    const errText = await searchRes.text();
-                    console.log(`Search failed. Status: ${searchRes.status}. Response: ${errText}`);
-                    return new Response(
-                        JSON.stringify({
-                            error: `Failed to find field '${fieldName}' via ID or Search`,
-                            details: `Direct: ${getRes.status} ${getErrText} | Search: ${searchRes.status} ${errText}`,
-                            debug_info: {
-                                appId_start: appId?.substring(0, 5),
-                                authToken_start: authToken?.substring(0, 5),
-                                appId_len: appId?.length,
-                                authToken_len: authToken?.length
-                            }
-                        }),
-                        { status: searchRes.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-                    )
-                }
-
-                const fieldsData = await searchRes.json();
-                const fields = fieldsData.results || fieldsData.objects || fieldsData; // Handle various list formats
-
-                // Try exact match on 'label' or 'name'
-                const matchedField = Array.isArray(fields)
-                    ? fields.find((f: any) => f.label === fieldName || f.name === fieldName)
-                    : null;
-
-                if (!matchedField) {
-                    // If no exact match, return 404
-                    return new Response(
-                        JSON.stringify({ error: `Field '${fieldName}' not found in search results.` }),
-                        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-                    )
-                }
-
-                // Use the found ID
-                getUrl = `https://app.iconik.io/API/metadata/v1/fields/${matchedField.name}/`; // .name is usually the ID
-                fieldData = matchedField;
+                return new Response(
+                    JSON.stringify({
+                        error: `Field '${fieldName}' not found.`,
+                        details: `Iconik returned ${getRes.status}: ${getErrText}. Please ensure your 'Field Label' in settings matches the exact Field Name (ID) in Iconik.`,
+                        debug_info: {
+                            attempted_url: getUrl,
+                            appId_start: appId?.substring(0, 5),
+                            authToken_start: authToken?.substring(0, 5),
+                        }
+                    }),
+                    { status: getRes.status || 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+                )
             }
 
             // 3. Update the options
