@@ -186,7 +186,7 @@ export function generateExport(
         "values": athletes.map(a => a.fullName),
         "isExtensible": true,
         "isKeptSorted": true,
-        "savesValues": false,
+        "savesValues": true,
         "isLocked": false
       };
 
