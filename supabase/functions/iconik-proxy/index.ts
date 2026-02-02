@@ -12,7 +12,7 @@ serve(async (req) => {
     }
 
     try {
-        const { action, username, password, appId, authToken } = await req.json()
+        const { action, username, password, appId, authToken, fieldName, options: newOptions } = await req.json()
 
         // --- LOGIN ACTION ---
         if (action === 'login') {
@@ -93,7 +93,7 @@ serve(async (req) => {
 
         // --- SYNC FIELD OPTIONS ACTION ---
         if (action === 'sync_field_options') {
-            const { fieldName, options: newOptions } = await req.json();
+            // Variables are already destructured at the top
             if (!appId || !authToken || !fieldName || !Array.isArray(newOptions)) {
                 return new Response(
                     JSON.stringify({ error: 'Missing required parameters: appId, authToken, fieldName, or options array.' }),

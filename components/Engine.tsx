@@ -383,13 +383,13 @@ export const Engine: React.FC<Props> = ({
         })
       });
 
+      const data = await response.json().catch(() => null);
+
       if (!response.ok) {
-        const errData = await response.json();
-        throw new Error(errData.error || errData.details || 'Unknown error');
+        throw new Error(data?.error || data?.details || response.statusText || 'Sync request failed');
       }
 
-      const result = await response.json();
-      console.log('[Engine] Sync success:', result);
+      console.log('[Engine] Sync success:', data);
       setIsSyncIconikSuccess(true);
       setTimeout(() => setIsSyncIconikSuccess(false), 5000);
 
