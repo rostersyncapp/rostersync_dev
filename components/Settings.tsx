@@ -501,24 +501,24 @@ const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                      <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Application ID</label>
-                      <input type="text" placeholder="Enter App ID" className="w-full p-3.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-medium focus:ring-2 focus:ring-[#5B5FFF]/20 focus:border-[#5B5FFF] outline-none transition-all" />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Field Label</label>
-                      <input type="text" placeholder="Enter Field Label" className="w-full p-3.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-medium focus:ring-2 focus:ring-[#5B5FFF]/20 focus:border-[#5B5FFF] outline-none transition-all" />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Auth Token</label>
-                      <input type="password" placeholder="Enter Auth Token" className="w-full p-3.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-medium focus:ring-2 focus:ring-[#5B5FFF]/20 focus:border-[#5B5FFF] outline-none transition-all" />
-                    </div>
-                    <div className="space-y-2">
                       <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Username</label>
                       <input type="text" placeholder="Enter Username" className="w-full p-3.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-medium focus:ring-2 focus:ring-[#5B5FFF]/20 focus:border-[#5B5FFF] outline-none transition-all" />
                     </div>
                     <div className="space-y-2">
                       <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Password</label>
                       <input type="password" placeholder="Enter Password" className="w-full p-3.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-medium focus:ring-2 focus:ring-[#5B5FFF]/20 focus:border-[#5B5FFF] outline-none transition-all" />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Application ID</label>
+                      <input type="text" placeholder="Enter App ID" className="w-full p-3.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-medium focus:ring-2 focus:ring-[#5B5FFF]/20 focus:border-[#5B5FFF] outline-none transition-all" />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Auth Token</label>
+                      <input type="password" placeholder="Enter Auth Token" className="w-full p-3.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-medium focus:ring-2 focus:ring-[#5B5FFF]/20 focus:border-[#5B5FFF] outline-none transition-all" />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Field Label</label>
+                      <input type="text" placeholder="Enter Field Label" className="w-full p-3.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-medium focus:ring-2 focus:ring-[#5B5FFF]/20 focus:border-[#5B5FFF] outline-none transition-all" />
                     </div>
                   </div>
                   <div className="mt-8 flex justify-end">
