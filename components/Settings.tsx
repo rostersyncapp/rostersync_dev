@@ -170,7 +170,9 @@ const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
           if (data.upstream_data && data.upstream_data.errors) {
             errorMessage = data.upstream_data.errors.join(', ');
           }
-          throw new Error(errorMessage || 'Login failed: Invalid response format');
+          // DEBUG: Show what keys we actually got
+          const receivedKeys = Object.keys(data).join(', ');
+          throw new Error(errorMessage || `Login failed: Invalid response format. Received keys: [${receivedKeys}]`);
         }
       } catch (error: any) {
         setConnectionStatus('error');
