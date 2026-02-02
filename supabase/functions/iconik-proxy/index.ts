@@ -56,6 +56,17 @@ serve(async (req) => {
                 data.auth_token = headerToken;
             }
 
+            // Handle System Domains response (Enterprise Auth)
+            if (data.auth_system_domains && Array.isArray(data.auth_system_domains) && data.auth_system_domains.length > 0) {
+                console.log('Detected System Domains Auth response');
+                const firstDomain = data.auth_system_domains[0];
+                if (firstDomain.token) {
+                    console.log(`Extracted token from system domain: ${firstDomain.system_domain_name}`);
+                    data.token = firstDomain.token;
+                    data.app_id = loginHeaders['App-ID']; // Ensure App-ID is passed back if needed
+                }
+            }
+
             if (!response.ok) {
                 console.log('Login failed upstream:', response.status, data);
                 return new Response(
