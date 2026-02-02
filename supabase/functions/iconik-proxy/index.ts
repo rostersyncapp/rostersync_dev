@@ -101,7 +101,10 @@ serve(async (req) => {
                 )
             }
 
-            console.log(`Syncing options for field: ${fieldName}`);
+            console.log(`Syncing options for field: '${fieldName}'`);
+            console.log(`AppID length: ${appId?.length}, AuthToken length: ${authToken?.length}`);
+            console.log(`AppID start: ${appId?.substring(0, 5)}..., AuthToken start: ${authToken?.substring(0, 5)}...`);
+
             const headers = {
                 'App-ID': appId,
                 'Auth-Token': authToken,
@@ -109,68 +112,86 @@ serve(async (req) => {
                 'Accept': 'application/json'
             };
 
-            // 1. Look up field by label/name to get the actual field ID
-            const searchUrl = `https://app.iconik.io/API/metadata/v1/fields/?name=${encodeURIComponent(fieldName)}`;
-            const searchRes = await fetch(searchUrl, { method: 'GET', headers });
+            // 1. Try Direct Access first (Most common case where Name = ID)
+            let getUrl = `https://app.iconik.io/API/metadata/v1/fields/${fieldName}/`;
+            console.log(`Attempting Direct Access: ${getUrl}`);
+            let getRes = await fetch(getUrl, { method: 'GET', headers });
+            let fieldData = null;
+            let getErrText = ''; // Declare here to be accessible later
 
-            if (!searchRes.ok) {
-                const errText = await searchRes.text();
-                return new Response(
-                    JSON.stringify({ error: `Failed to search for field '${fieldName}'`, details: errText }),
-                    { status: searchRes.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-                )
+            if (getRes.ok) {
+                console.log(`Direct access successful for '${fieldName}'`);
+                fieldData = await getRes.json();
+            } else {
+                getErrText = await getRes.text();
+                console.log(`Direct access failed. Status: ${getRes.status}. Response: ${getErrText}`);
+
+                console.log(`Trying search by name/label...`);
+                // 2. If Direct Access fails (e.g. 404 because user provided Label, not Name), try Search
+                const searchUrl = `https://app.iconik.io/API/metadata/v1/fields/?name=${encodeURIComponent(fieldName)}`;
+                const searchRes = await fetch(searchUrl, { method: 'GET', headers });
+
+                if (!searchRes.ok) {
+                    const errText = await searchRes.text();
+                    console.log(`Search failed. Status: ${searchRes.status}. Response: ${errText}`);
+                    return new Response(
+                        JSON.stringify({
+                            error: `Failed to find field '${fieldName}' via ID or Search`,
+                            details: `Direct: ${getRes.status} ${getErrText} | Search: ${searchRes.status} ${errText}`,
+                            debug_info: {
+                                appId_start: appId?.substring(0, 5),
+                                authToken_start: authToken?.substring(0, 5),
+                                appId_len: appId?.length,
+                                authToken_len: authToken?.length
+                            }
+                        }),
+                        { status: searchRes.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+                    )
+                }
+
+                const fieldsData = await searchRes.json();
+                const fields = fieldsData.results || fieldsData.objects || fieldsData; // Handle various list formats
+
+                // Try exact match on 'label' or 'name'
+                const matchedField = Array.isArray(fields)
+                    ? fields.find((f: any) => f.label === fieldName || f.name === fieldName)
+                    : null;
+
+                if (!matchedField) {
+                    // If no exact match, return 404
+                    return new Response(
+                        JSON.stringify({ error: `Field '${fieldName}' not found in search results.` }),
+                        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+                    )
+                }
+
+                // Use the found ID
+                getUrl = `https://app.iconik.io/API/metadata/v1/fields/${matchedField.name}/`; // .name is usually the ID
+                fieldData = matchedField;
             }
 
-            const fieldsData = await searchRes.json();
-            const fields = fieldsData.results || fieldsData;
-            const matchedField = Array.isArray(fields)
-                ? fields.find((f: any) => f.label === fieldName || f.name === fieldName)
-                : null;
+            // 3. Update the options
+            // Merge existing options with new ones to avoid overwriting unrelated options
+            const existingOptions = fieldData.options || [];
 
-            if (!matchedField) {
-                const availableFields = Array.isArray(fields) ? fields.map((f: any) => f.label || f.name) : [];
-                return new Response(
-                    JSON.stringify({ error: `Field '${fieldName}' not found. Available fields: ${JSON.stringify(availableFields)}` }),
-                    { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-                )
-            }
+            // Create a map of existing options for easy lookup
+            const optionMap = new Map(existingOptions.map((opt: any) => [typeof opt === 'string' ? opt : opt.value, opt]));
 
-            const fieldId = matchedField.id;
-            console.log(`Found field '${fieldName}' with ID: ${fieldId}`);
-
-            // 2. GET field definition using the actual field ID
-            const getUrl = `https://app.iconik.io/API/metadata/v1/fields/${fieldId}/`;
-            const getRes = await fetch(getUrl, { method: 'GET', headers });
-
-            if (!getRes.ok) {
-                const errText = await getRes.text();
-                return new Response(
-                    JSON.stringify({ error: `Failed to fetch field '${fieldName}' (ID: ${fieldId})`, details: errText }),
-                    { status: getRes.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-                )
-            }
-
-            const fieldData = await getRes.json();
-
-            // 3. Merge options
-            // Iconik options can be plain strings or objects {label: "X", value: "Y"}
-            // We will normalize to what we find.
-            let updatedOptions = [...(fieldData.options || [])];
-            const existingValues = new Set(updatedOptions.map((o: any) => typeof o === 'string' ? o : o.value));
+            // Add or update options
             let addedCount = 0;
-
-            newOptions.forEach((opt: string) => {
-                if (!existingValues.has(opt)) {
+            newOptions.forEach((optStr: string) => {
+                if (!optionMap.has(optStr)) {
                     // If existing options are objects, add as object. Default to string.
-                    if (updatedOptions.length > 0 && typeof updatedOptions[0] === 'object') {
-                        updatedOptions.push({ label: opt, value: opt });
+                    if (existingOptions.length > 0 && typeof existingOptions[0] === 'object') {
+                        optionMap.set(optStr, { label: optStr, value: optStr });
                     } else {
-                        updatedOptions.push(opt);
+                        optionMap.set(optStr, optStr);
                     }
-                    existingValues.add(opt);
                     addedCount++;
                 }
             });
+
+            const updatedOptions = Array.from(optionMap.values());
 
             if (addedCount === 0) {
                 return new Response(
@@ -179,27 +200,45 @@ serve(async (req) => {
                 )
             }
 
-            // 3. PUT updated field definition
-            // We send back the entire object with modified options
-            fieldData.options = updatedOptions;
+            // Paylod for PUT
+            const updatePayload = {
+                // Only sending back fields likely to be accepted for update
+                options: updatedOptions,
+                label: fieldData.label,
+                description: fieldData.description,
+                field_type: fieldData.field_type
+            };
 
-            const putRes = await fetch(getUrl, {
+            const putUrl = `https://app.iconik.io/API/metadata/v1/fields/${fieldData.name || fieldData.id}/`;
+            console.log(`Updating field options at: ${putUrl}`);
+
+            const putRes = await fetch(putUrl, {
                 method: 'PUT',
                 headers,
-                body: JSON.stringify(fieldData)
+                body: JSON.stringify(updatePayload)
             });
 
             if (!putRes.ok) {
                 const errText = await putRes.text();
+                console.log(`PUT Payload: ${JSON.stringify(updatePayload)}`);
+                console.log(`PUT Failed: ${putRes.status} | ${errText}`);
+
                 return new Response(
-                    JSON.stringify({ error: `Failed to update field '${fieldName}'`, details: errText }),
+                    JSON.stringify({
+                        error: `Failed to update field '${fieldName}'`,
+                        details: errText,
+                        debug_info: {
+                            put_url: putUrl,
+                            payload_keys: Object.keys(updatePayload)
+                        }
+                    }),
                     { status: putRes.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
                 )
             }
 
             const putData = await putRes.json();
             return new Response(
-                JSON.stringify({ success: true, added: addedCount, total: updatedOptions.length, field: putData }),
+                JSON.stringify({ success: true, message: `Field updated with ${addedCount} new options.`, data: putData }),
                 { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
             )
         }
@@ -215,30 +254,42 @@ serve(async (req) => {
             )
         }
 
-        console.log(`Proxying request to Iconik for AppID: ${appId.substring(0, 5)}...`);
-        const iconikUrl = 'https://app.iconik.io/API/users/current/';
+        console.log(`Proxying check connection for AppID: ${appId.substring(0, 5)}...`);
+
+        // Try User Endpoint First
+        const userUrl = 'https://app.iconik.io/API/users/v1/users/me/';
         const headers: Record<string, string> = {
             'App-ID': appId,
             'Auth-Token': authToken,
             'Accept': 'application/json'
         };
 
-        const response = await fetch(iconikUrl, {
-            method: 'GET',
-            headers: headers,
-        })
+        let response = await fetch(userUrl, { method: 'GET', headers });
+        let data = await response.json().catch(() => null);
 
-        const data = await response.json().catch(e => ({ error: 'Failed to parse JSON', details: e.message }));
-
+        // Fallback: Try Metadata Field List (since user endpoint might 404 for some tokens)
         if (!response.ok) {
+            console.log('User check failed, trying Metadata check...');
+            const metadataUrl = 'https://app.iconik.io/API/metadata/v1/fields/?limit=1';
+            const metaRes = await fetch(metadataUrl, { method: 'GET', headers });
+
+            if (metaRes.ok) {
+                // Succeeded with metadata check!
+                return new Response(
+                    JSON.stringify({ success: true, message: "Metadata API connection verified.", source: "metadata" }),
+                    { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+                )
+            }
+
+            // If both fail, return the error from the User check (or metadata check)
             return new Response(
                 JSON.stringify({
-                    error: 'Iconik API Error',
+                    error: 'Iconik Connection Failed',
                     status: response.status,
                     upstream_data: data
                 }),
                 {
-                    status: response.status,
+                    status: response.status || 500,
                     headers: { ...corsHeaders, 'Content-Type': 'application/json' },
                 }
             )

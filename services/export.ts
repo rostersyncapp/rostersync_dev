@@ -36,9 +36,13 @@ export function generateExport(
 
     case 'ICONIK_JSON':
       const slugTeam = teamName.replace(/\s+/g, '-').toLowerCase();
+      // Format equivalent to Iconik's ISO format
+      const nowIso = new Date().toISOString().replace('Z', '+00:00');
       const iconikMetadata = {
         "auto_set": true,
-        "description": `Imported via RosterSync AI (${language})`,
+        "date_created": nowIso,
+        "date_modified": nowIso,
+        "description": `Imported via RosterSync`,
         "external_id": null,
         "field_type": "drop_down",
         "hide_if_not_set": false,
@@ -46,6 +50,8 @@ export function generateExport(
         "is_warning_field": false,
         "label": teamName,
         "mapped_field_name": null,
+        "max_value": 0.0,
+        "min_value": 0.0,
         "multi": true,
         "name": slugTeam,
         "options": athletes.map(a => ({
@@ -57,8 +63,7 @@ export function generateExport(
         "required": false,
         "sortable": true,
         "source_url": null,
-        "use_as_facet": true,
-        "language": language
+        "use_as_facet": true
       };
 
       return {

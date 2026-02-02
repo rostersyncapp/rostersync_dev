@@ -209,9 +209,9 @@ export const Dashboard: React.FC<Props> = ({
         },
         body: JSON.stringify({
           action: 'sync_field_options',
-          appId: config.appId,
-          authToken: config.authToken,
-          fieldName: config.fieldLabel,
+          appId: config.appId.trim(),
+          authToken: config.authToken.trim(),
+          fieldName: config.fieldLabel.trim(),
           options: uniqueNames
         })
       });
