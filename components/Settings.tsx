@@ -152,23 +152,25 @@ const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
 
         const data = await response.json().catch(() => ({}));
 
-        if (response.ok && data.app_id && data.token) {
+        // Iconik likely returns { token: "..." } or { auth_token: "..." } but maybe not app_id
+        if (response.ok && (data.token || data.auth_token)) {
           // Update state with credentials
+          const newToken = data.token || data.auth_token;
           setIconikConfig(prev => ({
             ...prev,
-            appId: data.app_id,
-            authToken: data.token
+            appId: iconikConfig.appId, // We already have this from input
+            authToken: newToken
           }));
 
           setConnectionStatus('success');
-          setConnectionMessage(`Login successful! App ID and Token retrieved.`);
+          setConnectionMessage(`Login successful! Token retrieved.`);
           return;
         } else {
           let errorMessage = data.detail || data.error || response.statusText;
           if (data.upstream_data && data.upstream_data.errors) {
             errorMessage = data.upstream_data.errors.join(', ');
           }
-          throw new Error(errorMessage || 'Login failed');
+          throw new Error(errorMessage || 'Login failed: Invalid response format');
         }
       } catch (error: any) {
         setConnectionStatus('error');
