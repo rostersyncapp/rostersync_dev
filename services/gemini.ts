@@ -418,8 +418,7 @@ export async function processRosterRawText(
   // 3. Input Tokens (simpler prompt)
   const FULLY_SEEDED_LEAGUES = [
     'nba', 'wnba', 'nfl', 'nhl', 'mlb',
-    'premier-league', 'la-liga', 'bundesliga', 'serie-a', 'ligue-1', 'eredivisie', 'liga-mx', 'mls', 'nwsl',
-    'college-football', 'mens-college-basketball', 'ncaa-football', 'ncaa-basketball'
+    'premier-league', 'la-liga', 'bundesliga', 'serie-a', 'ligue-1', 'eredivisie', 'liga-mx', 'mls', 'nwsl'
   ];
 
   const isMajorLeague = league && FULLY_SEEDED_LEAGUES.includes(league);

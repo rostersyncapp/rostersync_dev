@@ -190,34 +190,32 @@ export const Engine: React.FC<Props> = ({
     {
       category: "🏀 Basketball",
       options: [
+        { value: "euroleague", label: "EuroLeague" },
         { value: "nba", label: "NBA" },
-        { value: "wnba", label: "WNBA" },
-        { value: "ncaa-basketball", label: "NCAA Basketball" },
-        { value: "euroleague", label: "EuroLeague" }
+        { value: "wnba", label: "WNBA" }
       ]
     },
     {
       category: "🏈 Football (American)",
       options: [
-        { value: "nfl", label: "NFL" },
-        { value: "ncaa-football", label: "NCAA Football" }
+        { value: "nfl", label: "NFL" }
       ]
     },
     {
       category: "⚽ Soccer",
       options: [
-        { value: "premier-league", label: "Premier League" },
-        { value: "la-liga", label: "La Liga" },
-        { value: "serie-a", label: "Serie A" },
         { value: "bundesliga", label: "Bundesliga" },
+        { value: "efl-championship", label: "EFL Championship" },
+        { value: "eredivisie", label: "Eredivisie" },
+        { value: "la-liga", label: "La Liga" },
+        { value: "liga-mx", label: "Liga MX" },
         { value: "ligue-1", label: "Ligue 1" },
         { value: "mls", label: "MLS" },
         { value: "nwsl", label: "NWSL" },
-        { value: "liga-mx", label: "Liga MX" },
-        { value: "eredivisie", label: "Eredivisie" },
-        { value: "usl", label: "USL Championship" },
-        { value: "efl-championship", label: "EFL Championship" },
+        { value: "premier-league", label: "Premier League" },
         { value: "scottish-premiership", label: "Scottish Premiership" },
+        { value: "serie-a", label: "Serie A" },
+        { value: "usl", label: "USL Championship" },
         { value: "wsl", label: "Women's Super League (WSL)" }
       ]
     },
@@ -236,8 +234,8 @@ export const Engine: React.FC<Props> = ({
     {
       category: "⚾ Baseball",
       options: [
-        { value: "mlb", label: "MLB" },
-        { value: "milb", label: "MiLB" }
+        { value: "milb", label: "MiLB" },
+        { value: "mlb", label: "MLB" }
       ]
     }
   ];
@@ -256,8 +254,8 @@ export const Engine: React.FC<Props> = ({
 
     // Auto-set sport based on league
     const leagueToSport: Record<string, string> = {
-      'nba': 'Basketball', 'wnba': 'Basketball', 'ncaa-basketball': 'Basketball', 'euroleague': 'Basketball',
-      'nfl': 'Football', 'ncaa-football': 'Football',
+      'nba': 'Basketball', 'wnba': 'Basketball', 'euroleague': 'Basketball',
+      'nfl': 'Football',
       'premier-league': 'Soccer', 'la-liga': 'Soccer', 'serie-a': 'Soccer',
       'bundesliga': 'Soccer', 'ligue-1': 'Soccer', 'mls': 'Soccer', 'nwsl': 'Soccer', 'liga-mx': 'Soccer',
       'eredivisie': 'Soccer', 'usl': 'Soccer',
