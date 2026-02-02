@@ -339,6 +339,68 @@ export const Engine: React.FC<Props> = ({
     setShowTeamSelection(false);
   };
 
+  // Iconik Sync Logic
+  const [isSyncingIconik, setIsSyncingIconik] = useState(false);
+  const [isSyncIconikSuccess, setIsSyncIconikSuccess] = useState(false);
+
+  const handleIconikSync = async () => {
+    setIsSyncingIconik(true);
+    setIsSyncIconikSuccess(false);
+
+    try {
+      const savedConfig = localStorage.getItem('iconikConfig');
+      if (!savedConfig) {
+        alert('Please configure Iconik settings first.');
+        setIsSyncingIconik(false);
+        return;
+      }
+
+      const config = JSON.parse(savedConfig);
+      if (!config.appId || !config.authToken || !config.fieldLabel) {
+        alert('Missing Iconik credentials or Field Label in settings.');
+        setIsSyncingIconik(false);
+        return;
+      }
+
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://rddqcxfalrlmlvirjlca.supabase.co';
+      const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+      const uniqueNames = Array.from(new Set(processedAthletes.map(a => a.fullName).filter(Boolean)));
+
+      console.log(`[Engine] Syncing ${uniqueNames.length} names to field: ${config.fieldLabel}`);
+
+      const response = await fetch(`${supabaseUrl}/functions/v1/iconik-proxy`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${supabaseAnonKey}`,
+        },
+        body: JSON.stringify({
+          action: 'sync_field_options',
+          appId: config.appId,
+          authToken: config.authToken,
+          fieldName: config.fieldLabel,
+          options: uniqueNames
+        })
+      });
+
+      if (!response.ok) {
+        const errData = await response.json();
+        throw new Error(errData.error || errData.details || 'Unknown error');
+      }
+
+      const result = await response.json();
+      console.log('[Engine] Sync success:', result);
+      setIsSyncIconikSuccess(true);
+      setTimeout(() => setIsSyncIconikSuccess(false), 5000);
+
+    } catch (err: any) {
+      console.error('Iconik Sync Failed:', err);
+      alert(`Sync failed: ${err.message}`);
+    } finally {
+      setIsSyncingIconik(false);
+    }
+  };
+
   const hasCredits = creditsUsed < maxCredits;
 
   return (
@@ -592,23 +654,28 @@ export const Engine: React.FC<Props> = ({
 
                 <div className="flex flex-col gap-5 min-w-[280px]">
                   <div className="space-y-2.5">
-                    <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest font-mono">Assign Project</label>
-                    <div className="relative">
-                      <FolderOpen className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                      <select
-                        value={selectedProjectId}
-                        onChange={(e) => setSelectedProjectId(e.target.value)}
-                        className="pl-12 pr-6 py-3.5 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg text-sm font-bold outline-none focus:ring-2 focus:ring-[#5B5FFF]/20 text-gray-900 dark:text-white cursor-pointer w-full"
+                    <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest font-mono">Export/Sync</label>
+                    <div className="flex flex-col gap-3">
+                      <button onClick={handleSaveToLibrary} disabled={isSaving} className="w-full flex items-center justify-center gap-3 px-6 py-3.5 rounded-xl primary-gradient text-white font-bold text-sm hover:shadow-lg shadow-[#5B5FFF]/20 transition-all uppercase tracking-widest">
+                        {isSaving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />} Save to Library
+                      </button>
+
+                      <button
+                        onClick={handleIconikSync}
+                        disabled={isSyncingIconik || processedAthletes.length === 0}
+                        className={`w-full flex items-center justify-center gap-3 px-6 py-3.5 rounded-xl border font-bold text-sm transition-all uppercase tracking-widest ${isSyncIconikSuccess ? 'bg-green-50 text-green-600 border-green-200' : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'}`}
                       >
-                        <option value="">Unassigned (Library)</option>
-                        {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-                      </select>
+                        {isSyncingIconik ? (
+                          <Loader2 size={18} className="animate-spin text-[#5B5FFF]" />
+                        ) : isSyncIconikSuccess ? (
+                          <CheckCircle2 size={18} />
+                        ) : (
+                          <Globe size={18} />
+                        )}
+                        {isSyncingIconik ? 'Syncing...' : isSyncIconikSuccess ? 'Synced!' : 'Sync to Iconik'}
+                      </button>
                     </div>
                   </div>
-
-                  <button onClick={handleSaveToLibrary} disabled={isSaving} className="w-full flex items-center justify-center gap-3 px-6 py-3.5 rounded-xl primary-gradient text-white font-bold text-sm hover:shadow-lg shadow-[#5B5FFF]/20 transition-all uppercase tracking-widest">
-                    {isSaving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />} Save to Library
-                  </button>
                 </div>
               </div>
 

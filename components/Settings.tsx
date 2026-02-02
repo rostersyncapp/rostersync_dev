@@ -115,12 +115,15 @@ const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
   };
 
   // Iconik Configuration State
-  const [iconikConfig, setIconikConfig] = useState({
-    username: '',
-    password: '',
-    appId: '',
-    authToken: '',
-    fieldLabel: ''
+  const [iconikConfig, setIconikConfig] = useState(() => {
+    const saved = localStorage.getItem('iconikConfig');
+    return saved ? JSON.parse(saved) : {
+      username: '',
+      password: '',
+      appId: '',
+      authToken: '',
+      fieldLabel: ''
+    };
   });
   const [connectionStatus, setConnectionStatus] = useState<'idle' | 'testing' | 'success' | 'error'>('idle');
   const [connectionMessage, setConnectionMessage] = useState('');
@@ -154,6 +157,7 @@ const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
 
           setConnectionStatus('success');
           setConnectionMessage(`Connected successfully as ${userEmail}`);
+          localStorage.setItem('iconikConfig', JSON.stringify(iconikConfig));
           return;
         }
 

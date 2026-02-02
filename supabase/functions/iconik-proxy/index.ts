@@ -91,6 +91,90 @@ serve(async (req) => {
             )
         }
 
+        // --- SYNC FIELD OPTIONS ACTION ---
+        if (action === 'sync_field_options') {
+            const { fieldName, options: newOptions } = await req.json();
+            if (!appId || !authToken || !fieldName || !Array.isArray(newOptions)) {
+                return new Response(
+                    JSON.stringify({ error: 'Missing required parameters: appId, authToken, fieldName, or options array.' }),
+                    { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+                )
+            }
+
+            console.log(`Syncing options for field: ${fieldName}`);
+            const headers = {
+                'App-ID': appId,
+                'Auth-Token': authToken,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            };
+
+            // 1. GET current field definition
+            const getUrl = `https://app.iconik.io/API/metadata/v1/fields/${fieldName}/`;
+            const getRes = await fetch(getUrl, { method: 'GET', headers });
+
+            if (!getRes.ok) {
+                const errText = await getRes.text();
+                return new Response(
+                    JSON.stringify({ error: `Failed to fetch field '${fieldName}'`, details: errText }),
+                    { status: getRes.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+                )
+            }
+
+            const fieldData = await getRes.json();
+
+            // 2. Merge options
+            // Iconik options can be plain strings or objects {label: "X", value: "Y"}
+            // We will normalize to what we find.
+            let updatedOptions = [...(fieldData.options || [])];
+            const existingValues = new Set(updatedOptions.map((o: any) => typeof o === 'string' ? o : o.value));
+            let addedCount = 0;
+
+            newOptions.forEach((opt: string) => {
+                if (!existingValues.has(opt)) {
+                    // If existing options are objects, add as object. Default to string.
+                    if (updatedOptions.length > 0 && typeof updatedOptions[0] === 'object') {
+                        updatedOptions.push({ label: opt, value: opt });
+                    } else {
+                        updatedOptions.push(opt);
+                    }
+                    existingValues.add(opt);
+                    addedCount++;
+                }
+            });
+
+            if (addedCount === 0) {
+                return new Response(
+                    JSON.stringify({ message: 'No new options to add.', optionsV: updatedOptions.length }),
+                    { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+                )
+            }
+
+            // 3. PUT updated field definition
+            // We send back the entire object with modified options
+            fieldData.options = updatedOptions;
+
+            const putRes = await fetch(getUrl, {
+                method: 'PUT',
+                headers,
+                body: JSON.stringify(fieldData)
+            });
+
+            if (!putRes.ok) {
+                const errText = await putRes.text();
+                return new Response(
+                    JSON.stringify({ error: `Failed to update field '${fieldName}'`, details: errText }),
+                    { status: putRes.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+                )
+            }
+
+            const putData = await putRes.json();
+            return new Response(
+                JSON.stringify({ success: true, added: addedCount, total: updatedOptions.length, field: putData }),
+                { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+            )
+        }
+
         // --- DEFAULT ACTION: CHECK CONNECTION ---
         if (!appId || !authToken) {
             return new Response(
