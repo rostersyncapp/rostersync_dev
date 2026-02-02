@@ -28,17 +28,13 @@ serve(async (req) => {
 
             console.log(`Proxying login request for user: ${username}, AppID: ${appId}`);
 
-            // Use the specific auth service URL provided
             const loginUrl = 'https://app.iconik.io/API/auth/v1/auth/simple/login/';
-
-            // Explicit headers object to better control casing if needed by specific endpoints
             const loginHeaders: Record<string, string> = {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
                 'App-ID': appId
             };
 
-            // If an existing token is provided, pass it (unlikely for login, but respecting "User must provide... Auth-Token" hint)
             if (authToken) {
                 loginHeaders['Auth-Token'] = authToken;
             }
@@ -49,7 +45,16 @@ serve(async (req) => {
                 body: JSON.stringify({ email: username, password: password, app_name: 'RosterSync' })
             });
 
-            const data = await response.json().catch(e => ({ error: 'Failed to parse JSON', details: e.message }));
+            let data = await response.json().catch(e => ({ error: 'Failed to parse JSON', details: e.message }));
+
+            // Inject Header Token into Body if present
+            const headerToken = response.headers.get('Auth-Token');
+            if (headerToken) {
+                if (typeof data !== 'object' || data === null) {
+                    data = { response_body: data };
+                }
+                data.auth_token = headerToken;
+            }
 
             if (!response.ok) {
                 console.log('Login failed upstream:', response.status, data);
@@ -88,8 +93,6 @@ serve(async (req) => {
 
         console.log(`Proxying request to Iconik for AppID: ${appId.substring(0, 5)}...`);
         const iconikUrl = 'https://app.iconik.io/API/users/current/';
-
-        // Explicit headers with specific casing
         const headers: Record<string, string> = {
             'App-ID': appId,
             'Auth-Token': authToken,
