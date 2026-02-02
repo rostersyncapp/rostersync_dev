@@ -176,29 +176,57 @@ export const Dashboard: React.FC<Props> = ({
   // Iconik Sync State
   const [isSyncingIconik, setIsSyncingIconik] = useState(false);
   const [isSyncIconikSuccess, setIsSyncIconikSuccess] = useState(false);
+  const [isIconikModalOpen, setIsIconikModalOpen] = useState(false);
+  const [targetFieldLabel, setTargetFieldLabel] = useState('');
 
-  const handleIconikSync = async () => {
-    if (!selectedRoster) return;
+  const handleIconikSync = () => {
+    setIsIconikModalOpen(true);
+  };
+
+  const performIconikSync = async () => {
+    if (!selectedRoster) return; // Changed from currentRoster to selectedRoster to match existing context
+    if (!targetFieldLabel.trim()) {
+      alert('Please enter a Field Name (ID).');
+      return;
+    }
+
     setIsSyncingIconik(true);
-    setIsSyncIconikSuccess(false);
+
+    // Get credentials from localStorage
+    const savedConfig = localStorage.getItem('iconikConfig');
+    const { appId, authToken } = savedConfig ? JSON.parse(savedConfig) : { appId: '', authToken: '' };
+
+    if (!appId || !authToken) {
+      alert('Missing Iconik credentials. Please configure them in Settings.');
+      setIsSyncingIconik(false);
+      return;
+    }
+
+    // Build payload
+    const teamName = selectedRoster.teamName; // Changed from currentRoster.name to selectedRoster.teamName
+    const athletes = selectedRoster.rosterData || []; // Changed from currentRoster.athletes to selectedRoster.rosterData
+    const language = exportLanguage; // Using selected export language
+
+    const payload = {
+      action: 'sync_field_options', // Added action as per previous implementation
+      appId: appId.trim(),
+      authToken: authToken.trim(),
+      fieldName: targetFieldLabel.trim(), // From Modal Input
+      options: athletes.map(a => ({
+        label: a.fullName,
+        value: a.fullName // Assuming value = label for now
+      })),
+      fieldMetadata: {
+        label: teamName, // The roster name becomes the field label in options? Or description? 
+        // Actually, the previous logic was updating the FIELD itself. 
+        // We probably want to update the options of the field specified by targetFieldLabel.
+        description: `Synced from RosterSync: ${teamName} (${new Date().toLocaleDateString()})`,
+        field_type: 'drop_down' // Hardcoded assumption based on previous code
+      }
+    };
 
     try {
-      const savedConfig = localStorage.getItem('iconikConfig');
-      if (!savedConfig) {
-        alert('Please configure Iconik settings first.');
-        setIsSyncingIconik(false);
-        return;
-      }
-
-      const config = JSON.parse(savedConfig);
-      if (!config.appId || !config.authToken || !config.fieldLabel) {
-        alert('Missing Iconik credentials or Field Label in settings.');
-        setIsSyncingIconik(false);
-        return;
-      }
-
-      const uniqueNames = Array.from(new Set(selectedRoster.rosterData.map((a: Athlete) => a.fullName).filter(Boolean)));
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://rddqcxfalrlmlvirjlca.supabase.co';
       const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
       const response = await fetch(`${supabaseUrl}/functions/v1/iconik-proxy`, {
@@ -207,27 +235,25 @@ export const Dashboard: React.FC<Props> = ({
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${supabaseAnonKey}`,
         },
-        body: JSON.stringify({
-          action: 'sync_field_options',
-          appId: config.appId.trim(),
-          authToken: config.authToken.trim(),
-          fieldName: config.fieldLabel.trim(),
-          options: uniqueNames
-        })
+        body: JSON.stringify(payload)
       });
 
       const data = await response.json().catch(() => null);
 
       if (!response.ok) {
-        throw new Error(data?.error || response.statusText || 'Sync request failed');
+        console.error('Iconik Sync Error Details:', data);
+        const errorMessage = data?.error || response.statusText || 'Sync request failed';
+        const errorDetails = data?.details ? `\nDetails: ${data.details}` : '';
+        throw new Error(`${errorMessage}${errorDetails}`);
       }
 
       setIsSyncIconikSuccess(true);
       setTimeout(() => setIsSyncIconikSuccess(false), 5000);
+      setIsIconikModalOpen(false); // Close modal on success
 
     } catch (err: any) {
       console.error('Iconik Sync Failed:', err);
-      alert(`Sync failed: ${err.message}`);
+      alert(err.message);
     } finally {
       setIsSyncingIconik(false);
     }

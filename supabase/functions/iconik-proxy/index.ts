@@ -178,7 +178,8 @@ serve(async (req) => {
                 options: updatedOptions,
                 label: fieldData.label,
                 description: fieldData.description,
-                field_type: fieldData.field_type
+                field_type: fieldData.field_type,
+                name: fieldData.name || fieldData.id // Ensure name is present, as it might be required for validation
             };
 
             const putUrl = `https://app.iconik.io/API/metadata/v1/fields/${fieldData.name || fieldData.id}/`;

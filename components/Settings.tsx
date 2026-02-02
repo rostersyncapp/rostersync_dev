@@ -122,7 +122,6 @@ const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
       password: '',
       appId: '',
       authToken: '',
-      fieldLabel: ''
     };
   });
   const [connectionStatus, setConnectionStatus] = useState<'idle' | 'testing' | 'success' | 'error'>('idle');
@@ -649,16 +648,7 @@ const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
                         className="w-full p-3.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-medium focus:ring-2 focus:ring-[#5B5FFF]/20 focus:border-[#5B5FFF] outline-none transition-all"
                       />
                     </div>
-                    <div className="space-y-2">
-                      <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Field Label</label>
-                      <input
-                        type="text"
-                        placeholder="Enter Field Label"
-                        value={iconikConfig.fieldLabel}
-                        onChange={(e) => setIconikConfig(prev => ({ ...prev, fieldLabel: e.target.value }))}
-                        className="w-full p-3.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-medium focus:ring-2 focus:ring-[#5B5FFF]/20 focus:border-[#5B5FFF] outline-none transition-all"
-                      />
-                    </div>
+
                   </div>
                   <div className="mt-8 flex items-center justify-between">
                     <div className="flex-1 mr-4">
