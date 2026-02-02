@@ -137,13 +137,20 @@ const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
     }
 
     try {
-      const response = await fetch('https://app.iconik.io/API/v1/users/current/', {
-        method: 'GET',
+      // Use Supabase Edge Function proxy to avoid CORS
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://rddqcxfalrlmlvirjlca.supabase.co';
+      const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+      const response = await fetch(`${supabaseUrl}/functions/v1/iconik-proxy`, {
+        method: 'POST',
         headers: {
-          'App-ID': iconikConfig.appId,
-          'Auth-Token': iconikConfig.authToken,
-          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${supabaseAnonKey}`,
         },
+        body: JSON.stringify({
+          appId: iconikConfig.appId,
+          authToken: iconikConfig.authToken
+        })
       });
 
       if (response.ok) {
