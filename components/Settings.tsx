@@ -145,7 +145,8 @@ const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
           body: JSON.stringify({
             action: 'login',
             username: iconikConfig.username,
-            password: iconikConfig.password
+            password: iconikConfig.password,
+            appId: iconikConfig.appId // Required for login
           })
         });
 

@@ -14,10 +14,11 @@ serve(async (req) => {
     try {
         const { action, username, password, appId, authToken } = await req.json()
 
+        // --- LOGIN ACTION ---
         if (action === 'login') {
-            if (!username || !password) {
+            if (!username || !password || !appId) {
                 return new Response(
-                    JSON.stringify({ error: 'Missing username or password' }),
+                    JSON.stringify({ error: 'Missing username, password, or appId' }),
                     {
                         status: 400,
                         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -25,19 +26,33 @@ serve(async (req) => {
                 )
             }
 
-            console.log(`Proxying login request for user: ${username}`);
-            const response = await fetch('https://app.iconik.io/API/v1/auth/simple/login/', {
+            console.log(`Proxying login request for user: ${username}, AppID: ${appId}`);
+
+            // Use the specific auth service URL provided
+            const loginUrl = 'https://app.iconik.io/API/auth/v1/auth/simple/login/';
+
+            // Explicit headers object to better control casing if needed by specific endpoints
+            const loginHeaders: Record<string, string> = {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'App-ID': appId
+            };
+
+            // If an existing token is provided, pass it (unlikely for login, but respecting "User must provide... Auth-Token" hint)
+            if (authToken) {
+                loginHeaders['Auth-Token'] = authToken;
+            }
+
+            const response = await fetch(loginUrl, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                },
+                headers: loginHeaders,
                 body: JSON.stringify({ email: username, password: password, app_name: 'RosterSync' })
             });
 
             const data = await response.json().catch(e => ({ error: 'Failed to parse JSON', details: e.message }));
 
             if (!response.ok) {
+                console.log('Login failed upstream:', response.status, data);
                 return new Response(
                     JSON.stringify({
                         error: 'Iconik Login Failed',
@@ -60,7 +75,7 @@ serve(async (req) => {
             )
         }
 
-        // Default: Check Connection (User Info)
+        // --- DEFAULT ACTION: CHECK CONNECTION ---
         if (!appId || !authToken) {
             return new Response(
                 JSON.stringify({ error: 'Missing appId or authToken' }),
@@ -73,10 +88,13 @@ serve(async (req) => {
 
         console.log(`Proxying request to Iconik for AppID: ${appId.substring(0, 5)}...`);
         const iconikUrl = 'https://app.iconik.io/API/users/current/';
-        const headers = new Headers();
-        headers.append('App-ID', appId);
-        headers.append('Auth-Token', authToken);
-        headers.append('Accept', 'application/json');
+
+        // Explicit headers with specific casing
+        const headers: Record<string, string> = {
+            'App-ID': appId,
+            'Auth-Token': authToken,
+            'Accept': 'application/json'
+        };
 
         const response = await fetch(iconikUrl, {
             method: 'GET',
