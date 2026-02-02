@@ -24,21 +24,32 @@ serve(async (req) => {
             )
         }
 
-        const response = await fetch('https://app.iconik.io/API/v1/users/current/', {
+        console.log(`Proxying request to Iconik for AppID: ${appId.substring(0, 5)}...`);
+
+        const iconikUrl = 'https://app.iconik.io/API/v1/users/current/';
+
+        // Explicitly construct headers object
+        const headers = new Headers();
+        headers.append('App-ID', appId);
+        headers.append('Auth-Token', authToken);
+        headers.append('Accept', 'application/json');
+
+        const response = await fetch(iconikUrl, {
             method: 'GET',
-            headers: {
-                'App-ID': appId,
-                'Auth-Token': authToken,
-                'Accept': 'application/json',
-            },
+            headers: headers,
         })
 
-        const data = await response.json()
+        const data = await response.json().catch(e => ({ error: 'Failed to parse JSON', details: e.message }));
 
-        // Pass through shape of error if not ok
+        console.log(`Iconik Response Status: ${response.status}`);
+
         if (!response.ok) {
             return new Response(
-                JSON.stringify(data),
+                JSON.stringify({
+                    error: 'Iconik API Error',
+                    status: response.status,
+                    upstream_data: data
+                }),
                 {
                     status: response.status,
                     headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -54,6 +65,7 @@ serve(async (req) => {
             }
         )
     } catch (error) {
+        console.error('Edge Function Error:', error);
         return new Response(
             JSON.stringify({ error: error.message }),
             {
