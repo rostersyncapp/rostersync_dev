@@ -188,7 +188,7 @@ export const Dashboard: React.FC<Props> = ({
   const [isSyncingCatdv, setIsSyncingCatdv] = useState(false);
   const [isSyncCatdvSuccess, setIsSyncCatdvSuccess] = useState(false);
   const [isCatdvModalOpen, setIsCatdvModalOpen] = useState(false);
-  const [catdvFieldName, setCatdvFieldName] = useState('Name');
+  const [catdvFieldName, setCatdvFieldName] = useState('roster');
 
   const handleIconikSync = () => {
     setIsIconikModalOpen(true);

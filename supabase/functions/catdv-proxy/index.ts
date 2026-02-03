@@ -7,12 +7,26 @@ const corsHeaders = {
     'Access-Control-Max-Age': '86400',
 }
 
-// Helper to construct response with CORS
 const createResponse = (body: any, status = 200) => {
     return new Response(JSON.stringify(body), {
         status,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
+}
+
+function extractSessionId(obj: any): string | null {
+    if (!obj || typeof obj !== 'object') return null;
+    const keys = ['jsessionid', 'jSessionId', 'JSESSIONID', 'sessionId', 'id', 'token', 'accessToken'];
+    for (const key of keys) {
+        if (obj[key] && typeof obj[key] === 'string') return obj[key];
+    }
+    for (const key in obj) {
+        if (typeof obj[key] === 'object') {
+            const result = extractSessionId(obj[key]);
+            if (result) return result;
+        }
+    }
+    return null;
 }
 
 Deno.serve(async (req) => {
@@ -29,22 +43,15 @@ Deno.serve(async (req) => {
             return null;
         });
 
-        if (!body) {
-            return createResponse({ error: 'Invalid or missing JSON body' }, 400);
-        }
+        if (!body) return createResponse({ error: 'Invalid or missing JSON body' }, 400);
 
         const { action, server, username, password, sessionId, fieldName, options: newOptions } = body;
+        if (!server) return createResponse({ error: 'Missing server address' }, 400);
 
-        if (!server) {
-            return createResponse({ error: 'Missing server address' }, 400);
-        }
-
-        // --- NORMALIZE SERVER URL ---
         let baseUrl = server.trim();
         if (!baseUrl.startsWith('http')) baseUrl = `http://${baseUrl}`;
         if (baseUrl.endsWith('/')) baseUrl = baseUrl.slice(0, -1);
 
-        // Standard CatDV base: http://server:8080/catdv
         let catdvBase = baseUrl;
         if (!catdvBase.includes('/catdv')) catdvBase = `${catdvBase}/catdv`;
         const apiBase = `${catdvBase}/api`;
@@ -53,115 +60,136 @@ Deno.serve(async (req) => {
 
         let activeSessionId = sessionId;
 
-        // --- LOGIN IF NO SESSION ID ---
+        // --- LOGIN ---
         if (!activeSessionId && username && password) {
-            console.log(`[${reqId}] Attempting login to: ${apiBase}/session`);
+            console.log(`[${reqId}] Starting login discovery...`);
+            const variations = ['/catdv/api/1/session', '/api/1/session', '/catdv/api/session', '/api/session'];
+            let found = false;
 
-            // Try POST first (modern CatDV)
+            for (const path of variations) {
+                let loginUrl = baseUrl;
+                if (path.startsWith('/catdv')) {
+                    loginUrl = loginUrl.includes('/catdv') ? `${loginUrl}${path.slice(6)}` : `${loginUrl}${path}`;
+                } else {
+                    loginUrl = `${loginUrl}${path}`;
+                }
+
+                const commonHeaders = {
+                    'User-Agent': 'PostmanRuntime/7.51.1',
+                    'Accept': '*/*',
+                    'ngrok-skip-browser-warning': 'true'
+                };
+
+                try {
+                    const getUrl = `${loginUrl}${loginUrl.includes('?') ? '&' : '?'}usr=${encodeURIComponent(username)}&pwd=${encodeURIComponent(password)}`;
+                    const res = await fetch(getUrl, { method: 'GET', headers: commonHeaders, redirect: 'follow' });
+                    const text = await res.text();
+
+                    if (text.includes('session limit') || text.includes('"status":"BUSY"')) {
+                        return createResponse({ error: 'CatDV Session Limit Reached', details: text.slice(0, 100) }, 429);
+                    }
+
+                    if (res.ok) {
+                        const setCookie = res.headers.get('set-cookie');
+                        const cookieId = setCookie?.match(/JSESSIONID=([^;]+)/i)?.[1];
+                        let jsonData = {};
+                        try { jsonData = JSON.parse(text); } catch (e) { }
+                        activeSessionId = cookieId || extractSessionId(jsonData);
+
+                        if (activeSessionId) {
+                            console.log(`[${reqId}] Login Success: ${activeSessionId}`);
+                            found = true;
+                            break;
+                        }
+                    }
+                } catch (e) { console.error(`Login error at ${loginUrl}:`, e.message); }
+            }
+            if (!found) return createResponse({ error: 'CatDV Login Failed' }, 401);
+        }
+
+        if (!activeSessionId) return createResponse({ error: 'Missing session' }, 401);
+        if (action === 'login') return createResponse({ success: true, sessionId: activeSessionId });
+
+        // --- SYNC PICKLIST ---
+        if (action === 'sync_catdv_picklist') {
+            if (!fieldName || !Array.isArray(newOptions)) return createResponse({ error: 'Missing fieldName or options' }, 400);
+
+            // 1. LOOKUP FIELD ID (User says use /9/fields)
+            console.log(`[${reqId}] Looking up internal ID for field: ${fieldName}`);
+            let internalFieldId = fieldName;
+
+            const lookupUrl = `${apiBase}/9/fields`;
             try {
-                const loginRes = await fetch(`${apiBase}/session`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password })
+                const lookupRes = await fetch(lookupUrl, {
+                    headers: {
+                        'Cookie': `JSESSIONID=${activeSessionId}`,
+                        'ngrok-skip-browser-warning': 'true',
+                        'User-Agent': 'PostmanRuntime/7.51.1'
+                    }
                 });
 
-                const loginText = await loginRes.text();
-                console.log(`[${reqId}] Login response status: ${loginRes.status}`);
+                if (lookupRes.ok) {
+                    const fieldsData = await lookupRes.json();
+                    const fields = Array.isArray(fieldsData) ? fieldsData : (fieldsData.data || []);
 
-                if (loginRes.ok) {
-                    const loginData = JSON.parse(loginText);
-                    activeSessionId = loginData.id || loginData.sessionId || loginData.jSessionId;
-                    console.log(`[${reqId}] Login successful, session: ${activeSessionId}`);
-                } else {
-                    // If POST fails, try GET (legacy CatDV)
-                    console.log(`[${reqId}] POST login failed, trying legacy GET login...`);
-                    const legacyUrl = `${apiBase}/session?usr=${encodeURIComponent(username)}&pwd=${encodeURIComponent(password)}`;
-                    const legacyRes = await fetch(legacyUrl);
-                    const legacyText = await legacyRes.text();
+                    const match = fields.find((f: any) =>
+                        f.name?.toLowerCase() === fieldName.toLowerCase() ||
+                        f.identifier?.toLowerCase() === fieldName.toLowerCase() ||
+                        String(f.id) === String(fieldName)
+                    );
 
-                    if (legacyRes.ok) {
-                        const legacyData = JSON.parse(legacyText);
-                        activeSessionId = legacyData.id || legacyData.sessionId || legacyData.jSessionId;
-                        console.log(`[${reqId}] Legacy login successful, session: ${activeSessionId}`);
+                    if (match) {
+                        internalFieldId = match.id;
+                        console.log(`[${reqId}] Found match: ${match.name} (ID: ${internalFieldId})`);
                     } else {
-                        console.error(`[${reqId}] Both login methods failed. Status: ${legacyRes.status}`);
-                        return createResponse({ error: 'CatDV Login Failed', details: legacyText }, 401);
+                        console.warn(`[${reqId}] No field match found in /9/fields for "${fieldName}". Proceeding with raw ID if numeric.`);
                     }
                 }
-            } catch (err: any) {
-                console.error(`[${reqId}] Network error during login:`, err.message);
-                return createResponse({ error: 'Connection to CatDV failed', details: err.message }, 500);
-            }
-        }
-
-        if (!activeSessionId) {
-            return createResponse({ error: 'Missing session. Please provide credentials.' }, 401);
-        }
-
-        if (action === 'login') {
-            return createResponse({ success: true, sessionId: activeSessionId });
-        }
-
-        // --- SYNC PICKLIST ACTION ---
-        if (action === 'sync_catdv_picklist') {
-            if (!fieldName || !Array.isArray(newOptions)) {
-                return createResponse({ error: 'Missing fieldName or options array' }, 400);
+            } catch (e: any) {
+                console.warn(`[${reqId}] Field lookup failed at ${lookupUrl}:`, e.message);
             }
 
-            console.log(`[${reqId}] Syncing picklist for field: ${fieldName}`);
-
-            // Research says: PUT /catdv/api/admin/v1/fields/{fieldId}/list
-            // Note: We might need to try multiple path variations
+            // 2. DO THE SYNC (User says use: /9/fields/{id}/list?groupID=1&include=values)
             const variations = [
-                `${apiBase}/admin/v1/fields/${fieldName}/list`,
-                `${apiBase}/admin/fields/${fieldName}/list`,
-                `${apiBase}/fields/${fieldName}/list`
+                `${apiBase}/9/fields/${internalFieldId}/list?groupID=1&include=values`,
+                `${apiBase}/1/fields/${internalFieldId}/list`,
+                `${apiBase}/admin/1/fields/${internalFieldId}/list`,
+                `${apiBase}/fields/${internalFieldId}/list`
             ];
 
-            let lastError = null;
+            let lastErr = null;
             for (const putUrl of variations) {
-                console.log(`[${reqId}] Trying PUT to: ${putUrl}`);
-
+                console.log(`[${reqId}] Syncing to: ${putUrl}`);
                 try {
                     const response = await fetch(putUrl, {
                         method: 'PUT',
                         headers: {
                             'Content-Type': 'application/json',
-                            'Cookie': `JSESSIONID=${activeSessionId}`
+                            'Cookie': `JSESSIONID=${activeSessionId}`,
+                            'ngrok-skip-browser-warning': 'true',
+                            'User-Agent': 'PostmanRuntime/7.51.1'
                         },
                         body: JSON.stringify({
+                            fieldGroupID: 1,
+                            memberOf: "clip",
+                            identifier: fieldName.includes('.') ? fieldName : `custom.${fieldName.toLowerCase().replace(/\s/g, '.')}`,
+                            name: fieldName,
+                            fieldType: "picklist",
                             values: newOptions,
-                            isExtensible: false,
+                            isExtensible: true,
                             isKeptSorted: true,
-                            savesValues: false,
-                            isLocked: true
+                            savesValues: true,
+                            isLocked: false
                         })
                     });
 
-                    const resText = await response.text();
-                    console.log(`[${reqId}] Response [${response.status}] from ${putUrl}`);
-
-                    if (response.ok) {
-                        let resData = {};
-                        try { resData = JSON.parse(resText); } catch (e) { }
-                        return createResponse({ success: true, data: resData, method: putUrl });
-                    }
-
-                    lastError = { status: response.status, body: resText, url: putUrl };
-
-                    if (response.status === 401) {
-                        console.warn(`[${reqId}] Session expired or invalid at ${putUrl}`);
-                    }
-                } catch (e: any) {
-                    console.error(`[${reqId}] Error calling ${putUrl}:`, e.message);
-                    lastError = { error: e.message, url: putUrl };
-                }
+                    if (response.ok) return createResponse({ success: true, fieldId: internalFieldId, method: putUrl });
+                    lastErr = { status: response.status, body: await response.text(), url: putUrl };
+                    if (response.status === 401) break;
+                } catch (e: any) { lastErr = { error: e.message, url: putUrl }; }
             }
 
-            return createResponse({
-                error: 'CatDV Sync Failed after trying all path variations',
-                details: lastError
-            }, lastError?.status || 500);
+            return createResponse({ error: 'CatDV Sync Failed', details: lastErr }, lastErr?.status || 500);
         }
 
         return createResponse({ error: 'Unsupported action' }, 400);
