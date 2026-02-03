@@ -176,8 +176,8 @@ serve(async (req) => {
             const updatePayload = {
                 // Only sending back fields likely to be accepted for update
                 options: updatedOptions,
-                label: fieldData.label,
-                description: fieldData.description,
+                label: fieldData.label || fieldData.name || fieldData.id,
+                description: fieldData.description || "",
                 field_type: fieldData.field_type,
                 name: fieldData.name || fieldData.id // Ensure name is present, as it might be required for validation
             };
