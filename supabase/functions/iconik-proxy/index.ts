@@ -151,13 +151,19 @@ serve(async (req) => {
 
             // Add or update options
             let addedCount = 0;
-            newOptions.forEach((optStr: string) => {
-                if (!optionMap.has(optStr)) {
-                    // If existing options are objects, add as object. Default to string.
-                    if (existingOptions.length > 0 && typeof existingOptions[0] === 'object') {
-                        optionMap.set(optStr, { label: optStr, value: optStr });
+            const isObjectField = existingOptions.length > 0
+                ? typeof existingOptions[0] === 'object'
+                : (newOptions.length > 0 && typeof newOptions[0] === 'object');
+
+            newOptions.forEach((newOpt: any) => {
+                const val = typeof newOpt === 'object' ? newOpt.value : newOpt;
+                const label = typeof newOpt === 'object' ? newOpt.label : newOpt;
+
+                if (!optionMap.has(val)) {
+                    if (isObjectField) {
+                        optionMap.set(val, { label: label, value: val });
                     } else {
-                        optionMap.set(optStr, optStr);
+                        optionMap.set(val, val);
                     }
                     addedCount++;
                 }
