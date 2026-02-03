@@ -33,7 +33,9 @@ import {
   Search,
   Check,
   Terminal,
-  Code2
+  Code2,
+  Database,
+  ArrowRight
 } from 'lucide-react';
 
 interface Props {
@@ -342,8 +344,24 @@ export const Engine: React.FC<Props> = ({
   // Iconik Sync Logic
   const [isSyncingIconik, setIsSyncingIconik] = useState(false);
   const [isSyncIconikSuccess, setIsSyncIconikSuccess] = useState(false);
+  const [isIconikModalOpen, setIsIconikModalOpen] = useState(false);
+  const [targetFieldLabel, setTargetFieldLabel] = useState('');
 
-  const handleIconikSync = async () => {
+  // CatDV Sync State
+  const [isSyncingCatdv, setIsSyncingCatdv] = useState(false);
+  const [isSyncCatdvSuccess, setIsSyncCatdvSuccess] = useState(false);
+  const [isCatdvModalOpen, setIsCatdvModalOpen] = useState(false);
+  const [catdvFieldName, setCatdvFieldName] = useState('Name');
+
+  const handleIconikSync = () => {
+    setIsIconikModalOpen(true);
+  };
+
+  const handleCatdvSync = () => {
+    setIsCatdvModalOpen(true);
+  };
+
+  const performIconikSync = async () => {
     setIsSyncingIconik(true);
     setIsSyncIconikSuccess(false);
 
@@ -356,8 +374,11 @@ export const Engine: React.FC<Props> = ({
       }
 
       const config = JSON.parse(savedConfig);
-      if (!config.appId || !config.authToken || !config.fieldLabel) {
-        alert('Missing Iconik credentials or Field Label in settings.');
+      const appId = config.appId;
+      const authToken = config.authToken;
+
+      if (!appId || !authToken) {
+        alert('Missing Iconik credentials in settings.');
         setIsSyncingIconik(false);
         return;
       }
@@ -365,8 +386,6 @@ export const Engine: React.FC<Props> = ({
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://rddqcxfalrlmlvirjlca.supabase.co';
       const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
       const uniqueNames = Array.from(new Set(processedAthletes.map(a => a.fullName).filter(Boolean)));
-
-      console.log(`[Engine] Syncing ${uniqueNames.length} names to field: ${config.fieldLabel}`);
 
       const response = await fetch(`${supabaseUrl}/functions/v1/iconik-proxy`, {
         method: 'POST',
@@ -376,9 +395,9 @@ export const Engine: React.FC<Props> = ({
         },
         body: JSON.stringify({
           action: 'sync_field_options',
-          appId: config.appId,
-          authToken: config.authToken,
-          fieldName: config.fieldLabel,
+          appId: appId,
+          authToken: authToken,
+          fieldName: targetFieldLabel.trim(),
           options: uniqueNames
         })
       });
@@ -389,15 +408,73 @@ export const Engine: React.FC<Props> = ({
         throw new Error(data?.error || data?.details || response.statusText || 'Sync request failed');
       }
 
-      console.log('[Engine] Sync success:', data);
       setIsSyncIconikSuccess(true);
       setTimeout(() => setIsSyncIconikSuccess(false), 5000);
+      setIsIconikModalOpen(false);
 
     } catch (err: any) {
       console.error('Iconik Sync Failed:', err);
       alert(`Sync failed: ${err.message}`);
     } finally {
       setIsSyncingIconik(false);
+    }
+  };
+
+  const performCatdvSync = async () => {
+    setIsSyncingCatdv(true);
+    setIsSyncCatdvSuccess(false);
+
+    try {
+      const savedConfig = localStorage.getItem('catdvConfig');
+      if (!savedConfig) {
+        alert('Please configure CatDV settings first.');
+        setIsSyncingCatdv(false);
+        return;
+      }
+
+      const config = JSON.parse(savedConfig);
+      if (!config.ipAddress || !config.username || !config.password) {
+        alert('Incomplete CatDV credentials in settings.');
+        setIsSyncingCatdv(false);
+        return;
+      }
+
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://rddqcxfalrlmlvirjlca.supabase.co';
+      const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+      const uniqueNames = Array.from(new Set(processedAthletes.map(a => a.fullName).filter(Boolean)));
+
+      const response = await fetch(`${supabaseUrl}/functions/v1/catdv-proxy`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${supabaseAnonKey}`,
+        },
+        body: JSON.stringify({
+          action: 'sync_catdv_picklist',
+          server: config.ipAddress.trim(),
+          username: config.username.trim(),
+          password: config.password.trim(),
+          sessionId: config.sessionId?.trim() || '',
+          fieldName: catdvFieldName.trim(),
+          options: uniqueNames
+        })
+      });
+
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        throw new Error(data?.error || data?.details || response.statusText || 'CatDV Sync failed');
+      }
+
+      setIsSyncCatdvSuccess(true);
+      setTimeout(() => setIsSyncCatdvSuccess(false), 5000);
+      setIsCatdvModalOpen(false);
+
+    } catch (err: any) {
+      console.error('CatDV Sync Failed:', err);
+      alert(`Sync failed: ${err.message}`);
+    } finally {
+      setIsSyncingCatdv(false);
     }
   };
 
@@ -685,6 +762,21 @@ export const Engine: React.FC<Props> = ({
                         )}
                         {isSyncingIconik ? 'Syncing...' : isSyncIconikSuccess ? 'Synced!' : 'Sync to Iconik'}
                       </button>
+
+                      <button
+                        onClick={handleCatdvSync}
+                        disabled={isSyncingCatdv || processedAthletes.length === 0}
+                        className={`w-full flex items-center justify-center gap-3 px-6 py-3.5 rounded-xl border font-bold text-sm transition-all uppercase tracking-widest ${isSyncCatdvSuccess ? 'bg-green-50 text-green-600 border-green-200' : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'}`}
+                      >
+                        {isSyncingCatdv ? (
+                          <Loader2 size={18} className="animate-spin text-emerald-500" />
+                        ) : isSyncCatdvSuccess ? (
+                          <CheckCircle2 size={18} />
+                        ) : (
+                          <Database size={18} />
+                        )}
+                        {isSyncingCatdv ? 'Syncing...' : isSyncCatdvSuccess ? 'Synced!' : 'Sync to CatDV'}
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -760,6 +852,145 @@ export const Engine: React.FC<Props> = ({
           </div>
         )
       }
+      {/* Iconik Sync Modal */}
+      {isIconikModalOpen && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4" onClick={() => setIsIconikModalOpen(false)}>
+          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl w-full max-w-md border border-gray-100 dark:border-gray-800 overflow-hidden transform transition-all animate-in fade-in zoom-in-95 duration-200" onClick={(e) => e.stopPropagation()}>
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xl font-black text-gray-900 dark:text-white flex items-center gap-2">
+                  <Globe size={20} className="text-[#5B5FFF]" />
+                  Sync to Iconik
+                </h3>
+                <button
+                  onClick={() => setIsIconikModalOpen(false)}
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-100 dark:border-blue-800/50">
+                  <p className="text-sm text-blue-700 dark:text-blue-300 font-medium leading-relaxed">
+                    Enter the exact <strong>Field Name</strong> (ID) from Iconik where you want to add these athletes.
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-gray-500 uppercase tracking-widest pl-1">
+                    Target Field Name
+                  </label>
+                  <input
+                    type="text"
+                    value={targetFieldLabel}
+                    onChange={(e) => setTargetFieldLabel(e.target.value)}
+                    placeholder="e.g. athlete_names_v1"
+                    className="w-full p-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-bold focus:ring-2 focus:ring-[#5B5FFF]/20 focus:border-[#5B5FFF] outline-none transition-all placeholder:font-medium text-gray-900 dark:text-white"
+                    autoFocus
+                  />
+                </div>
+              </div>
+
+              <div className="mt-8 flex gap-3">
+                <button
+                  onClick={() => setIsIconikModalOpen(false)}
+                  className="flex-1 px-4 py-3 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 font-bold rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={performIconikSync}
+                  disabled={!targetFieldLabel.trim() || isSyncingIconik}
+                  className="flex-1 px-4 py-3 bg-[#5B5FFF] text-white font-bold rounded-xl hover:bg-[#4a4eff] transition-all shadow-lg shadow-[#5B5FFF]/20 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {isSyncingIconik ? (
+                    <>
+                      <Loader2 size={18} className="animate-spin" />
+                      Syncing...
+                    </>
+                  ) : (
+                    <>
+                      Sync Now
+                      <ArrowRight size={18} />
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* CatDV Sync Modal */}
+      {isCatdvModalOpen && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4" onClick={() => setIsCatdvModalOpen(false)}>
+          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl w-full max-w-md border border-gray-100 dark:border-gray-800 overflow-hidden transform transition-all animate-in fade-in zoom-in-95 duration-200" onClick={(e) => e.stopPropagation()}>
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xl font-black text-gray-900 dark:text-white flex items-center gap-2">
+                  <Database size={20} className="text-emerald-500" />
+                  Sync to CatDV
+                </h3>
+                <button
+                  onClick={() => setIsCatdvModalOpen(false)}
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div className="p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl border border-emerald-100 dark:border-emerald-800/50">
+                  <p className="text-sm text-emerald-700 dark:text-emerald-300 font-medium leading-relaxed">
+                    Enter the exact <strong>Field Name</strong> in CatDV where you want to add these athletes.
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-gray-500 uppercase tracking-widest pl-1">
+                    CatDV Field Name
+                  </label>
+                  <input
+                    type="text"
+                    value={catdvFieldName}
+                    onChange={(e) => setCatdvFieldName(e.target.value)}
+                    placeholder="e.g. Name"
+                    className="w-full p-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-bold focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all placeholder:font-medium text-gray-900 dark:text-white"
+                    autoFocus
+                  />
+                </div>
+              </div>
+
+              <div className="mt-8 flex gap-3">
+                <button
+                  onClick={() => setIsCatdvModalOpen(false)}
+                  className="flex-1 px-4 py-3 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 font-bold rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={performCatdvSync}
+                  disabled={!catdvFieldName.trim() || isSyncingCatdv}
+                  className="flex-1 px-4 py-3 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-500 transition-all shadow-lg shadow-emerald-500/20 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {isSyncingCatdv ? (
+                    <>
+                      <Loader2 size={18} className="animate-spin" />
+                      Syncing...
+                    </>
+                  ) : (
+                    <>
+                      Sync Now
+                      <ArrowRight size={18} />
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div >
   );
 };

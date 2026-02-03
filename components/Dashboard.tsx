@@ -184,8 +184,18 @@ export const Dashboard: React.FC<Props> = ({
   const [isIconikModalOpen, setIsIconikModalOpen] = useState(false);
   const [targetFieldLabel, setTargetFieldLabel] = useState('');
 
+  // CatDV Sync State
+  const [isSyncingCatdv, setIsSyncingCatdv] = useState(false);
+  const [isSyncCatdvSuccess, setIsSyncCatdvSuccess] = useState(false);
+  const [isCatdvModalOpen, setIsCatdvModalOpen] = useState(false);
+  const [catdvFieldName, setCatdvFieldName] = useState('Name');
+
   const handleIconikSync = () => {
     setIsIconikModalOpen(true);
+  };
+
+  const handleCatdvSync = () => {
+    setIsCatdvModalOpen(true);
   };
 
   const performIconikSync = async () => {
@@ -261,6 +271,77 @@ export const Dashboard: React.FC<Props> = ({
       alert(err.message);
     } finally {
       setIsSyncingIconik(false);
+    }
+  };
+
+  const performCatdvSync = async () => {
+    if (!selectedRoster) return;
+    if (!catdvFieldName.trim()) {
+      alert('Please enter a Field Name.');
+      return;
+    }
+
+    setIsSyncingCatdv(true);
+
+    // Get credentials from localStorage
+    const savedConfig = localStorage.getItem('catdvConfig');
+    if (!savedConfig) {
+      alert('Missing CatDV credentials. Please configure them in Settings.');
+      setIsSyncingCatdv(false);
+      return;
+    }
+
+    const { ipAddress, username, password, sessionId } = JSON.parse(savedConfig);
+
+    if (!ipAddress || !username || !password) {
+      alert('Incomplete CatDV credentials. Please check Settings.');
+      setIsSyncingCatdv(false);
+      return;
+    }
+
+    // Build payload
+    const teamName = selectedRoster.teamName;
+    const athletes = selectedRoster.rosterData || [];
+
+    const payload = {
+      action: 'sync_catdv_picklist',
+      server: ipAddress.trim(),
+      username: username.trim(),
+      password: password.trim(),
+      sessionId: sessionId?.trim() || '',
+      fieldName: catdvFieldName.trim(),
+      options: athletes.map(a => a.fullName)
+    };
+
+    try {
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://rddqcxfalrlmlvirjlca.supabase.co';
+      const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+      // Note: Reusing a generic proxy or preparing for catdv-proxy
+      const response = await fetch(`${supabaseUrl}/functions/v1/catdv-proxy`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${supabaseAnonKey}`,
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        throw new Error(data?.error || response.statusText || 'CatDV Sync failed');
+      }
+
+      setIsSyncCatdvSuccess(true);
+      setTimeout(() => setIsSyncCatdvSuccess(false), 5000);
+      setIsCatdvModalOpen(false);
+
+    } catch (err: any) {
+      console.error('CatDV Sync Failed:', err);
+      alert(err.message);
+    } finally {
+      setIsSyncingCatdv(false);
     }
   };
 
@@ -580,6 +661,24 @@ export const Dashboard: React.FC<Props> = ({
                         </div>
                         <ArrowRight size={18} className="text-gray-300 group-hover:text-[#5B5FFF] group-hover:translate-x-1 transition-all shrink-0" />
                       </button>
+                      <button
+                        onClick={handleCatdvSync}
+                        disabled={isSyncingCatdv}
+                        className="w-full flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 hover:bg-emerald-500/5 dark:hover:bg-emerald-500/10 rounded-lg transition-all group border border-gray-100 dark:border-gray-800 hover:border-emerald-500/20"
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className={`w-12 h-12 rounded-lg flex items-center justify-center shadow-sm transition-colors group-hover:scale-110 ${isSyncCatdvSuccess ? 'bg-green-100 text-green-600' : 'bg-white dark:bg-gray-800 text-gray-400 group-hover:text-emerald-500'}`}>
+                            {isSyncingCatdv ? <Loader2 size={24} className="animate-spin" /> : isSyncCatdvSuccess ? <Check size={24} /> : <Database size={20} />}
+                          </div>
+                          <div className="text-left min-w-0">
+                            <div className="text-sm font-extrabold text-gray-900 dark:text-white truncate">Sync to CatDV</div>
+                            <div className="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-tight mt-0.5 truncate">
+                              {isSyncingCatdv ? 'Syncing...' : isSyncCatdvSuccess ? 'Synced Successfully!' : 'Update Picklist'}
+                            </div>
+                          </div>
+                        </div>
+                        <ArrowRight size={18} className="text-gray-300 group-hover:text-emerald-500 group-hover:translate-x-1 transition-all shrink-0" />
+                      </button>
                       <ExportItem icon={<Cloud size={20} />} title="CatDV Schema" desc="JSON Picklist Definition." onClick={() => handleExport('CATDV_JSON')} />
                     </div>
                   </div>
@@ -647,6 +746,76 @@ export const Dashboard: React.FC<Props> = ({
                     className="flex-1 px-4 py-3 bg-[#5B5FFF] text-white font-bold rounded-xl hover:bg-[#4a4eff] transition-all shadow-lg shadow-[#5B5FFF]/20 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
                     {isSyncingIconik ? (
+                      <>
+                        <Loader2 size={18} className="animate-spin" />
+                        Syncing...
+                      </>
+                    ) : (
+                      <>
+                        Sync Now
+                        <ArrowRight size={18} />
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* CatDV Sync Modal */}
+        {isCatdvModalOpen && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4" onClick={() => setIsCatdvModalOpen(false)}>
+            <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl w-full max-w-md border border-gray-100 dark:border-gray-800 overflow-hidden transform transition-all animate-in fade-in zoom-in-95 duration-200" onClick={(e) => e.stopPropagation()}>
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-xl font-black text-gray-900 dark:text-white flex items-center gap-2">
+                    <Database size={20} className="text-emerald-500" />
+                    Sync to CatDV
+                  </h3>
+                  <button
+                    onClick={() => setIsCatdvModalOpen(false)}
+                    className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl border border-emerald-100 dark:border-emerald-800/50">
+                    <p className="text-sm text-emerald-700 dark:text-emerald-300 font-medium leading-relaxed">
+                      Enter the exact <strong>Field Name</strong> in CatDV where you want to add these athletes.
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-gray-500 uppercase tracking-widest pl-1">
+                      CatDV Field Name
+                    </label>
+                    <input
+                      type="text"
+                      value={catdvFieldName}
+                      onChange={(e) => setCatdvFieldName(e.target.value)}
+                      placeholder="e.g. Name"
+                      className="w-full p-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-bold focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all placeholder:font-medium text-gray-900 dark:text-white"
+                      autoFocus
+                    />
+                  </div>
+                </div>
+
+                <div className="mt-8 flex gap-3">
+                  <button
+                    onClick={() => setIsCatdvModalOpen(false)}
+                    className="flex-1 px-4 py-3 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 font-bold rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={performCatdvSync}
+                    disabled={!catdvFieldName.trim() || isSyncingCatdv}
+                    className="flex-1 px-4 py-3 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-500 transition-all shadow-lg shadow-emerald-500/20 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    {isSyncingCatdv ? (
                       <>
                         <Loader2 size={18} className="animate-spin" />
                         Syncing...
