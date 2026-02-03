@@ -937,6 +937,7 @@ export const ESPN_TEAM_IDS: Record<string, TeamLogoInfo> = {
   "ST. LOUIS CITY SC": { id: 25000, sport: "soccer", league: "usa.1", logoUrl: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/mls/st-louis-city-sc.png", primaryColor: "#e51837", secondaryColor: "#1d1d1b" },
   "TORONTO FC": { id: 18102, sport: "soccer", league: "usa.1", logoUrl: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/mls/toronto-fc.png", primaryColor: "#b81137", secondaryColor: "#414042" },
   "VANCOUVER WHITECAPS FC": { id: 18106, sport: "soccer", league: "usa.1", logoUrl: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/mls/vancouver-whitecaps-fc.png", primaryColor: "#00245e", secondaryColor: "#9cc2e5" },
+  "SAN DIEGO FC": { id: 22529, sport: "soccer", league: "usa.1", logoUrl: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/mls/san-diego-fc.png", primaryColor: "#697a7C", secondaryColor: "#F89E1A" },
   // NWSL (National Women's Soccer League)
   "ANGEL CITY FC": { id: 21422, sport: "soccer", league: "usa.nwsl", logoUrl: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/nwsl/angel-city-fc.png", primaryColor: "#F2D4D7", secondaryColor: "#010101" },
   "ANGEL CITY": { id: 21422, sport: "soccer", league: "usa.nwsl", logoUrl: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/nwsl/angel-city-fc.png", primaryColor: "#F2D4D7", secondaryColor: "#010101" },
