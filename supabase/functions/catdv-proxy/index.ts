@@ -45,11 +45,15 @@ serve(async (req) => {
                 });
 
                 if (loginRes.ok) {
-                    const loginData = await loginRes.json();
+                    const loginData = await loginRes.json().catch(() => ({}));
                     activeSessionId = loginData.id || loginData.sessionId || loginData.jsessionid;
+                    if (!activeSessionId) {
+                        console.error('Login succeeded but no session ID found in response:', loginData);
+                        return new Response(JSON.stringify({ error: 'CatDV Login Failed', details: 'No session ID in response' }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+                    }
                     console.log('Login successful, obtained session:', activeSessionId);
                 } else {
-                    const errText = await loginRes.text();
+                    const errText = await loginRes.text().catch(() => 'Could not read error text');
                     console.error('Login failed:', loginRes.status, errText);
                     return new Response(JSON.stringify({ error: 'CatDV Login Failed', details: errText }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
                 }
@@ -114,21 +118,26 @@ serve(async (req) => {
                 }
             }
 
-            const data = await response.json().catch(() => null);
-            const text = !data ? await response.text().catch(() => 'No response body') : null;
+            const responseText = await response.text();
+            let responseData = null;
+            try {
+                responseData = JSON.parse(responseText);
+            } catch (e) {
+                // Not JSON
+            }
 
             if (!response.ok) {
-                console.error('Sync failed:', response.status, data || text);
+                console.error('Sync failed:', response.status, responseData || responseText);
                 return new Response(JSON.stringify({
                     error: `CatDV Sync Failed (${response.status})`,
-                    details: data || text
+                    details: responseData || responseText
                 }), {
                     status: response.status,
                     headers: { ...corsHeaders, 'Content-Type': 'application/json' }
                 });
             }
 
-            return new Response(JSON.stringify({ success: true, data }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+            return new Response(JSON.stringify({ success: true, data: responseData }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
         }
 
         return new Response(JSON.stringify({ error: 'Unsupported action' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
