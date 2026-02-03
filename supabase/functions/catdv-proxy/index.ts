@@ -15,13 +15,19 @@ const createResponse = (body: any, status = 200) => {
 }
 
 function extractSessionId(obj: any): string | null {
-    if (!obj || typeof obj !== 'object') return null;
-    const keys = ['jsessionid', 'jSessionId', 'JSESSIONID', 'sessionId', 'id', 'token', 'accessToken'];
+    if (!obj) return null;
+    if (typeof obj === 'string' && obj.length > 10) return obj;
+    if (typeof obj !== 'object') return null;
+
+    // Check direct keys
+    const keys = ['jsessionid', 'jSessionId', 'JSESSIONID', 'sessionId', 'id', 'token', 'accessToken', 'data'];
     for (const key of keys) {
-        if (obj[key] && typeof obj[key] === 'string') return obj[key];
+        if (obj[key] && typeof obj[key] === 'string' && obj[key].length > 5) return obj[key];
     }
+
+    // Recursively check
     for (const key in obj) {
-        if (typeof obj[key] === 'object') {
+        if (obj[key] && typeof obj[key] === 'object') {
             const result = extractSessionId(obj[key]);
             if (result) return result;
         }
@@ -117,11 +123,18 @@ Deno.serve(async (req) => {
             // 1. LOOKUP FIELD ID
             console.log(`[${reqId}] Looking up internal ID for field: ${fieldName}`);
             let internalFieldId = fieldName;
-            let fieldInfo = {
+            let fieldInfo: {
+                fieldGroupID: number;
+                memberOf: string;
+                identifier: string;
+                name: string;
+                label: string;
+            } = {
                 fieldGroupID: 1,
                 memberOf: "clip",
-                identifier: fieldName.includes('.') ? fieldName : `custom.${fieldName.toLowerCase().replace(/\\s/g, '.')}`,
-                name: fieldName
+                identifier: fieldName.includes('.') ? fieldName : `custom.${fieldName.toLowerCase().replace(/\s/g, '.')}`,
+                name: fieldName,
+                label: fieldName
             };
 
             const discoveryPaths = [`${apiBase}/9/fields`, `${apiBase}/1/fields`/*, `${apiBase}/fields`*/];
@@ -129,8 +142,10 @@ Deno.serve(async (req) => {
 
             for (const lookupUrl of discoveryPaths) {
                 try {
-                    console.log(`[${reqId}] Fetching fields from: ${lookupUrl}`);
-                    const lookupRes = await fetch(lookupUrl, {
+                    const separator = lookupUrl.includes('?') ? '&' : '?';
+                    const finalUrl = `${lookupUrl}${separator}jsessionid=${activeSessionId}`;
+                    console.log(`[${reqId}] Fetching fields from: ${finalUrl}`);
+                    const lookupRes = await fetch(finalUrl, {
                         headers: {
                             'Cookie': `JSESSIONID=${activeSessionId}`,
                             'ngrok-skip-browser-warning': 'true',
@@ -141,6 +156,12 @@ Deno.serve(async (req) => {
                     if (lookupRes.ok) {
                         const rawData = await lookupRes.json();
                         console.log(`[${reqId}] Lookup response from ${lookupUrl}:`, JSON.stringify(rawData).slice(0, 500));
+
+                        // Check if the body itself indicates an error despite 200 OK
+                        if (rawData && (rawData.status === "AUTH" || rawData.errorMessage === "Authentication Required")) {
+                            console.warn(`[${reqId}] Auth failure detected in 200 response body`);
+                            continue;
+                        }
 
                         if (Array.isArray(rawData)) {
                             fields = rawData;
@@ -176,9 +197,10 @@ Deno.serve(async (req) => {
                         fieldGroupID: match.fieldGroupID || match.fieldGroupId || match.groupID || 1,
                         memberOf: match.memberOf || "clip",
                         identifier: match.identifier || match.Field || match.field || fieldInfo.identifier,
-                        name: match.name || match.Name || fieldName
+                        name: match.name || match.Name || fieldName,
+                        label: match.label || match.Label || match.name || match.Name || fieldName
                     };
-                    console.log(`[${reqId}] SUCCESS: Found match "${fieldInfo.name}" (Target ID: ${internalFieldId})`);
+                    console.log(`[${reqId}] SUCCESS: Found match "${fieldInfo.name}" (Target ID: ${internalFieldId}) (Label: ${fieldInfo.label})`);
                 } else {
                     console.warn(`[${reqId}] Field "${fieldName}" not found in discovered list.`);
                     const sample = fields.slice(0, 3).map(f => `${f.Name || f.name} (${f.Field || f.identifier})`);
@@ -197,9 +219,11 @@ Deno.serve(async (req) => {
 
             let lastErr = null;
             for (const putUrl of syncUrls) {
-                console.log(`[${reqId}] Syncing to: ${putUrl}`);
+                const separator = putUrl.includes('?') ? '&' : '?';
+                const finalPutUrl = `${putUrl}${separator}jsessionid=${activeSessionId}`;
+                console.log(`[${reqId}] Syncing to: ${finalPutUrl}`);
                 try {
-                    const response = await fetch(putUrl, {
+                    const response = await fetch(finalPutUrl, {
                         method: 'PUT',
                         headers: {
                             'Content-Type': 'application/json',
@@ -212,6 +236,7 @@ Deno.serve(async (req) => {
                             memberOf: fieldInfo.memberOf,
                             identifier: fieldInfo.identifier,
                             name: fieldInfo.name,
+                            label: fieldInfo.label || fieldInfo.name,
                             fieldType: "picklist",
                             values: newOptions,
                             isExtensible: true,
@@ -224,7 +249,12 @@ Deno.serve(async (req) => {
                     const resText = await response.text();
                     console.log(`[${reqId}] Sync Result (${response.status}): ${resText.slice(0, 500)}`);
 
-                    if (response.ok) return createResponse({ success: true, fieldId: internalFieldId, method: putUrl, catdv: resText });
+                    let resData: any = null;
+                    try { resData = JSON.parse(resText); } catch (e) { }
+
+                    if (response.ok && (!resData || (resData.status !== "AUTH" && resData.errorMessage !== "Authentication Required"))) {
+                        return createResponse({ success: true, fieldId: internalFieldId, method: finalPutUrl, catdv: resText });
+                    }
                     lastErr = { status: response.status, body: resText, url: putUrl };
                     if (response.status === 401) break;
                 } catch (e: any) {
