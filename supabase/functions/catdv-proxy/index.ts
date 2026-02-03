@@ -114,9 +114,15 @@ Deno.serve(async (req) => {
         if (action === 'sync_catdv_picklist') {
             if (!fieldName || !Array.isArray(newOptions)) return createResponse({ error: 'Missing fieldName or options' }, 400);
 
-            // 1. LOOKUP FIELD ID (User says use /9/fields)
+            // 1. LOOKUP FIELD ID
             console.log(`[${reqId}] Looking up internal ID for field: ${fieldName}`);
             let internalFieldId = fieldName;
+            let fieldInfo = {
+                fieldGroupID: 1,
+                memberOf: "clip",
+                identifier: fieldName.includes('.') ? fieldName : `custom.${fieldName.toLowerCase().replace(/\s/g, '.')}`,
+                name: fieldName
+            };
 
             const lookupUrl = `${apiBase}/9/fields`;
             try {
@@ -140,18 +146,24 @@ Deno.serve(async (req) => {
 
                     if (match) {
                         internalFieldId = match.id;
-                        console.log(`[${reqId}] Found match: ${match.name} (ID: ${internalFieldId})`);
+                        fieldInfo = {
+                            fieldGroupID: match.fieldGroupID || 1,
+                            memberOf: match.memberOf || "clip",
+                            identifier: match.identifier || fieldInfo.identifier,
+                            name: match.name || fieldName
+                        };
+                        console.log(`[${reqId}] Match Found: ${fieldInfo.name} (ID: ${internalFieldId}, Identifier: ${fieldInfo.identifier})`);
                     } else {
-                        console.warn(`[${reqId}] No field match found in /9/fields for "${fieldName}". Proceeding with raw ID if numeric.`);
+                        console.warn(`[${reqId}] No field match found in /9/fields for "${fieldName}".`);
                     }
                 }
             } catch (e: any) {
                 console.warn(`[${reqId}] Field lookup failed at ${lookupUrl}:`, e.message);
             }
 
-            // 2. DO THE SYNC (User says use: /9/fields/{id}/list?groupID=1&include=values)
+            // 2. DO THE SYNC
             const variations = [
-                `${apiBase}/9/fields/${internalFieldId}/list?groupID=1&include=values`,
+                `${apiBase}/9/fields/${internalFieldId}/list?groupID=${fieldInfo.fieldGroupID}&include=values`,
                 `${apiBase}/1/fields/${internalFieldId}/list`,
                 `${apiBase}/admin/1/fields/${internalFieldId}/list`,
                 `${apiBase}/fields/${internalFieldId}/list`
@@ -170,10 +182,10 @@ Deno.serve(async (req) => {
                             'User-Agent': 'PostmanRuntime/7.51.1'
                         },
                         body: JSON.stringify({
-                            fieldGroupID: 1,
-                            memberOf: "clip",
-                            identifier: fieldName.includes('.') ? fieldName : `custom.${fieldName.toLowerCase().replace(/\s/g, '.')}`,
-                            name: fieldName,
+                            fieldGroupID: fieldInfo.fieldGroupID,
+                            memberOf: fieldInfo.memberOf,
+                            identifier: fieldInfo.identifier,
+                            name: fieldInfo.name,
                             fieldType: "picklist",
                             values: newOptions,
                             isExtensible: true,
@@ -183,10 +195,16 @@ Deno.serve(async (req) => {
                         })
                     });
 
-                    if (response.ok) return createResponse({ success: true, fieldId: internalFieldId, method: putUrl });
-                    lastErr = { status: response.status, body: await response.text(), url: putUrl };
+                    const resText = await response.text();
+                    console.log(`[${reqId}] CatDV Response (${response.status}): ${resText.slice(0, 500)}`);
+
+                    if (response.ok) return createResponse({ success: true, fieldId: internalFieldId, method: putUrl, catdv: resText });
+                    lastErr = { status: response.status, body: resText, url: putUrl };
                     if (response.status === 401) break;
-                } catch (e: any) { lastErr = { error: e.message, url: putUrl }; }
+                } catch (e: any) {
+                    console.error(`[${reqId}] Sync error at ${putUrl}:`, e.message);
+                    lastErr = { error: e.message, url: putUrl };
+                }
             }
 
             return createResponse({ error: 'CatDV Sync Failed', details: lastErr }, lastErr?.status || 500);
