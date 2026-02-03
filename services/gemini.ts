@@ -516,9 +516,13 @@ export async function processRosterRawText(
   let result;
   try {
     const model = genAI.getGenerativeModel(modelParams);
+    const identificationInstruction = shouldSearchForBranding
+      ? `1. Identification: Use 'googleSearch' to identify the team name (e.g. "Sacramento River Cats") by searching for the athletes in 'DATA'.`
+      : `1. Identification: Identify the team name (e.g. "Boston Bruins") from the roster data using your internal knowledge. Do NOT use search tools.`;
+
     const userPrompt = `DATA:\n${text}\n\n${context}\nTier: ${tier}. Mode: ${isNocMode ? 'NOC' : 'Standard'}.\n\n` +
       `FINAL INSTRUCTIONS:\n` +
-      `1. Identification: Use 'googleSearch' to identify the team name (e.g. "Sacramento River Cats") by searching for the athletes in 'DATA'.\n` +
+      `${identificationInstruction}\n` +
       `2. Extraction: CRITICAL - You MUST extract EVERY SINGLE athlete from the 'DATA' block into the JSON results. Do not return an empty athletes list.\n` +
       `3. Return ONLY valid JSON. No conversational text.`;
 
