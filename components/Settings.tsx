@@ -137,6 +137,7 @@ const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
   const [connectionMessage, setConnectionMessage] = useState('');
   const [catdvStatus, setCatdvStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [catdvMessage, setCatdvMessage] = useState('');
+  const [isConnectingCatdv, setIsConnectingCatdv] = useState(false);
 
   const handleSaveConfig = async () => {
     setConnectionStatus('testing');
@@ -242,6 +243,61 @@ const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
     } catch (e) {
       setCatdvStatus('error');
       setCatdvMessage('Failed to save configuration.');
+    }
+  };
+
+  const handleCatdvLogin = async () => {
+    if (!catdvConfig.username || !catdvConfig.password || !catdvConfig.ipAddress) {
+      setCatdvStatus('error');
+      setCatdvMessage('Please enter Username, Password, and IP Address.');
+      return;
+    }
+
+    setIsConnectingCatdv(true);
+    setCatdvMessage('Connecting to CatDV...');
+    setCatdvStatus('idle');
+
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://rddqcxfalrlmlvirjlca.supabase.co';
+    const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+    try {
+      const response = await fetch(`${supabaseUrl}/functions/v1/catdv-proxy`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${supabaseAnonKey}`,
+        },
+        body: JSON.stringify({
+          action: 'login',
+          username: catdvConfig.username,
+          password: catdvConfig.password,
+          server: catdvConfig.ipAddress
+        })
+      });
+
+      const data = await response.json().catch(() => ({}));
+
+      if (response.ok && data.sessionId) {
+        const newConfig = {
+          ...catdvConfig,
+          sessionId: data.sessionId
+        };
+        setCatdvConfig(newConfig);
+        localStorage.setItem('catdvConfig', JSON.stringify(newConfig));
+
+        setCatdvStatus('success');
+        setCatdvMessage('Login successful! Session ID retrieved.');
+      } else {
+        const errorMsg = data.error || data.details || 'Login failed';
+        setCatdvStatus('error');
+        setCatdvMessage(errorMsg);
+      }
+
+    } catch (error: any) {
+      setCatdvStatus('error');
+      setCatdvMessage(`Network error: ${error.message}`);
+    } finally {
+      setIsConnectingCatdv(false);
     }
   };
 
@@ -773,13 +829,29 @@ const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
                           {catdvMessage}
                         </div>
                       )}
+                      {isConnectingCatdv && (
+                        <div className="flex items-center gap-2 text-emerald-500 text-sm font-bold">
+                          <Loader2 size={16} className="animate-spin" />
+                          Connecting...
+                        </div>
+                      )}
                     </div>
-                    <button
-                      onClick={handleSaveCatdvConfig}
-                      className="px-8 py-3 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-500/20 hover:scale-[1.02] active:scale-[0.98] flex items-center gap-2"
-                    >
-                      Save CatDV Configuration
-                    </button>
+                    <div className="flex gap-3">
+                      <button
+                        onClick={handleCatdvLogin}
+                        disabled={isConnectingCatdv}
+                        className="px-6 py-3 bg-white border-2 border-emerald-500 text-emerald-600 font-bold rounded-xl hover:bg-emerald-50 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                      >
+                        <LogIn size={18} />
+                        {isConnectingCatdv ? 'Logging in...' : 'Login & Get Session'}
+                      </button>
+                      <button
+                        onClick={handleSaveCatdvConfig}
+                        className="px-8 py-3 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-500/20 hover:scale-[1.02] active:scale-[0.98] flex items-center gap-2"
+                      >
+                        Save
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>

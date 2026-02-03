@@ -58,6 +58,11 @@ serve(async (req) => {
             return new Response(JSON.stringify({ error: 'No active session. Please provide credentials or a session ID.' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
         }
 
+        // --- EXPLICIT LOGIN ACTION ---
+        if (action === 'login') {
+            return new Response(JSON.stringify({ success: true, sessionId: activeSessionId }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+        }
+
         // --- SYNC PICKLIST ACTION ---
         if (action === 'sync_catdv_picklist') {
             if (!fieldName || !Array.isArray(newOptions)) {
