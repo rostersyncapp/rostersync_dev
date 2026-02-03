@@ -55,7 +55,8 @@ import {
   MonitorPlay,
   Database,
   Layers,
-  FileText
+  FileText,
+  Shirt
 } from 'lucide-react';
 
 interface Props {
@@ -189,6 +190,9 @@ export const Dashboard: React.FC<Props> = ({
   const [isSyncCatdvSuccess, setIsSyncCatdvSuccess] = useState(false);
   const [isCatdvModalOpen, setIsCatdvModalOpen] = useState(false);
   const [catdvFieldName, setCatdvFieldName] = useState('roster');
+
+  // Health Detail State
+  const [isHealthModalOpen, setIsHealthModalOpen] = useState(false);
 
   const handleIconikSync = () => {
     setIsIconikModalOpen(true);
@@ -462,7 +466,11 @@ export const Dashboard: React.FC<Props> = ({
   };
 
   const totalAthletes = filteredRosters.reduce((acc, r) => acc + (r.athleteCount || 0), 0);
-  const totalMissingData = filteredRosters.flatMap(r => r.rosterData || []).filter(a =>
+
+  const allAthletes = filteredRosters.flatMap(r => r.rosterData || []);
+  const missingJerseys = allAthletes.filter(a => !a.jerseyNumber || a.jerseyNumber === '00').length;
+  const missingPositions = allAthletes.filter(a => !a.position || a.position === '?' || a.position === '').length;
+  const totalMissingData = allAthletes.filter(a =>
     !a.jerseyNumber || a.jerseyNumber === '00' || !a.position || a.position === '?' || a.position === ''
   ).length;
 
@@ -885,7 +893,10 @@ export const Dashboard: React.FC<Props> = ({
         </div>
 
         {/* Health Card */}
-        <div className="group relative bg-white/40 dark:bg-gray-900/40 backdrop-blur-xl p-6 rounded-3xl border border-white/20 dark:border-gray-800/50 shadow-xl transition-all hover:scale-[1.02] hover:shadow-emerald-500/10 overflow-hidden">
+        <div
+          onClick={() => setIsHealthModalOpen(true)}
+          className="group relative bg-white/40 dark:bg-gray-900/40 backdrop-blur-xl p-6 rounded-3xl border border-white/20 dark:border-gray-800/50 shadow-xl transition-all hover:scale-[1.02] hover:shadow-emerald-500/10 overflow-hidden cursor-pointer"
+        >
           <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 blur-3xl -mr-16 -mt-16 group-hover:bg-emerald-500/20 transition-colors"></div>
           <div className="flex items-center justify-between mb-4">
             <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center shadow-inner"><Activity size={20} /></div>
@@ -899,6 +910,93 @@ export const Dashboard: React.FC<Props> = ({
             </div>
           </div>
         </div>
+
+        {/* Health Details Modal */}
+        {isHealthModalOpen && (
+          <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/60 backdrop-blur-md p-4 animate-in fade-in duration-300" onClick={() => setIsHealthModalOpen(false)}>
+            <div
+              className="bg-white dark:bg-gray-900 rounded-[2.5rem] shadow-2xl w-full max-w-lg border border-white/20 dark:border-gray-800 overflow-hidden transform transition-all animate-in zoom-in-95 duration-300"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="p-10">
+                <div className="flex items-center justify-between mb-10">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center shadow-inner">
+                      <Activity size={28} />
+                    </div>
+                    <div>
+                      <h3 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">System Health</h3>
+                      <p className="text-[11px] text-gray-400 font-bold uppercase tracking-[0.2em] mt-1">Audit Breakdown</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setIsHealthModalOpen(false)}
+                    className="p-3 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-2xl text-gray-400 hover:text-gray-900 dark:hover:text-white transition-all transform hover:rotate-90"
+                  >
+                    <X size={24} />
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 gap-6">
+                  <div className="bg-emerald-500/5 dark:bg-emerald-500/10 rounded-3xl p-8 border border-emerald-500/10">
+                    <div className="flex items-end justify-between mb-2">
+                      <div className="text-[11px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-[0.2em] font-mono">Overall Score</div>
+                      <div className="text-5xl font-black text-emerald-500 tracking-tighter">{healthScore}%</div>
+                    </div>
+                    <div className="h-4 bg-emerald-500/10 rounded-full overflow-hidden border border-emerald-500/10">
+                      <div className="h-full bg-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.5)] transition-all duration-1000" style={{ width: `${healthScore}%` }}></div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="p-6 bg-gray-50/50 dark:bg-gray-800/50 rounded-3xl border border-gray-100 dark:border-gray-700/50">
+                      <div className="text-gray-400 font-bold text-[10px] uppercase tracking-widest mb-1 font-mono">Total Athletes</div>
+                      <div className="text-2xl font-black text-gray-900 dark:text-white">{totalAthletes}</div>
+                    </div>
+                    <div className="p-6 bg-emerald-50/50 dark:bg-emerald-500/5 rounded-3xl border border-emerald-100/50 dark:border-emerald-500/10">
+                      <div className="text-emerald-600 dark:text-emerald-400 font-bold text-[10px] uppercase tracking-widest mb-1 font-mono">Complete</div>
+                      <div className="text-2xl font-black text-emerald-500">{totalAthletes - totalMissingData}</div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3 pt-2">
+                    <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.25em] ml-1 mb-4">Integrity Issues</h4>
+
+                    <div className="flex items-center justify-between p-5 bg-orange-500/5 rounded-2xl border border-orange-500/10 group hover:bg-orange-500/10 transition-colors">
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-xl bg-orange-500/10 text-orange-500 flex items-center justify-center">
+                          <Shirt size={18} />
+                        </div>
+                        <span className="text-sm font-bold text-gray-700 dark:text-gray-300">Missing Jersey Numbers</span>
+                      </div>
+                      <div className="px-4 py-1.5 bg-orange-500/10 rounded-full text-orange-600 dark:text-orange-400 text-xs font-black font-mono">
+                        {missingJerseys}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between p-5 bg-blue-500/5 rounded-2xl border border-blue-500/10 group hover:bg-blue-500/10 transition-colors">
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center">
+                          <Target size={18} />
+                        </div>
+                        <span className="text-sm font-bold text-gray-700 dark:text-gray-300">Missing Positions</span>
+                      </div>
+                      <div className="px-4 py-1.5 bg-blue-500/10 rounded-full text-blue-600 dark:text-blue-400 text-xs font-black font-mono">
+                        {missingPositions}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-10 pt-8 border-t border-gray-100 dark:border-gray-800 text-center">
+                  <p className="text-xs text-gray-400 font-medium italic">
+                    Health is calculated based on completeness of athlete metadata across your entire library.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Time Saved Card */}
         <div className="group relative bg-white/40 dark:bg-gray-900/40 backdrop-blur-xl p-6 rounded-3xl border border-white/20 dark:border-gray-800/50 shadow-xl transition-all hover:scale-[1.02] hover:shadow-purple-500/10 overflow-hidden">
