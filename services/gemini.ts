@@ -6,7 +6,7 @@ import { KNOWN_TEAM_LOGOS, ESPN_TEAM_IDS, LEAGUE_DISPLAY_NAMES, LEAGUE_TO_SPORT,
 
 // Helper to get the key even if the build tool is doing static analysis on process.env.API_KEY
 const getApiKey = () => {
-  return (import.meta as any).env?.VITE_GEMINI_API_KEY || '';
+  return (import.meta as any).env?.VITE_GEMINI_API_KEY || (process as any).env?.VITE_GEMINI_API_KEY || '';
 };
 
 export const isGeminiConfigured = !!getApiKey();
@@ -206,6 +206,32 @@ async function fetchESPNRoster(teamName: string): Promise<Map<string, string> | 
     console.error('[ESPN] Failed to fetch roster:', error);
     return null;
   }
+}
+
+/**
+ * Extract unique team names for a specific league from our seeded data.
+ * Used to provide a "multiple-choice" list to the AI to prevent "Unknown Team"
+ * when search is disabled.
+ */
+function getKnownTeamsForLeague(league: string): string[] {
+  const teams = new Set<string>();
+  const targetLeague = league.toLowerCase();
+
+  // Check ESPN_TEAM_IDS
+  Object.entries(ESPN_TEAM_IDS).forEach(([name, info]) => {
+    if (info.league?.toLowerCase() === targetLeague) {
+      teams.add(name);
+    }
+  });
+
+  // Check KNOWN_TEAM_LOGOS as fallback/secondary
+  Object.entries(KNOWN_TEAM_LOGOS).forEach(([name, info]) => {
+    if (info.league?.toLowerCase() === targetLeague) {
+      teams.add(name);
+    }
+  });
+
+  return Array.from(teams).sort();
 }
 
 /**
@@ -426,6 +452,11 @@ export async function processRosterRawText(
   // Force disable branding search if we know we have the data
   const shouldSearchForBranding = findBranding && !isMajorLeague;
 
+  const knownTeams = league ? getKnownTeamsForLeague(league) : [];
+  const knownTeamsList = knownTeams.length > 0
+    ? `VALID TEAM LIST FOR ${league.toUpperCase()}:\n[${knownTeams.join(', ')}]\n`
+    : '';
+
   const brandingInstruction = shouldSearchForBranding
     ? `BRANDING DISCOVERY: 
 1. MiLB (Triple-A): 
@@ -448,6 +479,10 @@ export async function processRosterRawText(
     
     1. TEAM IDENTIFICATION (HIGHEST PRIORITY):
     - ${leagueHint}
+    - ${knownTeamsList}
+    - Identification Strategy:
+      * Use the 'googleSearch' tool ONLY if the team name is not obvious from the text.
+      * Look at the player names. ${knownTeams.length > 0 ? 'Compare the athletes against your knowledge of the VALID TEAM LIST provided above.' : ''}
     - Identification Strategy:
       * Use the 'googleSearch' tool ONLY if the team name is not obvious from the text.
       * Look at the player names. If you see "Sacramento" or "River Cats" - this is ALWAYS the "Sacramento River Cats" baseball team.
@@ -518,7 +553,10 @@ export async function processRosterRawText(
     const model = genAI.getGenerativeModel(modelParams);
     const identificationInstruction = shouldSearchForBranding
       ? `1. Identification: Use 'googleSearch' to identify the team name (e.g. "Sacramento River Cats") by searching for the athletes in 'DATA'.`
-      : `1. Identification: Identify the team name (e.g. "Boston Bruins") from the roster data using your internal knowledge. Do NOT use search tools.`;
+      : `1. Identification: Identify the team name (e.g. "Boston Bruins") from the roster data. 
+         - Search tool is DISABLED for this request. 
+         - Compare the players in 'DATA' against the VALID TEAM LIST in your instructions. 
+         - Choose the most likely team name from that list. Do NOT return "Unknown Team" if the players match a known professional team.`;
 
     const userPrompt = `DATA:\n${text}\n\n${context}\nTier: ${tier}. Mode: ${isNocMode ? 'NOC' : 'Standard'}.\n\n` +
       `FINAL INSTRUCTIONS:\n` +
