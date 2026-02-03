@@ -23,8 +23,10 @@ If the ESPN numeric ID cannot be determined:
 2.  **Official Sites**: Fallback to `laliga.com` or team sites.
 
 ## 3. Team Identification
-- **Implicit**: We rely on standard club names.
-- **Search**: The `googleSearch` tool is used to resolve ambiguous names or verify specialized clubs.
+- **Strategy**: Uses [Core Team Identification](CORE_TEAM_IDENTIFICATION.md).
+- **Priority**: **Tier 1 (Major Pro)**.
+- **Implicit**: We rely on standard La Liga team names being present in `ESPN_TEAM_IDS` or `KNOWN_TEAM_LOGOS`.
+- **Ambiguity**: La Liga teams score **3 points** in priority resolving.
 
 ## 4. Usage in Code
 This logic is embedded in the `brandingInstruction` block of `gemini.ts` under the Soccer section:

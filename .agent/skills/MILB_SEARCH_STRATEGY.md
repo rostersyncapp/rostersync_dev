@@ -22,7 +22,10 @@ For Minor League Baseball (MiLB) teams, we use the **mlbstatic.com** SVG pattern
 - **Prefer**: `mlbstatic` (Best) or `wikimedia` (Fallback).
 
 ## 2. Team Identification (Triple-A)
-We have hardcoded a **Validation List** of all 30 Triple-A teams in the system prompt to prevent hallucinations (e.g., confusing Buffalo Bisons with Boston Red Sox).
+- **Strategy**: Uses [Core Team Identification](CORE_TEAM_IDENTIFICATION.md).
+- **Priority**: **Tier 3 (Minor/Amateur)**.
+- **Validation**: We have hardcoded a **Validation List** of all 30 Triple-A teams in the system prompt to prevent hallucinations.
+- **Ambiguity**: MiLB teams score **1 point** in priority resolving (e.g., "Sacramento" -> Sacramento Kings (NBA - Tier 1) vs Sacramento River Cats (MiLB - Tier 3) -> Kings wins).
 
 **Key Teams:** 
 Buffalo Bisons, Charlotte Knights, Columbus Clippers, Durham Bulls, Gwinnett Stripers, Indianapolis Indians, Iowa Cubs, Jacksonville Jumbo Shrimp, Lehigh Valley IronPigs, Louisville Bats, Memphis Redbirds, Nashville Sounds, Norfolk Tides, Omaha Storm Chasers, Rochester Red Wings, Scranton/Wilkes-Barre RailRiders, St. Paul Saints, Syracuse Mets, Toledo Mud Hens, Worcester Red Sox, Albuquerque Isotopes, El Paso Chihuahuas, Las Vegas Aviators, Oklahoma City Comets, Reno Aces, Round Rock Express, Sacramento River Cats, Salt Lake Bees, Sugar Land Space Cowboys, Tacoma Rainiers.

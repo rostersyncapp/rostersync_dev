@@ -23,8 +23,10 @@ If the ESPN numeric ID cannot be found:
 2.  **Official Sites**: Fallback to `mlssoccer.com` or team sites.
 
 ## 3. Team Identification
-- **Implicit**: We rely on standard MLS team names.
-- **Search**: The `googleSearch` tool is used to resolve common names (e.g., distinguishing "New York Red Bulls" from "NYCFC").
+- **Strategy**: Uses [Core Team Identification](CORE_TEAM_IDENTIFICATION.md).
+- **Priority**: **Tier 1 (Major Pro)**.
+- **Implicit**: We rely on standard MLS team names being present in `ESPN_TEAM_IDS` or `KNOWN_TEAM_LOGOS`.
+- **Ambiguity**: MLS teams score **3 points** in priority resolving (e.g., "City" -> St. Louis City vs Orlando City vs NYCFC).
 
 ## 4. Usage in Code
 This logic is embedded in the `brandingInstruction` block of `gemini.ts` under the Soccer section:

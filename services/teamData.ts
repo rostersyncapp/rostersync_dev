@@ -718,8 +718,7 @@ export const KNOWN_TEAM_LOGOS: Record<string, TeamLogoInfo> = {
   "SRH": { logoUrl: "https://upload.wikimedia.org/wikipedia/commons/8/81/Sunrisers_Hyderabad.svg", primaryColor: "#F7A721", secondaryColor: "#000000" },
 
   // MiLB (Minor League Baseball) - AAA
-  "SACRAMENTO RIVER CATS": { logoUrl: "https://upload.wikimedia.org/wikipedia/commons/a/a2/SacramentoRiverCatsCap.png", primaryColor: "#b20000", secondaryColor: "#000000" },
-  "RIVER CATS": { logoUrl: "https://upload.wikimedia.org/wikipedia/commons/a/a2/SacramentoRiverCatsCap.png", primaryColor: "#b20000", secondaryColor: "#000000" },
+
   "SALT LAKE BEES": { logoUrl: "https://brandeps.com/logo/S/Salt-Lake-Bees-logo-vector.svg", primaryColor: "#ffd700", secondaryColor: "#000000" },
   "BEES": { logoUrl: "https://brandeps.com/logo/S/Salt-Lake-Bees-logo-vector.svg", primaryColor: "#ffd700", secondaryColor: "#000000" },
   "LAS VEGAS AVIATORS": { logoUrl: "https://www.seeklogo.com/images/L/las-vegas-aviators-logo-28F88E28F8-seeklogo.com.png", primaryColor: "#FF6900", secondaryColor: "#002D62" },

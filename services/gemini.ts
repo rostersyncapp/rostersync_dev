@@ -758,41 +758,95 @@ export async function processRosterRawText(
   // This handles cases like "KINGS" which matches LA Kings exactly but should prompt for Sacramento Kings too
   let candidateTeams: { name: string; logoUrl: string; primaryColor: string; secondaryColor: string; sport?: string; league?: string }[] = [];
 
+  // Helper for disambiguation priority
+  const getLeaguePriority = (league?: string, sport?: string): number => {
+    if (!league) return 1;
+    const l = league.toLowerCase();
+    // Tier 1: Major Pro Leagues
+    if (l.includes('nba') || l.includes('nfl') || l.includes('mlb') || l.includes('nhl') || l.includes('premier') || l.includes('mls') || l.includes('wnba') || l.includes('mex.1') || l.includes('eng.1') || l.includes('ger.1') || l.includes('esp.1') || l.includes('ita.1') || l.includes('fra.1') || l.includes('ned.1')) {
+      return 3;
+    }
+    // Tier 2: Other Pro / Semi-Pro
+    if (l.includes('usl') || l.includes('champions')) {
+      return 2;
+    }
+    // Tier 3: Minor / College / Other
+    return 1;
+  };
+
   // Always check for ambiguity when the search term is short enough to be ambiguous (< 20 chars)
   if (teamNameUpper.length > 3 && teamNameUpper.length < 20) {
-    const allMatchingKeys = Object.keys(KNOWN_TEAM_LOGOS).filter(key =>
+    const allKeys = Array.from(new Set([
+      ...Object.keys(KNOWN_TEAM_LOGOS),
+      ...Object.keys(ESPN_TEAM_IDS)
+    ]));
+
+    const allMatchingKeys = allKeys.filter(key =>
       key.includes(teamNameUpper) || teamNameUpper.includes(key)
     );
 
     if (allMatchingKeys.length > 0) {
       // Deduplicate by logoUrl (same logo = same team, different aliases)
       const uniqueTeams = new Map<string, { name: string; logoUrl: string; primaryColor: string; secondaryColor: string; sport?: string; league?: string }>();
+
       for (const key of allMatchingKeys) {
-        const team = KNOWN_TEAM_LOGOS[key];
+        const team = KNOWN_TEAM_LOGOS[key] || ESPN_TEAM_IDS[key];
         const espnData = ESPN_TEAM_IDS[key]; // Look up sport/league metadata
-        console.log(`[Gemini] Team "${key}": sport = ${espnData?.sport}, league = ${espnData?.league} `);
-        if (!uniqueTeams.has(team.logoUrl)) {
-          uniqueTeams.set(team.logoUrl, {
+
+        const logoUrl = team?.logoUrl || '';
+
+        if (team && logoUrl && !uniqueTeams.has(logoUrl)) {
+          uniqueTeams.set(logoUrl, {
             name: key,
-            ...team,
-            sport: espnData?.sport,
-            league: espnData?.league
+            logoUrl: logoUrl,
+            primaryColor: team.primaryColor || '',
+            secondaryColor: team.secondaryColor || '',
+            sport: espnData?.sport || (team as any).sport,
+            league: espnData?.league || (team as any).league
           });
         }
       }
 
+      // Sort keys by Priority (Major League first) then Length (Longest match first)
+      const sortedKeys = allMatchingKeys.sort((a, b) => {
+        const teamObjA = KNOWN_TEAM_LOGOS[a] || ESPN_TEAM_IDS[a];
+        const teamObjB = KNOWN_TEAM_LOGOS[b] || ESPN_TEAM_IDS[b];
+
+        if (!teamObjA || !teamObjB) return 0;
+
+        const teamA = uniqueTeams.get(teamObjA.logoUrl);
+        const teamB = uniqueTeams.get(teamObjB.logoUrl);
+
+        const priorityA = getLeaguePriority(teamA?.league, teamA?.sport);
+        const priorityB = getLeaguePriority(teamB?.league, teamB?.sport);
+
+        if (priorityA !== priorityB) {
+          return priorityB - priorityA; // Descending priority (3 > 1)
+        }
+        return b.length - a.length;
+      });
+
       // If multiple DISTINCT teams match, return them as candidates for user selection
       if (uniqueTeams.size > 1) {
         candidateTeams = Array.from(uniqueTeams.values());
-        console.log(`[Gemini] AMBIGUITY DETECTED for "${teamNameUpper}": ${candidateTeams.map(t => t.name).join(', ')} `);
-        // Pick the longest match as default
-        allMatchingKeys.sort((a, b) => b.length - a.length);
-        knownTeam = KNOWN_TEAM_LOGOS[allMatchingKeys[0]];
+        // Sort candidates for UI presentation
+        candidateTeams.sort((a, b) => {
+          const priorityA = getLeaguePriority(a.league, a.sport);
+          const priorityB = getLeaguePriority(b.league, b.sport);
+          if (priorityA !== priorityB) return priorityB - priorityA;
+          return b.name.length - a.name.length;
+        });
+
+        console.log(`[Gemini] AMBIGUITY DETECTED for "${teamNameUpper}": ${candidateTeams.map(t => `${t.name} (L:${t.league})`).join(', ')} `);
+
+        // Pick the best match (highest priority + longest name) as default
+        knownTeam = KNOWN_TEAM_LOGOS[sortedKeys[0]] || ESPN_TEAM_IDS[sortedKeys[0]];
+
       } else if (uniqueTeams.size === 1 && !knownTeam) {
         // Single team (possibly with aliases) and no exact match - use fuzzy result
-        const bestMatch = allMatchingKeys.sort((a, b) => b.length - a.length)[0];
+        const bestMatch = sortedKeys[0];
         console.log(`[Gemini] Fuzzy match found: "${teamNameUpper}" -> "${bestMatch}"`);
-        knownTeam = KNOWN_TEAM_LOGOS[bestMatch];
+        knownTeam = KNOWN_TEAM_LOGOS[bestMatch] || ESPN_TEAM_IDS[bestMatch];
       }
     }
   }

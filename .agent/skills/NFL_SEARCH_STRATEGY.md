@@ -22,8 +22,10 @@ If the ESPN abbreviation cannot be determined:
 2.  **Official Sites**: Fallback to `nfl.com` or team sites.
 
 ## 3. Team Identification
-- **Implicit**: We rely on standard NFL team names being present in the input text.
-- **Search**: If ambiguous, the `googleSearch` tool is used to confirm the team identity.
+- **Strategy**: Uses [Core Team Identification](CORE_TEAM_IDENTIFICATION.md).
+- **Priority**: **Tier 1 (Major Pro)**.
+- **Implicit**: We rely on standard NFL team names being present in `ESPN_TEAM_IDS` or `KNOWN_TEAM_LOGOS`.
+- **Ambiguity**: NFL teams score **3 points** in priority resolving (e.g., "Giants" -> NY Giants (NFL priority vs SF Giants MLB priority is equal, resolved by length or specific input)).
 
 ## 4. Usage in Code
 This logic is embedded in the `brandingInstruction` block of `gemini.ts`:

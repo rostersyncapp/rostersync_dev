@@ -796,22 +796,36 @@ const App: React.FC = () => {
                     setSelectedRosterId(null);
                   } else {
                     // Roster not in folder - permanently delete
+
+                    // 1. Optimistic UI Update: Remove immediately
+                    const originalRosters = [...rosters];
+                    setRosters(prev => prev.filter(r => r.id !== id));
+                    setSelectedRosterId(null);
+
                     if (user && isSupabaseConfigured) {
                       try {
+                        // 2. Refresh token to ensure request succeeds
                         const token = await getSupabaseTokenWithRetry();
                         await setSupabaseToken(token);
+
+                        // 3. Perform Delete
                         const { error } = await supabase.from('rosters').delete().eq('id', id);
                         if (error) throw error;
+
+                        // 4. Log Activity (Non-blocking / Fire-and-forget)
+                        logActivity(profile.id, 'ROSTER_DELETE', `Deleted roster for ${roster.teamName}`);
+
                       } catch (error: any) {
                         console.error("Delete Error:", error);
                         alert(`Failed to delete roster: ${error.message}`);
+
+                        // 5. Rollback on Error
+                        setRosters(originalRosters);
                         return;
                       }
                     }
-                    await logActivity(profile.id, 'ROSTER_DELETE', `Deleted roster for ${roster.teamName}.`);
-                    setRosters(prev => prev.filter(r => r.id !== id));
-                    setSelectedRosterId(null);
                   }
+
                 }} onUpdateRoster={async (r) => {
                   await logActivity(profile.id, 'ROSTER_UPDATE', `Updated metadata for ${r.teamName}.`);
 

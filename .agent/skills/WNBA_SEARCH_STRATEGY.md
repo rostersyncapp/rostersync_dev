@@ -22,8 +22,10 @@ If the ESPN abbreviation cannot be determined:
 2.  **Official Sites**: Fallback to `wnba.com` or team sites.
 
 ## 3. Team Identification
-- **Implicit**: We rely on standard WNBA team names.
-- **Search**: The `googleSearch` tool is used to resolve ambiguous names or verify current rosters.
+- **Strategy**: Uses [Core Team Identification](CORE_TEAM_IDENTIFICATION.md).
+- **Priority**: **Tier 1 (Major Pro)**.
+- **Implicit**: We rely on standard WNBA team names being present in `ESPN_TEAM_IDS` or `KNOWN_TEAM_LOGOS`.
+- **Ambiguity**: WNBA teams score **3 points** in priority resolving.
 
 ## 4. Usage in Code
 This logic is embedded in the `brandingInstruction` block of `gemini.ts`. The general rule covers WNBA because the `league` variable is passed into the URL template:
