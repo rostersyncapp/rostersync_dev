@@ -124,72 +124,79 @@ Deno.serve(async (req) => {
                 name: fieldName
             };
 
-            const lookupUrl = `${apiBase}/9/fields`;
-            try {
-                const lookupRes = await fetch(lookupUrl, {
-                    headers: {
-                        'Cookie': `JSESSIONID=${activeSessionId}`,
-                        'ngrok-skip-browser-warning': 'true',
-                        'User-Agent': 'PostmanRuntime/7.51.1'
+            const discoveryPaths = [`${apiBase}/9/fields`, `${apiBase}/1/fields`/*, `${apiBase}/fields`*/];
+            let fields: any[] = [];
+
+            for (const lookupUrl of discoveryPaths) {
+                try {
+                    console.log(`[${reqId}] Fetching fields from: ${lookupUrl}`);
+                    const lookupRes = await fetch(lookupUrl, {
+                        headers: {
+                            'Cookie': `JSESSIONID=${activeSessionId}`,
+                            'ngrok-skip-browser-warning': 'true',
+                            'User-Agent': 'PostmanRuntime/7.51.1'
+                        }
+                    });
+
+                    if (lookupRes.ok) {
+                        const rawData = await lookupRes.json();
+                        console.log(`[${reqId}] Lookup response from ${lookupUrl}:`, JSON.stringify(rawData).slice(0, 500));
+
+                        if (Array.isArray(rawData)) {
+                            fields = rawData;
+                        } else if (rawData && rawData.data && Array.isArray(rawData.data.items)) {
+                            fields = rawData.data.items;
+                        } else if (rawData && Array.isArray(rawData.data)) {
+                            fields = rawData.data;
+                        } else if (rawData && rawData.fields && Array.isArray(rawData.fields)) {
+                            fields = rawData.fields;
+                        }
+
+                        if (fields.length > 0) break;
                     }
+                } catch (e: any) {
+                    console.warn(`[${reqId}] Discovery failed at ${lookupUrl}:`, e.message);
+                }
+            }
+
+            if (fields.length > 0) {
+                console.log(`[${reqId}] Total fields discovered: ${fields.length}`);
+                const match = fields.find((f: any) => {
+                    const fName = (f.name || f.Name || "").toLowerCase();
+                    const fIden = (f.identifier || f.Field || f.field || f.fField || "").toLowerCase();
+                    const fId = String(f.id || f.ID || "").toLowerCase();
+                    const target = fieldName.toLowerCase();
+                    return fName === target || fIden === target || fId === target;
                 });
 
-                if (lookupRes.ok) {
-                    const fieldsData = await lookupRes.json();
-                    let fields = [];
-                    if (Array.isArray(fieldsData)) {
-                        fields = fieldsData;
-                    } else if (fieldsData && Array.isArray(fieldsData.data)) {
-                        fields = fieldsData.data;
-                    }
-
-                    if (Array.isArray(fields)) {
-                        console.log(`[${reqId}] Found ${fields.length} total fields.`);
-                        if (fields.length > 0) {
-                            console.log(`[${reqId}] First field sample:`, JSON.stringify(fields[0]).slice(0, 300));
-                        }
-
-                        const match = fields.find((f: any) => {
-                            const fName = (f.name || f.Name || "").toLowerCase();
-                            const fIden = (f.identifier || f.Field || f.field || f.fField || "").toLowerCase();
-                            const fId = String(f.id || "").toLowerCase();
-                            const target = fieldName.toLowerCase();
-                            return fName === target || fIden === target || fId === target;
-                        });
-
-                        if (match) {
-                            // Order of preference for ID/Identifier: Field, identifier, id
-                            internalFieldId = match.Field || match.field || match.identifier || match.id || fieldName;
-                            fieldInfo = {
-                                fieldGroupID: match.fieldGroupID || match.groupID || 1,
-                                memberOf: match.memberOf || "clip",
-                                identifier: match.Field || match.field || match.identifier || fieldInfo.identifier,
-                                name: match.name || match.Name || fieldName
-                            };
-                            console.log(`[${reqId}] Match Found: ${fieldInfo.name} (ID: ${internalFieldId}, Identifier: ${fieldInfo.identifier})`);
-                        } else {
-                            console.warn(`[${reqId}] No field match found for "${fieldName}".`);
-                            const names = fields.slice(0, 5).map(f => f.name || f.Name || 'unnamed');
-                            console.log(`[${reqId}] Sample field names: ${names.join(', ')}`);
-                        }
-                    } else {
-                        console.error(`[${reqId}] fieldsData is not an array and does not contain a 'data' array`);
-                    }
+                if (match) {
+                    // Order of preference for ID/Identifier: ID, Field, identifier, id
+                    internalFieldId = match.ID || match.Field || match.field || match.identifier || match.id || fieldName;
+                    fieldInfo = {
+                        fieldGroupID: match.fieldGroupID || match.fieldGroupId || match.groupID || 1,
+                        memberOf: match.memberOf || "clip",
+                        identifier: match.identifier || match.Field || match.field || fieldInfo.identifier,
+                        name: match.name || match.Name || fieldName
+                    };
+                    console.log(`[${reqId}] SUCCESS: Found match "${fieldInfo.name}" (Target ID: ${internalFieldId})`);
+                } else {
+                    console.warn(`[${reqId}] Field "${fieldName}" not found in discovered list.`);
+                    const sample = fields.slice(0, 3).map(f => `${f.Name || f.name} (${f.Field || f.identifier})`);
+                    console.log(`[${reqId}] Discovery samples: ${sample.join(' | ')}`);
                 }
-            } catch (e: any) {
-                console.warn(`[${reqId}] Field lookup failed at ${lookupUrl}:`, e.message);
+            } else {
+                console.error(`[${reqId}] CRITICAL: Could not retrieve a list of fields from any endpoint.`);
             }
 
             // 2. DO THE SYNC
-            const variations = [
+            const syncUrls = [
                 `${apiBase}/9/fields/${internalFieldId}/list?groupID=${fieldInfo.fieldGroupID}&include=values`,
                 `${apiBase}/1/fields/${internalFieldId}/list`,
-                `${apiBase}/admin/1/fields/${internalFieldId}/list`,
                 `${apiBase}/fields/${internalFieldId}/list`
             ];
 
             let lastErr = null;
-            for (const putUrl of variations) {
+            for (const putUrl of syncUrls) {
                 console.log(`[${reqId}] Syncing to: ${putUrl}`);
                 try {
                     const response = await fetch(putUrl, {
@@ -215,13 +222,13 @@ Deno.serve(async (req) => {
                     });
 
                     const resText = await response.text();
-                    console.log(`[${reqId}] CatDV Response (${response.status}): ${resText.slice(0, 500)}`);
+                    console.log(`[${reqId}] Sync Result (${response.status}): ${resText.slice(0, 500)}`);
 
                     if (response.ok) return createResponse({ success: true, fieldId: internalFieldId, method: putUrl, catdv: resText });
                     lastErr = { status: response.status, body: resText, url: putUrl };
                     if (response.status === 401) break;
                 } catch (e: any) {
-                    console.error(`[${reqId}] Sync error at ${putUrl}:`, e.message);
+                    console.error(`[${reqId}] Sync network error at ${putUrl}:`, e.message);
                     lastErr = { error: e.message, url: putUrl };
                 }
             }
