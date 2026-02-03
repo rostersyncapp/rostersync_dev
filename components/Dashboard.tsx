@@ -167,6 +167,11 @@ export const Dashboard: React.FC<Props> = ({
   const [editSport, setEditSport] = useState('');
   const [editSeason, setEditSeason] = useState('');
 
+  function handleQuickDeleteRoster(e: React.MouseEvent, roster: Roster) {
+    e.preventDefault(); e.stopPropagation();
+    if (window.confirm(`Delete ${roster.teamName}?`)) { onDeleteRoster(roster.id); }
+  }
+
   // Add Player Form State
   const [showAddPlayerForm, setShowAddPlayerForm] = useState(false);
   const [newPlayerName, setNewPlayerName] = useState('');
@@ -913,25 +918,21 @@ export const Dashboard: React.FC<Props> = ({
           </div>
         )}
       </div>
-      );
-
-      function handleQuickDeleteRoster(e: React.MouseEvent, roster: Roster) {
-        e.preventDefault(); e.stopPropagation();
-      if (window.confirm(`Delete ${roster.teamName}?`)) {onDeleteRoster(roster.id); }
-  }
+    </div>
+  );
 };
 
-      const ExportItem: React.FC<{ icon: React.ReactNode; title: string; desc: string; onClick: () => void }> = ({icon, title, desc, onClick}) => (
-      <button onClick={onClick} className="w-full flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 hover:bg-[#5B5FFF]/5 dark:hover:bg-[#5B5FFF]/10 rounded-lg transition-all group border border-gray-100 dark:border-gray-800 hover:border-[#5B5FFF]/20">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-lg bg-white dark:bg-gray-800 flex items-center justify-center text-gray-400 group-hover:text-[#5B5FFF] shadow-sm transition-colors group-hover:scale-110">
-            {icon}
-          </div>
-          <div className="text-left min-w-0">
-            <div className="text-sm font-extrabold text-gray-900 dark:text-white truncate">{title}</div>
-            <div className="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-tight mt-0.5 truncate">{desc}</div>
-          </div>
-        </div>
-        <ArrowRight size={18} className="text-gray-300 group-hover:text-[#5B5FFF] group-hover:translate-x-1 transition-all shrink-0" />
-      </button>
-      );
+const ExportItem: React.FC<{ icon: React.ReactNode; title: string; desc: string; onClick: () => void }> = ({ icon, title, desc, onClick }) => (
+  <button onClick={onClick} className="w-full flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 hover:bg-[#5B5FFF]/5 dark:hover:bg-[#5B5FFF]/10 rounded-lg transition-all group border border-gray-100 dark:border-gray-800 hover:border-[#5B5FFF]/20">
+    <div className="flex items-center gap-4">
+      <div className="w-12 h-12 rounded-lg bg-white dark:bg-gray-800 flex items-center justify-center text-gray-400 group-hover:text-[#5B5FFF] shadow-sm transition-colors group-hover:scale-110">
+        {icon}
+      </div>
+      <div className="text-left min-w-0">
+        <div className="text-sm font-extrabold text-gray-900 dark:text-white truncate">{title}</div>
+        <div className="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-tight mt-0.5 truncate">{desc}</div>
+      </div>
+    </div>
+    <ArrowRight size={18} className="text-gray-300 group-hover:text-[#5B5FFF] group-hover:translate-x-1 transition-all shrink-0" />
+  </button>
+);
