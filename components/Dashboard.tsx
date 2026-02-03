@@ -471,7 +471,7 @@ export const Dashboard: React.FC<Props> = ({
     return (
       <div className="animate-in slide-in-from-right duration-500 pb-16">
         <button onClick={() => onSelectRoster(null)} className="flex items-center gap-2 text-gray-400 hover:text-gray-900 dark:hover:text-white font-bold text-sm mb-6 transition-colors group">
-          <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" /> Back to {currentProject?.name || 'Library'}
+          <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" /> Back to {currentProject?.name || 'Dashboard'}
         </button>
 
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden mb-8">
@@ -842,7 +842,7 @@ export const Dashboard: React.FC<Props> = ({
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <button onClick={() => onSelectProject(null)} className={`text-[10px] font-bold uppercase tracking-[0.25em] transition-colors ${!activeProjectId ? 'text-[#5B5FFF]' : 'text-gray-400 hover:text-gray-600'}`}>Library</button>
+            <button onClick={() => onSelectProject(null)} className={`text-[10px] font-bold uppercase tracking-[0.25em] transition-colors ${!activeProjectId ? 'text-[#5B5FFF]' : 'text-gray-400 hover:text-gray-600'}`}>Dashboard</button>
             {breadcrumbs.map((crumb, idx) => (
               <React.Fragment key={crumb.id}>
                 <ChevronRight size={12} className="text-gray-300" />
@@ -850,7 +850,7 @@ export const Dashboard: React.FC<Props> = ({
               </React.Fragment>
             ))}
           </div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white">{currentProject?.name || 'Metadata Library'}</h1>
+          <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white">{currentProject?.name || 'Library'}</h1>
         </div>
         <button onClick={onNewRoster} className="px-6 py-3.5 rounded-lg primary-gradient text-white font-bold shadow-lg shadow-[#5B5FFF]/20 hover:scale-105 transition-transform flex items-center gap-2.5 cursor-pointer text-sm">
           <Plus size={20} /> New Roster
@@ -966,9 +966,9 @@ export const Dashboard: React.FC<Props> = ({
         </div>
       )}
 
-      {/* Assemblies Section */}
+      {/* Teams Section */}
       <div>
-        <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.25em] mb-4 font-mono ml-1">Assemblies</h3>
+        <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.25em] mb-4 font-mono ml-1">Teams</h3>
         {!isLoading && filteredRosters.length === 0 ? (
           <div className="text-center py-20 bg-gray-50 dark:bg-gray-800/30 rounded-xl border border-dashed border-gray-200 dark:border-gray-700">
             <FolderOpen size={48} className="mx-auto mb-4 text-gray-300" />
