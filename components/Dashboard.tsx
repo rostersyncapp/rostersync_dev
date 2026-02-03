@@ -316,7 +316,13 @@ export const Dashboard: React.FC<Props> = ({
       password: password.trim(),
       sessionId: sessionId?.trim() || '',
       fieldName: catdvFieldName.trim(),
-      options: athletes.map(a => a.fullName)
+      options: athletes.map(a => {
+        const parts = a.fullName.trim().split(/\s+/);
+        if (parts.length <= 1) return a.fullName;
+        const lastName = parts.pop();
+        const firstNames = parts.join(' ');
+        return `${lastName}, ${firstNames}`;
+      })
     };
 
     try {
