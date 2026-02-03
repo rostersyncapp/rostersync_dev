@@ -124,6 +124,14 @@ const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
       authToken: '',
     };
   });
+  const [catdvConfig, setCatdvConfig] = useState(() => {
+    const saved = localStorage.getItem('catdvConfig');
+    return saved ? JSON.parse(saved) : {
+      username: '',
+      password: '',
+      sessionId: '',
+    };
+  });
   const [connectionStatus, setConnectionStatus] = useState<'idle' | 'testing' | 'success' | 'error'>('idle');
   const [connectionMessage, setConnectionMessage] = useState('');
 
@@ -220,6 +228,12 @@ const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
     // Fallback if no scenarios matched or succeeded
     setConnectionStatus('error');
     setConnectionMessage('Connection failed. Please check your credentials.');
+  };
+
+  const handleSaveCatdvConfig = () => {
+    localStorage.setItem('catdvConfig', JSON.stringify(catdvConfig));
+    // For now, just a simple browser alert or local success state
+    alert('CatDV configuration saved locally.');
   };
 
   // ROI Stats
@@ -677,6 +691,61 @@ const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
                       className="px-8 py-3 bg-[#5B5FFF] text-white font-bold rounded-xl hover:bg-[#4a4eff] transition-all shadow-lg shadow-[#5B5FFF]/20 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-2"
                     >
                       {connectionStatus === 'testing' ? 'Testing...' : 'Save Configuration'}
+                    </button>
+                  </div>
+                </div>
+
+                {/* CatDV Configuration Card */}
+                <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700 p-8 mt-8">
+                  <div className="flex items-center gap-4 mb-8">
+                    <div className="w-14 h-14 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0">
+                      <Database size={28} className="text-emerald-500" />
+                    </div>
+                    <div>
+                      <h4 className="text-lg font-black text-gray-900 dark:text-white">CatDV</h4>
+                      <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Configure connection to CatDV Server.</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Username</label>
+                      <input
+                        type="text"
+                        placeholder="Enter Username"
+                        value={catdvConfig.username}
+                        onChange={(e) => setCatdvConfig(prev => ({ ...prev, username: e.target.value }))}
+                        className="w-full p-3.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-medium focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Password</label>
+                      <input
+                        type="password"
+                        placeholder="Enter Password"
+                        value={catdvConfig.password}
+                        onChange={(e) => setCatdvConfig(prev => ({ ...prev, password: e.target.value }))}
+                        className="w-full p-3.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-medium focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Session ID</label>
+                      <input
+                        type="text"
+                        placeholder="Enter Session ID"
+                        value={catdvConfig.sessionId}
+                        onChange={(e) => setCatdvConfig(prev => ({ ...prev, sessionId: e.target.value }))}
+                        className="w-full p-3.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-medium focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="mt-8 flex justify-end">
+                    <button
+                      onClick={handleSaveCatdvConfig}
+                      className="px-8 py-3 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-500/20 hover:scale-[1.02] active:scale-[0.98] flex items-center gap-2"
+                    >
+                      Save CatDV Configuration
                     </button>
                   </div>
                 </div>
