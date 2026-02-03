@@ -301,7 +301,13 @@ export const Dashboard: React.FC<Props> = ({
 
     // Build payload
     const teamName = selectedRoster.teamName;
-    const athletes = selectedRoster.rosterData || [];
+    const athletes = [...(selectedRoster.rosterData || [])].sort((a: Athlete, b: Athlete) => {
+      const getLastName = (name: string) => {
+        const parts = name.trim().split(' ');
+        return parts[parts.length - 1] || '';
+      };
+      return getLastName(a.fullName).localeCompare(getLastName(b.fullName));
+    });
 
     const payload = {
       action: 'sync_catdv_picklist',

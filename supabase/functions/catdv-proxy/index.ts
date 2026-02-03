@@ -240,7 +240,7 @@ Deno.serve(async (req) => {
                             fieldType: "picklist",
                             values: newOptions,
                             isExtensible: true,
-                            isKeptSorted: true,
+                            isKeptSorted: false,
                             savesValues: true,
                             isLocked: false
                         })
