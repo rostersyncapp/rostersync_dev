@@ -54,7 +54,12 @@ export function generateExport(
         "min_value": 0.0,
         "multi": true,
         "name": slugTeam,
-        "options": athletes.map(a => ({
+        "options": [...athletes].sort((a, b) => {
+          const getLN = (n: string) => n.trim().split(/\s+/).pop() || "";
+          const lnA = getLN(a.fullName).toLowerCase();
+          const lnB = getLN(b.fullName).toLowerCase();
+          return lnA !== lnB ? lnA.localeCompare(lnB) : a.fullName.localeCompare(b.fullName);
+        }).map(a => ({
           "label": a.fullName,
           "value": a.fullName
         })),
@@ -188,7 +193,12 @@ export function generateExport(
         "identifier": "player.names",
         "name": "Player Names",
         "fieldType": "picklist",
-        "values": athletes.map(a => a.fullName),
+        "values": [...athletes].sort((a, b) => {
+          const getLN = (n: string) => n.trim().split(/\s+/).pop() || "";
+          const lnA = getLN(a.fullName).toLowerCase();
+          const lnB = getLN(b.fullName).toLowerCase();
+          return lnA !== lnB ? lnA.localeCompare(lnB) : a.fullName.localeCompare(b.fullName);
+        }).map(a => a.fullName),
         "isExtensible": true,
         "isKeptSorted": true,
         "savesValues": true,

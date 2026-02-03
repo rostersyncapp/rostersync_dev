@@ -171,6 +171,24 @@ serve(async (req) => {
 
             const updatedOptions = Array.from(optionMap.values());
 
+            // Sort by Last Name (Heuristic: last word in string)
+            updatedOptions.sort((a: any, b: any) => {
+                const getLastName = (opt: any) => {
+                    const label = typeof opt === 'string' ? opt : opt.label;
+                    const parts = label.trim().split(/\s+/);
+                    return parts[parts.length - 1] || "";
+                };
+                const lnA = getLastName(a).toLowerCase();
+                const lnB = getLastName(b).toLowerCase();
+
+                if (lnA !== lnB) return lnA.localeCompare(lnB);
+
+                // Fallback to full name if last names are identical
+                const fullA = (typeof a === 'string' ? a : a.label).toLowerCase();
+                const fullB = (typeof b === 'string' ? b : b.label).toLowerCase();
+                return fullA.localeCompare(fullB);
+            });
+
             if (addedCount === 0) {
                 return new Response(
                     JSON.stringify({ message: 'No new options to add.', optionsV: updatedOptions.length }),
