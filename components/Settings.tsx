@@ -254,7 +254,7 @@ const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
             {activeTab === 'roi' && <ChevronRight size={18} />}
           </button>
           <button onClick={() => setActiveTab('api')} className={`w-full flex items-center justify-between px-5 py-3.5 rounded-lg text-base font-bold transition-all ${activeTab === 'api' ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF]' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
-            <div className="flex items-center gap-4"><Database size={20} /> MAM/DAM API</div>
+            <div className="flex items-center gap-4"><Database size={20} /> MAM/DAM Sync</div>
             {activeTab === 'api' && <ChevronRight size={18} />}
           </button>
         </aside>
