@@ -61,7 +61,7 @@ const SupportCard: React.FC<SupportCardProps> = ({ darkMode, onClose }) => {
                         We're here to help.
                     </h2>
                     <p className="text-blue-100 text-lg font-medium leading-relaxed">
-                        Running into issues? Have a feature request? Drop us a line and we'll get back to you ASAP.
+                        Running into issues? Drop us a line and we'll get back to you ASAP.
                     </p>
                 </div>
 
