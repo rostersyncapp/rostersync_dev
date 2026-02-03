@@ -843,27 +843,95 @@ export const Dashboard: React.FC<Props> = ({
             </div>
           )
         )}
-      </div>
-    </div>
-  );
+        {/* Iconik Sync Modal */}
+        {isIconikModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+            <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl w-full max-w-md border border-gray-100 dark:border-gray-800 overflow-hidden transform transition-all animate-in fade-in zoom-in-95 duration-200">
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-xl font-black text-gray-900 dark:text-white flex items-center gap-2">
+                    <Globe size={20} className="text-[#5B5FFF]" />
+                    Sync to Iconik
+                  </h3>
+                  <button
+                    onClick={() => setIsIconikModalOpen(false)}
+                    className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
 
-  function handleQuickDeleteRoster(e: React.MouseEvent, roster: Roster) {
-    e.preventDefault(); e.stopPropagation();
-    if (window.confirm(`Delete ${roster.teamName}?`)) { onDeleteRoster(roster.id); }
+                <div className="space-y-4">
+                  <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-100 dark:border-blue-800/50">
+                    <p className="text-sm text-blue-700 dark:text-blue-300 font-medium leading-relaxed">
+                      Enter the exact <strong>Field Name</strong> (ID) from Iconik where you want to add these athletes.
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-gray-500 uppercase tracking-widest pl-1">
+                      Target Field Name
+                    </label>
+                    <input
+                      type="text"
+                      value={targetFieldLabel}
+                      onChange={(e) => setTargetFieldLabel(e.target.value)}
+                      placeholder="e.g. athlete_names_v1"
+                      className="w-full p-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-bold focus:ring-2 focus:ring-[#5B5FFF]/20 focus:border-[#5B5FFF] outline-none transition-all placeholder:font-medium text-gray-900 dark:text-white"
+                      autoFocus
+                    />
+                  </div>
+                </div>
+
+                <div className="mt-8 flex gap-3">
+                  <button
+                    onClick={() => setIsIconikModalOpen(false)}
+                    className="flex-1 px-4 py-3 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 font-bold rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={performIconikSync}
+                    disabled={!targetFieldLabel.trim() || isSyncingIconik}
+                    className="flex-1 px-4 py-3 bg-[#5B5FFF] text-white font-bold rounded-xl hover:bg-[#4a4eff] transition-all shadow-lg shadow-[#5B5FFF]/20 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    {isSyncingIconik ? (
+                      <>
+                        <Loader2 size={18} className="animate-spin" />
+                        Syncing...
+                      </>
+                    ) : (
+                      <>
+                        Sync Now
+                        <ArrowRight size={18} />
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+      );
+
+      function handleQuickDeleteRoster(e: React.MouseEvent, roster: Roster) {
+        e.preventDefault(); e.stopPropagation();
+      if (window.confirm(`Delete ${roster.teamName}?`)) {onDeleteRoster(roster.id); }
   }
 };
 
-const ExportItem: React.FC<{ icon: React.ReactNode; title: string; desc: string; onClick: () => void }> = ({ icon, title, desc, onClick }) => (
-  <button onClick={onClick} className="w-full flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 hover:bg-[#5B5FFF]/5 dark:hover:bg-[#5B5FFF]/10 rounded-lg transition-all group border border-gray-100 dark:border-gray-800 hover:border-[#5B5FFF]/20">
-    <div className="flex items-center gap-4">
-      <div className="w-12 h-12 rounded-lg bg-white dark:bg-gray-800 flex items-center justify-center text-gray-400 group-hover:text-[#5B5FFF] shadow-sm transition-colors group-hover:scale-110">
-        {icon}
-      </div>
-      <div className="text-left min-w-0">
-        <div className="text-sm font-extrabold text-gray-900 dark:text-white truncate">{title}</div>
-        <div className="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-tight mt-0.5 truncate">{desc}</div>
-      </div>
-    </div>
-    <ArrowRight size={18} className="text-gray-300 group-hover:text-[#5B5FFF] group-hover:translate-x-1 transition-all shrink-0" />
-  </button>
-);
+      const ExportItem: React.FC<{ icon: React.ReactNode; title: string; desc: string; onClick: () => void }> = ({icon, title, desc, onClick}) => (
+      <button onClick={onClick} className="w-full flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 hover:bg-[#5B5FFF]/5 dark:hover:bg-[#5B5FFF]/10 rounded-lg transition-all group border border-gray-100 dark:border-gray-800 hover:border-[#5B5FFF]/20">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-lg bg-white dark:bg-gray-800 flex items-center justify-center text-gray-400 group-hover:text-[#5B5FFF] shadow-sm transition-colors group-hover:scale-110">
+            {icon}
+          </div>
+          <div className="text-left min-w-0">
+            <div className="text-sm font-extrabold text-gray-900 dark:text-white truncate">{title}</div>
+            <div className="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-tight mt-0.5 truncate">{desc}</div>
+          </div>
+        </div>
+        <ArrowRight size={18} className="text-gray-300 group-hover:text-[#5B5FFF] group-hover:translate-x-1 transition-all shrink-0" />
+      </button>
+      );
