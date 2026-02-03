@@ -135,6 +135,8 @@ const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
   });
   const [connectionStatus, setConnectionStatus] = useState<'idle' | 'testing' | 'success' | 'error'>('idle');
   const [connectionMessage, setConnectionMessage] = useState('');
+  const [catdvStatus, setCatdvStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [catdvMessage, setCatdvMessage] = useState('');
 
   const handleSaveConfig = async () => {
     setConnectionStatus('testing');
@@ -232,9 +234,15 @@ const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
   };
 
   const handleSaveCatdvConfig = () => {
-    localStorage.setItem('catdvConfig', JSON.stringify(catdvConfig));
-    // For now, just a simple browser alert or local success state
-    alert('CatDV configuration saved locally.');
+    try {
+      localStorage.setItem('catdvConfig', JSON.stringify(catdvConfig));
+      setCatdvStatus('success');
+      setCatdvMessage('CatDV configuration saved locally.');
+      setTimeout(() => setCatdvStatus('idle'), 3000);
+    } catch (e) {
+      setCatdvStatus('error');
+      setCatdvMessage('Failed to save configuration.');
+    }
   };
 
   // ROI Stats
@@ -751,7 +759,21 @@ const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
                     </div>
                   </div>
 
-                  <div className="mt-8 flex justify-end">
+                  <div className="mt-8 flex items-center justify-between">
+                    <div className="flex-1 mr-4">
+                      {catdvStatus === 'error' && (
+                        <div className="flex items-center gap-2 text-red-500 text-sm font-bold animate-pulse">
+                          <AlertCircle size={16} />
+                          {catdvMessage}
+                        </div>
+                      )}
+                      {catdvStatus === 'success' && (
+                        <div className="flex items-center gap-2 text-emerald-500 text-sm font-bold">
+                          <CheckCircle2 size={16} />
+                          {catdvMessage}
+                        </div>
+                      )}
+                    </div>
                     <button
                       onClick={handleSaveCatdvConfig}
                       className="px-8 py-3 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-500/20 hover:scale-[1.02] active:scale-[0.98] flex items-center gap-2"
