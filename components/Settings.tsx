@@ -716,17 +716,7 @@ const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <div className="space-y-2">
-                      <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">IP Address</label>
-                      <input
-                        type="text"
-                        placeholder="Enter Server IP"
-                        value={catdvConfig.ipAddress}
-                        onChange={(e) => setCatdvConfig(prev => ({ ...prev, ipAddress: e.target.value }))}
-                        className="w-full p-3.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-medium focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all"
-                      />
-                    </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                       <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Username</label>
                       <input
@@ -744,6 +734,16 @@ const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
                         placeholder="Enter Password"
                         value={catdvConfig.password}
                         onChange={(e) => setCatdvConfig(prev => ({ ...prev, password: e.target.value }))}
+                        className="w-full p-3.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-medium focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">IP Address</label>
+                      <input
+                        type="text"
+                        placeholder="Enter Server IP"
+                        value={catdvConfig.ipAddress}
+                        onChange={(e) => setCatdvConfig(prev => ({ ...prev, ipAddress: e.target.value }))}
                         className="w-full p-3.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-medium focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all"
                       />
                     </div>
