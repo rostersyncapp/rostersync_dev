@@ -120,7 +120,7 @@ Deno.serve(async (req) => {
             let fieldInfo = {
                 fieldGroupID: 1,
                 memberOf: "clip",
-                identifier: fieldName.includes('.') ? fieldName : `custom.${fieldName.toLowerCase().replace(/\s/g, '.')}`,
+                identifier: fieldName.includes('.') ? fieldName : `custom.${fieldName.toLowerCase().replace(/\\s/g, '.')}`,
                 name: fieldName
             };
 
@@ -144,23 +144,33 @@ Deno.serve(async (req) => {
                     }
 
                     if (Array.isArray(fields)) {
-                        const match = fields.find((f: any) =>
-                            f.name?.toLowerCase() === fieldName.toLowerCase() ||
-                            f.identifier?.toLowerCase() === fieldName.toLowerCase() ||
-                            String(f.id) === String(fieldName)
-                        );
+                        console.log(`[${reqId}] Found ${fields.length} total fields.`);
+                        if (fields.length > 0) {
+                            console.log(`[${reqId}] First field sample:`, JSON.stringify(fields[0]).slice(0, 300));
+                        }
+
+                        const match = fields.find((f: any) => {
+                            const fName = (f.name || f.Name || "").toLowerCase();
+                            const fIden = (f.identifier || f.Field || f.field || f.fField || "").toLowerCase();
+                            const fId = String(f.id || "").toLowerCase();
+                            const target = fieldName.toLowerCase();
+                            return fName === target || fIden === target || fId === target;
+                        });
 
                         if (match) {
-                            internalFieldId = match.id;
+                            // Order of preference for ID/Identifier: Field, identifier, id
+                            internalFieldId = match.Field || match.field || match.identifier || match.id || fieldName;
                             fieldInfo = {
-                                fieldGroupID: match.fieldGroupID || 1,
+                                fieldGroupID: match.fieldGroupID || match.groupID || 1,
                                 memberOf: match.memberOf || "clip",
-                                identifier: match.identifier || fieldInfo.identifier,
-                                name: match.name || fieldName
+                                identifier: match.Field || match.field || match.identifier || fieldInfo.identifier,
+                                name: match.name || match.Name || fieldName
                             };
                             console.log(`[${reqId}] Match Found: ${fieldInfo.name} (ID: ${internalFieldId}, Identifier: ${fieldInfo.identifier})`);
                         } else {
-                            console.warn(`[${reqId}] No field match found in /9/fields for "${fieldName}".`);
+                            console.warn(`[${reqId}] No field match found for "${fieldName}".`);
+                            const names = fields.slice(0, 5).map(f => f.name || f.Name || 'unnamed');
+                            console.log(`[${reqId}] Sample field names: ${names.join(', ')}`);
                         }
                     } else {
                         console.error(`[${reqId}] fieldsData is not an array and does not contain a 'data' array`);
