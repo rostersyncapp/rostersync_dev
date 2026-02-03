@@ -136,25 +136,34 @@ Deno.serve(async (req) => {
 
                 if (lookupRes.ok) {
                     const fieldsData = await lookupRes.json();
-                    const fields = Array.isArray(fieldsData) ? fieldsData : (fieldsData.data || []);
+                    let fields = [];
+                    if (Array.isArray(fieldsData)) {
+                        fields = fieldsData;
+                    } else if (fieldsData && Array.isArray(fieldsData.data)) {
+                        fields = fieldsData.data;
+                    }
 
-                    const match = fields.find((f: any) =>
-                        f.name?.toLowerCase() === fieldName.toLowerCase() ||
-                        f.identifier?.toLowerCase() === fieldName.toLowerCase() ||
-                        String(f.id) === String(fieldName)
-                    );
+                    if (Array.isArray(fields)) {
+                        const match = fields.find((f: any) =>
+                            f.name?.toLowerCase() === fieldName.toLowerCase() ||
+                            f.identifier?.toLowerCase() === fieldName.toLowerCase() ||
+                            String(f.id) === String(fieldName)
+                        );
 
-                    if (match) {
-                        internalFieldId = match.id;
-                        fieldInfo = {
-                            fieldGroupID: match.fieldGroupID || 1,
-                            memberOf: match.memberOf || "clip",
-                            identifier: match.identifier || fieldInfo.identifier,
-                            name: match.name || fieldName
-                        };
-                        console.log(`[${reqId}] Match Found: ${fieldInfo.name} (ID: ${internalFieldId}, Identifier: ${fieldInfo.identifier})`);
+                        if (match) {
+                            internalFieldId = match.id;
+                            fieldInfo = {
+                                fieldGroupID: match.fieldGroupID || 1,
+                                memberOf: match.memberOf || "clip",
+                                identifier: match.identifier || fieldInfo.identifier,
+                                name: match.name || fieldName
+                            };
+                            console.log(`[${reqId}] Match Found: ${fieldInfo.name} (ID: ${internalFieldId}, Identifier: ${fieldInfo.identifier})`);
+                        } else {
+                            console.warn(`[${reqId}] No field match found in /9/fields for "${fieldName}".`);
+                        }
                     } else {
-                        console.warn(`[${reqId}] No field match found in /9/fields for "${fieldName}".`);
+                        console.error(`[${reqId}] fieldsData is not an array and does not contain a 'data' array`);
                     }
                 }
             } catch (e: any) {
