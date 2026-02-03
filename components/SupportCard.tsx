@@ -86,7 +86,6 @@ const SupportCard: React.FC<SupportCardProps> = ({ darkMode, onClose }) => {
                             value={form.name}
                             onChange={(e) => setForm({ ...form, name: e.target.value })}
                             className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border-none rounded-xl text-sm font-medium text-gray-900 dark:text-white focus:ring-2 focus:ring-[#5B5FFF]/20 outline-none transition-all placeholder:text-gray-400"
-                            placeholder="Jane Doe"
                         />
                     </div>
 
@@ -98,7 +97,6 @@ const SupportCard: React.FC<SupportCardProps> = ({ darkMode, onClose }) => {
                             value={form.email}
                             onChange={(e) => setForm({ ...form, email: e.target.value })}
                             className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border-none rounded-xl text-sm font-medium text-gray-900 dark:text-white focus:ring-2 focus:ring-[#5B5FFF]/20 outline-none transition-all placeholder:text-gray-400"
-                            placeholder="jane@company.com"
                         />
                     </div>
 
@@ -110,7 +108,6 @@ const SupportCard: React.FC<SupportCardProps> = ({ darkMode, onClose }) => {
                             value={form.message}
                             onChange={(e) => setForm({ ...form, message: e.target.value })}
                             className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border-none rounded-xl text-sm font-medium text-gray-900 dark:text-white focus:ring-2 focus:ring-[#5B5FFF]/20 outline-none transition-all resize-none placeholder:text-gray-400"
-                            placeholder="How can we help you?"
                         />
                     </div>
 
