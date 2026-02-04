@@ -617,8 +617,16 @@ export async function processRosterRawText(
          - IGNORE years or extra metadata (e.g. "2025", "U18") when matching.
          - Do NOT return "Unknown Team" if the players match a known professional team.`;
 
+    const detectedTeam = knownTeams.find(name => {
+      const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(`\\b${escaped}\\b`, 'i');
+      return regex.test(text.substring(0, 1000)); // Check first 1000 chars
+    });
+    const teamHint = detectedTeam ? `DETECTION HINT: I found "${detectedTeam}" in the header/text. This is extremely likely to be the team name. Use this name if the athletes match.` : '';
+
     const userPrompt = `DATA:\n${text}\n\n${context}\nTier: ${tier}. Mode: ${isNocMode ? 'NOC' : 'Standard'}.\n\n` +
       `FINAL INSTRUCTIONS:\n` +
+      `${teamHint}\n` +
       `${identificationInstruction}\n` +
       `2. Extraction: CRITICAL - You MUST extract EVERY SINGLE athlete from the 'DATA' block into the JSON results. Do not return an empty athletes list.\n` +
       `3. Return ONLY valid JSON. No conversational text.`;
