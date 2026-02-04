@@ -588,22 +588,21 @@ export const Dashboard: React.FC<Props> = ({
                       {/* Color Picker */}
                       {(originalPrimaryColor || secondaryColor) && (
                         <div className="flex items-center gap-1.5 ml-2 border-l border-gray-200 dark:border-gray-700 pl-4">
-                          {originalPrimaryColor && (
-                            <button
-                              onClick={(e) => { e.stopPropagation(); handleColorSelect(originalPrimaryColor); }}
-                              className={`w-4 h-4 rounded-full border border-gray-200 dark:border-gray-700 shadow-sm transition-transform hover:scale-110 ${primaryColor === originalPrimaryColor ? 'ring-2 ring-offset-2 ring-gray-900 dark:ring-white scale-110' : ''}`}
-                              style={{ backgroundColor: originalPrimaryColor }}
-                              title="Primary Color"
-                            />
-                          )}
-                          {secondaryColor && secondaryColor.toLowerCase() !== originalPrimaryColor?.toLowerCase() && (
-                            <button
-                              onClick={(e) => { e.stopPropagation(); handleColorSelect(secondaryColor); }}
-                              className={`w-4 h-4 rounded-full border border-gray-200 dark:border-gray-700 shadow-sm transition-transform hover:scale-110 ${primaryColor === secondaryColor ? 'ring-2 ring-offset-2 ring-gray-900 dark:ring-white scale-110' : ''}`}
-                              style={{ backgroundColor: secondaryColor }}
-                              title="Secondary Color"
-                            />
-                          )}
+                          {[originalPrimaryColor, secondaryColor]
+                            .filter((c): c is string => !!c) // Filter out null/undefined
+                            .filter((c, index, self) =>
+                              // Deduplicate case-insensitively
+                              index === self.findIndex(t => t.toLowerCase() === c.toLowerCase())
+                            )
+                            .map((col, idx) => (
+                              <button
+                                key={`${col}-${idx}`}
+                                onClick={(e) => { e.stopPropagation(); handleColorSelect(col); }}
+                                className={`w-4 h-4 rounded-full border border-gray-200 dark:border-gray-700 shadow-sm transition-transform hover:scale-110 ${primaryColor?.toLowerCase() === col.toLowerCase() ? 'ring-2 ring-offset-2 ring-gray-900 dark:ring-white scale-110' : ''}`}
+                                style={{ backgroundColor: col }}
+                                title={idx === 0 && col === originalPrimaryColor ? "Primary Color" : "Secondary Color"}
+                              />
+                            ))}
                         </div>
                       )}
                     </div>
