@@ -143,6 +143,7 @@ export const Dashboard: React.FC<Props> = ({
   const [showExportDrawer, setShowExportDrawer] = useState(false);
   const [exportLanguage, setExportLanguage] = useState('EN');
   const [movingRosterId, setMovingRosterId] = useState<string | null>(null);
+  const [rosterToDelete, setRosterToDelete] = useState<Roster | null>(null);
   const [viewMode, setViewMode] = useState<'card' | 'list'>('card');
 
   const SPORT_NAME_MAP: Record<string, string> = {
@@ -169,7 +170,7 @@ export const Dashboard: React.FC<Props> = ({
 
   function handleQuickDeleteRoster(e: React.MouseEvent, roster: Roster) {
     e.preventDefault(); e.stopPropagation();
-    if (window.confirm(`Delete ${roster.teamName}?`)) { onDeleteRoster(roster.id); }
+    setRosterToDelete(roster);
   }
 
   // Add Player Form State
