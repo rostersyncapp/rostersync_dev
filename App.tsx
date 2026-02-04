@@ -302,6 +302,76 @@ const App: React.FC = () => {
   const [showUserProfile, setShowUserProfile] = useState(false);
   const [initializationError, setInitializationError] = useState<string | null>(null);
 
+  // -- URL PERSISTENCE LOGIC START --
+
+  // 1. Sync State -> URL
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    let updated = false;
+
+    if (selectedRosterId) {
+      if (params.get('roster') !== selectedRosterId) {
+        params.set('roster', selectedRosterId);
+        updated = true;
+      }
+    } else {
+      if (params.has('roster')) {
+        params.delete('roster');
+        updated = true;
+      }
+    }
+
+    if (activeProjectId) {
+      if (params.get('project') !== activeProjectId) {
+        params.set('project', activeProjectId);
+        updated = true;
+      }
+    } else {
+      if (params.has('project')) {
+        params.delete('project');
+        updated = true;
+      }
+    }
+
+    if (updated) {
+      const newUrl = `${window.location.pathname}?${params.toString()}`;
+      window.history.replaceState(null, '', newUrl);
+    }
+  }, [selectedRosterId, activeProjectId]);
+
+  // 2. Sync URL -> State (On initial load or detailed data fetch)
+  useEffect(() => {
+    // Only attempt to restore state once we have the data to validate against
+    if (loadingData || rosters.length === 0) return;
+
+    const params = new URLSearchParams(window.location.search);
+    const rosterIdParam = params.get('roster');
+    const projectIdParam = params.get('project');
+
+    if (rosterIdParam && !selectedRosterId) {
+      const targetRoster = rosters.find(r => r.id === rosterIdParam);
+      if (targetRoster) {
+        setSelectedRosterId(targetRoster.id);
+        // If the roster belongs to a project, make sure we also expand/activate that project context if needed
+        if (targetRoster.projectId) {
+          setActiveProjectId(targetRoster.projectId);
+          // Also expand the folder in the sidebar
+          setExpandedFolderIds(prev => prev.includes(targetRoster.projectId!) ? prev : [...prev, targetRoster.projectId!]);
+        }
+      }
+    }
+
+    if (projectIdParam && !activeProjectId) {
+      const targetProject = projects.find(p => p.id === projectIdParam);
+      if (targetProject) {
+        setActiveProjectId(targetProject.id);
+        setExpandedFolderIds(prev => prev.includes(targetProject.id) ? prev : [...prev, targetProject.id]);
+      }
+    }
+  }, [loadingData, rosters, projects]);
+
+  // -- URL PERSISTENCE LOGIC END --
+
   useEffect(() => {
     if (darkMode) {
       document.documentElement.classList.add('dark');
