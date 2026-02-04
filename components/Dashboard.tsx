@@ -42,7 +42,6 @@ import {
   TrendingDown,
   FolderPlus,
   MoreVertical,
-  Move,
   FileJson,
   FileCode,
   Languages,
@@ -1171,7 +1170,7 @@ export const Dashboard: React.FC<Props> = ({
                     <div className="flex justify-between items-start mb-4">
                       <TeamLogo url={roster.teamMetadata?.logoUrl} name={roster.teamName} abbreviation={roster.teamMetadata?.abbreviation} primaryColor={primaryColor} size="md" />
                       <div className="flex gap-1 relative z-10">
-                        <button onClick={(e) => { e.stopPropagation(); setMovingRosterId(roster.id); }} className="p-1.5 text-gray-300 hover:text-[#5B5FFF] opacity-0 group-hover:opacity-100"><Move size={16} /></button>
+                        <button onClick={(e) => { e.stopPropagation(); setMovingRosterId(roster.id); }} className="p-1.5 text-gray-300 hover:text-[#5B5FFF] opacity-0 group-hover:opacity-100" title="Move to Folder"><Plus size={16} /></button>
                         <button onClick={(e) => { e.stopPropagation(); handleQuickDeleteRoster(e, roster); }} className="p-1.5 text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100"><Trash2 size={16} /></button>
                       </div>
                     </div>
@@ -1262,8 +1261,8 @@ export const Dashboard: React.FC<Props> = ({
                         </td>
                         <td className="px-6 py-4 text-right">
                           <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button onClick={(e) => { e.stopPropagation(); setMovingRosterId(roster.id); }} className="p-2 text-gray-300 hover:text-[#5B5FFF] bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-700 rounded-lg shadow-sm hover:shadow-md"><Move size={14} /></button>
-                            <button onClick={(e) => { e.stopPropagation(); handleQuickDeleteRoster(e, roster); }} className="p-2 text-gray-300 hover:text-red-500 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-700 rounded-lg shadow-sm hover:shadow-md"><Trash2 size={14} /></button>
+                            <button onClick={(e) => { e.stopPropagation(); setMovingRosterId(roster.id); }} className="p-2 text-gray-300 hover:text-[#5B5FFF] bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-700 rounded-lg shadow-sm hover:shadow-md" title="Move to Folder"><Plus size={14} /></button>
+                            <button onClick={(e) => { e.stopPropagation(); handleQuickDeleteRoster(e, roster); }} className="p-2 text-gray-300 hover:text-red-500 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-700 rounded-lg shadow-sm hover:shadow-md" title="Delete Roster"><Trash2 size={14} /></button>
                           </div>
                         </td>
                       </tr>
