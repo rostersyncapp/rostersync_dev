@@ -208,6 +208,20 @@ async function fetchESPNRoster(teamName: string): Promise<Map<string, string> | 
   }
 }
 
+const LEAGUE_ALIAS_MAP: Record<string, string[]> = {
+  'mls': ['usa.1', 'mls'],
+  'nwsl': ['usa.nwsl', 'nwsl'],
+  'premier-league': ['eng.1', 'premier-league', 'eng.premier'],
+  'la-liga': ['esp.1', 'la-liga', 'esp.laliga'],
+  'bundesliga': ['ger.1', 'bundesliga', 'ger.bundesliga'],
+  'serie-a': ['ita.1', 'serie-a', 'ita.seriea'],
+  'ligue-1': ['fra.1', 'ligue-1', 'fra.ligue1'],
+  'eredivisie': ['ned.1', 'eredivisie'],
+  'liga-mx': ['mex.1', 'liga-mx'],
+  'usl': ['usa.usl.1', 'usl'],
+  'champions-league': ['uefa.champions', 'champions-league'],
+};
+
 /**
  * Extract unique team names for a specific league from our seeded data.
  * Used to provide a "multiple-choice" list to the AI to prevent "Unknown Team"
@@ -216,17 +230,18 @@ async function fetchESPNRoster(teamName: string): Promise<Map<string, string> | 
 function getKnownTeamsForLeague(league: string): string[] {
   const teams = new Set<string>();
   const targetLeague = league.toLowerCase();
+  const validLeagues = LEAGUE_ALIAS_MAP[targetLeague] || [targetLeague];
 
   // Check ESPN_TEAM_IDS
   Object.entries(ESPN_TEAM_IDS).forEach(([name, info]) => {
-    if (info.league?.toLowerCase() === targetLeague) {
+    if (info.league && validLeagues.includes(info.league.toLowerCase())) {
       teams.add(name);
     }
   });
 
   // Check KNOWN_TEAM_LOGOS as fallback/secondary
   Object.entries(KNOWN_TEAM_LOGOS).forEach(([name, info]) => {
-    if (info.league?.toLowerCase() === targetLeague) {
+    if (info.league && validLeagues.includes(info.league.toLowerCase())) {
       teams.add(name);
     }
   });
