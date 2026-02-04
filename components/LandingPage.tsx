@@ -41,8 +41,10 @@ interface LandingPageProps {
 const FAQS = [
   { q: "How does the AI normalization work?", a: "We use advanced large language models to parse raw text, identifying athlete names, jersey numbers, and positions. The engine then standardizes this data into hardware-safe formats compatible with broadcast character generators." },
   { q: "What is a 'Credit'?", a: "One credit equals one run of the AI Scout. A single run can process an entire roster text block. Credits refresh monthly based on your subscription tier." },
-  { q: "What is a multi-format output?", a: "RosterSync generates native files for different production systems from a single input—eliminating manual typing for Ross Xpression, Vizrt, and MAM systems simultaneously." },
-  { q: "Can I export for Ross Xpression or Vizrt?", a: "Yes. Our Studio and Network tiers include direct exports for Ross DataLinq (CSV) and Vizrt graphics, with full XML support in the Network tier including automatic sanitization." }
+  { q: "What is the difference between Pro and Studio tiers?", a: "The Studio tier ($149) is designed for teams, providing 3 user seats and 500 monthly credits. It also adds direct CSV exports for Ross XPression and Vizrt, whereas Pro is limited to Premiere and MAM systems." },
+  { q: "Can I add more team members to my account?", a: "Yes. The Studio tier includes 3 seats and the Network tier includes 5 seats. Free and Pro tiers are currently limited to a single user." },
+  { q: "Do you offer an API or XML support?", a: "Yes. Our Network tier provides full XML suite support (including ODF and Ross DataLinq XML) along with direct API access for custom production pipeline integrations." },
+  { q: "What languages are supported?", a: "All tiers support English. The Network tier adds support for Spanish (ES) and Mandarin (ZH) localization, including hardware-safe phonetic guides for each." }
 ];
 
 const FEATURES = [
