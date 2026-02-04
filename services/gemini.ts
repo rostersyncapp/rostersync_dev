@@ -495,7 +495,13 @@ export async function processRosterRawText(
 
   const isMajorLeague = league && FULLY_SEEDED_LEAGUES.includes(league);
 
-  // Force disable branding search if we know we have the data
+  // SEARCH LOGIC: 
+  // 1. Always enable search if the user wants branding (and it's not a major league where we have it).
+  // 2. ALWAYS enable search for professional leagues (MiLB, NWSL, USL, etc.) to handle trades and expansion, 
+  //    even if we have their branding seeded. Live data is better for player-to-team matching.
+  const shouldSearch = !isNocMode && (findBranding || !!league);
+
+  // brandingDiscovery is separate - we only tell it to deep-dive for logos if findBranding is true
   const shouldSearchForBranding = findBranding && !isMajorLeague;
 
   const knownTeams = league ? getKnownTeamsForLeague(league) : [];
@@ -592,14 +598,14 @@ export async function processRosterRawText(
     maxOutputTokens: 8192, // Allow for large rosters + search logs
   };
 
-  if (!shouldSearchForBranding) {
+  if (!shouldSearch) {
     generationConfig.responseMimeType = "application/json";
     generationConfig.responseSchema = schema;
   }
   modelParams.generationConfig = generationConfig;
 
-  // Only enable tools if we REALLY need to search for branding, or if checking a completely unknown league/NOC
-  if (shouldSearchForBranding) {
+  // Enable tools if we need to search for branding OR for robust team identification
+  if (shouldSearch) {
     modelParams.tools = [{ googleSearch: {} }];
   }
 
@@ -608,8 +614,12 @@ export async function processRosterRawText(
   let result;
   try {
     const model = genAI.getGenerativeModel(modelParams);
-    const identificationInstruction = shouldSearchForBranding
-      ? `1. Identification: Use 'googleSearch' to identify the team name (e.g. "Sacramento River Cats") by searching for the athletes in 'DATA'.`
+    const identificationInstruction = shouldSearch
+      ? `1. Identification: Use 'googleSearch' to identify the team name (e.g. "Bay FC") by searching for the athletes in 'DATA'.
+         - Select 2-3 unique player names and search for: "roster {Player 1} {Player 2} {Player 3}".
+         - Use the search results to find the specific professional team (NWSL, MiLB, etc.).
+         - Cross-reference the identified team with the VALID TEAM LIST provided above.
+         - TRUST THE SEARCH RESULTS for team identification; professional rosters change frequently, and expansion teams like "Bay FC" may not be in your training data.`
       : `1. Identification: Identify the team name (e.g. "Boston Bruins") from the roster data. 
          - Search tool is DISABLED for this request. 
          - Compare the players in 'DATA' against the VALID TEAM LIST in your instructions. 
