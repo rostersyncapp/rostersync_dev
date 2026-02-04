@@ -42,6 +42,32 @@ function toSafeName(name: string): string {
     .trim();
 }
 
+function toTitleCase(str: string): string {
+  if (!str) return "";
+  const smallWords = ['of', 'the', 'and', 'de', 'del', 'da', 'at', 'by', 'for', 'in', 'on', 'to', 'up', 'y'];
+  // Common sports acronyms and region codes to keep uppercase
+  const acronyms = ['FC', 'CF', 'II', 'III', 'IV', 'VI', 'AFC', 'SC', 'AC', 'US', 'USA', 'U18', 'U20', 'U23', 'LA', 'NY', 'NJ', 'DC', 'KC', 'STL', 'RSL', 'NYC', 'S.C.', 'F.C.'];
+
+  return str.split(' ').map((word, index) => {
+    const upper = word.toUpperCase();
+    // Check if the word (stripped of punctuation for matching) is a known acronym
+    const cleanWord = upper.replace(/[^A-Z0-9]/g, '');
+
+    if (acronyms.includes(cleanWord) || acronyms.includes(upper)) {
+      return upper;
+    }
+
+    // Check for small words (skip if first word)
+    const lower = word.toLowerCase();
+    if (index > 0 && smallWords.includes(lower)) {
+      return lower;
+    }
+
+    // Capitalize first letter, lowercase rest
+    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+  }).join(' ');
+}
+
 /**
  * Robustly extract JSON from AI response text
  */
@@ -693,7 +719,9 @@ export async function processRosterRawText(
   if (parsedResult) {
     const keysToClean = ['teamName', 'logoUrl', 'primaryColor', 'secondaryColor', 'abbreviation', 'conference', 'sport'];
     keysToClean.forEach(key => {
-      if (typeof parsedResult[key] === 'string') {
+      if (key === 'teamName') {
+        parsedResult[key] = toTitleCase(cleanStr(parsedResult[key]));
+      } else {
         parsedResult[key] = cleanStr(parsedResult[key]);
       }
     });
@@ -753,6 +781,9 @@ export async function processRosterRawText(
       if (branding.logoUrl) {
         console.log(`[Gemini] Overriding AI logo with DB logo: ${branding.logoUrl} `);
         parsedResult.logoUrl = branding.logoUrl;
+        // Also ensure team name matches DB exactly if possible
+        // parsedResult.teamName = branding.name; // Actually, keeping user perception might be better
+
       }
       if (branding.primaryColor) parsedResult.primaryColor = branding.primaryColor;
       if (branding.secondaryColor) parsedResult.secondaryColor = branding.secondaryColor;
