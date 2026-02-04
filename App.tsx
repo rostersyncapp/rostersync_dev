@@ -467,6 +467,14 @@ const App: React.FC = () => {
       return;
     }
     try {
+      // Refresh token before operation to prevent JWT error
+      try {
+        const token = await getSupabaseTokenWithRetry();
+        await setSupabaseToken(token);
+      } catch (tokenErr) {
+        console.warn("Token auto-refresh failed, attempting create anyway...", tokenErr);
+      }
+
       const { data, error } = await supabase.from('projects').insert({ user_id: user.id, name: newProjectName, parent_id: parentId }).select().single();
       if (error) throw error;
       if (data) {
@@ -492,6 +500,15 @@ const App: React.FC = () => {
     }
 
     try {
+      // Refresh token before operation to prevent JWT error
+      try {
+        const token = await getSupabaseTokenWithRetry();
+        await setSupabaseToken(token);
+      } catch (tokenErr) {
+        console.warn("Token auto-refresh failed, attempting delete anyway...", tokenErr);
+      }
+
+
       const { error } = await supabase.from('projects').delete().eq('id', projectId);
 
       if (error) {
