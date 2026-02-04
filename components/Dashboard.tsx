@@ -170,6 +170,7 @@ export const Dashboard: React.FC<Props> = ({
 
   function handleQuickDeleteRoster(e: React.MouseEvent, roster: Roster) {
     e.preventDefault(); e.stopPropagation();
+    console.log("handleQuickDeleteRoster triggered for:", roster.teamName);
     setRosterToDelete(roster);
   }
 
@@ -1275,6 +1276,47 @@ export const Dashboard: React.FC<Props> = ({
           )
         )}
 
+        {/* Delete Confirmation Modal (Main View) */}
+        {rosterToDelete && (
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={() => setRosterToDelete(null)} />
+            <div className="bg-white dark:bg-gray-900 rounded-3xl p-8 max-w-sm w-full shadow-2xl relative z-10 border border-gray-100 dark:border-gray-800 animate-in zoom-in-95 fade-in duration-200">
+              <div className="w-16 h-16 bg-red-50 dark:bg-red-950/30 rounded-2xl flex items-center justify-center mb-6 mx-auto">
+                <Trash2 size={32} className="text-red-500" />
+              </div>
+
+              <h3 className="text-xl font-black text-gray-900 dark:text-white text-center mb-2">
+                {rosterToDelete.projectId ? 'Remove from Folder?' : 'Delete Roster?'}
+              </h3>
+
+              <p className="text-sm text-gray-500 dark:text-gray-400 text-center mb-8 leading-relaxed font-medium">
+                {rosterToDelete.projectId
+                  ? `Moving "${rosterToDelete.teamName}" out of this folder. It will still be available in your main Library.`
+                  : `Are you sure you want to permanently delete "${rosterToDelete.teamName}"? This action cannot be undone.`
+                }
+              </p>
+
+              <div className="flex flex-col gap-3">
+                <button
+                  onClick={() => {
+                    console.log("Confirming delete for:", rosterToDelete.id);
+                    onDeleteRoster(rosterToDelete.id);
+                    setRosterToDelete(null);
+                  }}
+                  className="w-full py-4 px-6 bg-red-500 hover:bg-red-600 text-white rounded-2xl font-black text-sm transition-all shadow-lg shadow-red-500/20"
+                >
+                  {rosterToDelete.projectId ? 'Remove from Folder' : 'Delete Roster'}
+                </button>
+                <button
+                  onClick={() => setRosterToDelete(null)}
+                  className="w-full py-4 px-6 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-2xl font-bold text-sm transition-all"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
