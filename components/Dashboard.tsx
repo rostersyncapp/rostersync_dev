@@ -1116,7 +1116,7 @@ export const Dashboard: React.FC<Props> = ({
           viewMode === 'card' ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {filteredRosters.map(roster => {
-                const primaryColor = roster.teamMetadata?.primaryColor || '#5B5FFF';
+                const primaryColor = roster.preferredAccentColor || roster.teamMetadata?.primaryColor || '#5B5FFF';
                 return (
                   <div key={roster.id} onClick={() => onSelectRoster(roster.id)} className="group bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-6 cursor-pointer hover:shadow-lg transition-all relative overflow-hidden flex flex-col">
                     <div className="absolute top-0 left-0 w-full h-1" style={{ backgroundColor: primaryColor }}></div>
@@ -1179,7 +1179,7 @@ export const Dashboard: React.FC<Props> = ({
                 </thead>
                 <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                   {filteredRosters.map(roster => {
-                    const primaryColor = roster.teamMetadata?.primaryColor || '#5B5FFF';
+                    const primaryColor = roster.preferredAccentColor || roster.teamMetadata?.primaryColor || '#5B5FFF';
                     return (
                       <tr
                         key={roster.id}
