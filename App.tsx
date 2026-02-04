@@ -837,7 +837,11 @@ const App: React.FC = () => {
                         team_name: r.teamName,
                         sport: r.sport,
                         season_year: r.seasonYear,
-                        project_id: r.projectId
+                        project_id: r.projectId,
+                        team_metadata: {
+                          ...r.teamMetadata,
+                          primaryColor: r.preferredAccentColor || r.teamMetadata?.primaryColor
+                        }
                       })
                       .eq('id', r.id);
 
