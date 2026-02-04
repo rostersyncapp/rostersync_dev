@@ -505,7 +505,7 @@ export const Dashboard: React.FC<Props> = ({
 
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden mb-8">
           <div className="p-8 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-full h-full opacity-5 pointer-events-none" style={{ background: `linear-gradient(135deg, ${primaryColor} 0%, transparent 100%)` }}></div>
+            <div className="absolute top-0 left-0 w-full h-full pointer-events-none" style={{ backgroundImage: `linear-gradient(${primaryColor}25, ${primaryColor}25)`, borderBottom: `2px solid ${primaryColor}40` }}></div>
             <div className="flex items-center gap-6 relative z-10 w-full lg:w-auto">
               <TeamLogo url={selectedRoster.teamMetadata?.logoUrl} name={selectedRoster.teamName} abbreviation={selectedRoster.teamMetadata?.abbreviation} primaryColor={primaryColor} size="lg" />
               <div className="flex-1">
