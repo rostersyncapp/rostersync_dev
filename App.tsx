@@ -302,12 +302,13 @@ const App: React.FC = () => {
   const [showUserProfile, setShowUserProfile] = useState(false);
   const [initializationError, setInitializationError] = useState<string | null>(null);
 
-  // -- URL PERSISTENCE LOGIC START --
+  const [isUrlRestored, setIsUrlRestored] = useState(false);
+  const hasAttemptedRestore = React.useRef(false);
 
   // 1. Sync State -> URL
   useEffect(() => {
-    // Prevent wiping URL parameters while initial data load is happening
-    if (loadingData) return;
+    // Prevent wiping URL parameters until we have verified/restored state from URL at least once
+    if (!isUrlRestored) return;
 
     const params = new URLSearchParams(window.location.search);
     let updated = false;
@@ -340,12 +341,19 @@ const App: React.FC = () => {
       const newUrl = `${window.location.pathname}?${params.toString()}`;
       window.history.replaceState(null, '', newUrl);
     }
-  }, [selectedRosterId, activeProjectId, loadingData]);
+  }, [selectedRosterId, activeProjectId, isUrlRestored]);
 
   // 2. Sync URL -> State (On initial load or detailed data fetch)
   useEffect(() => {
-    // Only attempt to restore state once we have the data to validate against
-    if (loadingData || rosters.length === 0) return;
+    // Wait for data load to complete
+    if (loadingData) return;
+
+    // Only run this logic once per full data load cycle
+    if (hasAttemptedRestore.current) return;
+
+    // Check if we have rosters loaded (or if user has none, that counts as loaded)
+    // We mark attempted restore even if rosters is empty, to unlock URL writing
+    hasAttemptedRestore.current = true;
 
     const params = new URLSearchParams(window.location.search);
     const rosterIdParam = params.get('roster');
@@ -372,6 +380,10 @@ const App: React.FC = () => {
         setExpandedFolderIds(prev => prev.includes(targetProject.id) ? prev : [...prev, targetProject.id]);
       }
     }
+
+    // Unlock the URL writer effect
+    setIsUrlRestored(true);
+
   }, [loadingData, rosters, projects]);
 
   // -- URL PERSISTENCE LOGIC END --
