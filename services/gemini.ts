@@ -501,7 +501,18 @@ export async function processRosterRawText(
       * Pinpoint the specific professional team (MiLB, NWSL, USL, MLS, etc.). 
       * Once identified, STOP searching. Do NOT search for logos or colors.
     - VALIDATION: Ensure at least 3 names from the input match the identified team's official roster.
-    - DO NOT return "Unknown Team" without attempting a player-based search.
+    - SEARCH STRATEGY:
+      * If unknown, pick 3 athletes. Search Google for: "{Name 1}" "{Name 2}" "{Name 3}" roster.
+      * Pinpoint the specific professional team (MiLB, NWSL, USL, MLS, etc.). 
+      * Once identified, STOP searching. Do NOT search for logos or colors.
+    - VALIDATION: Ensure at least 3 names from the input match the identified team's official roster.
+    
+    - HANDLING YEARS / SEASONS:
+      * IGNORE years or season labels in the Team Name (e.g. "Houston Dynamo 2025" -> "Houston Dynamo").
+      * If the input says "Houston Dynamo 2025", the Team Name is "Houston Dynamo".
+      * Do NOT result "Unknown Team" just because the year makes it an inexact string match. Find the closest match in the VALID TEAM LIST.
+      
+    - DO NOT return "Unknown Team" without attempting a player-based search (if search is enabled).
 
     2. ROSTER EXTRACTION (MANDATORY):
     - SOURCE DATA: You MUST extract the athletes from the literal 'DATA' provided in the user message, NOT from your search tool results.
@@ -556,7 +567,9 @@ export async function processRosterRawText(
       : `1. Identification: Identify the team name (e.g. "Boston Bruins") from the roster data. 
          - Search tool is DISABLED for this request. 
          - Compare the players in 'DATA' against the VALID TEAM LIST in your instructions. 
-         - Choose the most likely team name from that list. Do NOT return "Unknown Team" if the players match a known professional team.`;
+         - Choose the closest matching team name from that list. 
+         - IGNORE years or extra metadata (e.g. "2025", "U18") when matching.
+         - Do NOT return "Unknown Team" if the players match a known professional team.`;
 
     const userPrompt = `DATA:\n${text}\n\n${context}\nTier: ${tier}. Mode: ${isNocMode ? 'NOC' : 'Standard'}.\n\n` +
       `FINAL INSTRUCTIONS:\n` +
@@ -791,7 +804,13 @@ export async function processRosterRawText(
   };
 
   // PRIORITY: Check hardcoded known teams first (most reliable)
-  const teamNameUpper = (parsedResult.teamName || "").toUpperCase().trim();
+  // Normalize team name: uppercase, trim, and REMOVE YEARS (e.g. "San Diego FC 2025" -> "SAN DIEGO FC")
+  // This prevents year inputs from breaking exact matches
+  const teamNameUpper = (parsedResult.teamName || "")
+    .toUpperCase()
+    .replace(/\b20\d{2}(-20\d{2})?\b/g, '') // Remove 2024, 2025, 2024-25
+    .trim()
+    .replace(/\s+/g, ' ');
   console.log('[Gemini] Checking KNOWN_TEAM_LOGOS for:', teamNameUpper);
 
   let knownTeam = KNOWN_TEAM_LOGOS[teamNameUpper];
@@ -816,8 +835,9 @@ export async function processRosterRawText(
     return 1;
   };
 
-  // Always check for ambiguity when the search term is short enough to be ambiguous (< 20 chars)
-  if (teamNameUpper.length > 3 && teamNameUpper.length < 20) {
+  // Always check for ambiguity when the search term is reasonable length (< 60 chars)
+  // Expanded from 20 to 60 to handle long team names + metadata
+  if (teamNameUpper.length > 3 && teamNameUpper.length < 60) {
     const allKeys = Array.from(new Set([
       ...Object.keys(KNOWN_TEAM_LOGOS),
       ...Object.keys(ESPN_TEAM_IDS)
