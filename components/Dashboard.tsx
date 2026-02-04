@@ -933,7 +933,7 @@ export const Dashboard: React.FC<Props> = ({
             <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center shadow-inner"><Activity size={20} /></div>
             <div className="text-[10px] font-black text-emerald-500 uppercase tracking-widest bg-emerald-500/5 px-2 py-1 rounded-full border border-emerald-500/10">Stable</div>
           </div>
-          <div className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em] font-mono mb-1">System Health</div>
+          <div className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em] font-mono mb-1">Roster Health</div>
           <div className="flex items-baseline gap-2">
             <div className="text-3xl font-black text-emerald-500 tracking-tight">{healthScore}%</div>
           </div>
@@ -953,7 +953,7 @@ export const Dashboard: React.FC<Props> = ({
                       <Activity size={28} />
                     </div>
                     <div>
-                      <h3 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">System Health</h3>
+                      <h3 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">Roster Health</h3>
                       <p className="text-[11px] text-gray-400 font-bold uppercase tracking-[0.2em] mt-1">Audit Breakdown</p>
                     </div>
                   </div>
