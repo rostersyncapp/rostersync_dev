@@ -84,7 +84,7 @@ const ChatSupport: React.FC = () => {
     };
 
     return (
-        <div className="w-full max-w-4xl mx-auto h-[600px] bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-xl overflow-hidden flex flex-col">
+        <div className="w-full max-w-4xl mx-auto h-[450px] bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-xl overflow-hidden flex flex-col">
             {/* Header */}
             <div className="p-4 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50 flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center shadow-md">
@@ -109,8 +109,8 @@ const ChatSupport: React.FC = () => {
 
                         <div className={`max-w-[80%] space-y-1 ${msg.role === 'user' ? 'items-end flex flex-col' : ''}`}>
                             <div className={`p-4 rounded-2xl text-sm leading-relaxed ${msg.role === 'user'
-                                    ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-tr-none'
-                                    : 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded-tl-none'
+                                ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-tr-none'
+                                : 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded-tl-none'
                                 }`}>
                                 {msg.content}
                             </div>

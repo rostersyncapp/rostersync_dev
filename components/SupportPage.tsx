@@ -17,11 +17,11 @@ const SupportPage: React.FC<SupportPageProps> = ({ darkMode }) => {
                 <p className="text-gray-500 dark:text-gray-400 font-medium">Get help with your roster workflows and technical questions.</p>
             </div>
 
-            {/* Main Support Card */}
-            <SupportCard darkMode={darkMode} />
-
             {/* AI Agent Chat */}
             <ChatSupport />
+
+            {/* Main Support Card */}
+            <SupportCard darkMode={darkMode} />
         </div>
     );
 };
