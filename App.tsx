@@ -203,29 +203,22 @@ const FolderItem: React.FC<{
 
   return (
     <div className="space-y-0.5">
-      <div className="group flex items-center gap-1" style={{ paddingLeft: `${level * 12}px` }}>
-        <button onClick={() => { setView('dashboard'); setActiveProjectId(folder.id); setSelectedRosterId(null); }} className={`flex-1 flex items-center pl-1 pr-2 py-1.5 rounded-lg text-[13px] font-bold transition-all ${activeProjectId === folder.id ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF]' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800'}`}>
-          <div className="flex items-center gap-2 min-w-0 flex-1">
-            {hasChildren ? (
+      <div className="group flex items-center gap-1" style={{ paddingLeft: `${level * 16}px` }}>
+        <button onClick={() => { setView('dashboard'); setActiveProjectId(folder.id); setSelectedRosterId(null); }} className={`flex-1 flex items-center p-2 rounded-lg text-[14px] transition-all ${activeProjectId === folder.id ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF] font-bold' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800 font-medium'}`}>
+          <div className="flex items-center gap-3 min-w-0 flex-1 relative">
+            {hasChildren && (
               <button
                 onClick={(e) => { e.stopPropagation(); toggleExpand(folder.id); }}
-                className="p-0.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors shrink-0"
+                className="absolute -left-5 p-0.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors shrink-0 z-10"
               >
-                <ChevronDown size={12} className={`transition-transform ${!isOpen ? '-rotate-90' : ''}`} />
+                <ChevronDown size={10} className={`transition-transform ${!isOpen ? '-rotate-90' : ''}`} />
               </button>
-            ) : (
-              <div className="w-2 shrink-0" />
             )}
-            <div className="w-6 flex items-center justify-center shrink-0">
-              {totalRosterCount > 0 && (
-                <span className="text-[10px] font-mono font-black text-gray-400 dark:text-gray-500">
-                  {totalRosterCount}
-                </span>
-              )}
-            </div>
-            <FolderOpen size={16} className={`shrink-0 ${activeProjectId === folder.id ? 'text-[#5B5FFF]' : 'text-gray-400'}`} />
+            <FolderOpen size={20} className={`shrink-0 ${activeProjectId === folder.id ? 'text-[#5B5FFF]' : 'text-gray-400'}`} />
             <div className="flex items-baseline gap-1 truncate">
-              <span className="hidden lg:block truncate">{folder.name}</span>
+              <span className={`hidden lg:block truncate ${totalRosterCount > 0 ? 'text-gray-900 dark:text-white font-bold' : ''}`}>
+                {folder.name}
+              </span>
             </div>
           </div>
         </button>
