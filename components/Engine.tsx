@@ -425,7 +425,7 @@ export const Engine: React.FC<Props> = ({
                 disabled={isProcessing || !rawInput || !hasCredits}
                 className={`px-8 py-4 rounded-xl font-bold flex items-center gap-3 shadow-lg transition-all text-base uppercase tracking-widest ${hasCredits ? 'primary-gradient text-white shadow-[#5B5FFF]/20 hover:scale-[1.02] active:scale-[0.98]' : 'bg-gray-200 text-gray-400 cursor-not-allowed shadow-none'}`}
               >
-                {isProcessing ? <Loader2 className="animate-spin" size={20} /> : <Cpu size={20} />} {isProcessing ? 'Processing...' : 'Run Engine'}
+                {isProcessing ? <Loader2 className="animate-spin" size={20} /> : <Search size={20} />} {isProcessing ? 'Scouting...' : 'Scout'}
               </button>
             </div>
           </div>
