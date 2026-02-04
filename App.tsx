@@ -5,6 +5,7 @@ import Engine from './components/Engine.tsx';
 import Settings from './components/Settings.tsx';
 import LandingPage from './components/LandingPage.tsx';
 import SupportCard from './components/SupportCard.tsx';
+import SupportPage from './components/SupportPage.tsx';
 import { Roster, Profile, Project } from './types.ts';
 import { processRosterRawText, ProcessedRoster } from './services/gemini.ts';
 import { TeamSelectionModal } from './components/TeamSelectionModal.tsx';
@@ -31,6 +32,7 @@ import {
   Mail,
   User,
   MessageSquare,
+  MessageCircle,
   Send,
   CheckCircle2,
   Folder,
@@ -290,9 +292,7 @@ const App: React.FC = () => {
   const [creatingFolderInId, setCreatingFolderInId] = useState<string | 'root' | null>(null);
   const [isSavingProject, setIsSavingProject] = useState(false);
   const [newProjectName, setNewProjectName] = useState('');
-  const [showSupportModal, setShowSupportModal] = useState(false);
-  const [supportForm, setSupportForm] = useState({ name: '', email: '', message: '' });
-  const [supportStatus, setSupportStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
+
   const [rosters, setRosters] = useState<Roster[]>([]);
   const [selectedRosterId, setSelectedRosterId] = useState<string | null>(null);
   const [profile, setProfile] = useState<Profile>({ id: 'guest_user', fullName: 'Guest User', email: 'guest@rostersync.io', subscriptionTier: 'BASIC', organizationName: 'Demo Studio', creditsUsed: 0 });
@@ -635,52 +635,7 @@ const App: React.FC = () => {
     handleSetView('dashboard');
   };
 
-  const handleSupportSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSupportStatus('sending');
-    try {
-      const functionUrl = import.meta.env.VITE_RESEND_EMAIL_FUNCTION_URL;
 
-      if (!functionUrl) {
-        throw new Error("Email service not configured.");
-      }
-
-      const response = await fetch(functionUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
-        },
-        body: JSON.stringify({
-          table: 'support',
-          record: {
-            id: Math.random().toString(36).substring(7), // Mock ID since we aren't using DB
-            name: supportForm.name,
-            email: supportForm.email,
-            user_email: supportForm.email, // Dual field for robustness
-            message: supportForm.message,
-            user_id: user?.id || 'guest'
-          }
-        })
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to send ticket');
-      }
-
-      setSupportStatus('success');
-      setTimeout(() => {
-        setShowSupportModal(false);
-        setSupportStatus('idle');
-        setSupportForm({ name: '', email: '', message: '' });
-      }, 2000);
-    } catch (err: any) {
-      console.error("Support ticket error:", err);
-      alert(`Failed to send ticket: ${err.message}`);
-      setSupportStatus('error');
-    }
-  };
 
   return (
     <>
@@ -754,8 +709,8 @@ const App: React.FC = () => {
 
               <div className="p-3 lg:p-4 border-t border-gray-100 dark:border-gray-800 space-y-1 bg-white dark:bg-gray-900">
                 <button onClick={() => setShowChangelog(true)} className="w-full flex items-center gap-3 p-2 rounded-lg text-gray-500 hover:bg-gray-100 font-medium"><ScrollText size={20} /><span className="hidden lg:block text-[14px]">Updates</span></button>
-                <button onClick={() => setShowSupportModal(true)} className="w-full flex items-center gap-3 p-2 rounded-lg text-gray-500 hover:bg-gray-100 font-medium">
-                  <HelpCircle size={20} />
+                <button onClick={() => setView('support')} className={`w-full flex items-center gap-3 p-2 rounded-lg transition-all ${view === 'support' ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF] font-bold' : 'text-gray-500 hover:bg-gray-100 font-medium'}`}>
+                  <MessageCircle size={20} />
                   <span className="hidden lg:block text-[14px]">Support</span>
                 </button>
                 <SignedOut>
@@ -881,52 +836,38 @@ const App: React.FC = () => {
                 {view === 'settings' && <Settings profile={profile} rosters={rosters} onUpdate={async (updates) => {
                   setProfile(prev => ({ ...prev, ...updates }));
                 }} />}
+                {view === 'support' && (
+                  <SupportPage darkMode={darkMode} />
+                )}
               </div>
             </main>
 
-            {showSupportModal && (
-              <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-300">
-                <div className="relative w-full max-w-4xl animate-in zoom-in duration-300" onClick={(e) => e.stopPropagation()}>
-                  <SupportCard darkMode={darkMode} onClose={() => setShowSupportModal(false)} />
-                </div>
-              </div>
-            )}
+
 
             {confirmDeleteProject && (
               <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-300">
-                <div className="relative w-full max-w-md bg-white dark:bg-gray-900 rounded-xl p-6 shadow-2xl animate-in zoom-in duration-300">
-                  <div className="text-center mb-6">
-                    <div className="w-12 h-12 rounded-lg bg-red-100 dark:bg-red-900/30 text-red-500 flex items-center justify-center mx-auto mb-3">
-                      <Trash2 size={24} />
-                    </div>
-                    <h2 className="text-xl font-extrabold text-gray-900 dark:text-white">Delete Folder?</h2>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                      Are you sure you want to delete "{confirmDeleteProject.name}"? This action cannot be undone.
-                    </p>
+                <div className="bg-white dark:bg-gray-900 p-8 rounded-3xl max-w-sm w-full shadow-2xl animate-in zoom-in duration-300 border border-red-100 dark:border-red-900/30">
+                  <div className="w-16 h-16 bg-red-100 dark:bg-red-500/10 text-red-500 rounded-2xl flex items-center justify-center mb-6 mx-auto">
+                    <Trash2 size={32} />
                   </div>
-                  <div className="space-y-2 mb-6 text-sm">
-                    <div className="flex items-center gap-2 text-orange-500 dark:text-orange-400">
-                      <Folder size={16} />
-                      <span>{getRecursiveSubfolderCount(confirmDeleteProject.id, projects)} subfolder(s) will be deleted</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400">
-                      <FileText size={16} />
-                      <span>{getRecursiveRosterCount(confirmDeleteProject.id, projects, rosters)} roster(s) will be unlinked (remain in library)</span>
-                    </div>
-                  </div>
-                  <div className="flex gap-3">
+                  <h3 className="text-xl font-black text-center text-gray-900 dark:text-white mb-2">Delete Folder?</h3>
+                  <p className="text-gray-500 dark:text-gray-400 text-center mb-8 font-medium">
+                    This will permanently delete the folder <span className="text-gray-900 dark:text-white font-bold">"{confirmDeleteProject.name}"</span>. Rosters inside will return to the root.
+                  </p>
+                  <div className="flex flex-col gap-3">
                     <button
-                      onClick={() => setConfirmDeleteProject(null)}
-                      className="flex-1 py-2.5 px-4 rounded-lg text-gray-500 dark:text-gray-400 font-medium hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
+                      onClick={() => {
+                        handleDeleteProject(confirmDeleteProject.id);
+                        setConfirmDeleteProject(null);
+                      }}
+                      className="w-full py-4 bg-red-500 hover:bg-red-600 text-white rounded-xl font-bold transition-all shadow-lg shadow-red-500/20 active:scale-[0.98]"
                     >
+                      Delete Folder
+                    </button>
+                    <button onClick={() => setConfirmDeleteProject(null)} className="py-4 text-gray-500 dark:text-gray-400 font-bold hover:text-gray-900 dark:hover:text-white transition-colors">
                       Cancel
                     </button>
-                    <button
-                      onClick={() => handleDeleteProject(confirmDeleteProject.id)}
-                      className="flex-1 py-2.5 px-4 rounded-lg bg-red-500 text-white font-bold hover:bg-red-600 transition-all flex items-center justify-center gap-2"
-                    >
-                      <Trash2 size={16} /> Delete
-                    </button>
+
                   </div>
                 </div>
               </div>
@@ -1016,7 +957,7 @@ const App: React.FC = () => {
             />
           </div>
         )}
-      </SignedIn>
+      </SignedIn >
     </>
   );
 };
