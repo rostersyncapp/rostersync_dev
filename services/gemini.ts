@@ -534,9 +534,9 @@ export async function processRosterRawText(
       * Look at the player names. If you see "Sacramento" or "River Cats" - this is ALWAYS the "Sacramento River Cats" baseball team.
       * If you see "Sydney Leroux", "Christen Press", "Alyssa Thompson", "Sarah Gorden", "Gisele Thompson", "Claire Emslie", or "M.A. Vignola" - this is ALWAYS "Angel City FC" (NWSL).
       * If you see "Naomi Girma", "Jaedyn Shaw", "Kailen Sheridan", "Maria Sanchez", "Alex Morgan", "Abby Dahlkemper", or "Delphine Cascarino" - this is ALWAYS "San Diego Wave FC" (NWSL).
+      * If you see "Racheal Kundananji", "Asisat Oshoala", "Deyna Castellanos", "Tess Boade", "Kayla Sharples", or "Scarlett Camberos" - this is ALWAYS "Bay FC" (NWSL).
       * If you see "Marta", "Trinity Rodman", or "Rose Lavelle" - this is a professional women's soccer team (likely NWSL).
-      * MANDATORY: Do not return "Unknown Team" if "Angel City", "ACFC", "Gotham", "Thorns", "Wave", "Spirit", "Sacramento", or "River Cats" appears in the player names or header.
-      * IGNORE Major League affiliates (e.g. "Affiliate of the Giants"). Always pick the MiLB club name.
+      * MANDATORY: Do not return "Unknown Team" if "Bay FC", "Angel City", "ACFC", "Gotham", "Thorns", "Wave", "Spirit", "Sacramento", or "River Cats" appears in the player names or header.
     - MiLB VALIDATION LIST (Reference these EXACT names):
       [Buffalo Bisons, Charlotte Knights, Columbus Clippers, Durham Bulls, Gwinnett Stripers, Indianapolis Indians, Iowa Cubs, Jacksonville Jumbo Shrimp, Lehigh Valley IronPigs, Louisville Bats, Memphis Redbirds, Nashville Sounds, Norfolk Tides, Omaha Storm Chasers, Rochester Red Wings, Scranton/Wilkes-Barre RailRiders, St. Paul Saints, Syracuse Mets, Toledo Mud Hens, Worcester Red Sox, Albuquerque Isotopes, El Paso Chihuahuas, Las Vegas Aviators, Oklahoma City Comets, Reno Aces, Round Rock Express, Sacramento River Cats, Salt Lake Bees, Sugar Land Space Cowboys, Tacoma Rainiers]
     - NWSL VALIDATION LIST (Reference these EXACT names):
