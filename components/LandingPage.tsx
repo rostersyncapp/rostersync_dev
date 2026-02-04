@@ -283,7 +283,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
 
           {/* Headline - Right Side on Desktop */}
           <div className="lg:col-span-1 text-left order-first lg:order-last">
-            <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-[#5B5FFF] mb-3">The Engine</h2>
+            <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-[#5B5FFF] mb-3">AI Scout</h2>
             <h3 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-6">
               <span className="bg-gradient-to-r from-indigo-400 via-purple-500 to-pink-500 text-transparent bg-clip-text inline-block py-1">
                 Built for <br /> High-Stakes Broadcast

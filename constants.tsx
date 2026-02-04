@@ -16,7 +16,8 @@ import {
   User,
   Plus,
   Disc,
-  Video
+  Video,
+  Search
 } from 'lucide-react';
 
 export const COLORS = {
@@ -74,6 +75,6 @@ export const getTierLimit = (tierId: string) => {
 
 export const NAV_ITEMS = [
   { name: 'Dashboard', icon: <LayoutDashboard size={20} />, id: 'dashboard' },
-  { name: 'The Engine', icon: <Cpu size={20} />, id: 'engine' },
+  { name: 'AI Scout', icon: <Search size={20} />, id: 'engine' },
   { name: 'Settings', icon: <Settings size={20} />, id: 'settings' },
 ];

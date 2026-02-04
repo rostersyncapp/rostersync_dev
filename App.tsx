@@ -44,7 +44,8 @@ import {
   Clock,
   History,
   ChevronDown,
-  AlertCircle
+  AlertCircle,
+  Search
 } from 'lucide-react';
 
 const ICON_MAP: Record<string, any> = {
@@ -53,7 +54,7 @@ const ICON_MAP: Record<string, any> = {
   shield: ShieldCheck,
   globe: Globe,
   mail: Mail,
-  cpu: Cpu,
+  cpu: Search,
   history: History,
   clock: Clock
 };
@@ -734,8 +735,8 @@ const App: React.FC = () => {
                     <span className="hidden lg:block text-[14px]">Dashboard</span>
                   </button>
                   <button onClick={() => handleSetView('engine')} className={`w-full flex items-center gap-3 p-2 rounded-lg transition-all ${view === 'engine' ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF] font-bold' : 'text-gray-500 hover:bg-gray-50 font-medium'}`}>
-                    <Cpu size={20} />
-                    <span className="hidden lg:block text-[14px]">The Engine</span>
+                    <Search size={20} />
+                    <span className="hidden lg:block text-[14px]">AI Scout</span>
                   </button>
                   <button onClick={() => handleSetView('settings')} className={`w-full flex items-center gap-3 p-2 rounded-lg transition-all ${view === 'settings' ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF] font-bold' : 'text-gray-500 hover:bg-gray-100 font-medium'}`}><SettingsIcon size={20} /><span className="hidden lg:block text-[14px]">Settings</span></button>
                 </nav>
