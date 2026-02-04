@@ -203,8 +203,8 @@ const FolderItem: React.FC<{
 
   return (
     <div className="space-y-0.5">
-      <div className="group flex items-center gap-1" style={{ paddingLeft: `${level * 16}px` }}>
-        <button onClick={() => { setView('dashboard'); setActiveProjectId(folder.id); setSelectedRosterId(null); }} className={`flex-1 flex items-center px-2 py-1.5 rounded-lg text-[13px] font-bold transition-all ${activeProjectId === folder.id ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF]' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800'}`}>
+      <div className="group flex items-center gap-1" style={{ paddingLeft: `${level * 12}px` }}>
+        <button onClick={() => { setView('dashboard'); setActiveProjectId(folder.id); setSelectedRosterId(null); }} className={`flex-1 flex items-center pl-1 pr-2 py-1.5 rounded-lg text-[13px] font-bold transition-all ${activeProjectId === folder.id ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF]' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800'}`}>
           <div className="flex items-center gap-2 min-w-0 flex-1">
             {hasChildren ? (
               <button
@@ -214,7 +214,7 @@ const FolderItem: React.FC<{
                 <ChevronDown size={12} className={`transition-transform ${!isOpen ? '-rotate-90' : ''}`} />
               </button>
             ) : (
-              <div className="w-4 shrink-0" />
+              <div className="w-2 shrink-0" />
             )}
             <div className="w-6 flex items-center justify-center shrink-0">
               {totalRosterCount > 0 && (
@@ -734,7 +734,7 @@ const App: React.FC = () => {
                 </button>
               </div>
 
-              <div className="flex-1 overflow-y-auto custom-scrollbar p-3 lg:p-4 space-y-6">
+              <div className="flex-1 overflow-y-auto custom-scrollbar pl-1 pr-3 lg:pr-4 py-3 lg:py-4 space-y-6">
                 <nav className="space-y-1">
                   <button onClick={() => { handleSetView('dashboard'); setActiveProjectId(null); setSelectedRosterId(null); }} className={`w-full flex items-center gap-3 p-2 rounded-lg transition-all ${view === 'dashboard' && activeProjectId === null ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF] font-bold' : 'text-gray-500 hover:bg-gray-50 font-medium'}`}>
                     <LayoutDashboard size={20} />
@@ -747,7 +747,7 @@ const App: React.FC = () => {
                   <button onClick={() => handleSetView('settings')} className={`w-full flex items-center gap-3 p-2 rounded-lg transition-all ${view === 'settings' ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF] font-bold' : 'text-gray-500 hover:bg-gray-100 font-medium'}`}><SettingsIcon size={20} /><span className="hidden lg:block text-[14px]">Settings</span></button>
                 </nav>
                 <div className="space-y-2">
-                  <div className="flex items-center justify-between px-3">
+                  <div className="flex items-center justify-between pl-1 pr-3">
                     <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest hidden lg:block">Folders</span>
                     <button onClick={() => { setCreatingFolderInId('root'); setNewProjectName(''); }} className="p-1 text-[#5B5FFF] hover:bg-[#5B5FFF]/5 rounded-md"><Plus size={16} /></button>
                   </div>
