@@ -220,6 +220,11 @@ const LEAGUE_ALIAS_MAP: Record<string, string[]> = {
   'liga-mx': ['mex.1', 'liga-mx'],
   'usl': ['usa.usl.1', 'usl'],
   'champions-league': ['uefa.champions', 'champions-league'],
+  'milb': ['milb-aaa', 'milb'],
+  'euroleague': ['euroleague'],
+  'efl-championship': ['eng.2', 'efl-championship'],
+  'scottish-premiership': ['sco.1', 'scottish-premiership'],
+  'wsl': ['eng.w.1', 'wsl'],
 };
 
 /**
