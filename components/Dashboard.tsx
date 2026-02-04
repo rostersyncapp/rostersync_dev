@@ -1016,7 +1016,56 @@ export const Dashboard: React.FC<Props> = ({
                   </div>
                 </div>
 
-                <div className="mt-10 pt-8 border-t border-gray-100 dark:border-gray-800 text-center">
+                <div className="mt-10 pt-8 border-t border-gray-100 dark:border-gray-800">
+                  <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.25em] mb-4">Action Required</h4>
+                  {filteredRosters
+                    .map(r => ({
+                      ...r,
+                      missingJ: (r.rosterData || []).filter(a => !a.jerseyNumber || a.jerseyNumber === '00').length,
+                      missingP: (r.rosterData || []).filter(a => !a.position || a.position === '?' || a.position === '').length
+                    }))
+                    .filter(r => r.missingJ > 0 || r.missingP > 0)
+                    .length === 0 ? (
+                    <div className="bg-emerald-50 dark:bg-emerald-900/20 p-4 rounded-xl flex items-center gap-3 text-emerald-600 dark:text-emerald-400">
+                      <Check size={18} />
+                      <span className="text-sm font-bold">All rosters are healthy!</span>
+                    </div>
+                  ) : (
+                    <div className="space-y-3 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
+                      {filteredRosters
+                        .map(r => ({
+                          ...r,
+                          missingJ: (r.rosterData || []).filter(a => !a.jerseyNumber || a.jerseyNumber === '00').length,
+                          missingP: (r.rosterData || []).filter(a => !a.position || a.position === '?' || a.position === '').length
+                        }))
+                        .filter(r => r.missingJ > 0 || r.missingP > 0)
+                        .map(r => (
+                          <button
+                            key={r.id}
+                            onClick={() => {
+                              onSelectRoster(r.id);
+                              setIsHealthModalOpen(false);
+                            }}
+                            className="w-full bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 flex items-center justify-between hover:border-[#5B5FFF] hover:shadow-md transition-all group text-left"
+                          >
+                            <div className="flex items-center gap-3">
+                              <TeamLogo url={r.teamMetadata?.logoUrl} name={r.teamName} primaryColor={r.preferredAccentColor || r.teamMetadata?.primaryColor} size="sm" />
+                              <div>
+                                <div className="text-sm font-bold text-gray-900 dark:text-white">{r.teamName}</div>
+                                <div className="flex gap-2 mt-1">
+                                  {r.missingJ > 0 && <span className="text-[9px] font-bold text-orange-500 bg-orange-50 dark:bg-orange-900/20 px-1.5 py-0.5 rounded">{r.missingJ} Missing #</span>}
+                                  {r.missingP > 0 && <span className="text-[9px] font-bold text-blue-500 bg-blue-50 dark:bg-blue-900/20 px-1.5 py-0.5 rounded">{r.missingP} Missing Pos</span>}
+                                </div>
+                              </div>
+                            </div>
+                            <ArrowRight size={16} className="text-gray-300 group-hover:text-[#5B5FFF] group-hover:translate-x-1 transition-all" />
+                          </button>
+                        ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="mt-8 pt-6 border-t border-gray-100 dark:border-gray-800 text-center">
                   <p className="text-xs text-gray-400 font-medium italic">
                     Health is calculated based on completeness of athlete metadata across your entire library.
                   </p>
