@@ -943,7 +943,7 @@ export const Dashboard: React.FC<Props> = ({
         {isHealthModalOpen && (
           <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/60 backdrop-blur-md p-4 animate-in fade-in duration-300" onClick={() => setIsHealthModalOpen(false)}>
             <div
-              className="bg-white dark:bg-gray-900 rounded-[2.5rem] shadow-2xl w-full max-w-lg border border-white/20 dark:border-gray-800 overflow-hidden transform transition-all animate-in zoom-in-95 duration-300"
+              className="bg-white dark:bg-gray-900 rounded-[2.5rem] shadow-2xl w-full max-w-lg border border-white/20 dark:border-gray-800 overflow-y-auto max-h-[85vh] transform transition-all animate-in zoom-in-95 duration-300"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="p-10">
