@@ -627,7 +627,7 @@ export const Dashboard: React.FC<Props> = ({
                       <td className="px-4 py-4 text-center text-sm font-medium text-gray-400 dark:text-gray-500">{idx + 1}</td>
                       <td className="px-8 py-4 text-sm font-semibold text-gray-900 dark:text-white tracking-tight">
                         {a.fullName}
-                        {a.countryCode && <span className="ml-2 text-[10px] bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded font-mono font-bold text-gray-400 uppercase tracking-wider">{a.countryCode}</span>}
+                        {selectedRoster.isNocMode && a.countryCode && <span className="ml-2 text-[10px] bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded font-mono font-bold text-gray-400 uppercase tracking-wider">{a.countryCode}</span>}
                       </td>
                       <td className="px-8 py-4 text-center"><span className="inline-block w-10 py-1 rounded-lg bg-blue-600 dark:bg-blue-700 text-white text-xs font-bold shadow-sm">{a.jerseyNumber.toString().replace(/#/g, '')}</span></td>
                       <td className="px-8 py-4 text-center"><span className="inline-block px-3 py-1 rounded-lg bg-purple-600 dark:bg-purple-700 text-white text-[10px] font-black uppercase tracking-widest shadow-sm">{a.position}</span></td>
