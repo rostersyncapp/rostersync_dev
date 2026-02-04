@@ -216,11 +216,13 @@ const FolderItem: React.FC<{
             ) : (
               <div className="w-4 shrink-0" />
             )}
-            {totalRosterCount > 0 && (
-              <span className="text-[10px] font-mono font-black text-gray-400 dark:text-gray-500 shrink-0">
-                {totalRosterCount}
-              </span>
-            )}
+            <div className="w-6 flex items-center justify-center shrink-0">
+              {totalRosterCount > 0 && (
+                <span className="text-[10px] font-mono font-black text-gray-400 dark:text-gray-500">
+                  {totalRosterCount}
+                </span>
+              )}
+            </div>
             <FolderOpen size={16} className={`shrink-0 ${activeProjectId === folder.id ? 'text-[#5B5FFF]' : 'text-gray-400'}`} />
             <div className="flex items-baseline gap-1 truncate">
               <span className="hidden lg:block truncate">{folder.name}</span>
