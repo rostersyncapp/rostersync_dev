@@ -531,11 +531,12 @@ export async function processRosterRawText(
       * Look at the player names. ${knownTeams.length > 0 ? 'Compare the athletes against your knowledge of the VALID TEAM LIST provided above.' : ''}
     - Identification Strategy:
       * Use the 'googleSearch' tool ONLY if the team name is not obvious from the text.
-      * Look at the player names. If you see "Sacramento" or "River Cats" - this is ALWAYS the "Sacramento River Cats" baseball team.
-      * If you see "Sydney Leroux", "Christen Press", "Alyssa Thompson", "Sarah Gorden", "Gisele Thompson", "Claire Emslie", or "M.A. Vignola" - this is ALWAYS "Angel City FC" (NWSL).
-      * If you see "Naomi Girma", "Jaedyn Shaw", "Kailen Sheridan", "Maria Sanchez", "Alex Morgan", "Abby Dahlkemper", or "Delphine Cascarino" - this is ALWAYS "San Diego Wave FC" (NWSL).
-      * If you see "Marta", "Trinity Rodman", or "Rose Lavelle" - this is a professional women's soccer team (likely NWSL).
-      * MANDATORY: Do not return "Unknown Team" if "Bay FC", "Angel City", "ACFC", "Gotham", "Thorns", "Wave", "Spirit", "Sacramento", or "River Cats" appears in the player names or header.
+      * Compare the players against the VALID TEAM LIST provided above.
+      * TRUST THE VALID TEAM LIST: The provided list is the ONLY authoritative set of professional teams for this league. 
+      * TRADES/TRANSFERS: If you recognize players as belonging to a different team in your training data, assume they have been transferred/traded to one of the teams in the VALID TEAM LIST.
+      * NEW TEAMS: If the VALID TEAM LIST contains a team you do not recognize (e.g. "Bay FC"), it is a real expansion team. Trust that it exists in the provided list.
+      * MANDATORY: If the text mentions a team from the VALID TEAM LIST (even with a year like "2025"), you MUST identify it as that team.
+      * DO NOT return "Unknown Team" if "Bay FC", "Angel City", "ACFC", "Gotham", "Thorns", "Wave", "Spirit", "Sacramento", or "River Cats" appears in the player names or header.
     - MiLB VALIDATION LIST (Reference these EXACT names):
       [Buffalo Bisons, Charlotte Knights, Columbus Clippers, Durham Bulls, Gwinnett Stripers, Indianapolis Indians, Iowa Cubs, Jacksonville Jumbo Shrimp, Lehigh Valley IronPigs, Louisville Bats, Memphis Redbirds, Nashville Sounds, Norfolk Tides, Omaha Storm Chasers, Rochester Red Wings, Scranton/Wilkes-Barre RailRiders, St. Paul Saints, Syracuse Mets, Toledo Mud Hens, Worcester Red Sox, Albuquerque Isotopes, El Paso Chihuahuas, Las Vegas Aviators, Oklahoma City Comets, Reno Aces, Round Rock Express, Sacramento River Cats, Salt Lake Bees, Sugar Land Space Cowboys, Tacoma Rainiers]
     - NWSL VALIDATION LIST (Reference these EXACT names):
