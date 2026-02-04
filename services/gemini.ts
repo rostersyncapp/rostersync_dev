@@ -490,7 +490,7 @@ export async function processRosterRawText(
   // 3. Input Tokens (simpler prompt)
   const FULLY_SEEDED_LEAGUES = [
     'nba', 'wnba', 'nfl', 'nhl', 'mlb',
-    'premier-league', 'la-liga', 'bundesliga', 'serie-a', 'ligue-1', 'eredivisie', 'liga-mx', 'mls',
+    'premier-league', 'la-liga', 'bundesliga', 'serie-a', 'ligue-1', 'eredivisie', 'liga-mx', 'mls', 'nwsl',
   ];
 
   const isMajorLeague = league && FULLY_SEEDED_LEAGUES.includes(league);
@@ -877,7 +877,7 @@ export async function processRosterRawText(
     if (!league) return 1;
     const l = league.toLowerCase();
     // Tier 1: Major Pro Leagues
-    if (l.includes('nba') || l.includes('nfl') || l.includes('mlb') || l.includes('nhl') || l.includes('premier') || l.includes('mls') || l.includes('wnba') || l.includes('mex.1') || l.includes('eng.1') || l.includes('ger.1') || l.includes('esp.1') || l.includes('ita.1') || l.includes('fra.1') || l.includes('ned.1')) {
+    if (l.includes('nba') || l.includes('nfl') || l.includes('mlb') || l.includes('nhl') || l.includes('premier') || l.includes('mls') || l.includes('nwsl') || l.includes('wnba')) {
       return 3;
     }
     // Tier 2: Other Pro / Semi-Pro
@@ -924,6 +924,10 @@ export async function processRosterRawText(
 
       // Sort keys by Priority (Major League first) then Length (Longest match first)
       const sortedKeys = allMatchingKeys.sort((a, b) => {
+        // ULTIMATE PRIORITY: Exact Match
+        if (a === teamNameUpper) return -1;
+        if (b === teamNameUpper) return 1;
+
         const teamObjA = KNOWN_TEAM_LOGOS[a] || ESPN_TEAM_IDS[a];
         const teamObjB = KNOWN_TEAM_LOGOS[b] || ESPN_TEAM_IDS[b];
 
