@@ -218,13 +218,12 @@ const FolderItem: React.FC<{
             )}
             <FolderOpen size={16} className={`shrink-0 ${activeProjectId === folder.id ? 'text-[#5B5FFF]' : 'text-gray-400'}`} />
             <div className="flex items-baseline gap-1 truncate">
-              <span className="hidden lg:block truncate">{folder.name}</span>
               {totalRosterCount > 0 && (
-                <span className="text-[9px] font-mono opacity-40 translate-y-[-1px] shrink-0 font-black">
+                <span className="text-[10px] font-mono font-black text-gray-400 dark:text-gray-500 shrink-0 mr-1">
                   {totalRosterCount}
                 </span>
               )}
-
+              <span className="hidden lg:block truncate">{folder.name}</span>
             </div>
           </div>
         </button>
