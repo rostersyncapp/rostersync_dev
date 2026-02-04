@@ -847,6 +847,14 @@ const App: React.FC = () => {
 
                   // Persist the changes to the database
                   if (user && isSupabaseConfigured) {
+                    // Refresh token before operation to prevent JWT error
+                    try {
+                      const token = await getSupabaseTokenWithRetry();
+                      await setSupabaseToken(token);
+                    } catch (tokenErr) {
+                      console.warn("Token auto-refresh failed, attempting update anyway...", tokenErr);
+                    }
+
                     const { error } = await supabase
                       .from('rosters')
                       .update({
