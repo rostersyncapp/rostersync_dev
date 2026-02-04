@@ -51,7 +51,7 @@ const SupportCard: React.FC<SupportCardProps> = ({ darkMode, onClose }) => {
             )}
 
             {/* Left Side - Brand & Info */}
-            <div className="md:w-1/2 bg-[#5B5FFF] p-12 text-white flex flex-col justify-between relative overflow-hidden">
+            <div className="md:w-1/2 bg-[#5B5FFF] p-8 text-white flex flex-col justify-between relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-white/10 to-transparent pointer-events-none" />
                 <div className="relative z-10">
                     <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mb-8 backdrop-blur-sm">
@@ -74,7 +74,7 @@ const SupportCard: React.FC<SupportCardProps> = ({ darkMode, onClose }) => {
             </div>
 
             {/* Right Side - Form */}
-            <div className="md:w-1/2 bg-white dark:bg-gray-900 p-8 md:p-12 flex flex-col justify-center">
+            <div className="md:w-1/2 bg-white dark:bg-gray-900 p-6 md:p-8 flex flex-col justify-center">
                 <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Send a Message</h3>
 
                 <form onSubmit={handleSubmit} className="space-y-5">
@@ -104,10 +104,10 @@ const SupportCard: React.FC<SupportCardProps> = ({ darkMode, onClose }) => {
                         <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Message</label>
                         <textarea
                             required
-                            rows={4}
+                            rows={2}
                             value={form.message}
                             onChange={(e) => setForm({ ...form, message: e.target.value })}
-                            className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border-none rounded-xl text-sm font-medium text-gray-900 dark:text-white focus:ring-2 focus:ring-[#5B5FFF]/20 outline-none transition-all resize-none placeholder:text-gray-400"
+                            className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border-none rounded-xl text-sm font-medium text-gray-900 dark:text-white focus:ring-2 focus:ring-[#5B5FFF]/20 outline-none transition-all resize-none placeholder:text-gray-400"
                         />
                     </div>
 
@@ -120,7 +120,7 @@ const SupportCard: React.FC<SupportCardProps> = ({ darkMode, onClose }) => {
                         <button
                             type="submit"
                             disabled={status === 'sending'}
-                            className="w-full py-4 rounded-xl bg-[#5B5FFF] hover:bg-[#4B4FEF] text-white font-bold shadow-lg shadow-[#5B5FFF]/20 flex items-center justify-center gap-2 text-sm transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:pointer-events-none"
+                            className="w-full py-3 rounded-xl bg-[#5B5FFF] hover:bg-[#4B4FEF] text-white font-bold shadow-lg shadow-[#5B5FFF]/20 flex items-center justify-center gap-2 text-sm transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:pointer-events-none"
                         >
                             {status === 'sending' ? (
                                 <Loader2 className="animate-spin" size={18} />
