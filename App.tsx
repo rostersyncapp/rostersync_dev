@@ -735,7 +735,7 @@ const App: React.FC = () => {
         />
       </SignedOut>
       <SignedIn>
-        {initializationError ? (
+        {(initializationError) ? (
           <div className="min-h-screen w-full flex items-center justify-center bg-[#FAFAFA] dark:bg-gray-950 p-8 font-sans">
             <div className="max-w-md w-full text-center">
               <div className="mb-6 text-red-500 flex justify-center">
@@ -754,6 +754,13 @@ const App: React.FC = () => {
               >
                 Restart Engine
               </button>
+            </div>
+          </div>
+        ) : (!isUrlRestored) ? (
+          <div className="min-h-screen w-full flex items-center justify-center bg-[#FAFAFA] dark:bg-gray-950 font-sans">
+            <div className="flex flex-col items-center gap-4 animate-in fade-in zoom-in duration-300">
+              <Loader2 size={48} className="text-[#5B5FFF] animate-spin" />
+              <p className="text-gray-400 font-bold text-sm tracking-widest uppercase">Initializing Workspace...</p>
             </div>
           </div>
         ) : (
