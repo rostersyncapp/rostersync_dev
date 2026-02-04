@@ -487,7 +487,16 @@ export const Dashboard: React.FC<Props> = ({
   };
 
   if (selectedRoster) {
-    const primaryColor = selectedRoster.teamMetadata?.primaryColor || '#5B5FFF';
+    const primaryColor = selectedRoster.preferredAccentColor || selectedRoster.teamMetadata?.primaryColor || '#5B5FFF';
+    const secondaryColor = selectedRoster.teamMetadata?.secondaryColor;
+    const originalPrimaryColor = selectedRoster.teamMetadata?.primaryColor;
+
+    const handleColorSelect = (color: string) => {
+      onUpdateRoster({
+        ...selectedRoster,
+        preferredAccentColor: color
+      });
+    };
     return (
       <div className="animate-in slide-in-from-right duration-500 pb-16">
         <button onClick={() => onSelectRoster(null)} className="flex items-center gap-2 text-gray-400 hover:text-gray-900 dark:hover:text-white font-bold text-sm mb-6 transition-colors group">
@@ -541,6 +550,28 @@ export const Dashboard: React.FC<Props> = ({
                       <span className="px-3 py-1 bg-[#5B5FFF] dark:bg-[#4A4EDD] text-white rounded-full text-[10px] font-black uppercase tracking-widest">{getSportDisplayName(selectedRoster.sport)}</span>
                       {selectedRoster.league && (
                         <span className="px-3 py-1 bg-emerald-600 text-white rounded-full text-[10px] font-black uppercase tracking-widest">{selectedRoster.league}</span>
+                      )}
+
+                      {/* Color Picker */}
+                      {(originalPrimaryColor || secondaryColor) && (
+                        <div className="flex items-center gap-1.5 ml-2 border-l border-gray-200 dark:border-gray-700 pl-4">
+                          {originalPrimaryColor && (
+                            <button
+                              onClick={(e) => { e.stopPropagation(); handleColorSelect(originalPrimaryColor); }}
+                              className={`w-4 h-4 rounded-full border border-gray-200 dark:border-gray-700 shadow-sm transition-transform hover:scale-110 ${primaryColor === originalPrimaryColor ? 'ring-2 ring-offset-2 ring-gray-900 dark:ring-white scale-110' : ''}`}
+                              style={{ backgroundColor: originalPrimaryColor }}
+                              title="Primary Color"
+                            />
+                          )}
+                          {secondaryColor && (
+                            <button
+                              onClick={(e) => { e.stopPropagation(); handleColorSelect(secondaryColor); }}
+                              className={`w-4 h-4 rounded-full border border-gray-200 dark:border-gray-700 shadow-sm transition-transform hover:scale-110 ${primaryColor === secondaryColor ? 'ring-2 ring-offset-2 ring-gray-900 dark:ring-white scale-110' : ''}`}
+                              style={{ backgroundColor: secondaryColor }}
+                              title="Secondary Color"
+                            />
+                          )}
+                        </div>
                       )}
                     </div>
                   </>

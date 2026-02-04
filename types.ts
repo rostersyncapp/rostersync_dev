@@ -57,6 +57,7 @@ export interface Roster {
   teamMetadata?: TeamMetadata;
   isSynced?: boolean;
   isNocMode?: boolean;
+  preferredAccentColor?: string; // User selected accent color
 }
 
 export interface Profile {
