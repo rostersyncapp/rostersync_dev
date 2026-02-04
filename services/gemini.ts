@@ -720,7 +720,9 @@ export async function processRosterRawText(
     const keysToClean = ['teamName', 'logoUrl', 'primaryColor', 'secondaryColor', 'abbreviation', 'conference', 'sport'];
     keysToClean.forEach(key => {
       if (key === 'teamName') {
+        console.log(`[Gemini] Normalizing teamName. Before: "${parsedResult[key]}"`);
         parsedResult[key] = toTitleCase(cleanStr(parsedResult[key]));
+        console.log(`[Gemini] Normalizing teamName. After: "${parsedResult[key]}"`);
       } else {
         parsedResult[key] = cleanStr(parsedResult[key]);
       }
@@ -910,7 +912,7 @@ export async function processRosterRawText(
 
         if (team && logoUrl && !uniqueTeams.has(logoUrl)) {
           uniqueTeams.set(logoUrl, {
-            name: key,
+            name: toTitleCase(key),
             logoUrl: logoUrl,
             primaryColor: team.primaryColor || '',
             secondaryColor: team.secondaryColor || '',
