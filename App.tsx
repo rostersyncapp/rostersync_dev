@@ -349,7 +349,8 @@ const App: React.FC = () => {
     const projectIdParam = params.get('project');
 
     if (rosterIdParam && !selectedRosterId) {
-      const targetRoster = rosters.find(r => r.id === rosterIdParam);
+      // Use String() conversion to handle potential numeric/string ID mismatches from Supabase
+      const targetRoster = rosters.find(r => String(r.id) === rosterIdParam);
       if (targetRoster) {
         setSelectedRosterId(targetRoster.id);
         // If the roster belongs to a project, make sure we also expand/activate that project context if needed
