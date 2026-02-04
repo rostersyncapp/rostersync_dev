@@ -1044,7 +1044,6 @@ export const Dashboard: React.FC<Props> = ({
                             key={r.id}
                             onClick={() => {
                               onSelectRoster(r.id);
-                              setIsHealthModalOpen(false);
                             }}
                             className="w-full bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 flex items-center justify-between hover:border-[#5B5FFF] hover:shadow-md transition-all group text-left"
                           >
