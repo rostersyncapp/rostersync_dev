@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Athlete, SubscriptionTier, Roster, ExportFormat, Project } from '../types.ts';
 import { ProcessedRoster } from '../services/gemini.ts';
 import { TeamSelectionModal } from './TeamSelectionModal';
-
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Upload,
   Cpu,
@@ -11,7 +11,6 @@ import {
   AlertCircle,
   ChevronDown,
   Table,
-
   Save,
   Loader2,
   X,
@@ -21,7 +20,6 @@ import {
   UserMinus,
   Calendar,
   Users,
-
   ExternalLink,
   Palette,
   Flag,
@@ -34,8 +32,12 @@ import {
   Check,
   Terminal,
   Code2,
-
-  ArrowRight
+  ArrowRight,
+  Info,
+  History,
+  Activity,
+  ZapOff,
+  Search
 } from 'lucide-react';
 
 interface Props {
@@ -92,9 +94,44 @@ export const Engine: React.FC<Props> = ({
 
   const [isSaving, setIsSaving] = useState(false);
 
-  // Terminal Logic
-  const [terminalLogs, setTerminalLogs] = useState<string[]>([]);
+  // Intelligence & History States
+  const [scoutHistory, setScoutHistory] = useState<{ name: string, date: string, count: number }[]>([]);
+  const [inputQuality, setInputQuality] = useState(0); // 0 to 100
+  const [detections, setDetections] = useState<string[]>([]);
+
   const [currentTipIndex, setCurrentTipIndex] = useState(0);
+
+  // Load history on mount
+  useEffect(() => {
+    const saved = localStorage.getItem('scout_history');
+    if (saved) setScoutHistory(JSON.parse(saved));
+  }, []);
+
+  // Update input quality and detections as user types
+  useEffect(() => {
+    if (!rawInput) {
+      setInputQuality(0);
+      setDetections([]);
+      return;
+    }
+
+    const lines = rawInput.split('\n');
+    let quality = Math.min(lines.length * 2, 40); // Base quality on length
+    const detected: string[] = [];
+
+    const keywords = ['name', 'pos', 'position', 'jersey', '#', 'ht', 'wt', 'class', 'hometown'];
+    const hits = keywords.filter(k => rawInput.toLowerCase().includes(k)).length;
+    quality += hits * 6;
+
+    if (rawInput.length > 500) quality += 10;
+
+    if (hits > 3) detected.push('Roster Pattern Detected');
+    if (rawInput.includes('http')) detected.push('URL/Web Content');
+    if (lines.length > 50) detected.push('High Volume Dataset');
+
+    setInputQuality(Math.min(quality, 100));
+    setDetections(detected);
+  }, [rawInput]);
 
   const PROCESSING_LOGS = [
     "> INITIALIZING_NEURAL_NETWORKS...",
@@ -121,27 +158,13 @@ export const Engine: React.FC<Props> = ({
 
   useEffect(() => {
     if (isProcessing) {
-      setTerminalLogs([]);
-      let logIndex = 0;
-
-      const logInterval = setInterval(() => {
-        if (logIndex < PROCESSING_LOGS.length) {
-          setTerminalLogs(prev => [...prev, PROCESSING_LOGS[logIndex]]);
-          logIndex++;
-          // Randomize speed for realism
-        }
-      }, 800);
-
       const tipInterval = setInterval(() => {
         setCurrentTipIndex(prev => (prev + 1) % TIPS.length);
       }, 4000);
 
       return () => {
-        clearInterval(logInterval);
         clearInterval(tipInterval);
       };
-    } else {
-      setTerminalLogs([]);
     }
   }, [isProcessing]);
 
@@ -314,6 +337,17 @@ export const Engine: React.FC<Props> = ({
 
     setTimeout(() => {
       onSave(newRoster);
+
+      // Update local history
+      const historyItem = {
+        name: newRoster.teamName,
+        date: new Date().toLocaleDateString(),
+        count: newRoster.athleteCount
+      };
+      const updatedHistory = [historyItem, ...scoutHistory.slice(0, 2)];
+      setScoutHistory(updatedHistory);
+      localStorage.setItem('scout_history', JSON.stringify(updatedHistory));
+
       setIsSaving(false);
     }, 800);
   };
@@ -368,68 +402,170 @@ export const Engine: React.FC<Props> = ({
       </div>
 
       {step === 1 && (
-        <div className="space-y-10 animate-in fade-in duration-500">
-          <div className="bg-white dark:bg-gray-900 p-10 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm relative overflow-hidden">
-            <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-6">
-              <h2 className="text-3xl font-extrabold flex items-center gap-4 tracking-tight text-gray-900 dark:text-white shrink-0"><Upload size={32} className="text-[#5B5FFF]" /> Input Raw Data</h2>
-              <div className="flex flex-wrap items-center gap-4">
-                <div className={`px-5 py-3 rounded-2xl flex items-center gap-3 border ${hasCredits ? 'bg-[#5B5FFF]/5 border-[#5B5FFF]/20 text-[#5B5FFF]' : 'bg-red-50 border-red-200 text-red-600'}`}>
-                  <Zap size={18} className={hasCredits ? "fill-[#5B5FFF]" : "fill-red-600"} />
-                  <span className="text-sm font-bold tracking-tight uppercase">{maxCredits - creditsUsed} Credits</span>
-                </div>
-              </div>
-            </div>
-            {isProcessing ? (
-              <div className="w-full h-96 bg-white dark:bg-gray-950 rounded-2xl p-6 font-mono text-sm relative overflow-hidden flex flex-col border border-gray-200 dark:border-gray-800 shadow-inner">
-                {/* Scanline Effect */}
-                <div className="absolute inset-0 bg-[linear-gradient(transparent_50%,rgba(0,0,0,0.5)_50%)] bg-[length:100%_4px] pointer-events-none opacity-5 dark:opacity-20"></div>
-
-                {/* Header */}
-                <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-4 mb-4 z-10">
-                  <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-500 font-bold uppercase tracking-widest text-xs">
-                    <Terminal size={14} />
-                    <span>Live Processing Node: 0xA4F...92</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <div className="w-2.5 h-2.5 rounded-full bg-red-500/20"></div>
-                    <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/20"></div>
-                    <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></div>
-                  </div>
-                </div>
-
-                {/* Logs */}
-                <div className="flex-1 overflow-y-auto space-y-2 z-10 custom-scrollbar pb-10">
-                  {terminalLogs.map((log, i) => (
-                    <div key={i} className="text-emerald-600/80 dark:text-emerald-500/80 font-medium animate-in slide-in-from-left-2 duration-300">
-                      {log}
-                    </div>
-                  ))}
-                  <div className="text-emerald-600 dark:text-emerald-500 animate-pulse">_</div>
-                </div>
-
-              </div>
-            ) : (
-              <textarea className={`w-full h-96 px-6 py-6 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl outline-none transition-all text-base leading-relaxed font-mono text-gray-900 dark:text-gray-200 placeholder:text-gray-400 dark:placeholder:text-gray-600 focus:ring-2 focus:ring-[#5B5FFF]/20`} value={rawInput} onChange={(e) => setRawInput(e.target.value)} placeholder="Paste raw roster text here..." />
-            )}
-            <div className="flex items-center justify-between mt-8 gap-4">
-              <div className="flex-1 flex justify-center">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="grid grid-cols-1 lg:grid-cols-4 gap-8"
+        >
+          {/* Main Input Area */}
+          <div className="lg:col-span-3 space-y-6">
+            <div className="bg-white dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden relative group">
+              {/* Scanning Overlay */}
+              <AnimatePresence>
                 {isProcessing && (
-                  <div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-full px-5 py-2 flex items-center gap-3 shadow-sm animate-in fade-in slide-in-from-bottom-2 duration-500">
-                    <Sparkles size={14} className="text-[#5B5FFF]" />
-                    <span className="text-xs font-bold text-gray-400 dark:text-gray-500 tracking-wide">{TIPS[currentTipIndex]}</span>
-                  </div>
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="absolute inset-0 z-20 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm flex flex-col items-center justify-center p-12 text-center"
+                  >
+                    <motion.div
+                      animate={{
+                        scale: [1, 1.05, 1],
+                        opacity: [0.5, 1, 0.5]
+                      }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                      className="w-24 h-24 rounded-full bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center mb-8"
+                    >
+                      <Bot size={40} className="text-indigo-600 dark:text-indigo-400" />
+                    </motion.div>
+
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">AI Roster Scouting...</h3>
+                    <p className="text-gray-500 dark:text-gray-400 text-sm font-medium max-w-xs mx-auto mb-8">
+                      {TIPS[currentTipIndex]}
+                    </p>
+
+                    <div className="w-full max-w-xs h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                      <motion.div
+                        initial={{ x: "-100%" }}
+                        animate={{ x: "100%" }}
+                        transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+                        className="w-full h-full bg-gradient-to-r from-transparent via-indigo-500 to-transparent"
+                      />
+                    </div>
+                  </motion.div>
                 )}
+              </AnimatePresence>
+
+              <div className="p-8 pb-4 flex items-center justify-between border-b border-gray-50 dark:border-gray-800">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+                    <Upload size={20} />
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-bold text-gray-900 dark:text-white">Roster Source</h2>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Paste text, PDF content, or HTML</p>
+                  </div>
+                </div>
+
+                <div className={`px-4 py-2 rounded-xl flex items-center gap-2 border ${hasCredits ? 'bg-indigo-50/50 dark:bg-indigo-900/10 border-indigo-100/50 dark:border-indigo-800/50 text-indigo-600 dark:text-indigo-400' : 'bg-red-50 border-red-200 text-red-600'}`}>
+                  <Zap size={14} className={hasCredits ? "fill-current" : "fill-red-600"} />
+                  <span className="text-xs font-black uppercase tracking-wider">{maxCredits - creditsUsed} Left</span>
+                </div>
               </div>
-              <button
-                onClick={() => setShowSeasonModal(true)}
-                disabled={isProcessing || !rawInput || !hasCredits}
-                className={`px-8 py-4 rounded-xl font-bold flex items-center gap-3 shadow-lg transition-all text-base uppercase tracking-widest ${hasCredits ? 'primary-gradient text-white shadow-[#5B5FFF]/20 hover:scale-[1.02] active:scale-[0.98]' : 'bg-gray-200 text-gray-400 cursor-not-allowed shadow-none'}`}
-              >
-                {isProcessing ? <Loader2 className="animate-spin" size={20} /> : <Bot size={20} />} {isProcessing ? 'Scouting...' : 'Scout'}
-              </button>
+
+              <textarea
+                className="w-full h-[500px] px-8 py-6 bg-transparent border-none rounded-none outline-none transition-all text-base leading-relaxed font-mono text-gray-900 dark:text-gray-200 placeholder:text-gray-300 dark:placeholder:text-gray-700 resize-none focus:ring-0"
+                value={rawInput}
+                onChange={(e) => setRawInput(e.target.value)}
+                placeholder="Paste your raw roster data here..."
+              />
+
+              <div className="p-6 bg-gray-50/50 dark:bg-gray-800/30 border-t border-gray-50 dark:border-gray-800 flex items-center justify-end">
+                <button
+                  onClick={() => setShowSeasonModal(true)}
+                  disabled={isProcessing || !rawInput || !hasCredits}
+                  className={`px-10 py-4 rounded-2xl font-bold flex items-center gap-3 shadow-xl transition-all text-sm uppercase tracking-widest ${hasCredits && rawInput ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:scale-[1.02] active:scale-[0.98]' : 'bg-gray-200 dark:bg-gray-800 text-gray-400 cursor-not-allowed shadow-none'}`}
+                >
+                  {isProcessing ? <Loader2 className="animate-spin" size={18} /> : <Search size={18} />}
+                  {isProcessing ? 'Scouting...' : 'Scout Roster'}
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+
+          {/* Intelligence Sidebar */}
+          <div className="space-y-6">
+            {/* Input Quality Card */}
+            <div className="bg-white dark:bg-gray-900 p-6 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm">
+              <div className="flex items-center gap-2 mb-6 text-gray-400 dark:text-gray-500">
+                <Activity size={16} />
+                <span className="text-[10px] font-black uppercase tracking-widest">Live Intelligence</span>
+              </div>
+
+              <div className="space-y-6">
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-bold text-gray-600 dark:text-gray-400">Data Density</span>
+                    <span className={`text-[10px] font-black ${inputQuality > 70 ? 'text-emerald-500' : inputQuality > 30 ? 'text-indigo-500' : 'text-gray-400'}`}>
+                      {inputQuality}%
+                    </span>
+                  </div>
+                  <div className="h-1.5 w-full bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${inputQuality}%` }}
+                      className={`h-full ${inputQuality > 70 ? 'bg-emerald-500' : inputQuality > 30 ? 'bg-indigo-500' : 'bg-gray-400'}`}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1">Detections</span>
+                  {detections.length > 0 ? (
+                    <div className="flex flex-wrap gap-2">
+                      {detections.map((d, i) => (
+                        <span key={i} className="px-2 py-1 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 text-[9px] font-bold rounded-md border border-indigo-100/50 dark:border-indigo-800/50">
+                          {d}
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-[10px] text-gray-400 italic">Waiting for input...</p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Recent Scouts Card */}
+            <div className="bg-white dark:bg-gray-900 p-6 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm">
+              <div className="flex items-center gap-2 mb-6 text-gray-400 dark:text-gray-500">
+                <History size={16} />
+                <span className="text-[10px] font-black uppercase tracking-widest">Recent Scouts</span>
+              </div>
+
+              {scoutHistory.length > 0 ? (
+                <div className="space-y-4">
+                  {scoutHistory.map((h, i) => (
+                    <div key={i} className="group cursor-default">
+                      <h4 className="text-xs font-bold text-gray-900 dark:text-white group-hover:text-indigo-500 transition-colors truncate">{h.name}</h4>
+                      <div className="flex items-center justify-between mt-1">
+                        <span className="text-[10px] text-gray-400 font-medium">{h.date}</span>
+                        <span className="text-[10px] text-gray-400 font-mono">{h.count} Players</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-4">
+                  <div className="w-10 h-10 rounded-full bg-gray-50 dark:bg-gray-800 flex items-center justify-center mx-auto mb-2">
+                    <History size={16} className="text-gray-300 dark:text-gray-600" />
+                  </div>
+                  <p className="text-[10px] text-gray-400 font-medium">No recent activity</p>
+                </div>
+              )}
+            </div>
+
+            {/* Tip Card */}
+            <div className="p-6 rounded-3xl bg-indigo-600 text-white shadow-xl shadow-indigo-500/10">
+              <Info size={20} className="mb-4 opacity-50" />
+              <h4 className="text-sm font-bold mb-2">Scout Tip</h4>
+              <p className="text-[11px] leading-relaxed font-medium opacity-90">
+                {TIPS[currentTipIndex]}
+              </p>
+            </div>
+          </div>
+        </motion.div>
       )}
 
       {showSeasonModal && (
@@ -537,147 +673,182 @@ export const Engine: React.FC<Props> = ({
       />
 
 
-      {
-        step === 2 && (
-          <div className="space-y-10 animate-in slide-in-from-right-4 duration-500 pb-24">
-            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
-              <div className="p-10 border-b border-gray-100 dark:border-gray-800 flex flex-col md:flex-row md:items-start justify-between bg-gray-50/30 dark:bg-gray-800/30 gap-10">
-                <div className="flex-1 flex flex-col md:flex-row gap-6">
-                  <div className="w-24 h-24 rounded-3xl text-white flex items-center justify-center shadow-lg shrink-0 overflow-hidden relative group bg-white border border-gray-100 dark:border-gray-700">
-                    {logoUrl && logoUrl !== 'Unknown' ? (
-                      <img src={logoUrl} alt={teamName} className="w-full h-full object-contain p-3" onError={() => setLogoUrl('')} />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-white font-mono font-black text-3xl" style={{ backgroundColor: primaryColor }}>
-                        {abbreviation || '??'}
+      {step === 2 && (
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          className="space-y-8 pb-24"
+        >
+          {/* Detailed Metadata Header */}
+          <div className="bg-white dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
+            <div className="p-8 md:p-10 flex flex-col md:flex-row gap-10 bg-gray-50/30 dark:bg-gray-800/20">
+              <div className="flex-1 flex flex-col md:flex-row gap-8">
+                <div className="w-28 h-28 rounded-3xl text-white flex items-center justify-center shadow-lg shrink-0 overflow-hidden relative group bg-white border border-gray-100 dark:border-gray-800">
+                  {logoUrl && logoUrl !== 'Unknown' ? (
+                    <img src={logoUrl} alt={teamName} className="w-full h-full object-contain p-4" onError={() => setLogoUrl('')} />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-white font-mono font-black text-4xl" style={{ backgroundColor: primaryColor }}>
+                      {abbreviation || '??'}
+                    </div>
+                  )}
+                  <button onClick={() => setIsEditingMetadata(!isEditingMetadata)} className="absolute inset-0 bg-black/40 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                    <Edit2 size={24} />
+                  </button>
+                </div>
+
+                <div className="flex-1 space-y-4">
+                  <div className="flex items-center gap-4 flex-wrap">
+                    <h2 className="text-4xl font-black tracking-tight text-gray-900 dark:text-white">
+                      {teamName}
+                    </h2>
+                    <span className="px-4 py-1.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-xl text-[10px] font-black uppercase tracking-[0.2em]">{sport}</span>
+                  </div>
+
+                  <div className="flex items-center gap-6 text-gray-400 dark:text-gray-500 text-sm font-bold">
+                    <div className="flex items-center gap-2">
+                      <Calendar size={18} className="text-indigo-500/50" />
+                      <span>{seasonYear} Season</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Users size={18} className="text-indigo-500/50" />
+                      <span>{processedAthletes.length} Athletes Found</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-4 pt-2">
+                    <button onClick={() => setIsEditingMetadata(!isEditingMetadata)} className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl text-xs font-bold text-gray-600 dark:text-gray-300 hover:border-indigo-500 transition-all flex items-center gap-2">
+                      <Palette size={14} className="text-indigo-500" /> Branding
+                    </button>
+                    {pendingRoster?.verificationSources && pendingRoster.verificationSources.length > 0 && (
+                      <div className="flex items-center gap-2 pl-4 border-l border-gray-100 dark:border-gray-800">
+                        <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">AI Sources</span>
+                        <div className="flex gap-2">
+                          {pendingRoster.verificationSources.slice(0, 3).map((src, i) => (
+                            <a key={i} href={src.uri} target="_blank" rel="noopener noreferrer" className="w-7 h-7 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center text-gray-400 hover:text-indigo-500 transition-colors" title={src.title}>
+                              <ExternalLink size={12} />
+                            </a>
+                          ))}
+                        </div>
                       </div>
                     )}
-                    <button onClick={() => setIsEditingMetadata(!isEditingMetadata)} className="absolute inset-0 bg-black/40 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
-                      <Edit2 size={24} />
-                    </button>
-                  </div>
-
-                  <div className="flex-1">
-                    <div className="flex items-center gap-4 flex-wrap">
-                      <div className="flex items-center gap-3 flex-1 min-w-[200px]">
-                        <input
-                          type="text"
-                          value={teamName}
-                          onChange={(e) => setTeamName(e.target.value)}
-                          className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white bg-transparent border-b-2 border-transparent hover:border-gray-200 focus:border-[#5B5FFF] outline-none transition-all w-full placeholder:text-gray-300"
-                          placeholder="Team Name"
-                        />
-                        <Edit2 size={16} className="text-gray-400 shrink-0" />
-                      </div>
-                      <span className="px-4 py-1.5 bg-[#5B5FFF]/10 text-[#5B5FFF] rounded-xl text-xs font-black uppercase tracking-[0.2em]">{sport}</span>
-                    </div>
-                    <div className="flex items-center gap-5 mt-3 text-gray-500 dark:text-gray-400 text-base font-medium">
-                      <span className="flex items-center gap-2 font-bold text-gray-900 dark:text-white"><Calendar size={20} /> {seasonYear}</span>
-                      <span className="flex items-center gap-2"><Users size={20} /> {processedAthletes.length} Athletes</span>
-                    </div>
-                    <div className="flex items-center gap-4 mt-4">
-                      <button onClick={() => setIsEditingMetadata(!isEditingMetadata)} className="text-sm font-bold text-[#5B5FFF] hover:underline flex items-center gap-2">
-                        <Palette size={18} /> Branding Controls
-                      </button>
-                      {pendingRoster?.verificationSources && pendingRoster.verificationSources.length > 0 && (
-                        <div className="flex items-center gap-2">
-                          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest font-mono">Verified by AI Search:</span>
-                          <div className="flex gap-1.5">
-                            {pendingRoster.verificationSources.slice(0, 2).map((src, i) => (
-                              <a key={i} href={src.uri} target="_blank" rel="noopener noreferrer" className="p-1.5 bg-gray-100 dark:bg-gray-800 rounded-lg text-gray-400 hover:text-[#5B5FFF] transition-colors" title={src.title}>
-                                <ExternalLink size={14} />
-                              </a>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex flex-col gap-5 min-w-[280px]">
-                  <div className="space-y-2.5">
-                    <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest font-mono">Export/Sync</label>
-                    <div className="flex flex-col gap-3">
-                      <button onClick={handleSaveToLibrary} disabled={isSaving} className="w-full flex items-center justify-center gap-3 px-6 py-3.5 rounded-xl primary-gradient text-white font-bold text-sm hover:shadow-lg shadow-[#5B5FFF]/20 transition-all uppercase tracking-widest">
-                        {isSaving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />} Save to Library
-                      </button>
-
-
-                    </div>
                   </div>
                 </div>
               </div>
 
-              {isEditingMetadata && (
-                <div className="p-10 bg-gray-50/50 dark:bg-gray-800/50 border-b border-gray-100 dark:border-gray-700 animate-in slide-in-from-top-4 duration-300">
-                  <div className="flex items-center justify-between mb-8">
-                    <h3 className="text-[11px] font-black uppercase tracking-[0.25em] text-gray-400 font-mono">Metadata Overrides</h3>
-                    <button onClick={() => setIsEditingMetadata(false)} className="text-gray-400 hover:text-gray-600"><X size={24} /></button>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                    <div className="space-y-3">
-                      <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest font-mono flex items-center gap-2"><TypeIcon size={14} /> Team Name</label>
-                      <input type="text" value={teamName} onChange={(e) => setTeamName(e.target.value)} className="w-full px-5 py-3 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-700 rounded-2xl text-base font-semibold outline-none focus:ring-2 focus:ring-[#5B5FFF]/20" />
-                    </div>
-                    <div className="space-y-3">
-                      <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest font-mono flex items-center gap-2"><Calendar size={14} /> Season</label>
-                      <input type="text" value={seasonYear} onChange={(e) => setSeasonYear(e.target.value)} className="w-full px-5 py-3 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-700 rounded-2xl text-base font-bold outline-none focus:ring-2 focus:ring-[#5B5FFF]/20" />
-                    </div>
-                    <div className="space-y-3">
-                      <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest font-mono flex items-center gap-2"><Palette size={14} /> Colors</label>
-                      <div className="flex gap-3">
-                        <input type="color" value={primaryColor} onChange={(e) => setPrimaryColor(e.target.value)} className="w-full h-12 rounded-2xl border-none cursor-pointer bg-transparent" />
-                        <input type="color" value={secondaryColor} onChange={(e) => setSecondaryColor(e.target.value)} className="w-full h-12 rounded-2xl border-none cursor-pointer bg-transparent" />
-                      </div>
-                    </div>
-                    <div className="space-y-3">
-                      <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest font-mono flex items-center gap-2"><Image size={14} /> Logo URL</label>
-                      <input type="text" value={logoUrl} onChange={(e) => setLogoUrl(e.target.value)} className="w-full px-5 py-3 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-700 rounded-2xl text-xs font-medium outline-none focus:ring-2 focus:ring-[#5B5FFF]/20" placeholder="URL..." />
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              <div className="overflow-x-auto max-h-[50vh]">
-                <table className="w-full text-left">
-                  <thead className="sticky top-0 z-10">
-                    <tr className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-md">
-                      <th className="px-4 py-5 text-[11px] font-bold text-gray-400 uppercase tracking-[0.2em] text-center border-b border-gray-100 dark:border-gray-800 w-12">#</th>
-                      <th className="px-6 py-5 text-[11px] font-bold text-gray-400 uppercase tracking-[0.2em] border-b border-gray-100 dark:border-gray-800">Athlete Name</th>
-                      <th className="px-6 py-5 text-[11px] font-bold text-gray-400 uppercase tracking-[0.2em] text-center border-b border-gray-100 dark:border-gray-800">{isNocMode ? 'Bib' : 'Jersey'}</th>
-                      <th className="px-6 py-5 text-[11px] font-bold text-gray-400 uppercase tracking-[0.2em] text-center border-b border-gray-100 dark:border-gray-800">{isNocMode ? 'Event/Discipline' : 'Position'}</th>
-                      <th className="px-6 py-5 text-[11px] font-bold text-gray-400 uppercase tracking-[0.2em] text-center border-b border-gray-100 dark:border-gray-800">Hardware Safe</th>
-                      {onDeletePlayer && <th className="px-6 py-5 text-[11px] font-bold text-gray-400 uppercase tracking-[0.2em] text-center border-b border-gray-100 dark:border-gray-800 w-20"></th>}
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                    {processedAthletes.map((a, idx) => (
-                      <tr key={a.id || idx} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors group">
-                        <td className="px-4 py-5 text-center text-sm font-medium text-gray-400 dark:text-gray-500">{idx + 1}</td>
-                        <td className="px-6 py-5 text-base font-semibold text-gray-900 dark:text-white">{a.fullName}</td>
-                        <td className="px-6 py-5 text-center"><span className="inline-block w-12 py-1.5 rounded-xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-sm font-bold">{a.jerseyNumber.toString().replace(/#/g, '')}</span></td>
-                        <td className="px-6 py-5 text-center"><span className="inline-block px-4 py-1.5 rounded-xl bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 text-[11px] font-bold uppercase">{a.position.toString().replace(/#/g, '')}</span></td>
-                        <td className="px-6 py-5 text-center"><span className="bg-emerald-50 dark:bg-emerald-900/30 px-4 py-1.5 rounded-xl text-[11px] font-bold text-emerald-700 dark:text-emerald-400 tracking-wider font-mono">{a.displayNameSafe}</span></td>
-                        {onDeletePlayer && (
-                          <td className="px-6 py-5 text-center">
-                            <button
-                              onClick={() => handleDeletePlayer(a.fullName)}
-                              className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
-                              title="Remove player"
-                            >
-                              <UserMinus size={16} />
-                            </button>
-                          </td>
-                        )}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <div className="flex flex-col justify-center min-w-[240px] pt-6 md:pt-0 border-t md:border-t-0 md:border-l border-gray-100 dark:border-gray-800 md:pl-10">
+                <button onClick={handleSaveToLibrary} disabled={isSaving} className="w-full h-14 rounded-2xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-bold text-sm hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-gray-900/10 dark:shadow-white/5 transition-all flex items-center justify-center gap-3 uppercase tracking-[0.2em]">
+                  {isSaving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />} Save To Library
+                </button>
+                <p className="text-[10px] text-gray-400 text-center mt-4 font-medium uppercase tracking-widest">Ready for export and sync</p>
               </div>
             </div>
+
+            {/* Editing Pane */}
+            <AnimatePresence>
+              {isEditingMetadata && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="overflow-hidden bg-gray-50/50 dark:bg-gray-800/40 border-t border-gray-50 dark:border-gray-800"
+                >
+                  <div className="p-8 md:p-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <div className="space-y-2">
+                      <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-1">Team Name</label>
+                      <input type="text" value={teamName} onChange={(e) => setTeamName(e.target.value)} className="w-full px-5 py-3.5 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-indigo-500/20" />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-1">Season</label>
+                      <input type="text" value={seasonYear} onChange={(e) => setSeasonYear(e.target.value)} className="w-full px-5 py-3.5 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-indigo-500/20" />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-1">Brand Colors</label>
+                      <div className="flex gap-2">
+                        <input type="color" value={primaryColor} onChange={(e) => setPrimaryColor(e.target.value)} className="w-full h-12 rounded-xl border-none cursor-pointer bg-transparent" />
+                        <input type="color" value={secondaryColor} onChange={(e) => setSecondaryColor(e.target.value)} className="w-full h-12 rounded-xl border-none cursor-pointer bg-transparent" />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-1">Logo URL</label>
+                      <input type="text" value={logoUrl} onChange={(e) => setLogoUrl(e.target.value)} className="w-full px-5 py-3.5 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl text-xs font-medium outline-none focus:ring-2 focus:ring-indigo-500/20" placeholder="https://..." />
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
-        )
-      }
+
+          {/* Roster Table */}
+          <div className="bg-white dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-gray-50/50 dark:bg-gray-800/50">
+                    <th className="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] w-16">#</th>
+                    <th className="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Full Name</th>
+                    <th className="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-center">Jersey</th>
+                    <th className="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-center">Position</th>
+                    <th className="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-right pr-12">Hardware Safe</th>
+                    {onDeletePlayer && <th className="w-16 h-full"></th>}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
+                  {processedAthletes.map((a, idx) => (
+                    <motion.tr
+                      key={a.id || idx}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: idx * 0.03 }}
+                      className="hover:bg-indigo-50/30 dark:hover:bg-indigo-900/10 transition-colors group"
+                    >
+                      <td className="px-6 py-6 text-sm font-bold text-gray-300 dark:text-gray-600">{idx + 1}</td>
+                      <td className="px-6 py-6">
+                        <span className="text-base font-bold text-gray-900 dark:text-white tracking-tight">{a.fullName}</span>
+                      </td>
+                      <td className="px-6 py-6 text-center">
+                        <span className="inline-flex items-center justify-center min-w-[32px] h-8 bg-gray-100 dark:bg-gray-800 rounded-lg text-sm font-black text-gray-900 dark:text-white">
+                          {a.jerseyNumber.toString().replace(/#/g, '') || '--'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-6 text-center">
+                        <span className="inline-block px-3 py-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 text-[10px] font-black uppercase tracking-wider">
+                          {a.position.toString().replace(/#/g, '')}
+                        </span>
+                      </td>
+                      <td className="px-6 py-6 text-right pr-12">
+                        <span className="inline-flex items-center gap-2 px-3 py-1.5 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 rounded-lg text-xs font-bold font-mono">
+                          <Check size={12} />
+                          {a.displayNameSafe}
+                        </span>
+                      </td>
+                      {onDeletePlayer && (
+                        <td className="px-6 py-6 text-center">
+                          <button
+                            onClick={() => handleDeletePlayer(a.fullName)}
+                            className="p-2 text-gray-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                          >
+                            <UserMinus size={16} />
+                          </button>
+                        </td>
+                      )}
+                    </motion.tr>
+                  ))}
+                </tbody>
+              </table>
+
+              {processedAthletes.length === 0 && (
+                <div className="py-20 text-center">
+                  <div className="w-16 h-16 bg-gray-50 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <UserMinus size={24} className="text-gray-300" />
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white">No Athletes Found</h3>
+                  <p className="text-gray-500 text-sm">Review your source input and try scouting again.</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </motion.div>
+      )}
 
     </div >
   );
