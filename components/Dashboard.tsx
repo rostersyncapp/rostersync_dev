@@ -596,7 +596,7 @@ export const Dashboard: React.FC<Props> = ({
                               title="Primary Color"
                             />
                           )}
-                          {secondaryColor && (
+                          {secondaryColor && secondaryColor.toLowerCase() !== originalPrimaryColor?.toLowerCase() && (
                             <button
                               onClick={(e) => { e.stopPropagation(); handleColorSelect(secondaryColor); }}
                               className={`w-4 h-4 rounded-full border border-gray-200 dark:border-gray-700 shadow-sm transition-transform hover:scale-110 ${primaryColor === secondaryColor ? 'ring-2 ring-offset-2 ring-gray-900 dark:ring-white scale-110' : ''}`}
