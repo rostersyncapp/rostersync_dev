@@ -306,6 +306,9 @@ const App: React.FC = () => {
 
   // 1. Sync State -> URL
   useEffect(() => {
+    // Prevent wiping URL parameters while initial data load is happening
+    if (loadingData) return;
+
     const params = new URLSearchParams(window.location.search);
     let updated = false;
 
@@ -337,7 +340,7 @@ const App: React.FC = () => {
       const newUrl = `${window.location.pathname}?${params.toString()}`;
       window.history.replaceState(null, '', newUrl);
     }
-  }, [selectedRosterId, activeProjectId]);
+  }, [selectedRosterId, activeProjectId, loadingData]);
 
   // 2. Sync URL -> State (On initial load or detailed data fetch)
   useEffect(() => {
