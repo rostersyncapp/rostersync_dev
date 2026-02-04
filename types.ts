@@ -1,5 +1,5 @@
 
-export type SubscriptionTier = 'BASIC' | 'PRO' | 'NETWORK';
+export type SubscriptionTier = 'BASIC' | 'PRO' | 'STUDIO' | 'NETWORK';
 
 export type NILStatus = 'Active' | 'Transfer' | 'Alumni' | 'Incoming';
 

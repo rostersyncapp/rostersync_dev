@@ -40,30 +40,39 @@ export const BRAND_CONFIG = {
 
 export const PRICING_TIERS = [
   {
-    name: 'Basic',
+    name: 'Free',
     id: 'BASIC',
     price: '$0',
-    monthlyCredits: 10,
-    description: 'Perfect for testing and small local clubs.',
-    features: ['10 AI Credits / Month', 'Standard CSV Export', 'Basic Normalization', 'Community Support'],
+    monthlyCredits: 20,
+    description: 'For students, clubs, and freelancers.',
+    features: ['20 AI Credits / Month', 'CSV Export Only', '1 Project / 1 User', 'Basic AI Processing', 'Community Support'],
     polarCheckoutUrl: '#'
   },
   {
     name: 'Pro',
     id: 'PRO',
-    price: '$49',
-    monthlyCredits: 250,
-    description: 'High volume processing for media houses.',
-    features: ['250 AI Credits / Month', 'Adobe Premiere (MOGRT)', 'Iconik MAM JSON', 'Unlimited Storage', 'Phonetic Guides'],
+    price: '$79',
+    monthlyCredits: 150,
+    description: 'For professional motion designers.',
+    features: ['150 AI Credits / Month', 'Premiere, Iconik & CatDV', 'Unlimited Projects', 'Phonetic Guides', 'Email Support'],
     polarCheckoutUrl: 'https://polar.sh/rostersync/products/pro-tier'
+  },
+  {
+    name: 'Studio',
+    id: 'STUDIO',
+    price: '$149',
+    monthlyCredits: 500,
+    description: 'For RSNs and production teams.',
+    features: ['500 AI Credits / Month', 'Ross, Vizrt Graphics', '3 Team Members', 'Bio Stats & History', 'Priority Support'],
+    polarCheckoutUrl: 'https://polar.sh/rostersync/products/studio-tier'
   },
   {
     name: 'Network',
     id: 'NETWORK',
     price: '$249',
-    monthlyCredits: 3000,
-    description: 'Full broadcast integration for networks.',
-    features: ['3,000 AI Credits / Month', 'Ross DataLinq XML', 'Localization (EN/ES/ZH)', 'Priority 24/7 Support', 'API Access'],
+    monthlyCredits: 800,
+    description: 'For national broadcasters & enterprises.',
+    features: ['800 AI Credits / Month', 'Full XML Suite (Ross/Viz/ODF)', '5 Team Members', 'Multi-Language (ES/ZH)', 'API Access + SLA'],
     polarCheckoutUrl: 'https://polar.sh/rostersync/products/network-tier'
   }
 ];

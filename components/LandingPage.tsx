@@ -42,18 +42,18 @@ interface LandingPageProps {
 
 const FAQS = [
   { q: "How does the AI normalization work?", a: "We use advanced large language models to parse raw text, identifying athlete names, jersey numbers, and positions. The engine then standardizes this data into hardware-safe formats compatible with broadcast character generators." },
-  { q: "What is a 'Credit'?", a: "One credit equals one run of the AI Engine. A single run can process an entire roster text block (up to 8,000 tokens). Credits refresh monthly based on your subscription tier." },
+  { q: "What is a 'Credit'?", a: "One credit equals one run of the AI Scout. A single run can process an entire roster text block. Credits refresh monthly based on your subscription tier." },
   { q: "What is a multi-format output?", a: "RosterSync generates native files for different production systems from a single input—eliminating manual typing for Ross Xpression, Vizrt, and MAM systems simultaneously." },
-  { q: "Can I export for Ross Xpression or Vizrt?", a: "Yes. Our Network tier includes direct exports for Ross DataLinq (XML/CSV) and Vizrt DataCenter, including automatic accent removal and case normalization." }
+  { q: "Can I export for Ross Xpression or Vizrt?", a: "Yes. Our Studio and Network tiers include direct exports for Ross DataLinq (CSV) and Vizrt graphics, with full XML support in the Network tier including automatic sanitization." }
 ];
 
 
 const FEATURES = [
-  { icon: <Wand2 size={20} />, title: "AI Normalization", desc: "Instantly parses messy text from PDF scrapes, websites, and emails with 99.9% accuracy." },
+  { icon: <Wand2 size={20} />, title: "AI Normalization", desc: "Instantly parses messy text from PDF scrapes, websites, and emails with high accuracy." },
   { icon: <ShieldCheck size={20} />, title: "Broadcast Safe", desc: "Automatically strips accents and sanitizes special characters for character generator compatibility." },
   { icon: <Palette size={20} />, title: "Smart Branding", desc: "Discovers official team hex codes, logos, and conference metadata automatically." },
-  { icon: <Globe size={20} />, title: "Multi-Language", desc: "Generate phonetics and localized rosters in English, Spanish, and Mandarin instantly." },
-  { icon: <Layers size={20} />, title: "Asset Management", desc: "Integrates with Iconik, CatDV, and other MAM systems via structured JSON metadata." },
+  { icon: <Globe size={20} />, title: "Multi-Language", desc: "Generate phonetics and localized rosters in English, Spanish, and Mandarin (Network Tier)." },
+  { icon: <Layers size={20} />, title: "Asset Management", desc: "Integrates with Iconik, CatDV, and other MAM systems via live sync (Pro Tier and above)." },
   { icon: <Zap size={20} />, title: "Real-time Sync", desc: "Push updates directly to your production folders or cloud buckets in seconds." }
 ];
 
@@ -299,16 +299,16 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
       {/* Pricing Section */}
       <section className="py-16 px-6 relative overflow-hidden bg-white dark:bg-gray-900">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#5B5FFF]/5 rounded-full blur-[100px] -z-10"></div>
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-[#5B5FFF] mb-2">Pricing</h2>
             <h3 className="text-2xl md:text-4xl font-extrabold tracking-tight">
               <span className="bg-gradient-to-r from-blue-400 via-indigo-500 to-purple-500 text-transparent bg-clip-text inline-block py-1">Scalable Workflows</span>
             </h3>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {PRICING_TIERS.map((tier) => (
-              <div key={tier.id} className={`p-6 rounded-2xl bg-white dark:bg-gray-800 border-2 transition-all relative flex flex-col ${tier.id === 'PRO' ? 'border-[#5B5FFF] shadow-xl scale-105 z-10' : 'border-gray-100 dark:border-gray-700'}`}>
+              <div key={tier.id} className={`p-6 rounded-2xl bg-white dark:bg-gray-800 border-2 transition-all relative flex flex-col ${tier.id === 'PRO' ? 'border-[#5B5FFF] shadow-xl lg:scale-105 z-10' : 'border-gray-100 dark:border-gray-700'}`}>
                 {tier.id === 'PRO' && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full primary-gradient text-white text-[9px] font-black uppercase tracking-widest">Most Popular</div>
                 )}
@@ -322,7 +322,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
                 </div>
                 <div className="space-y-3 mb-8 flex-1">
                   {tier.features.map((feature, i) => (
-                    <div key={i} className="flex items-start gap-2 text-xs font-medium text-gray-600 dark:text-gray-300">
+                    <div key={i} className="flex items-start gap-2 text-[11px] font-medium text-gray-600 dark:text-gray-300">
                       <CheckCircle2 size={14} className="text-emerald-500 shrink-0 mt-0.5" />
                       <span>{feature}</span>
                     </div>
