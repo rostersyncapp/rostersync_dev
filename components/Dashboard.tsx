@@ -123,6 +123,21 @@ const TeamLogo: React.FC<{
   );
 };
 
+const ExportItem: React.FC<{ icon: React.ReactNode; title: string; desc: string; onClick: () => void }> = ({ icon, title, desc, onClick }) => (
+  <button onClick={onClick} className="w-full flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 hover:bg-[#5B5FFF]/5 dark:hover:bg-[#5B5FFF]/10 rounded-lg transition-all group border border-gray-100 dark:border-gray-800 hover:border-[#5B5FFF]/20">
+    <div className="flex items-center gap-4">
+      <div className="w-12 h-12 rounded-lg bg-white dark:bg-gray-800 flex items-center justify-center text-gray-400 group-hover:text-[#5B5FFF] shadow-sm transition-colors group-hover:scale-110">
+        {icon}
+      </div>
+      <div className="text-left min-w-0">
+        <div className="text-sm font-extrabold text-gray-900 dark:text-white truncate">{title}</div>
+        <div className="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-tight mt-0.5 truncate">{desc}</div>
+      </div>
+    </div>
+    <ArrowRight size={18} className="text-gray-300 group-hover:text-[#5B5FFF] group-hover:translate-x-1 transition-all shrink-0" />
+  </button>
+);
+
 export const Dashboard: React.FC<Props> = ({
   userId,
   rosters,
@@ -884,6 +899,48 @@ export const Dashboard: React.FC<Props> = ({
             </div>
           </div>
         )}
+
+        {/* Delete Confirmation Modal (Detail View) */}
+        {rosterToDelete && (
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={() => setRosterToDelete(null)} />
+            <div className="bg-white dark:bg-gray-900 rounded-3xl p-8 max-w-sm w-full shadow-2xl relative z-10 border border-gray-100 dark:border-gray-800 animate-in zoom-in-95 fade-in duration-200">
+              <div className="w-16 h-16 bg-red-50 dark:bg-red-950/30 rounded-2xl flex items-center justify-center mb-6 mx-auto">
+                <Trash2 size={32} className="text-red-500" />
+              </div>
+
+              <h3 className="text-xl font-black text-gray-900 dark:text-white text-center mb-2">
+                {rosterToDelete.projectId ? 'Remove from Folder?' : 'Delete Roster?'}
+              </h3>
+
+              <p className="text-sm text-gray-500 dark:text-gray-400 text-center mb-8 leading-relaxed font-medium">
+                {rosterToDelete.projectId
+                  ? `Moving "${rosterToDelete.teamName}" out of this folder. It will still be available in your main Library.`
+                  : `Are you sure you want to permanently delete "${rosterToDelete.teamName}"? This action cannot be undone.`
+                }
+              </p>
+
+              <div className="flex flex-col gap-3">
+                <button
+                  onClick={() => {
+                    console.log("Confirming delete for:", rosterToDelete.id);
+                    onDeleteRoster(rosterToDelete.id);
+                    setRosterToDelete(null);
+                  }}
+                  className="w-full py-4 px-6 bg-red-500 hover:bg-red-600 text-white rounded-2xl font-black text-sm transition-all shadow-lg shadow-red-500/20"
+                >
+                  {rosterToDelete.projectId ? 'Remove from Folder' : 'Delete Roster'}
+                </button>
+                <button
+                  onClick={() => setRosterToDelete(null)}
+                  className="w-full py-4 px-6 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-2xl font-bold text-sm transition-all"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
@@ -1045,6 +1102,7 @@ export const Dashboard: React.FC<Props> = ({
                             key={r.id}
                             onClick={() => {
                               onSelectRoster(r.id);
+                              setIsHealthModalOpen(false);
                             }}
                             className="w-full bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 flex items-center justify-between hover:border-[#5B5FFF] hover:shadow-md transition-all group text-left"
                           >
@@ -1321,18 +1379,3 @@ export const Dashboard: React.FC<Props> = ({
     </div>
   );
 };
-
-const ExportItem: React.FC<{ icon: React.ReactNode; title: string; desc: string; onClick: () => void }> = ({ icon, title, desc, onClick }) => (
-  <button onClick={onClick} className="w-full flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 hover:bg-[#5B5FFF]/5 dark:hover:bg-[#5B5FFF]/10 rounded-lg transition-all group border border-gray-100 dark:border-gray-800 hover:border-[#5B5FFF]/20">
-    <div className="flex items-center gap-4">
-      <div className="w-12 h-12 rounded-lg bg-white dark:bg-gray-800 flex items-center justify-center text-gray-400 group-hover:text-[#5B5FFF] shadow-sm transition-colors group-hover:scale-110">
-        {icon}
-      </div>
-      <div className="text-left min-w-0">
-        <div className="text-sm font-extrabold text-gray-900 dark:text-white truncate">{title}</div>
-        <div className="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-tight mt-0.5 truncate">{desc}</div>
-      </div>
-    </div>
-    <ArrowRight size={18} className="text-gray-300 group-hover:text-[#5B5FFF] group-hover:translate-x-1 transition-all shrink-0" />
-  </button>
-);
