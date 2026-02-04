@@ -603,7 +603,7 @@ export const Dashboard: React.FC<Props> = ({
           <div className="overflow-x-auto">
             <table className="w-full text-left">
               <thead>
-                <tr className="bg-gray-50/50 dark:bg-gray-800/50" style={{ backgroundColor: `${primaryColor}10`, borderBottom: `1px solid ${primaryColor}20` }}>
+                <tr className="bg-gray-50/50 dark:bg-gray-800/50" style={{ backgroundImage: `linear-gradient(${primaryColor}25, ${primaryColor}25)`, borderBottom: `2px solid ${primaryColor}40` }}>
                   <th className="px-4 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] text-center w-12">#</th>
                   <th className="px-8 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">Athlete Name</th>
                   <th className="px-8 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] text-center">{selectedRoster.isNocMode ? 'Bib' : 'Jersey'}</th>
