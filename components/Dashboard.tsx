@@ -526,42 +526,59 @@ export const Dashboard: React.FC<Props> = ({
               <TeamLogo url={selectedRoster.teamMetadata?.logoUrl} name={selectedRoster.teamName} abbreviation={selectedRoster.teamMetadata?.abbreviation} primaryColor={primaryColor} size="lg" />
               <div className="flex-1">
                 {isEditingMetadata ? (
-                  <div className="space-y-3 animate-in fade-in slide-in-from-left-2 duration-200">
+                  <div className="space-y-4 animate-in fade-in slide-in-from-left-2 duration-200">
                     <div className="flex items-center gap-3">
-                      <input
-                        type="text"
-                        value={editName}
-                        onChange={(e) => setEditName(e.target.value)}
-                        className="text-2xl font-extrabold tracking-tight bg-gray-50 dark:bg-gray-800 border-none rounded-lg px-4 py-2.5 outline-none ring-2 ring-[#5B5FFF]/20 text-gray-900 dark:text-white w-full max-w-md"
-                        autoFocus
-                      />
-                      <button onClick={handleUpdateMetadata} className="p-2.5 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 shadow-md"><Check size={20} /></button>
-                      <button onClick={() => setIsEditingMetadata(false)} className="p-2.5 bg-gray-100 dark:bg-gray-800 text-gray-500 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700"><X size={20} /></button>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center gap-2 bg-gray-50 dark:bg-gray-800 px-3 py-1.5 rounded-lg border border-gray-100 dark:border-gray-700">
-                        <TypeIcon size={14} className="text-gray-400" />
-                        <input type="text" value={editSport} onChange={(e) => setEditSport(e.target.value)} className="bg-transparent border-none outline-none text-[11px] font-bold uppercase tracking-wider text-gray-600 dark:text-gray-300 w-24" placeholder="Sport" />
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Season</label>
+                        <input
+                          type="text"
+                          value={editSeason}
+                          onChange={(e) => setEditSeason(e.target.value)}
+                          className="w-24 text-xl font-black tracking-tight bg-gray-100 dark:bg-gray-800 border-none rounded-xl px-4 py-3 outline-none ring-2 ring-gray-100 dark:ring-gray-700 focus:ring-[#5B5FFF]/20 text-gray-900 dark:text-white transition-all text-center"
+                          placeholder="2024"
+                        />
                       </div>
-                      <div className="flex items-center gap-2 bg-gray-50 dark:bg-gray-800 px-3 py-1.5 rounded-lg border border-gray-100 dark:border-gray-700">
-                        <Calendar size={14} className="text-gray-400" />
-                        <input type="text" value={editSeason} onChange={(e) => setEditSeason(e.target.value)} className="bg-transparent border-none outline-none text-[11px] font-bold uppercase tracking-wider text-gray-600 dark:text-gray-300 w-24" placeholder="Season" />
+                      <div className="flex flex-col gap-1 flex-1">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 ml-1">Team Name</label>
+                        <input
+                          type="text"
+                          value={editName}
+                          onChange={(e) => setEditName(e.target.value)}
+                          className="text-xl font-black tracking-tight bg-gray-100 dark:bg-gray-800 border-none rounded-xl px-4 py-3 outline-none ring-2 ring-gray-100 dark:ring-gray-700 focus:ring-[#5B5FFF]/20 text-gray-900 dark:text-white w-full transition-all"
+                          autoFocus
+                        />
+                      </div>
+                      <div className="flex items-end h-full pt-6">
+                        <div className="flex gap-2">
+                          <button onClick={handleUpdateMetadata} className="p-3.5 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 shadow-lg shadow-emerald-500/20 active:scale-95 transition-all"><Check size={20} /></button>
+                          <button onClick={() => setIsEditingMetadata(false)} className="p-3.5 bg-gray-100 dark:bg-gray-800 text-gray-500 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700 active:scale-95 transition-all"><X size={20} /></button>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2 bg-gray-50/50 dark:bg-gray-800/50 px-3 py-2 rounded-xl border border-gray-100 dark:border-gray-700">
+                        <TypeIcon size={14} className="text-gray-400" />
+                        <input type="text" value={editSport} onChange={(e) => setEditSport(e.target.value)} className="bg-transparent border-none outline-none text-[11px] font-bold uppercase tracking-wider text-gray-600 dark:text-gray-300 w-32" placeholder="Sport" />
                       </div>
                     </div>
                   </div>
                 ) : (
                   <>
                     <div className="flex items-center gap-3 group">
-                      <h2 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white">{selectedRoster.teamName}</h2>
+                      <h2 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white flex items-center gap-3">
+                        <span className="text-gray-300 dark:text-gray-600 font-black tabular-nums">{selectedRoster.seasonYear}</span>
+                        {selectedRoster.teamName}
+                      </h2>
                       <button
                         onClick={() => setIsEditingMetadata(true)}
                         className="p-1.5 text-gray-300 hover:text-[#5B5FFF] hover:bg-[#5B5FFF]/5 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
+                        title="Edit Header"
                       >
                         <Edit2 size={18} />
                       </button>
                     </div>
-                    <div className="flex items-center gap-4 mt-2 text-gray-500 text-sm font-medium">
-                      <span className="flex items-center gap-1.5"><Calendar size={16} /> {selectedRoster.seasonYear}</span>
+                    <div className="flex items-center gap-4 mt-3 text-gray-500 text-sm font-medium">
+                      <span className="flex items-center gap-1.5 opacity-60"><Calendar size={16} /> {selectedRoster.seasonYear}</span>
                       <span className="flex items-center gap-1.5"><Users size={16} /> {selectedRoster.athleteCount} Athletes</span>
                       <span className="px-3 py-1 bg-[#5B5FFF] dark:bg-[#4A4EDD] text-white rounded-full text-[10px] font-black uppercase tracking-widest">{getSportDisplayName(selectedRoster.sport)}</span>
                       {selectedRoster.league && (
