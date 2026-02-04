@@ -186,6 +186,39 @@ export function generateExport(
         mimeType: 'text/csv'
       };
 
+    case 'TAGBOARD_CSV':
+      // Tagboard DDG (Data Driven Graphics) format
+      // Requires simple headers in Row 1.
+      // Image URLs must be direct links.
+      const tagboardHeaders = ["Name", "Jersey", "Position", "Team Name", "Headshot URL", "Team Logo URL"];
+
+      // We look for Branding metadata in the first athlete or pass it in if available in future refactors.
+      // For now, we assume the logo might be attached to individual athletes if we enriched them, 
+      // or we just leave it blank if not available at the athlete level.
+      // Ideally, team logo should come from the teamMetadata, but this function signature takes athletes array.
+      // We will leave Team Logo URL blank for now unless we can get it from a prop, 
+      // but headshots are usually constructed from ESPN IDs or similar if we had them.
+      // Since we don't store headshot URLs on the athlete object explicitly yet (only constructed in UI),
+      // we will output blank or constructed URLs if we add that field.
+      // For this initial implementation, we map what we have.
+
+      const tagboardRows = athletes.map(a => [
+        a.fullName,
+        a.jerseyNumber,
+        a.position,
+        teamName,
+        // TODO: Add headshot logic if readily available. 
+        // For now, use a placeholder or blank to avoid breaking the CSV if the user maps it manually.
+        "",
+        ""
+      ].map(val => `"${val}"`).join(","));
+
+      return {
+        content: [tagboardHeaders.join(","), ...tagboardRows].join("\n"),
+        filename: `${safeTeam}_tagboard_ddg_${langSuffix}_${timestamp}.csv`,
+        mimeType: 'text/csv'
+      };
+
     case 'CATDV_JSON':
       const catdvData = {
         "fieldGroupID": 1,

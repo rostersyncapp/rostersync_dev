@@ -724,6 +724,14 @@ export const Dashboard: React.FC<Props> = ({
                   </div>
 
                   <div className="space-y-4">
+                    <h4 className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-400 font-mono"><Palette size={14} className="text-[#5B5FFF]" /> Cloud Graphics</h4>
+                    <div className="grid grid-cols-1 gap-3">
+                      <ExportItem icon={<Palette size={20} />} title="Tagboard DDG CSV" desc="Direct import for Tagboard graphics." onClick={() => handleExport('TAGBOARD_CSV')} />
+                      <ExportItem icon={<Zap size={20} />} title="NewBlue Titler CSV" desc="Titler Live data source." onClick={() => handleExport('NEWBLUE_CSV')} />
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
                     <h4 className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-400 font-mono"><Layers size={14} className="text-[#5B5FFF]" /> Asset Management (MAM)</h4>
                     <div className="grid grid-cols-1 gap-3">
                       <ExportItem icon={<Layers size={20} />} title="Iconik Metadata (JSON)" desc="Download JSON file." onClick={() => handleExport('ICONIK_JSON')} />
