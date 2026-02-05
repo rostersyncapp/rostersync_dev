@@ -342,26 +342,26 @@ const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
           {activeTab === 'subscription' && (
             <div className="space-y-10">
               {/* Usage Card */}
-              <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-10 shadow-sm">
-                <div className="flex items-center justify-between mb-10">
-                  <h3 className="text-2xl font-extrabold flex items-center gap-4 text-gray-900 dark:text-white">
-                    <Zap size={24} className="text-[#5B5FFF]" /> Current Usage
+              <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-6 shadow-sm">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-xl font-extrabold flex items-center gap-3 text-gray-900 dark:text-white">
+                    <Zap size={20} className="text-[#5B5FFF]" /> Usage
                   </h3>
-                  <div className="flex items-center gap-3 bg-[#5B5FFF]/10 px-5 py-2 rounded-full">
-                    <span className="text-sm font-black text-[#5B5FFF] uppercase tracking-widest">{profile.subscriptionTier} PLAN</span>
+                  <div className="flex items-center gap-2 bg-[#5B5FFF]/10 px-3 py-1 rounded-full">
+                    <span className="text-[10px] font-black text-[#5B5FFF] uppercase tracking-widest">{profile.subscriptionTier}</span>
                   </div>
                 </div>
 
-                <div className="space-y-6">
+                <div className="space-y-4">
                   <div className="flex items-end justify-between">
                     <div>
-                      <span className="text-4xl font-black text-gray-900 dark:text-white tracking-tight">{profile.creditsUsed}</span>
-                      <span className="text-base text-gray-400 font-bold ml-3 uppercase tracking-widest">/ {usageLimit} Credits Used</span>
+                      <span className="text-3xl font-black text-gray-900 dark:text-white tracking-tight">{profile.creditsUsed}</span>
+                      <span className="text-xs text-gray-400 font-bold ml-2 uppercase tracking-widest">/ {usageLimit} Credits</span>
                     </div>
-                    <span className="text-base font-bold text-gray-400 uppercase tracking-widest">{usagePercent}%</span>
+                    <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">{usagePercent}%</span>
                   </div>
 
-                  <div className="w-full h-4 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                  <div className="w-full h-2.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
                     <div
                       className="h-full primary-gradient transition-all duration-1000 ease-out"
                       style={{ width: `${usagePercent}%` }}
@@ -392,35 +392,35 @@ const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
                         </div>
                       )}
 
-                      <div className="mb-8">
-                        <h4 className="text-lg font-black text-gray-900 dark:text-white uppercase tracking-tight mb-2">{tier.name}</h4>
-                        <div className="flex items-baseline gap-2">
-                          <span className="text-3xl font-black text-gray-900 dark:text-white">{tier.price}</span>
-                          <span className="text-sm text-gray-400 font-bold">/mo</span>
+                      <div className="mb-4">
+                        <h4 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-tight mb-1">{tier.name}</h4>
+                        <div className="flex items-baseline gap-1">
+                          <span className="text-xl font-black text-gray-900 dark:text-white">{tier.price}</span>
+                          <span className="text-[10px] text-gray-400 font-bold">/mo</span>
                         </div>
                       </div>
 
-                      <div className="space-y-4 mb-10">
+                      <div className="space-y-2.5 mb-6">
                         {tier.features.slice(0, 4).map((feat, i) => (
-                          <div key={i} className="flex items-start gap-3 text-sm text-gray-600 dark:text-gray-400 font-medium">
-                            <CheckCircle2 size={18} className="text-[#5B5FFF] shrink-0 mt-0.5" />
-                            <span>{feat}</span>
+                          <div key={i} className="flex items-start gap-2 text-[11px] text-gray-600 dark:text-gray-400 font-medium">
+                            <CheckCircle2 size={14} className="text-[#5B5FFF] shrink-0 mt-0.5" />
+                            <span className="leading-tight">{feat}</span>
                           </div>
                         ))}
                       </div>
 
                       {isCurrent ? (
-                        <div className="w-full py-4 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-400 text-sm font-bold text-center uppercase tracking-widest">
-                          Manage Plan
+                        <div className="w-full py-2.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-400 text-[10px] font-bold text-center uppercase tracking-widest">
+                          Manage
                         </div>
                       ) : (
                         <a
                           href={tier.polarCheckoutUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="w-full py-4 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white text-sm font-bold text-center uppercase tracking-widest hover:bg-[#5B5FFF] hover:text-white hover:border-[#5B5FFF] transition-all flex items-center justify-center gap-2.5"
+                          className="w-full py-2.5 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white text-[10px] font-bold text-center uppercase tracking-widest hover:bg-[#5B5FFF] hover:text-white hover:border-[#5B5FFF] transition-all flex items-center justify-center gap-2"
                         >
-                          Upgrade <ArrowRight size={16} />
+                          Upgrade <ArrowRight size={14} />
                         </a>
                       )}
                     </div>
