@@ -38,79 +38,37 @@ export interface ODFAthlete extends Athlete {
 
 /**
  * Transforms athlete data into broadcaster-compliant ODF XML.
- * Compliance rules:
- * 1. FamilyName -> MUST BE UPPERCASE.
- * 2. Parent ID -> MUST BE THE PRIMARY KEY (7-digit unique ODF ID).
- * 3. Normalization -> 3-letter codes for Nations and Sports.
+ * Official ODF Participant Feed for Milano Cortina 2026
  */
 export function convertToODF(athletes: Athlete[]): string {
-    const timestamp = new Date().toISOString().split('T')[0].replace(/-/g, '');
+    const timestamp = new Date().toISOString().split('T');
+    const [date, time] = [timestamp[0], timestamp[1].split('.')[0]];
 
     let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
-    xml += `<ODF version="1.0">\n`;
-    xml += `  <Competition Code="OG2026">\n`;
+    xml += `<OdfBody DocumentType="DT_PARTIC" CompetitionCode="OWG2026" FeedFlag="P" Version="1" Date="${date}" Time="${time}">\n`;
+    xml += `  <Competition>\n`;
 
-    // Group by Discipline (Sport)
-    const groupedBySport = athletes.reduce((acc: any, a) => {
-        // Map position or sport to 3-letter code if possible, fallback to pos
-        const sportCode = a.position?.substring(0, 3).toUpperCase() || 'GEN';
-        if (!acc[sportCode]) acc[sportCode] = [];
-        acc[sportCode].push(a);
-        return acc;
-    }, {});
+    for (const athlete of athletes) {
+        const familyCaps = (athlete.lastName || athlete.fullName.split(' ').pop() || '').toUpperCase();
+        const firstName = athlete.firstName || athlete.fullName.split(' ')[0] || '';
+        const printName = `${familyCaps} ${firstName}`;
+        const countryCode = athlete.countryCode || athlete.organisationId || 'AIN';
+        const sportCode = athlete.position?.substring(0, 3).toUpperCase() || 'GEN';
+        const athleteId = athlete.id.length >= 7 ? athlete.id.substring(0, 7) : athlete.id.padStart(7, '0');
 
-    Object.entries(groupedBySport).forEach(([sportCode, group]: [string, any]) => {
-        xml += `    <Discipline Code="${sportCode}">\n`;
+        xml += `    <Participant Code="${athleteId}" Parent="${athleteId}" Status="ACTIVE" Organisation="${countryCode}" `;
+        xml += `GivenName="${firstName}" FamilyName="${familyCaps}" PrintName="${printName}" `;
+        xml += `Gender="${athlete.gender || 'M'}" BirthDate="${athlete.birthDate || '1990-01-01'}"`;
 
-        // Group by Event
-        const groupedByEvent = group.reduce((acc: any, a: Athlete) => {
-            const eventName = a.event || "General";
-            if (!acc[eventName]) acc[eventName] = [];
-            acc[eventName].push(a);
-            return acc;
-        }, {});
+        if (athlete.heightCm) xml += ` Height="${athlete.heightCm}"`;
+        if (athlete.weightKg) xml += ` Weight="${athlete.weightKg}"`;
+        if (athlete.placeOfBirth) xml += ` PlaceOfBirth="${athlete.placeOfBirth}"`;
 
-        Object.entries(groupedByEvent).forEach(([eventName, eventGroup]: [string, any]) => {
-            xml += `      <Event Name="${eventName}">\n`;
-            xml += `        <Entries>\n`;
+        xml += `>\n`;
+        xml += `      <Discipline Code="${sportCode}" />\n`;
+        xml += `    </Participant>\n`;
+    }
 
-            eventGroup.forEach((a: Athlete) => {
-                const familyName = (a.lastName || a.fullName.split(' ').pop() || '').toUpperCase();
-                const givenName = a.firstName || a.fullName.split(' ')[0] || '';
-                const printName = `${familyName} ${givenName}`;
-
-                // Ensure 7-digit ID for ODF (using jersey + hash or similar if not present)
-                const parentId = a.id.length >= 7 ? a.id.substring(0, 7) : a.id.padStart(7, '0');
-
-                xml += `          <Athlete Parent="${parentId}" Code="${parentId}">\n`;
-                xml += `            <Description Firstname="${givenName}" FamilyName="${familyName}" PrintName="${printName}" />\n`;
-                xml += `            <Gender Code="${a.gender || 'M'}" />\n`;
-                xml += `            <Organisation Code="${a.countryCode || a.organisationId || 'AIN'}" />\n`;
-                xml += `            <Metadata>\n`;
-
-                if (a.birthDate) xml += `              <BirthDate Value="${a.birthDate}" />\n`;
-                else xml += `              <!-- REQUIRED_FOR_BROADCAST: BirthDate -->\n`;
-
-                if (a.heightCm) xml += `              <Height Value="${a.heightCm}" />\n`;
-                else xml += `              <!-- REQUIRED_FOR_BROADCAST: Height -->\n`;
-
-                if (a.weightKg) xml += `              <Weight Value="${a.weightKg}" />\n`;
-                else xml += `              <!-- REQUIRED_FOR_BROADCAST: Weight -->\n`;
-
-                xml += `              <Bib Number="${a.jerseyNumber}" />\n`;
-                xml += `            </Metadata>\n`;
-                xml += `          </Athlete>\n`;
-            });
-
-            xml += `        </Entries>\n`;
-            xml += `      </Event>\n`;
-        });
-
-        xml += `    </Discipline>\n`;
-    });
-
-    xml += `  </Competition>\n`;
-    xml += `</ODF>`;
-
+    xml += `  </Competition>\n</OdfBody>`;
     return xml;
 }

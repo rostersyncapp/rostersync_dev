@@ -36,6 +36,7 @@ export interface Athlete {
   birthDate?: string;
   heightCm?: number;
   weightKg?: number;
+  placeOfBirth?: string;
   event?: string; // Specific Olympic Event
   metadata?: Record<string, any>;
 }

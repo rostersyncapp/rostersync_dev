@@ -20,6 +20,7 @@ interface ProcessedRoster {
   verificationSources?: { title: string; uri: string }[];
   candidateTeams?: { name: string; logoUrl: string; primaryColor: string; secondaryColor: string; sport?: string; league?: string }[];
   league?: string;
+  abbreviation?: string;
   teamMetadata?: {
     primaryColor: string;
     secondaryColor: string;
@@ -396,6 +397,7 @@ function getSchemaForTier(tier: SubscriptionTier, isNocMode: boolean, findBrandi
     baseAthleteProperties.birthDate = { type: SchemaType.STRING, description: "ISO Date format (YYYY-MM-DD)." };
     baseAthleteProperties.heightCm = { type: SchemaType.NUMBER };
     baseAthleteProperties.weightKg = { type: SchemaType.NUMBER };
+    baseAthleteProperties.placeOfBirth = { type: SchemaType.STRING, description: "Athlete's hometown or birthplace (e.g. 'Park City, UT')." };
     baseAthleteProperties.event = { type: SchemaType.STRING, description: "Specific event (e.g. 100m Butterfly)." };
   }
 
@@ -589,9 +591,12 @@ export async function processRosterRawText(
       * USE 'phoneticIPA' ONLY IF REQUESTED (Network Tier). Use standard International Phonetic Alphabet symbols.
     - SPORT INFERENCE: If the sport is not explicitly named, INFER it from the positions.
     - ODF COMPLIANCE (isNocMode):
-      * NORMALIZE: Use 3-letter IOC codes for Nations (organisationId) and Sports (position code).
+      * TEAM NAME: Set 'teamName' to the Nation (e.g. "Jamaica").
+      * ABBREVIATION: Set 'abbreviation' to the 3-letter IOC code (e.g. "JAM").
+      * SPORT: Set 'sport' to include the Discipline + Gender (e.g. "Alpine Skiing - Men").
+      * NORMALIZE: Use 3-letter IOC codes for Nations (organisationId).
       * NAMES: Extract 'firstName' and 'lastName' (Proper Case).
-      * METADATA: BirthDate MUST be YYYY-MM-DD. heightCm and weightKg MUST be integers. Gender MUST be 'M' or 'W'.
+      * METADATA: BirthDate MUST be YYYY-MM-DD. heightCm and weightKg MUST be integers. Gender MUST be 'M' or 'W'. Extract 'placeOfBirth' as the athlete's hometown.
 
     3. BRANDING & METADATA:
     - ${brandingInstruction}
@@ -634,6 +639,7 @@ export async function processRosterRawText(
     const model = genAI.getGenerativeModel(modelParams);
     const identificationInstruction = shouldSearch
       ? `1. Identification: Use 'googleSearch' to identify the team name (e.g. "Bay FC") by searching for the athletes in 'DATA'.
+         - ${isNocMode ? 'PRIMARY SOURCE: Use https://www.olympics.com/en/milano-cortina-2026/results/hubs/individuals/athletes?showAll=true to identify athletes.' : ''}
          - Select 2-3 unique player names and search for: "roster {Player 1} {Player 2} {Player 3}".
          - Use the search results to find the specific professional team (NWSL, MiLB, etc.).
          - Cross-reference the identified team with the VALID TEAM LIST provided above.
@@ -880,7 +886,8 @@ export async function processRosterRawText(
     bioStats: a.bioStats,
     socialHandle: a.socialHandle,
     countryCode: a.countryCode || parsedResult.countryCode,
-    event: a.event
+    event: a.event,
+    placeOfBirth: a.placeOfBirth
   }));
   // Check branding cache if branding was enabled
   let finalBranding = {
@@ -1059,7 +1066,8 @@ export async function processRosterRawText(
   // will have the correct sport/league metadata already attached
   let standardizedSport = parsedResult.sport || "";
 
-  if (candidateTeams.length <= 1) {
+  // Guard: For Olympics (NOC Mode), do not overwrite the AI's sport/gender string
+  if (candidateTeams.length <= 1 && !isNocMode) {
     // PRIORITY 1: Check if a MiLB league was explicitly selected
     if (league && LEAGUE_TO_SPORT[league]) {
       standardizedSport = LEAGUE_TO_SPORT[league];
@@ -1132,6 +1140,7 @@ export async function processRosterRawText(
     athletes: athletesWithJerseys,
     verificationSources,
     candidateTeams: candidateTeams.length > 1 ? candidateTeams : undefined,
-    teamMetadata: finalBranding
+    teamMetadata: finalBranding,
+    abbreviation: finalBranding.abbreviation // Also include at root for easy UI access
   };
 }
