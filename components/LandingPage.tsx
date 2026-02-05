@@ -24,6 +24,7 @@ import {
 import { useClerk, SignUpButton } from '@clerk/clerk-react';
 import { WavyBackground } from './ui/wavy-background';
 import TerminalWorkflow from './TerminalWorkflow';
+import { Logos3 } from './blocks/logos3';
 
 // --- Utility for Tailwind classes ---
 const cn = (...classes: any[]) => classes.filter(Boolean).join(' ');
@@ -240,6 +241,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
           <div><TerminalWorkflow loop onExportComplete={(format) => console.log('Exported:', format)} /></div>
         </div>
       </section>
+
+      <Logos3 />
 
       <section className="py-24 px-6 bg-[#FAFAFA] dark:bg-gray-900">
         <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-12 lg:gap-24 items-start">
