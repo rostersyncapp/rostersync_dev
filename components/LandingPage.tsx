@@ -19,7 +19,8 @@ import {
   Zap,
   Twitter,
   Linkedin,
-  Sparkles
+  Sparkles,
+  Terminal as TerminalIcon
 } from 'lucide-react';
 import { useClerk, SignUpButton } from '@clerk/clerk-react';
 import { WavyBackground } from './ui/wavy-background';
@@ -75,9 +76,9 @@ const PRICING_MATRIX = [
 
 
 const MatrixCell: React.FC<{ value: any }> = ({ value }) => {
-  if (value === true) return <CheckCircle2 size={16} className="text-emerald-500 mx-auto" />;
-  if (value === false) return <X size={16} className="text-gray-300 dark:text-gray-700 mx-auto" />;
-  return <span className="text-xs font-bold text-gray-600 dark:text-gray-400">{value}</span>;
+  if (value === true) return <span className="text-[#5B5FFF] font-mono text-[10px] font-bold">[X]</span>;
+  if (value === false) return <span className="text-gray-400/30 dark:text-gray-700 font-mono text-[10px]">[ ]</span>;
+  return <span className="text-[10px] font-bold text-gray-600 dark:text-gray-400 font-mono">{value}</span>;
 };
 
 const BrandLogo: React.FC<{ siteConfig: SiteConfig; size?: 'sm' | 'md' }> = ({ siteConfig, size = 'md' }) => {
@@ -315,29 +316,53 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
               <h3 className="text-2xl font-bold text-gray-900 dark:text-white">Feature Breakdown</h3>
               <p className="text-[11px] text-gray-500 font-medium mt-1">Detailed comparison of tier-specific entitlements.</p>
             </div>
-            <div className="overflow-x-auto rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm bg-white dark:bg-gray-800/50">
-              <table className="w-full border-separate border-spacing-0">
-                <thead>
-                  <tr className="bg-gray-50/50 dark:bg-gray-800/50">
-                    <th className="p-3 text-left text-[9px] font-black uppercase tracking-widest text-gray-400 border-b border-gray-100 dark:border-gray-800">Feature</th>
-                    <th className="p-3 text-center text-[9px] font-black uppercase tracking-widest text-gray-400 border-b border-gray-100 dark:border-gray-800">Free</th>
-                    <th className="p-3 text-center text-[9px] font-black uppercase tracking-widest text-[#5B5FFF] border-b border-gray-100 dark:border-gray-800 bg-[#5B5FFF]/5">Pro</th>
-                    <th className="p-3 text-center text-[9px] font-black uppercase tracking-widest text-gray-400 border-b border-gray-100 dark:border-gray-800">Studio</th>
-                    <th className="p-3 text-center text-[9px] font-black uppercase tracking-widest text-gray-400 border-b border-gray-100 dark:border-gray-800">Net</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-50 dark:divide-gray-800/50">
-                  {PRICING_MATRIX.map((row, i) => (
-                    <tr key={i} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/30 transition-colors">
-                      <td className="p-3 text-[10px] font-bold text-gray-700 dark:text-gray-300">{row.feature}</td>
-                      <td className="p-3 text-center"><MatrixCell value={row.free} /></td>
-                      <td className="p-3 text-center bg-[#5B5FFF]/5"><MatrixCell value={row.pro} /></td>
-                      <td className="p-3 text-center"><MatrixCell value={row.studio} /></td>
-                      <td className="p-3 text-center"><MatrixCell value={row.network} /></td>
+            <div className="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-800 shadow-2xl bg-white dark:bg-[#0C0C0C] font-mono">
+              <div className="flex items-center justify-between px-4 py-3 bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+                <div className="flex gap-1.5">
+                  <div className="w-2.5 h-2.5 rounded-full bg-red-500/80" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/80" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-green-500/80" />
+                </div>
+                <div className="flex items-center gap-2 text-[10px] uppercase tracking-widest font-black text-gray-500 dark:text-gray-400">
+                  <TerminalIcon size={12} />
+                  <span>matrix.entitlements — cat</span>
+                </div>
+                <div className="w-12" />
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full border-separate border-spacing-0">
+                  <thead>
+                    <tr className="bg-gray-50/30 dark:bg-gray-800/20">
+                      <th className="p-4 text-left text-[9px] font-black uppercase tracking-widest text-gray-400 border-b border-gray-100 dark:border-gray-800/50">Feature</th>
+                      <th className="p-4 text-center text-[9px] font-black uppercase tracking-widest text-gray-400 border-b border-gray-100 dark:border-gray-800/50">Free</th>
+                      <th className="p-4 text-center text-[9px] font-black uppercase tracking-widest text-[#5B5FFF] border-b border-[#5B5FFF]/20 bg-[#5B5FFF]/5">Pro</th>
+                      <th className="p-4 text-center text-[9px] font-black uppercase tracking-widest text-gray-400 border-b border-gray-100 dark:border-gray-800/50">Studio</th>
+                      <th className="p-4 text-center text-[9px] font-black uppercase tracking-widest text-gray-400 border-b border-gray-100 dark:border-gray-800/50">Network</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="divide-y divide-gray-50/50 dark:divide-gray-800/20">
+                    {PRICING_MATRIX.map((row, i) => (
+                      <tr key={i} className="group hover:bg-gray-50/50 dark:hover:bg-gray-800/10 transition-colors">
+                        <td className="p-4 text-[10px] font-medium text-gray-600 dark:text-gray-400 border-r border-gray-100/50 dark:border-gray-800/30 whitespace-nowrap">
+                          <span className="text-[#5B5FFF] opacity-0 group-hover:opacity-100 mr-2">→</span>
+                          {row.feature}
+                        </td>
+                        <td className="p-4 text-center"><MatrixCell value={row.free} /></td>
+                        <td className="p-4 text-center bg-[#5B5FFF]/5 border-x border-[#5B5FFF]/10"><MatrixCell value={row.pro} /></td>
+                        <td className="p-4 text-center"><MatrixCell value={row.studio} /></td>
+                        <td className="p-4 text-center"><MatrixCell value={row.network} /></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="px-4 py-2 bg-gray-50/50 dark:bg-gray-900/50 border-t border-gray-200 dark:border-gray-800 flex items-center gap-4 text-[9px] text-gray-400 font-mono">
+                <span>Total records: {PRICING_MATRIX.length}</span>
+                <span>|</span>
+                <span>Status: READY</span>
+              </div>
             </div>
           </div>
         </div>
