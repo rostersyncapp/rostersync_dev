@@ -343,7 +343,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
                   </thead>
                   <tbody className="divide-y divide-gray-100 dark:divide-gray-800/10">
                     {PRICING_MATRIX.map((row, i) => (
-                      <tr key={i} className={`group transition-colors ${i % 2 === 0 ? 'bg-transparent' : 'bg-gray-50/20 dark:bg-gray-900/10'} hover:bg-gray-50/50 dark:hover:bg-gray-800/20`}>
+                      <tr key={i} className={`group transition-colors ${i % 2 === 0 ? 'bg-transparent' : 'bg-gray-50/50 dark:bg-gray-800/30'} hover:bg-gray-50/80 dark:hover:bg-gray-800/50`}>
                         <td className="p-4 text-xs font-bold text-gray-700 dark:text-gray-200 border-r border-gray-100/50 dark:border-gray-800/30 whitespace-nowrap">
                           <span className="text-[#5B5FFF] dark:text-emerald-500 opacity-0 group-hover:opacity-100 mr-2">→</span>
                           {row.feature}
