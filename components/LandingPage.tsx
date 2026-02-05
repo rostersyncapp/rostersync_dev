@@ -72,6 +72,16 @@ const PRICING_MATRIX = [
   { feature: "Support", free: "Community", pro: "Email", studio: "Email", network: "Email + Quarterly" },
 ];
 
+const SUPPORTED_LEAGUES = [
+  { sport: "Soccer", leagues: ["MLS", "NWSL", "Premier League", "La Liga", "Bundesliga", "Serie A", "Ligue 1", "Liga MX", "Eredivisie", "USL Championship"] },
+  { sport: "Basketball", leagues: ["NBA", "WNBA", "EuroLeague"] },
+  { sport: "Baseball", leagues: ["MLB", "Triple-A", "Double-A", "High-A", "Single-A"] },
+  { sport: "Football", leagues: ["NFL"] },
+  { sport: "Hockey", leagues: ["NHL"] },
+  { sport: "Motorsports", leagues: ["Formula 1"] },
+  { sport: "Cricket", leagues: ["IPL"] },
+];
+
 const MatrixCell: React.FC<{ value: any }> = ({ value }) => {
   if (value === true) return <CheckCircle2 size={16} className="text-emerald-500 mx-auto" />;
   if (value === false) return <X size={16} className="text-gray-300 dark:text-gray-700 mx-auto" />;
@@ -332,6 +342,39 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
                 ))}
               </tbody>
             </table>
+          </div>
+        </div>
+      </section>
+
+      {/* Supported Leagues Section */}
+      <section className="pb-24 px-6 bg-gray-50/30 dark:bg-gray-900/50">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-12">
+            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-2">Coverage</h4>
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white">Supported Leagues</h3>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {SUPPORTED_LEAGUES.map((group, i) => (
+              <div key={i} className="p-6 rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-800/50 shadow-sm hover:shadow-md transition-shadow">
+                <h5 className="text-[10px] font-black uppercase tracking-widest text-[#5B5FFF] mb-4 border-l-2 border-[#5B5FFF] pl-3">
+                  {group.sport}
+                </h5>
+                <div className="flex flex-wrap gap-2">
+                  {group.leagues.map((league, j) => (
+                    <span key={j} className="px-3 py-1 bg-gray-50 dark:bg-gray-800 rounded-full text-[11px] font-bold text-gray-600 dark:text-gray-400 border border-gray-100 dark:border-gray-700">
+                      {league}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-12 text-center">
+            <p className="text-xs text-gray-400 font-medium italic">
+              Don't see your league? Our AI Scout can still process any roster text from any sport using "No Project" mode.
+            </p>
           </div>
         </div>
       </section>
