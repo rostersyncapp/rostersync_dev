@@ -415,7 +415,8 @@ export const Dashboard: React.FC<Props> = ({
       phoneticIPA: newPlayerIPA,
       phoneticSimplified: newPlayerPhonetic,
       nilStatus: 'Active',
-      seasonYear: selectedRoster.seasonYear
+      seasonYear: selectedRoster.seasonYear,
+      birthDate: ''
     };
     const updatedRosterData = [...selectedRoster.rosterData, newAthlete];
     onUpdateRoster({
@@ -651,6 +652,9 @@ export const Dashboard: React.FC<Props> = ({
                   <th className="px-8 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] text-center">{selectedRoster.isNocMode ? 'Bib' : 'Jersey'}</th>
                   <th className="px-8 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] text-center">{selectedRoster.isNocMode ? 'Event' : 'Position'}</th>
                   <th className="px-8 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] text-center">Hardware Safe</th>
+                  {selectedRoster.isNocMode && (
+                    <th className="px-8 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] text-center">Birth Date</th>
+                  )}
                   {userTier !== 'BASIC' && (
                     <th className="px-8 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] text-center">Phonetic</th>
                   )}
@@ -677,6 +681,13 @@ export const Dashboard: React.FC<Props> = ({
                       <td className="px-8 py-4 text-center"><span className="inline-block w-10 py-1 rounded-lg bg-blue-600 dark:bg-blue-700 text-white text-xs font-bold shadow-sm">{a.jerseyNumber.toString().replace(/#/g, '')}</span></td>
                       <td className="px-8 py-4 text-center"><span className="inline-block px-3 py-1 rounded-lg bg-purple-600 dark:bg-purple-700 text-white text-[10px] font-black uppercase tracking-widest shadow-sm">{a.position}</span></td>
                       <td className="px-8 py-4 text-center"><span className="bg-emerald-600 dark:bg-emerald-700 px-3 py-1 rounded-lg text-[10px] font-black text-white tracking-widest font-mono shadow-sm">{a.displayNameSafe}</span></td>
+                      {selectedRoster.isNocMode && (
+                        <td className="px-8 py-4 text-center">
+                          <span className="bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded-lg text-[10px] font-bold text-gray-500 tracking-tighter tabular-nums shadow-sm border border-gray-100 dark:border-gray-700">
+                            {a.birthDate || 'Unknown'}
+                          </span>
+                        </td>
+                      )}
                       {userTier !== 'BASIC' && (
                         <td className="px-8 py-4 text-center">
                           <span className={`px-3 py-1 rounded-lg text-[10px] font-bold tracking-tight shadow-sm ${userTier === 'NETWORK' ? 'bg-indigo-600 dark:bg-indigo-700 text-white font-mono' : 'bg-amber-500 dark:bg-amber-600 text-white'}`}>

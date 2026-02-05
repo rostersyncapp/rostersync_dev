@@ -394,11 +394,11 @@ function getSchemaForTier(tier: SubscriptionTier, isNocMode: boolean, findBrandi
     baseAthleteProperties.firstName = { type: SchemaType.STRING };
     baseAthleteProperties.lastName = { type: SchemaType.STRING, description: "Athlete's Family Name." };
     baseAthleteProperties.gender = { type: SchemaType.STRING, description: "'M' or 'W'." };
-    baseAthleteProperties.birthDate = { type: SchemaType.STRING, description: "ISO Date format (YYYY-MM-DD)." };
-    baseAthleteProperties.heightCm = { type: SchemaType.NUMBER };
-    baseAthleteProperties.weightKg = { type: SchemaType.NUMBER };
+    baseAthleteProperties.birthDate = { type: SchemaType.STRING, description: "BirthDate (YYYY-MM-DD). Use NULL if unknown." };
+    baseAthleteProperties.heightCm = { type: SchemaType.NUMBER, description: "Height in CM. Use NULL if unknown." };
+    baseAthleteProperties.weightKg = { type: SchemaType.NUMBER, description: "Weight in KG. Use NULL if unknown." };
     baseAthleteProperties.placeOfBirth = { type: SchemaType.STRING, description: "Athlete's hometown or birthplace (e.g. 'Park City, UT')." };
-    baseAthleteProperties.event = { type: SchemaType.STRING, description: "Specific event (e.g. 100m Butterfly)." };
+    baseAthleteProperties.event = { type: SchemaType.STRING, description: "Specific discipline (e.g. 'ALP', 'IHO', 'FSK')." };
   }
 
   if (tier !== 'BASIC') {
@@ -604,7 +604,16 @@ export async function processRosterRawText(
       
     - DO NOT return "Unknown Team" without attempting a player-based search (if search is enabled).
 
-    2. ROSTER EXTRACTION (MANDATORY):
+    ${isNocMode ? `3. ODF DATA ENGINEER ROLE (MANDATORY):
+    - persona: You are an Olympic ODF Data Engineer for Milano Cortina 2026.
+    - GOAL: Ingest raw data and output broadcaster-compliant DT_PARTIC JSON.
+    - ATHLETE ID: Generate a permanent 7-digit ID (Primary Key) for 'id' and 'organisationId'.
+    - NAMES: 'lastName' (FamilyName) MUST be ALL CAPS. 'fullName' (PrintName) is "SURNAME GivenName".
+    - CODES: Use official 3-letter Discipline codes (ALP, BTH, BOB, CCS, CUR, FSK, FRS, IHO, LUG, NCB, STK, SKN, SJP, SMT, SBD, SSK).
+    - NEUTRAL ATHLETES: Use code 'AIN' for Individual Neutral Athletes.
+    - SEARCH: Use 'googleSearch' to find missing metadata: Birthdates (YYYY-MM-DD), Heights (cm), Weight (kg), and Hometowns.` : ''}
+
+    4. ROSTER EXTRACTION (MANDATORY):
     - CRITICAL: YOU MUST EXTRACT EVERY ATHLETE LISTED IN THE 'DATA' BLOCK BELOW.
     - NO SKIPPING: Even if an athlete only has a name and no other data, YOU MUST extract them.
     - DEFAULTS: If Jersey Number is missing, use "00". If NIL Status is missing, use "Incoming". If Position is missing, use "Athlete".
@@ -613,7 +622,7 @@ export async function processRosterRawText(
     - DO NOT return an empty 'athletes' array if there are names listed in the input.
     - CLEANING INPUT: The input text may have artifacts like "NAME01" (name + jersey number). You MUST separate them -> Name: "NAME", Jersey: "01".
     - NORMALIZE: Convert all athlete names to UPPERCASE and strip accents.
-    - JERSEY NUMBERS: Always use at least two digits. Pad single digits with a leading zero (e.g., '3' becomes '03', '0' becomes '00').
+    - JERSEY NUMBERS: Always use at least two digits for 'jerseyNumber'. For ODF 'Code', use the 7-digit ID.
     - PHONETIC GUIDES:
       * Use 'phoneticSimplified' for a readable, capitalized-stress guide.
       * USE 'phoneticIPA' ONLY IF REQUESTED (Network Tier). Use standard International Phonetic Alphabet symbols.
@@ -692,7 +701,8 @@ export async function processRosterRawText(
       `${identificationInstruction}\n` +
       `2. Extraction (MANDATORY): CRITICAL - You MUST extract EVERY SINGLE athlete from the 'DATA' block into the athletes array.
          - NO SKIPPING: If a name is in DATA, it MUST be in the JSON results. 
-         - Use "00", "Athlete", or "1990-01-01" as defaults for missing metadata.
+         - Use "00" for jersey/bib and "Athlete" as defaults for missing metadata.
+         - Only provide birthDate, height, and weight if found in text or via search. Do NOT use fake placeholders.
          - THE DATA BLOCK IS YOUR ONLY AUTHORITATIVE SOURCE FOR NAMES.\n` +
       (shouldSearch ? `3. Required JSON Structure Template:
       {

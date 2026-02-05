@@ -11,7 +11,7 @@ export const SPORT_CODES: Record<string, string> = {
     'BOB': 'Bobsleigh',
     'CCS': 'Cross-Country Skiing',
     'CUR': 'Curling',
-    'FIG': 'Figure Skating',
+    'FSK': 'Figure Skating',
     'FRS': 'Freestyle Skiing',
     'IHO': 'Ice Hockey',
     'LUG': 'Luge',
@@ -57,8 +57,8 @@ export function convertToODF(athletes: Athlete[]): string {
         const athleteId = athlete.id.length >= 7 ? athlete.id.substring(0, 7) : athlete.id.padStart(7, '0');
 
         xml += `    <Participant Code="${athleteId}" Parent="${athleteId}" Status="ACTIVE" Organisation="${countryCode}" `;
-        xml += `GivenName="${firstName}" FamilyName="${familyCaps}" PrintName="${printName}" `;
-        xml += `Gender="${athlete.gender || 'M'}" BirthDate="${athlete.birthDate || '1990-01-01'}"`;
+        xml += `GivenName="${firstName}" FamilyName="${familyCaps}" PrintName="${familyCaps} ${firstName}" `;
+        xml += `Gender="${athlete.gender || 'M'}" BirthDate="${athlete.birthDate || ''}"`;
 
         if (athlete.heightCm) xml += ` Height="${athlete.heightCm}"`;
         if (athlete.weightKg) xml += ` Weight="${athlete.weightKg}"`;
