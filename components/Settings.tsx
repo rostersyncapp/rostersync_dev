@@ -312,7 +312,7 @@ const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
   const usagePercent = Math.min(100, Math.round((profile.creditsUsed / usageLimit) * 100));
 
   return (
-    <div className="max-w-7xl mx-auto">
+    <div className="max-w-7xl mx-auto pb-24">
       <div className="mb-10">
         <h1 className="text-4xl font-extrabold tracking-tight mb-3 text-gray-900 dark:text-white">Settings</h1>
         <p className="text-base text-gray-500 dark:text-gray-400 font-medium">Manage your organization's metadata and preferences.</p>
@@ -477,9 +477,9 @@ const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
           )}
 
           {activeTab === 'roi' && (
-            <div className="space-y-8">
+            <div className="space-y-12">
               {/* Hero Savings Card */}
-              <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 p-10 rounded-2xl shadow-lg">
+              <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 p-8 rounded-2xl shadow-lg">
                 <div className="text-emerald-100 text-sm font-bold uppercase tracking-widest mb-2">
                   Total Cost Savings
                 </div>
@@ -501,7 +501,7 @@ const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
               {/* Supporting Metrics - 3 Column Grid */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {/* Time Saved */}
-                <div className="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm">
+                <div className="bg-white dark:bg-gray-900 p-5 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm">
                   <div className="flex items-center justify-between mb-4">
                     <Clock size={20} className="text-blue-500" />
                     <span className="text-xs font-bold text-gray-400 uppercase">Efficiency</span>
@@ -513,7 +513,7 @@ const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
                 </div>
 
                 {/* Rosters Processed */}
-                <div className="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm">
+                <div className="bg-white dark:bg-gray-900 p-5 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm">
                   <div className="flex items-center justify-between mb-4">
                     <Users size={20} className="text-purple-500" />
                     <span className="text-xs font-bold text-gray-400 uppercase">Volume</span>
@@ -527,7 +527,7 @@ const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
                 </div>
 
                 {/* Cost Per Athlete */}
-                <div className="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm">
+                <div className="bg-white dark:bg-gray-900 p-5 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm">
                   <div className="flex items-center justify-between mb-4">
                     <DollarSign size={20} className="text-emerald-500" />
                     <span className="text-xs font-bold text-gray-400 uppercase">Unit Cost</span>
