@@ -242,8 +242,6 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
         </div>
       </section>
 
-      <Logos3 />
-
       <section className="py-24 px-6 bg-[#FAFAFA] dark:bg-gray-900">
         <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-12 lg:gap-24 items-start">
           <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6 order-last lg:order-first">
@@ -266,6 +264,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
           </div>
         </div>
       </section>
+
+      <Logos3 />
 
       <section className="py-16 px-6 relative overflow-hidden bg-white dark:bg-gray-900">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#5B5FFF]/5 rounded-full blur-[100px] -z-10"></div>
