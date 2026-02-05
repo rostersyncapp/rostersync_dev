@@ -76,32 +76,55 @@ const SUPPORTED_LEAGUES = [
   {
     sport: "Soccer",
     color: "text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 border-emerald-100 dark:border-emerald-800/50",
-    leagues: ["MLS", "NWSL", "Premier League", "La Liga", "Bundesliga", "Serie A", "Ligue 1", "Liga MX", "Eredivisie", "USL Championship"]
+    leagues: [
+      { name: "MLS", logo: "https://upload.wikimedia.org/wikipedia/commons/7/76/MLS_crest_logo_RGB_gradient.svg" },
+      { name: "NWSL", logo: "https://upload.wikimedia.org/wikipedia/en/3/3d/NWSL_logo.svg" },
+      { name: "Premier League", logo: "https://upload.wikimedia.org/wikipedia/commons/2/2f/Premier_League.svg" },
+      { name: "La Liga", logo: "https://upload.wikimedia.org/wikipedia/commons/0/0f/LaLiga_logo_2023.svg" },
+      { name: "Bundesliga", logo: "https://upload.wikimedia.org/wikipedia/en/d/df/Bundesliga_logo_%282017%29.svg" },
+      { name: "Serie A", logo: "https://upload.wikimedia.org/wikipedia/commons/e/e9/Serie_A_logo_2022.svg" },
+      { name: "Ligue 1", logo: "https://upload.wikimedia.org/wikipedia/commons/a/af/Ligue1_logo_2024.svg" },
+      { name: "Liga MX", logo: "https://upload.wikimedia.org/wikipedia/commons/4/4c/Liga_MX_logo.svg" },
+      { name: "Eredivisie", logo: "https://upload.wikimedia.org/wikipedia/commons/4/4c/Eredivisie_nieuw_logo_2017-.svg" },
+      { name: "USL", logo: "https://upload.wikimedia.org/wikipedia/en/7/7d/USL_Championship_logo.svg" }
+    ]
   },
   {
     sport: "Basketball",
     color: "text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/30 border-orange-100 dark:border-orange-800/50",
-    leagues: ["NBA", "WNBA"]
+    leagues: [
+      { name: "NBA", logo: "https://upload.wikimedia.org/wikipedia/en/0/03/National_Basketball_Association_logo.svg" },
+      { name: "WNBA", logo: "https://upload.wikimedia.org/wikipedia/en/b/b3/WNBA_logo.svg" }
+    ]
   },
   {
     sport: "Baseball",
     color: "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 border-blue-100 dark:border-blue-800/50",
-    leagues: ["MLB", "Triple-A"]
+    leagues: [
+      { name: "MLB", logo: "https://upload.wikimedia.org/wikipedia/en/a/a6/Major_League_Baseball_logo.svg" },
+      { name: "MiLB", logo: "https://upload.wikimedia.org/wikipedia/en/2/2b/Minor_League_Baseball_logo.svg" }
+    ]
   },
   {
     sport: "Football",
     color: "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30 border-red-100 dark:border-red-800/50",
-    leagues: ["NFL"]
+    leagues: [
+      { name: "NFL", logo: "https://upload.wikimedia.org/wikipedia/en/a/a2/National_Football_League_logo.svg" }
+    ]
   },
   {
     sport: "Hockey",
     color: "text-cyan-600 dark:text-cyan-400 bg-cyan-50 dark:bg-cyan-900/30 border-cyan-100 dark:border-cyan-800/50",
-    leagues: ["NHL"]
+    leagues: [
+      { name: "NHL", logo: "https://upload.wikimedia.org/wikipedia/en/3/3a/05_NHL_Shield.svg" }
+    ]
   },
   {
     sport: "Cricket",
     color: "text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/30 border-purple-100 dark:border-purple-800/50",
-    leagues: ["IPL"]
+    leagues: [
+      { name: "IPL", logo: "https://upload.wikimedia.org/wikipedia/en/8/84/Indian_Premier_League_Official_Logo.svg" }
+    ]
   },
 ];
 
@@ -396,9 +419,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
                         <td className="p-3">
                           <div className="flex flex-wrap gap-2">
                             {group.leagues.map((league, j) => (
-                              <span key={j} className={cn("px-2 py-0.5 rounded-md text-[9px] font-bold border uppercase tracking-tighter", group.color)}>
-                                {league}
-                              </span>
+                              <div key={j} className={cn("flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[9px] font-bold border uppercase tracking-tighter bg-white dark:bg-gray-800/50 shadow-sm", group.color)}>
+                                <img src={league.logo} alt={league.name} className="w-3 h-3 object-contain filter dark:brightness-110" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                                <span>{league.name}</span>
+                              </div>
                             ))}
                           </div>
                         </td>
