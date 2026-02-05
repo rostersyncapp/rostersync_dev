@@ -39,12 +39,12 @@ interface LandingPageProps {
 }
 
 const FAQS = [
-  { q: "How does the AI normalization work?", a: "We use advanced large language models to parse raw text, identifying athlete names, jersey numbers, and positions. The engine then standardizes this data into hardware-safe formats compatible with broadcast character generators." },
-  { q: "What is a 'Credit'?", a: "One credit equals one run of the AI Scout. A single run can process an entire roster text block. Credits refresh monthly based on your subscription tier." },
-  { q: "What is the difference between Pro and Studio tiers?", a: "The Studio tier ($149) is designed for teams, providing 3 user seats and 500 monthly credits. It also adds direct CSV exports for Ross XPression and Vizrt, whereas Pro is limited to Premiere and MAM systems." },
-  { q: "Can I add more team members to my account?", a: "Yes. The Studio tier includes 3 seats and the Network tier includes 5 seats. Free and Pro tiers are currently limited to a single user." },
-  { q: "Do you offer an API or XML support?", a: "Yes. Our Network tier provides full XML suite support (including ODF and Ross DataLinq XML) along with direct API access for custom production pipeline integrations." },
-  { q: "What languages are supported?", a: "All tiers support English. The Network tier adds support for Spanish (ES) and Mandarin (ZH) localization, including hardware-safe phonetic guides for each." }
+  { q: "Why upgrade from Free to Pro?", a: "The Pro tier unlocks 150 credits per month, Adobe Premiere CSV exports, and Iconik/CatDV live sync. Crucially, it also enables automatic team logo and color (HEX) discovery for your rosters." },
+  { q: "What does the Studio tier offer for teams?", a: "The Studio tier ($149) is built for collaboration, including 3 user seats and 500 monthly credits. It adds Ross Xpression and Vizrt CSV exports, all color formats (RGB, Pantone, CMYK), and white-label exports for clients." },
+  { q: "When should I choose the Network tier?", a: "Choose Network for high-volume operations requiring multi-language name variants (Spanish/Mandarin), IPA phonetic guides, custom accent color overrides, full API access, and enterprise XML formats like ODF." },
+  { q: "Can I manage multiple projects?", a: "Yes. The Pro tier and above include unlimited folders and nested projects to help you organize rosters across different productions or seasons." },
+  { q: "What is 'White-label Export'?", a: "Available in Studio and Network tiers, white-label exports remove all RosterSync branding from generated files, making them perfect for direct client delivery." },
+  { q: "Do you support Ross DataLinq and Vizrt Graphics?", a: "Yes. We offer direct CSV support in the Studio tier for Ross and Vizrt, while the Network tier adds native XML feed support for enterprise ticker and graphics systems." }
 ];
 
 const FEATURES = [
@@ -60,22 +60,17 @@ const PRICING_MATRIX = [
   { feature: "Monthly Price", free: "$0", pro: "$79", studio: "$149", network: "$249" },
   { feature: "AI Credits", free: "20", pro: "150", studio: "500", network: "800" },
   { feature: "Rosters/month", free: "~1-2", pro: "~10", studio: "~33", network: "~53" },
-  { feature: "Total Formats", free: "1", pro: "4", studio: "8", network: "12" },
-  { feature: "Standard CSV", free: true, pro: true, studio: true, network: true },
-  { feature: "Adobe Premiere CSV", free: false, pro: true, studio: true, network: true },
-  { feature: "Iconik / CatDV MAM", free: false, pro: true, studio: true, network: true },
-  { feature: "Tagboard DDG CSV", free: false, pro: true, studio: true, network: true },
-  { feature: "Ross XPression (CSV)", free: false, pro: false, studio: true, network: true },
-  { feature: "Vizrt Graphics (CSV)", free: false, pro: false, studio: true, network: true },
-  { feature: "Ross DataLinq (XML)", free: false, pro: false, studio: false, network: true },
-  { feature: "Vizrt DataCenter (XML)", free: false, pro: false, studio: false, network: true },
-  { feature: "ODF Suite (XML)", free: false, pro: false, studio: false, network: true },
-  { feature: "Team Members", free: "1", pro: "1", studio: "3", network: "5" },
-  { feature: "Phonetic Guides", free: false, pro: "Simple", studio: "Simple", network: "Simple + IPA" },
+  { feature: "Export formats", free: "1", pro: "4", studio: "8", network: "12" },
+  { feature: "Team members", free: "1", pro: "1", studio: "3", network: "5" },
+  { feature: "Phonetic guides", free: false, pro: "Simple", studio: "Simple", network: "Simple + IPA" },
   { feature: "Multi-language", free: false, pro: false, studio: false, network: "ES + ZH" },
-  { feature: "MAM Live Sync", free: false, pro: true, studio: true, network: true },
-  { feature: "API Access", free: false, pro: false, studio: false, network: true },
-  { feature: "Support", free: "Community", pro: "Email", studio: "Email", network: "Quarterly Strategy" },
+  { feature: "Logo discovery", free: false, pro: true, studio: true, network: true },
+  { feature: "Colors", free: false, pro: "HEX", studio: "All formats", network: "All formats" },
+  { feature: "White-label exports", free: false, pro: false, studio: true, network: true },
+  { feature: "Custom accent color", free: false, pro: false, studio: false, network: true },
+  { feature: "MAM live sync", free: false, pro: true, studio: true, network: true },
+  { feature: "API access", free: false, pro: false, studio: false, network: true },
+  { feature: "Support", free: "Community", pro: "Email", studio: "Email", network: "Email + Quarterly" },
 ];
 
 const MatrixCell: React.FC<{ value: any }> = ({ value }) => {
