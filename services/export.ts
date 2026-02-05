@@ -24,6 +24,9 @@ export function generateExport(
         };
         if (tier !== 'BASIC') {
           row.phonetic = a.phoneticSimplified;
+          if (tier === 'NETWORK') {
+            row.phoneticIPA = a.phoneticIPA;
+          }
         }
         return row;
       });
@@ -84,7 +87,7 @@ export function generateExport(
         a.displayNameSafe,
         a.jerseyNumber,
         a.position,
-        a.phoneticSimplified,
+        tier === 'NETWORK' ? a.phoneticIPA : a.phoneticSimplified,
         language
       ].join(","));
       return {
@@ -100,7 +103,7 @@ export function generateExport(
         a.displayNameSafe.toUpperCase(),
         a.jerseyNumber,
         a.position.toUpperCase(),
-        a.phoneticSimplified || "",
+        tier === 'NETWORK' ? a.phoneticIPA : a.phoneticSimplified || "",
         `C:\\Rosters\\Heads\\${a.jerseyNumber}.tga`
       ].map(val => `"${val}"`).join(","));
 
@@ -121,10 +124,9 @@ export function generateExport(
         };
         return [
           a.jerseyNumber,
-          a.jerseyNumber,
           a.displayNameSafe.toUpperCase(),
           a.position.toUpperCase(),
-          a.phoneticSimplified || "",
+          tier === 'NETWORK' ? a.phoneticIPA : a.phoneticSimplified || "",
           JSON.stringify(bioData).replace(/"/g, '""')
         ].map(val => `"${val}"`).join(",");
       });
@@ -142,7 +144,7 @@ export function generateExport(
         vxml += `      <field name="ID">${a.jerseyNumber}</field>\n`;
         vxml += `      <field name="NAME_CAPS">${a.displayNameSafe.toUpperCase()}</field>\n`;
         vxml += `      <field name="POSITION">${a.position.toUpperCase()}</field>\n`;
-        vxml += `      <field name="PRONUNCIATION">${a.phoneticSimplified || ''}</field>\n`;
+        vxml += `      <field name="PRONUNCIATION">${(tier === 'NETWORK' ? a.phoneticIPA : a.phoneticSimplified) || ''}</field>\n`;
         vxml += `      <field name="STAT_LINE">${a.bioStats || ''}</field>\n`;
         vxml += `      <field name="HEADSHOT_URL">C:\\RosterSync\\Heads\\${a.jerseyNumber}.tga</field>\n`;
         vxml += `    </element>\n`;

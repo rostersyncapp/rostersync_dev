@@ -393,7 +393,11 @@ function getSchemaForTier(tier: SubscriptionTier, isNocMode: boolean, findBrandi
   }
 
   if (tier !== 'BASIC') {
-    baseAthleteProperties.phoneticSimplified = { type: SchemaType.STRING };
+    baseAthleteProperties.phoneticSimplified = { type: SchemaType.STRING, description: "Simplified phonetic guide (e.g. 'fuh-NET-ik')." };
+  }
+
+  if (tier === 'NETWORK') {
+    baseAthleteProperties.phoneticIPA = { type: SchemaType.STRING, description: "International Phonetic Alphabet (IPA) notation (e.g. /fəˈnɛtɪk/). Use standard symbols and slashes." };
   }
 
   if (tier === 'NETWORK') {
@@ -573,6 +577,9 @@ export async function processRosterRawText(
     - CLEANING INPUT: The input text may have artifacts like "NAME01" (name + jersey number). You MUST separate them -> Name: "NAME", Jersey: "01".
     - NORMALIZE: Convert all athlete names to UPPERCASE and strip accents.
     - JERSEY NUMBERS: Always use at least two digits. Pad single digits with a leading zero (e.g., '3' becomes '03', '0' becomes '00').
+    - PHONETIC GUIDES:
+      * Use 'phoneticSimplified' for a readable, capitalized-stress guide.
+      * USE 'phoneticIPA' ONLY IF REQUESTED (Network Tier). Use standard International Phonetic Alphabet symbols.
     - SPORT INFERENCE: If the sport is not explicitly named, INFER it from the positions.
 
     3. BRANDING & METADATA:

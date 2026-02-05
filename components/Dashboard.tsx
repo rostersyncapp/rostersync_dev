@@ -194,6 +194,8 @@ export const Dashboard: React.FC<Props> = ({
   const [newPlayerName, setNewPlayerName] = useState('');
   const [newPlayerJersey, setNewPlayerJersey] = useState('');
   const [newPlayerPosition, setNewPlayerPosition] = useState('');
+  const [newPlayerPhonetic, setNewPlayerPhonetic] = useState('');
+  const [newPlayerIPA, setNewPlayerIPA] = useState('');
 
   // Iconik Sync State
   const [isSyncingIconik, setIsSyncingIconik] = useState(false);
@@ -410,8 +412,8 @@ export const Dashboard: React.FC<Props> = ({
       displayNameSafe: sanitizeName(newPlayerName),
       jerseyNumber: newPlayerJersey.padStart(2, '0').replace(/#/g, ''),
       position: newPlayerPosition.toUpperCase().replace(/#/g, ''),
-      phoneticIPA: '',
-      phoneticSimplified: '',
+      phoneticIPA: newPlayerIPA,
+      phoneticSimplified: newPlayerPhonetic,
       nilStatus: 'Active',
       seasonYear: selectedRoster.seasonYear
     };
@@ -424,6 +426,8 @@ export const Dashboard: React.FC<Props> = ({
     setNewPlayerName('');
     setNewPlayerJersey('');
     setNewPlayerPosition('');
+    setNewPlayerPhonetic('');
+    setNewPlayerIPA('');
     setShowAddPlayerForm(false);
     logActivity(userId, 'PLAYER_ADD', `Added ${newAthlete.fullName} (#${newAthlete.jerseyNumber}) to ${selectedRoster.teamName}.`);
   };
@@ -622,6 +626,12 @@ export const Dashboard: React.FC<Props> = ({
                 <input type="text" placeholder="Name" value={newPlayerName} onChange={(e) => setNewPlayerName(e.target.value)} className="px-3 py-2 text-sm bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg flex-1 font-semibold" />
                 <input type="text" placeholder="Jersey" value={newPlayerJersey} onChange={(e) => setNewPlayerJersey(e.target.value)} className="px-3 py-2 text-sm bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg w-20 font-bold text-center" />
                 <input type="text" placeholder="Position" value={newPlayerPosition} onChange={(e) => setNewPlayerPosition(e.target.value)} className="px-3 py-2 text-sm bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg w-24 font-bold text-center uppercase" />
+                {userTier !== 'BASIC' && (
+                  <input type="text" placeholder="Phonetic" value={newPlayerPhonetic} onChange={(e) => setNewPlayerPhonetic(e.target.value)} className="px-3 py-2 text-sm bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg w-32 font-semibold" title="Simplified Phonetic (e.g. fuh-NET-ik)" />
+                )}
+                {userTier === 'NETWORK' && (
+                  <input type="text" placeholder="IPA" value={newPlayerIPA} onChange={(e) => setNewPlayerIPA(e.target.value)} className="px-3 py-2 text-sm bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg w-32 font-mono" title="IPA Notation (e.g. /fəˈnɛtɪk/)" />
+                )}
                 <button onClick={handleAddPlayer} className="px-4 py-2 bg-emerald-600 text-white rounded-lg text-xs font-bold hover:bg-emerald-500 transition-colors"><Plus size={14} /></button>
                 <button onClick={() => setShowAddPlayerForm(false)} className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-lg text-xs font-bold hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"><X size={14} /></button>
               </div>
@@ -641,6 +651,9 @@ export const Dashboard: React.FC<Props> = ({
                   <th className="px-8 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] text-center">{selectedRoster.isNocMode ? 'Bib' : 'Jersey'}</th>
                   <th className="px-8 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] text-center">{selectedRoster.isNocMode ? 'Event' : 'Position'}</th>
                   <th className="px-8 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] text-center">Hardware Safe</th>
+                  {userTier !== 'BASIC' && (
+                    <th className="px-8 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] text-center">Phonetic</th>
+                  )}
                   <th className="px-8 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] text-left">Colors</th>
                   <th className="px-4 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] text-center w-16"></th>
                 </tr>
@@ -664,6 +677,13 @@ export const Dashboard: React.FC<Props> = ({
                       <td className="px-8 py-4 text-center"><span className="inline-block w-10 py-1 rounded-lg bg-blue-600 dark:bg-blue-700 text-white text-xs font-bold shadow-sm">{a.jerseyNumber.toString().replace(/#/g, '')}</span></td>
                       <td className="px-8 py-4 text-center"><span className="inline-block px-3 py-1 rounded-lg bg-purple-600 dark:bg-purple-700 text-white text-[10px] font-black uppercase tracking-widest shadow-sm">{a.position}</span></td>
                       <td className="px-8 py-4 text-center"><span className="bg-emerald-600 dark:bg-emerald-700 px-3 py-1 rounded-lg text-[10px] font-black text-white tracking-widest font-mono shadow-sm">{a.displayNameSafe}</span></td>
+                      {userTier !== 'BASIC' && (
+                        <td className="px-8 py-4 text-center">
+                          <span className={`px-3 py-1 rounded-lg text-[10px] font-bold tracking-tight shadow-sm ${userTier === 'NETWORK' ? 'bg-indigo-600 dark:bg-indigo-700 text-white font-mono' : 'bg-amber-500 dark:bg-amber-600 text-white'}`}>
+                            {userTier === 'NETWORK' ? (a.phoneticIPA || a.phoneticSimplified || '-') : (a.phoneticSimplified || '-')}
+                          </span>
+                        </td>
+                      )}
                       <td className="px-8 py-4 text-left"><div className="flex gap-2"><div className="w-3.5 h-3.5 rounded-full border border-gray-200 shadow-sm" style={{ backgroundColor: selectedRoster.teamMetadata?.primaryColor || '#000' }}></div><div className="w-3.5 h-3.5 rounded-full border border-gray-200 shadow-sm" style={{ backgroundColor: selectedRoster.teamMetadata?.secondaryColor || '#fff' }}></div></div></td>
                       <td className="px-4 py-4 text-center">
                         <button onClick={() => handleDeletePlayer(a.id)} className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg opacity-0 group-hover:opacity-100 transition-all">
