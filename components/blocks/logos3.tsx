@@ -51,7 +51,7 @@ const Logos3 = ({
             <div className="container mx-auto px-6 mb-12">
                 <div className="flex flex-col items-center text-center">
                     <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-[#5B5FFF] mb-2">Coverage</h4>
-                    <h3 className="text-3xl font-bold text-gray-900 dark:text-white sm:text-4xl">
+                    <h3 className="text-3xl font-bold bg-gradient-to-r from-purple-600 via-fuchsia-500 to-cyan-400 text-transparent bg-clip-text inline-block py-1 sm:text-4xl">
                         {heading}
                     </h3>
                     <p className="text-gray-500 font-medium mt-4 max-w-2xl text-sm sm:text-base">
