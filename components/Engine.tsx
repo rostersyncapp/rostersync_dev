@@ -98,6 +98,7 @@ export const Engine: React.FC<Props> = ({
   const [scoutHistory, setScoutHistory] = useState<{ name: string, date: string, count: number }[]>([]);
   const [inputQuality, setInputQuality] = useState(0); // 0 to 100
   const [detections, setDetections] = useState<string[]>([]);
+  const [isOlympicFastMode, setIsOlympicFastMode] = useState(false);
 
   const [currentTipIndex, setCurrentTipIndex] = useState(0);
 
@@ -300,11 +301,26 @@ export const Engine: React.FC<Props> = ({
   const handleProcess = () => {
     if (!rawInput || isProcessing) return;
     setShowSeasonModal(false);
+
+    // If Olympic fast mode is checked, bypass modal and use defaults
+    const finalNocMode = isOlympicFastMode ? true : isNocMode;
+    const finalSeason = isOlympicFastMode ? "2026" : seasonYear;
+    const finalLeague = isOlympicFastMode ? "milano-cortina-2026" : league;
+
     // Prepend team name to raw input if provided (helps AI identification)
     const inputWithTeam = manualTeamName.trim()
       ? `Team: ${manualTeamName.trim()}\n\n${rawInput}`
       : rawInput;
-    onStartProcessing(inputWithTeam, isNocMode, seasonYear, true, league);
+
+    onStartProcessing(inputWithTeam, finalNocMode, finalSeason, true, finalLeague);
+  };
+
+  const handleStartScout = () => {
+    if (isOlympicFastMode) {
+      handleProcess();
+    } else {
+      setShowSeasonModal(true);
+    }
   };
 
   const handleSaveToLibrary = () => {
@@ -471,9 +487,25 @@ export const Engine: React.FC<Props> = ({
                 placeholder="Paste your raw roster data here..."
               />
 
-              <div className="p-6 bg-gray-50/50 dark:bg-gray-800/30 border-t border-gray-50 dark:border-gray-800 flex items-center justify-end">
+              <div className="p-6 bg-gray-50/50 dark:bg-gray-800/30 border-t border-gray-50 dark:border-gray-800 flex items-center justify-between">
+                <label className="flex items-center gap-3 cursor-pointer group">
+                  <div className={`w-5 h-5 rounded border transition-all flex items-center justify-center ${isOlympicFastMode ? 'bg-[#5B5FFF] border-[#5B5FFF] shadow-sm' : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 group-hover:border-[#5B5FFF]'}`}>
+                    <input
+                      type="checkbox"
+                      className="sr-only"
+                      checked={isOlympicFastMode}
+                      onChange={(e) => setIsOlympicFastMode(e.target.checked)}
+                    />
+                    {isOlympicFastMode && <Check size={14} className="text-white" />}
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-gray-700 dark:text-gray-300">Olympic Search</span>
+                    <span className="text-[9px] text-gray-400 font-medium">Bypass modal & use ODF standards</span>
+                  </div>
+                </label>
+
                 <button
-                  onClick={() => setShowSeasonModal(true)}
+                  onClick={handleStartScout}
                   disabled={isProcessing || !rawInput || !hasCredits}
                   className={`px-10 py-4 rounded-2xl font-bold flex items-center gap-3 shadow-xl transition-all text-sm uppercase tracking-widest ${hasCredits && rawInput ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:scale-[1.02] active:scale-[0.98]' : 'bg-gray-200 dark:bg-gray-800 text-gray-400 cursor-not-allowed shadow-none'}`}
                 >
