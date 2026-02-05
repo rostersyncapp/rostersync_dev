@@ -642,7 +642,7 @@ export async function processRosterRawText(
     const model = genAI.getGenerativeModel(modelParams);
     const identificationInstruction = shouldSearch
       ? `1. Identification: Use 'googleSearch' to identify the team name (e.g. "Bay FC") by searching for the athletes in 'DATA'.
-         - ${isNocMode ? 'PRIMARY SOURCE: Use https://www.olympics.com/en/milano-cortina-2026/results/hubs/individuals/athletes?showAll=true to identify athletes.' : ''}
+         - ${isNocMode ? 'PRIMARY SOURCES: Use https://www.olympics.com/en/milano-cortina-2026/results/hubs/individuals/athletes?showAll=true and https://www.nbcolympics.com/athletes to identify athletes.' : ''}
          - Select 2-3 unique player names and search for: "roster {Player 1} {Player 2} {Player 3}".
          - Use the search results to find the specific professional team (NWSL, MiLB, etc.).
          - Cross-reference the identified team with the VALID TEAM LIST provided above.
