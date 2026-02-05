@@ -580,8 +580,11 @@ export async function processRosterRawText(
     - DO NOT return "Unknown Team" without attempting a player-based search (if search is enabled).
 
     2. ROSTER EXTRACTION (MANDATORY):
+    - CRITICAL: YOU MUST EXTRACT EVERY ATHLETE LISTED IN THE 'DATA' BLOCK BELOW.
+    - NO SKIPPING: Even if an athlete only has a name and no other data, YOU MUST extract them.
+    - DEFAULTS: If Jersey Number is missing, use "00". If NIL Status is missing, use "Incoming". If Position is missing, use "Athlete".
     - SOURCE DATA: You MUST extract the athletes from the literal 'DATA' provided in the user message, NOT from your search tool results.
-    - SEARCH VS EXTRACTION: The 'googleSearch' tool is ONLY for identifying the 'teamName'. Once identified, you MUST go back to the 'DATA' and extract every athlete listed.
+    - SEARCH VS EXTRACTION: The 'googleSearch' tool is ONLY for identifying the 'teamName' and 'abbreviation'. Once identified, YOU MUST IMMEDIATELY go back to the 'DATA' block and extract every athlete listed there.
     - DO NOT return an empty 'athletes' array if there are names listed in the input.
     - CLEANING INPUT: The input text may have artifacts like "NAME01" (name + jersey number). You MUST separate them -> Name: "NAME", Jersey: "01".
     - NORMALIZE: Convert all athlete names to UPPERCASE and strip accents.
