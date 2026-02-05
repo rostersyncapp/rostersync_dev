@@ -647,12 +647,10 @@ export async function processRosterRawText(
   const generationConfig: any = {
     temperature: 0.1, // Keep it precise
     maxOutputTokens: 8192, // Allow for large rosters + search logs
+    responseMimeType: "application/json",
+    responseSchema: schema,
   };
 
-  if (!shouldSearch) {
-    generationConfig.responseMimeType = "application/json";
-    generationConfig.responseSchema = schema;
-  }
   modelParams.generationConfig = generationConfig;
 
   // Enable tools if we need to search for branding OR for robust team identification
@@ -692,8 +690,20 @@ export async function processRosterRawText(
       `FINAL INSTRUCTIONS:\n` +
       `${teamHint}\n` +
       `${identificationInstruction}\n` +
-      `2. Extraction: CRITICAL - You MUST extract EVERY SINGLE athlete from the 'DATA' block into the JSON results. Do not return an empty athletes list.\n` +
-      `3. Return ONLY valid JSON. No conversational text.`;
+      `2. Extraction (MANDATORY): CRITICAL - You MUST extract EVERY SINGLE athlete from the 'DATA' block into the athletes array.
+         - NO SKIPPING: If a name is in DATA, it MUST be in the JSON results. 
+         - Use "00", "Athlete", or "1990-01-01" as defaults for missing metadata.
+         - THE DATA BLOCK IS YOUR ONLY AUTHORITATIVE SOURCE FOR NAMES.\n` +
+      (shouldSearch ? `3. Required JSON Structure Template:
+      {
+        "teamName": "Full Nation Name",
+        "abbreviation": "3-letter IOC Code",
+        "sport": "Sport - Gender",
+        "athletes": [
+          { "fullName": "NAME", "jerseyNumber": "00", "position": "Athlete", "organisationId": "IOC_CODE", "gender": "M/W", "birthDate": "YYYY-MM-DD", "placeOfBirth": "Hometown" }
+        ]
+      }\n` : '') +
+      `4. Return ONLY valid JSON. No conversational text.`;
 
     result = await model.generateContent(userPrompt);
   } catch (error: any) {
