@@ -508,11 +508,36 @@ export async function processRosterRawText(
 
   const isMajorLeague = league && FULLY_SEEDED_LEAGUES.includes(league);
 
+  // COST OPTIMIZATION: Smart Search Sniffer
+  // Check if we can identify the Nation and Sport from the raw text alone.
+  // If we can, we bypass the $0.01 Google Search tool fee.
+  let detectionHint = "";
+  let bypassSearchForNoc = false;
+
+  if (isNocMode) {
+    // Basic sniffer for the first 1000 chars
+    const sniffText = text.substring(0, 1000).toUpperCase();
+
+    // Check for common IOC Codes (USA, CAN, ITA, FRA, etc.)
+    const IOC_CODES = ['USA', 'CAN', 'ITA', 'FRA', 'GER', 'GBR', 'CHN', 'JPN', 'NOR', 'SWE', 'FIN', 'SUI', 'AUT', 'NED', 'AUS', 'KOR', 'KAZ', 'SLO', 'SVK', 'CZE', 'LAT', 'EST', 'POL', 'BRA', 'MEX', 'AIN'];
+    const detectedNoc = IOC_CODES.find(code => new RegExp(`\\b${code}\\b`).test(sniffText));
+
+    // Check for common Sport keywords
+    const SPORTS = ['ALPINE', 'HOCKEY', 'SKATTING', 'CURLING', 'BIATHLON', 'BOBSLEIGH', 'LUGE', 'SKELETON', 'SNOWBOARD', 'SKI JUMPING'];
+    const detectedSport = SPORTS.find(sport => sniffText.includes(sport));
+
+    if (detectedNoc && detectedSport) {
+      bypassSearchForNoc = true;
+      detectionHint = `SMART DETECTION: Identified ${detectedNoc} for ${detectedSport}. Skipping live search to save cost. Extract metadata based on this identity.`;
+      console.log(`[Gemini] Smart Search: Bypassing tool fee for ${detectedNoc} ${detectedSport}`);
+    }
+  }
+
   // SEARCH LOGIC: 
   // 1. Always enable search if the user wants branding (and it's not a major league where we have it).
   // 2. ALWAYS enable search for professional leagues (MiLB, NWSL, USL, etc.) to handle trades and expansion.
-  // 3. ALWAYS enable search for Olympic/NOC mode to leverage the official athlete hub.
-  const shouldSearch = isNocMode || findBranding || !!league;
+  // 3. Enable search for Olympic/NOC mode UNLESS the sniffer was 100% confident.
+  const shouldSearch = (isNocMode && !bypassSearchForNoc) || findBranding || !!league;
 
   // brandingDiscovery is separate - we only tell it to deep-dive for logos if findBranding is true
   const shouldSearchForBranding = findBranding && !isMajorLeague;
@@ -659,7 +684,9 @@ export async function processRosterRawText(
       const regex = new RegExp(`\\b${escaped}\\b`, 'i');
       return regex.test(text.substring(0, 1000)); // Check first 1000 chars
     });
-    const teamHint = detectedTeam ? `DETECTION HINT: I found "${detectedTeam}" in the header/text. This is extremely likely to be the team name. Use this name if the athletes match.` : '';
+    const teamHint = (detectedTeam || detectionHint)
+      ? `DETECTION HINT: I found context suggesting this is "${detectedTeam || detectionHint}". Use this if the athletes match.`
+      : '';
 
     const userPrompt = `DATA:\n${text}\n\n${context}\nTier: ${tier}. Mode: ${isNocMode ? 'NOC' : 'Standard'}.\n\n` +
       `FINAL INSTRUCTIONS:\n` +
