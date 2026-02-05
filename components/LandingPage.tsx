@@ -39,12 +39,12 @@ interface LandingPageProps {
 }
 
 const FAQS = [
-  { q: "Why upgrade from Free to Pro?", a: "The Pro tier unlocks 150 credits per month, Adobe Premiere CSV exports, and Iconik/CatDV live sync. Crucially, it also enables automatic team logo and color (HEX) discovery for your rosters." },
-  { q: "What does the Studio tier offer for teams?", a: "The Studio tier ($149) is built for collaboration, including 3 user seats and 500 monthly credits. It adds Ross Xpression and Vizrt CSV exports, all color formats (RGB, Pantone, CMYK), and white-label exports for clients." },
-  { q: "When should I choose the Network tier?", a: "Choose Network for high-volume operations requiring multi-language name variants (Spanish/Mandarin), IPA phonetic guides, custom accent color overrides, full API access, and enterprise XML formats like ODF." },
-  { q: "Can I manage multiple projects?", a: "Yes. The Pro tier and above include unlimited folders and nested projects to help you organize rosters across different productions or seasons." },
-  { q: "What is 'White-label Export'?", a: "Available in Studio and Network tiers, white-label exports remove all RosterSync branding from generated files, making them perfect for direct client delivery." },
-  { q: "Do you support Ross DataLinq and Vizrt Graphics?", a: "Yes. We offer direct CSV support in the Studio tier for Ross and Vizrt, while the Network tier adds native XML feed support for enterprise ticker and graphics systems." }
+  { q: "Why upgrade from Free to Pro?", a: "Upgrade to Pro when you need more than 2 rosters per month, want to export for Adobe Premiere, or require automatic team logo and HEX color discovery with phonetic pronunciation guides." },
+  { q: "What does the Studio tier offer for agencies?", a: "The Studio tier ($149) is designed for teams and creative agencies. It includes 3 user seats, white-label exports for your clients, and support for all color formats including RGB, Pantone, and CMYK." },
+  { q: "When should I choose the Network tier?", a: "Choose Network for national or international broadcasts. It adds support for Spanish and Mandarin name variants, enterprise XML formats (ODF/Chyron), API access, and IPA-grade phonetic guides." },
+  { q: "Can I manage multiple projects?", a: "Yes. Starting with the Pro tier, you get unlimited folders and nested projects to help you organize rosters across different leagues, seasons, or production clients." },
+  { q: "What hardware systems do you support?", a: "We support nearly every major broadcast system. Studio tier provides direct data for Ross Xpression and Vizrt via CSV, while Network adds native XML feeds for high-end ticker and graphics pipelines." },
+  { q: "What are 'White-label Exports'?", a: "Available in Studio and Network tiers, this feature removes all RosterSync branding from your exported files, ensuring a completely clean and professional delivery to your production hardware." }
 ];
 
 const FEATURES = [
@@ -62,12 +62,11 @@ const PRICING_MATRIX = [
   { feature: "Rosters/month", free: "~1-2", pro: "~10", studio: "~33", network: "~53" },
   { feature: "Export formats", free: "1", pro: "4", studio: "8", network: "12" },
   { feature: "Team members", free: "1", pro: "1", studio: "3", network: "5" },
-  { feature: "Phonetic guides", free: false, pro: "Simple", studio: "Simple", network: "Simple + IPA" },
-  { feature: "Multi-language", free: false, pro: false, studio: false, network: "ES + ZH" },
+  { feature: "Phonetic guides", free: false, pro: "✅ Simple", studio: "✅ Simple", network: "✅ Simple + IPA" },
+  { feature: "Multi-language", free: false, pro: false, studio: false, network: "✅ ES + ZH" },
   { feature: "Logo discovery", free: false, pro: true, studio: true, network: true },
   { feature: "Colors", free: false, pro: "HEX", studio: "All formats", network: "All formats" },
   { feature: "White-label exports", free: false, pro: false, studio: true, network: true },
-  { feature: "Custom accent color", free: false, pro: false, studio: false, network: true },
   { feature: "MAM live sync", free: false, pro: true, studio: true, network: true },
   { feature: "API access", free: false, pro: false, studio: false, network: true },
   { feature: "Support", free: "Community", pro: "Email", studio: "Email", network: "Email + Quarterly" },

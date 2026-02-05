@@ -44,8 +44,8 @@ export const PRICING_TIERS = [
     id: 'BASIC',
     price: '$0',
     monthlyCredits: 20,
-    description: 'For students, clubs, and freelancers.',
-    features: ['20 AI Credits / Month', 'CSV_FLAT Export Only', '1 Project Maximum', 'Basic Normalization', 'Community Support'],
+    description: 'For students and freelancers.',
+    features: ['20 Credits / Month', 'CSV_FLAT Only', '1 Project Max', 'No Branding/Colors', 'Community Support'],
     polarCheckoutUrl: '#'
   },
   {
@@ -53,8 +53,8 @@ export const PRICING_TIERS = [
     id: 'PRO',
     price: '$79',
     monthlyCredits: 150,
-    description: 'For freelance motion designers.',
-    features: ['150 AI Credits / Month', 'Premiere, Iconik & CatDV', 'Logo & Color Discovery', 'Simplified Phonetics', 'Email Support'],
+    description: 'For solo motion designers.',
+    features: ['150 Credits / Month', 'Logo & HEX Colors', 'Simplified Phonetics', 'Premiere & MAM Support', 'Unlimited Storage'],
     polarCheckoutUrl: 'https://polar.sh/rostersync/products/pro-tier'
   },
   {
@@ -62,8 +62,8 @@ export const PRICING_TIERS = [
     id: 'STUDIO',
     price: '$149',
     monthlyCredits: 500,
-    description: 'For RSNs and production teams.',
-    features: ['500 AI Credits / Month', 'Ross, Vizrt, Tagboard', '3 Team Members', 'All Color Formats (RGB/PMS)', 'White-label Exports'],
+    description: 'For RSNs and creative agencies.',
+    features: ['500 Credits / Month', '3 Team Seats', 'Ross & Vizrt CSV', 'RGB/PMS/CMYK Colors', 'White-label Exports'],
     polarCheckoutUrl: 'https://polar.sh/rostersync/products/studio-tier'
   },
   {
@@ -72,7 +72,7 @@ export const PRICING_TIERS = [
     price: '$249',
     monthlyCredits: 800,
     description: 'For national broadcasters.',
-    features: ['800 AI Credits / Month', 'Full XML Suite (Ross/Viz/ODF)', '5 Team Members', 'Multi-Language (ES/ZH)', 'IPA Phonetics + API Access'],
+    features: ['800 Credits / Month', '5 Team Seats', 'IPA Phonetics', 'Multi-Language (ES/ZH)', 'Enterprise XML + API'],
     polarCheckoutUrl: 'https://polar.sh/rostersync/products/network-tier'
   }
 ];
