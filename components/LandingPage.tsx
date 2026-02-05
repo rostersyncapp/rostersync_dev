@@ -76,9 +76,9 @@ const PRICING_MATRIX = [
 
 
 const MatrixCell: React.FC<{ value: any }> = ({ value }) => {
-  if (value === true) return <span className="text-[#5B5FFF] font-mono text-[10px] font-bold">[X]</span>;
-  if (value === false) return <span className="text-gray-400/30 dark:text-gray-700 font-mono text-[10px]">[ ]</span>;
-  return <span className="text-[10px] font-bold text-gray-600 dark:text-gray-400 font-mono">{value}</span>;
+  if (value === true) return <span className="text-[#5B5FFF] dark:text-emerald-400 font-mono text-xs font-bold">[X]</span>;
+  if (value === false) return <span className="text-gray-400/30 dark:text-gray-700 font-mono text-xs">[ ]</span>;
+  return <span className="text-xs font-bold text-gray-700 dark:text-amber-400/90 font-mono">{value}</span>;
 };
 
 const BrandLogo: React.FC<{ siteConfig: SiteConfig; size?: 'sm' | 'md' }> = ({ siteConfig, size = 'md' }) => {
@@ -341,17 +341,17 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
                       <th className="p-4 text-center text-[9px] font-black uppercase tracking-widest text-gray-400 border-b border-gray-100 dark:border-gray-800/50">Network</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-50/50 dark:divide-gray-800/20">
+                  <tbody className="divide-y divide-gray-100 dark:divide-gray-800/10">
                     {PRICING_MATRIX.map((row, i) => (
-                      <tr key={i} className="group hover:bg-gray-50/50 dark:hover:bg-gray-800/10 transition-colors">
-                        <td className="p-4 text-[10px] font-medium text-gray-600 dark:text-gray-400 border-r border-gray-100/50 dark:border-gray-800/30 whitespace-nowrap">
-                          <span className="text-[#5B5FFF] opacity-0 group-hover:opacity-100 mr-2">→</span>
+                      <tr key={i} className={`group transition-colors ${i % 2 === 0 ? 'bg-transparent' : 'bg-gray-50/20 dark:bg-gray-900/10'} hover:bg-gray-50/50 dark:hover:bg-gray-800/20`}>
+                        <td className="p-4 text-xs font-bold text-gray-700 dark:text-gray-200 border-r border-gray-100/50 dark:border-gray-800/30 whitespace-nowrap">
+                          <span className="text-[#5B5FFF] dark:text-emerald-500 opacity-0 group-hover:opacity-100 mr-2">→</span>
                           {row.feature}
                         </td>
-                        <td className="p-4 text-center whitespace-nowrap"><MatrixCell value={row.free} /></td>
-                        <td className="p-4 text-center bg-[#5B5FFF]/5 border-x border-[#5B5FFF]/10 whitespace-nowrap"><MatrixCell value={row.pro} /></td>
-                        <td className="p-4 text-center whitespace-nowrap"><MatrixCell value={row.studio} /></td>
-                        <td className="p-4 text-center whitespace-nowrap"><MatrixCell value={row.network} /></td>
+                        <td className="p-4 text-center"><MatrixCell value={row.free} /></td>
+                        <td className="p-4 text-center bg-[#5B5FFF]/5 dark:bg-emerald-500/5 border-x border-gray-100/50 dark:border-gray-800/50"><MatrixCell value={row.pro} /></td>
+                        <td className="p-4 text-center"><MatrixCell value={row.studio} /></td>
+                        <td className="p-4 text-center"><MatrixCell value={row.network} /></td>
                       </tr>
                     ))}
                   </tbody>
