@@ -195,7 +195,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
             <span className="bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-purple-600 text-transparent bg-clip-text inline-block py-1">Simplified for Production.</span>
           </h1>
           <p className="text-lg md:text-xl text-gray-500 dark:text-gray-400 max-w-2xl mx-auto font-medium leading-relaxed">
-            Middleware transforming messy athlete data into production-ready metadata for MAM, DAM, and Broadcast systems.
+            The high-performance middleware transforming messy rosters into production-ready metadata for Broadcast, MAM, and DAM systems.
           </p>
           <div className="pt-6 flex justify-center relative z-50">
             <button onClick={() => setShowDemoModal(true)} className="px-6 py-3.5 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-300 font-bold text-base hover:bg-gray-50 dark:hover:bg-gray-800 transition-all">
