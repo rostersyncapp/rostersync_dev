@@ -72,61 +72,6 @@ const PRICING_MATRIX = [
   { feature: "Support", free: "Community", pro: "Email", studio: "Email", network: "Email + Quarterly" },
 ];
 
-const SUPPORTED_LEAGUES = [
-  {
-    sport: "Soccer",
-    color: "text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 border-emerald-100 dark:border-emerald-800/50",
-    leagues: [
-      { name: "MLS", logo: "https://upload.wikimedia.org/wikipedia/commons/7/76/MLS_crest_logo_RGB_gradient.svg" },
-      { name: "NWSL", logo: "https://upload.wikimedia.org/wikipedia/en/3/3d/NWSL_logo.svg" },
-      { name: "Premier League", logo: "https://upload.wikimedia.org/wikipedia/commons/2/2f/Premier_League.svg" },
-      { name: "La Liga", logo: "https://upload.wikimedia.org/wikipedia/commons/0/0f/LaLiga_logo_2023.svg" },
-      { name: "Bundesliga", logo: "https://upload.wikimedia.org/wikipedia/en/d/df/Bundesliga_logo_%282017%29.svg" },
-      { name: "Serie A", logo: "https://upload.wikimedia.org/wikipedia/commons/e/e9/Serie_A_logo_2022.svg" },
-      { name: "Ligue 1", logo: "https://upload.wikimedia.org/wikipedia/commons/a/af/Ligue1_logo_2024.svg" },
-      { name: "Liga MX", logo: "https://upload.wikimedia.org/wikipedia/commons/4/4c/Liga_MX_logo.svg" },
-      { name: "Eredivisie", logo: "https://upload.wikimedia.org/wikipedia/commons/4/4c/Eredivisie_nieuw_logo_2017-.svg" },
-      { name: "USL", logo: "https://upload.wikimedia.org/wikipedia/en/7/7d/USL_Championship_logo.svg" }
-    ]
-  },
-  {
-    sport: "Basketball",
-    color: "text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/30 border-orange-100 dark:border-orange-800/50",
-    leagues: [
-      { name: "NBA", logo: "https://upload.wikimedia.org/wikipedia/en/0/03/National_Basketball_Association_logo.svg" },
-      { name: "WNBA", logo: "https://upload.wikimedia.org/wikipedia/en/b/b3/WNBA_logo.svg" }
-    ]
-  },
-  {
-    sport: "Baseball",
-    color: "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 border-blue-100 dark:border-blue-800/50",
-    leagues: [
-      { name: "MLB", logo: "https://upload.wikimedia.org/wikipedia/en/a/a6/Major_League_Baseball_logo.svg" },
-      { name: "MiLB", logo: "https://upload.wikimedia.org/wikipedia/en/2/2b/Minor_League_Baseball_logo.svg" }
-    ]
-  },
-  {
-    sport: "Football",
-    color: "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30 border-red-100 dark:border-red-800/50",
-    leagues: [
-      { name: "NFL", logo: "https://upload.wikimedia.org/wikipedia/en/a/a2/National_Football_League_logo.svg" }
-    ]
-  },
-  {
-    sport: "Hockey",
-    color: "text-cyan-600 dark:text-cyan-400 bg-cyan-50 dark:bg-cyan-900/30 border-cyan-100 dark:border-cyan-800/50",
-    leagues: [
-      { name: "NHL", logo: "https://upload.wikimedia.org/wikipedia/en/3/3a/05_NHL_Shield.svg" }
-    ]
-  },
-  {
-    sport: "Cricket",
-    color: "text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/30 border-purple-100 dark:border-purple-800/50",
-    leagues: [
-      { name: "IPL", logo: "https://upload.wikimedia.org/wikipedia/en/8/84/Indian_Premier_League_Official_Logo.svg" }
-    ]
-  },
-];
 
 const MatrixCell: React.FC<{ value: any }> = ({ value }) => {
   if (value === true) return <CheckCircle2 size={16} className="text-emerald-500 mx-auto" />;
@@ -360,80 +305,36 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
       </section>
 
       <section className="pb-24 px-6 bg-white dark:bg-gray-900 border-t border-gray-50 dark:border-gray-800/50 pt-24">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
-            {/* Feature Matrix Column */}
-            <div className="space-y-8">
-              <div className="text-left">
-                <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-[#5B5FFF] mb-2">Capabilities</h4>
-                <h3 className="text-2xl font-bold text-gray-900 dark:text-white">Feature Breakdown</h3>
-                <p className="text-[11px] text-gray-500 font-medium mt-1">Detailed comparison of tier-specific entitlements.</p>
-              </div>
-              <div className="overflow-x-auto rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm bg-white dark:bg-gray-800/50">
-                <table className="w-full border-separate border-spacing-0">
-                  <thead>
-                    <tr className="bg-gray-50/50 dark:bg-gray-800/50">
-                      <th className="p-3 text-left text-[9px] font-black uppercase tracking-widest text-gray-400 border-b border-gray-100 dark:border-gray-800">Feature</th>
-                      <th className="p-3 text-center text-[9px] font-black uppercase tracking-widest text-gray-400 border-b border-gray-100 dark:border-gray-800">Free</th>
-                      <th className="p-3 text-center text-[9px] font-black uppercase tracking-widest text-[#5B5FFF] border-b border-gray-100 dark:border-gray-800 bg-[#5B5FFF]/5">Pro</th>
-                      <th className="p-3 text-center text-[9px] font-black uppercase tracking-widest text-gray-400 border-b border-gray-100 dark:border-gray-800">Studio</th>
-                      <th className="p-3 text-center text-[9px] font-black uppercase tracking-widest text-gray-400 border-b border-gray-100 dark:border-gray-800">Net</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-50 dark:divide-gray-800/50">
-                    {PRICING_MATRIX.map((row, i) => (
-                      <tr key={i} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/30 transition-colors">
-                        <td className="p-3 text-[10px] font-bold text-gray-700 dark:text-gray-300">{row.feature}</td>
-                        <td className="p-3 text-center"><MatrixCell value={row.free} /></td>
-                        <td className="p-3 text-center bg-[#5B5FFF]/5"><MatrixCell value={row.pro} /></td>
-                        <td className="p-3 text-center"><MatrixCell value={row.studio} /></td>
-                        <td className="p-3 text-center"><MatrixCell value={row.network} /></td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+        <div className="max-w-4xl mx-auto">
+          <div className="space-y-8">
+            <div className="text-center">
+              <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-[#5B5FFF] mb-2">Capabilities</h4>
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-white">Feature Breakdown</h3>
+              <p className="text-[11px] text-gray-500 font-medium mt-1">Detailed comparison of tier-specific entitlements.</p>
             </div>
-
-            {/* Supported Leagues Column */}
-            <div className="space-y-8">
-              <div className="text-left">
-                <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-500 mb-2">Coverage</h4>
-                <h3 className="text-2xl font-bold text-gray-900 dark:text-white">Supported Leagues</h3>
-                <p className="text-[11px] text-gray-500 font-medium mt-1">Direct API & Database verification support.</p>
-              </div>
-              <div className="overflow-x-auto rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm bg-white dark:bg-gray-800/50">
-                <table className="w-full border-separate border-spacing-0">
-                  <thead>
-                    <tr className="bg-gray-50/50 dark:bg-gray-800/50">
-                      <th className="p-3 text-left text-[9px] font-black uppercase tracking-widest text-gray-400 border-b border-gray-100 dark:border-gray-800 w-1/4">Sport</th>
-                      <th className="p-3 text-left text-[9px] font-black uppercase tracking-widest text-gray-400 border-b border-gray-100 dark:border-gray-800">Verified Coverage</th>
+            <div className="overflow-x-auto rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm bg-white dark:bg-gray-800/50">
+              <table className="w-full border-separate border-spacing-0">
+                <thead>
+                  <tr className="bg-gray-50/50 dark:bg-gray-800/50">
+                    <th className="p-3 text-left text-[9px] font-black uppercase tracking-widest text-gray-400 border-b border-gray-100 dark:border-gray-800">Feature</th>
+                    <th className="p-3 text-center text-[9px] font-black uppercase tracking-widest text-gray-400 border-b border-gray-100 dark:border-gray-800">Free</th>
+                    <th className="p-3 text-center text-[9px] font-black uppercase tracking-widest text-[#5B5FFF] border-b border-gray-100 dark:border-gray-800 bg-[#5B5FFF]/5">Pro</th>
+                    <th className="p-3 text-center text-[9px] font-black uppercase tracking-widest text-gray-400 border-b border-gray-100 dark:border-gray-800">Studio</th>
+                    <th className="p-3 text-center text-[9px] font-black uppercase tracking-widest text-gray-400 border-b border-gray-100 dark:border-gray-800">Net</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-50 dark:divide-gray-800/50">
+                  {PRICING_MATRIX.map((row, i) => (
+                    <tr key={i} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/30 transition-colors">
+                      <td className="p-3 text-[10px] font-bold text-gray-700 dark:text-gray-300">{row.feature}</td>
+                      <td className="p-3 text-center"><MatrixCell value={row.free} /></td>
+                      <td className="p-3 text-center bg-[#5B5FFF]/5"><MatrixCell value={row.pro} /></td>
+                      <td className="p-3 text-center"><MatrixCell value={row.studio} /></td>
+                      <td className="p-3 text-center"><MatrixCell value={row.network} /></td>
                     </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-50 dark:divide-gray-800/50">
-                    {SUPPORTED_LEAGUES.map((group, i) => (
-                      <tr key={i} className="hover:bg-gray-50/30 dark:hover:bg-gray-800/20 transition-colors">
-                        <td className="p-3 text-[10px] font-black uppercase tracking-widest text-gray-900 dark:text-white border-r border-gray-50/50 dark:border-gray-800/50">
-                          {group.sport}
-                        </td>
-                        <td className="p-3">
-                          <div className="flex flex-wrap gap-2">
-                            {group.leagues.map((league, j) => (
-                              <div key={j} className={cn("flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[9px] font-bold border uppercase tracking-tighter bg-white dark:bg-gray-800/50 shadow-sm", group.color)}>
-                                <img src={league.logo} alt={league.name} className="w-3 h-3 object-contain filter dark:brightness-110" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-                                <span>{league.name}</span>
-                              </div>
-                            ))}
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-              <p className="text-[10px] text-gray-400 font-medium italic text-right px-2">
-                AI Scout mode handles any sport outside these primary tiers.
-              </p>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
