@@ -309,7 +309,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
       </section>
 
       <section className="pb-24 px-6 bg-white dark:bg-gray-900 border-t border-gray-50 dark:border-gray-800/50 pt-24">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-6xl mx-auto">
           <div className="space-y-8">
             <div className="text-center">
               <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-[#5B5FFF] mb-2">Capabilities</h4>
@@ -348,10 +348,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
                           <span className="text-[#5B5FFF] opacity-0 group-hover:opacity-100 mr-2">→</span>
                           {row.feature}
                         </td>
-                        <td className="p-4 text-center"><MatrixCell value={row.free} /></td>
-                        <td className="p-4 text-center bg-[#5B5FFF]/5 border-x border-[#5B5FFF]/10"><MatrixCell value={row.pro} /></td>
-                        <td className="p-4 text-center"><MatrixCell value={row.studio} /></td>
-                        <td className="p-4 text-center"><MatrixCell value={row.network} /></td>
+                        <td className="p-4 text-center whitespace-nowrap"><MatrixCell value={row.free} /></td>
+                        <td className="p-4 text-center bg-[#5B5FFF]/5 border-x border-[#5B5FFF]/10 whitespace-nowrap"><MatrixCell value={row.pro} /></td>
+                        <td className="p-4 text-center whitespace-nowrap"><MatrixCell value={row.studio} /></td>
+                        <td className="p-4 text-center whitespace-nowrap"><MatrixCell value={row.network} /></td>
                       </tr>
                     ))}
                   </tbody>
