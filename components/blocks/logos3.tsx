@@ -42,7 +42,7 @@ const DEFAULT_LOGOS: Logo[] = [
 ];
 
 const Logos3 = ({
-    heading = "Official League Support",
+    heading = "Supported Leagues",
     logos = DEFAULT_LOGOS,
     className,
 }: Logos3Props) => {
@@ -55,7 +55,7 @@ const Logos3 = ({
                         {heading}
                     </h3>
                     <p className="text-gray-500 font-medium mt-4 max-w-2xl text-sm sm:text-base">
-                        Direct API and database verification for the world's premier sports organizations.
+                        Access verified rosters and data from the world&apos;s leading sports organizations.
                     </p>
                 </div>
             </div>
