@@ -70,4 +70,4 @@ export interface Profile {
   creditsUsed: number;
 }
 
-export type ExportFormat = 'CSV_FLAT' | 'ICONIK_JSON' | 'PREMIERE_CSV' | 'CATDV_JSON' | 'ROSS_XML' | 'ROSS_XP_CSV' | 'VIZRT_JSON' | 'VIZRT_DATACENTER_CSV' | 'VIZRT_XML' | 'CHYRON_CSV' | 'NEWBLUE_CSV' | 'TAGBOARD_CSV' | 'ODF_XML';
+export type ExportFormat = 'CSV_FLAT' | 'ICONIK_JSON' | 'AFTER_EFFECTS_CSV' | 'CATDV_JSON' | 'ROSS_XML' | 'ROSS_XP_CSV' | 'VIZRT_JSON' | 'VIZRT_DATACENTER_CSV' | 'VIZRT_XML' | 'CHYRON_CSV' | 'NEWBLUE_CSV' | 'TAGBOARD_CSV' | 'ODF_XML';

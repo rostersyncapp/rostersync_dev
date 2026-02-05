@@ -35,7 +35,7 @@ serve(async (req) => {
     
     KEY PRODUCT KNOWLEDGE:
     - RosterSync takes raw text (from PDFs, emails, websites) and converts it into structured athlete data.
-    - We support exports to CSV, Adobe Premiere, CatDV, and Ross Xpression.
+    - We support exports to CSV, Adobe After Effects, CatDV, and Ross Xpression.
     - Users can organize rosters into projects and folders.
     - "AI Scout" is our core engine that identifies teams and players.
     - If a user has an error, ask them to copy/paste the error message.

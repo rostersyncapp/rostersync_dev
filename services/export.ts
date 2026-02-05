@@ -77,9 +77,9 @@ export function generateExport(
         mimeType: 'application/json'
       };
 
-    case 'PREMIERE_CSV':
-      const premiereHeaders = ["Name", "DisplayName", "Jersey", "Position", "Phonetic", "Language"];
-      const premiereRows = athletes.map(a => [
+    case 'AFTER_EFFECTS_CSV':
+      const aeHeaders = ["Name", "DisplayName", "Jersey", "Position", "Phonetic", "Language"];
+      const aeRows = athletes.map(a => [
         a.fullName,
         a.displayNameSafe,
         a.jerseyNumber,
@@ -88,8 +88,8 @@ export function generateExport(
         language
       ].join(","));
       return {
-        content: [premiereHeaders.join(","), ...premiereRows].join("\n"),
-        filename: `${safeTeam}_premiere_${langSuffix}_${timestamp}.csv`,
+        content: [aeHeaders.join(","), ...aeRows].join("\n"),
+        filename: `${safeTeam}_after_effects_${langSuffix}_${timestamp}.csv`,
         mimeType: 'text/csv'
       };
 

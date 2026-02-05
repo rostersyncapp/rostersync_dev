@@ -64,7 +64,7 @@ const EXPORT_FORMATS = [
   { id: 'ross', name: 'Ross Xpression', ext: 'XML', color: 'text-blue-500' },
   { id: 'vizrt', name: 'Vizrt DataCenter', ext: 'CSV', color: 'text-purple-500' },
   { id: 'chyron', name: 'Chyron Prime', ext: 'CSV', color: 'text-orange-500' },
-  { id: 'premiere', name: 'Premiere Pro', ext: 'CSV', color: 'text-blue-400' },
+  { id: 'premiere', name: 'After Effects', ext: 'CSV', color: 'text-blue-400' },
   { id: 'iconik', name: 'Iconik', ext: 'JSON', color: 'text-amber-500' },
   { id: 'csv', name: 'Standard CSV', ext: 'CSV', color: 'text-green-500' },
   { id: 'catdv', name: 'CatDV', ext: 'CSV', color: 'text-red-500' }
