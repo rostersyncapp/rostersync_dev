@@ -73,13 +73,36 @@ const PRICING_MATRIX = [
 ];
 
 const SUPPORTED_LEAGUES = [
-  { sport: "Soccer", leagues: ["MLS", "NWSL", "Premier League", "La Liga", "Bundesliga", "Serie A", "Ligue 1", "Liga MX", "Eredivisie", "USL Championship"] },
-  { sport: "Basketball", leagues: ["NBA", "WNBA", "EuroLeague"] },
-  { sport: "Baseball", leagues: ["MLB", "Triple-A", "Double-A", "High-A", "Single-A"] },
-  { sport: "Football", leagues: ["NFL"] },
-  { sport: "Hockey", leagues: ["NHL"] },
-  { sport: "Motorsports", leagues: ["Formula 1"] },
-  { sport: "Cricket", leagues: ["IPL"] },
+  {
+    sport: "Soccer",
+    color: "text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 border-emerald-100 dark:border-emerald-800/50",
+    leagues: ["MLS", "NWSL", "Premier League", "La Liga", "Bundesliga", "Serie A", "Ligue 1", "Liga MX", "Eredivisie", "USL Championship"]
+  },
+  {
+    sport: "Basketball",
+    color: "text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/30 border-orange-100 dark:border-orange-800/50",
+    leagues: ["NBA", "WNBA"]
+  },
+  {
+    sport: "Baseball",
+    color: "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 border-blue-100 dark:border-blue-800/50",
+    leagues: ["MLB", "Triple-A"]
+  },
+  {
+    sport: "Football",
+    color: "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30 border-red-100 dark:border-red-800/50",
+    leagues: ["NFL"]
+  },
+  {
+    sport: "Hockey",
+    color: "text-cyan-600 dark:text-cyan-400 bg-cyan-50 dark:bg-cyan-900/30 border-cyan-100 dark:border-cyan-800/50",
+    leagues: ["NHL"]
+  },
+  {
+    sport: "Cricket",
+    color: "text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/30 border-purple-100 dark:border-purple-800/50",
+    leagues: ["IPL"]
+  },
 ];
 
 const MatrixCell: React.FC<{ value: any }> = ({ value }) => {
@@ -371,7 +394,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
                     <td className="p-4">
                       <div className="flex flex-wrap gap-2">
                         {group.leagues.map((league, j) => (
-                          <span key={j} className="px-2.5 py-0.5 bg-gray-50 dark:bg-gray-800/50 rounded-md text-[10px] font-bold text-gray-500 dark:text-gray-400 border border-gray-100 dark:border-gray-700/50 uppercase tracking-tighter">
+                          <span key={j} className={cn("px-2.5 py-0.5 rounded-md text-[10px] font-bold border uppercase tracking-tighter transition-all duration-300 hover:scale-105", group.color)}>
                             {league}
                           </span>
                         ))}
