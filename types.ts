@@ -29,6 +29,13 @@ export interface Athlete {
   bioStats?: string;
   socialHandle?: string;
   countryCode?: string; // IOC Country Code (e.g., USA, FRA)
+  organisationId?: string; // FK -> Nations.id (IOC Code)
+  firstName?: string;
+  lastName?: string;
+  gender?: 'M' | 'W';
+  birthDate?: string;
+  heightCm?: number;
+  weightKg?: number;
   event?: string; // Specific Olympic Event
   metadata?: Record<string, any>;
 }

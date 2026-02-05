@@ -1,5 +1,6 @@
 
 import { Athlete, ExportFormat, SubscriptionTier } from "../types.ts";
+import { convertToODF } from "./olympics.ts";
 
 export function generateExport(
   athletes: Athlete[],
@@ -285,33 +286,10 @@ export function generateExport(
       };
 
     case 'ODF_XML':
-      // Simplified Olympic Data Feed (ODF) compatible XML
-      let odf = `<?xml version="1.0" encoding="UTF-8"?>\n<ODF version="1.0">\n  <Competition Code="OG${timestamp.split('-')[0]}">\n`;
-      const groupedByEvent = athletes.reduce((acc: any, a) => {
-        const key = a.event || "General";
-        if (!acc[key]) acc[key] = [];
-        acc[key].push(a);
-        return acc;
-      }, {});
-
-      Object.entries(groupedByEvent).forEach(([eventName, group]: [string, any]) => {
-        const safeEvent = eventName.replace(/\s+/g, '_').toUpperCase();
-        odf += `    <Discipline Code="${safeEvent.substring(0, 4)}">\n`;
-        odf += `      <Event Name="${eventName}">\n`;
-        odf += `        <Entries>\n`;
-        group.forEach((a: Athlete) => {
-          odf += `          <Athlete Bib="${a.jerseyNumber}" Name="${a.displayNameSafe}" NOC="${a.countryCode || ''}" Position="${a.position.toUpperCase()}">\n`;
-          odf += `            <Metadata Phonetic="${a.phoneticSimplified || ''}" Bio="${a.bioStats || ''}" />\n`;
-          odf += `          </Athlete>\n`;
-        });
-        odf += `        </Entries>\n`;
-        odf += `      </Event>\n`;
-        odf += `    </Discipline>\n`;
-      });
-      odf += `  </Competition>\n</ODF>`;
+      const odfContent = convertToODF(athletes);
       return {
-        content: odf,
-        filename: `${safeTeam}_odf_${langSuffix}_${timestamp}.xml`,
+        content: odfContent,
+        filename: `${safeTeam}_odf_2026_${langSuffix}_${timestamp}.xml`,
         mimeType: 'application/xml'
       };
 

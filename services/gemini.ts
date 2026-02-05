@@ -389,6 +389,13 @@ function getSchemaForTier(tier: SubscriptionTier, isNocMode: boolean, findBrandi
 
   if (isNocMode) {
     baseAthleteProperties.countryCode = { type: SchemaType.STRING, description: "3-letter IOC Country Code (e.g. JAM, USA)." };
+    baseAthleteProperties.organisationId = { type: SchemaType.STRING, description: "IOC Country Code. Same as countryCode." };
+    baseAthleteProperties.firstName = { type: SchemaType.STRING };
+    baseAthleteProperties.lastName = { type: SchemaType.STRING, description: "Athlete's Family Name." };
+    baseAthleteProperties.gender = { type: SchemaType.STRING, description: "'M' or 'W'." };
+    baseAthleteProperties.birthDate = { type: SchemaType.STRING, description: "ISO Date format (YYYY-MM-DD)." };
+    baseAthleteProperties.heightCm = { type: SchemaType.NUMBER };
+    baseAthleteProperties.weightKg = { type: SchemaType.NUMBER };
     baseAthleteProperties.event = { type: SchemaType.STRING, description: "Specific event (e.g. 100m Butterfly)." };
   }
 
@@ -581,6 +588,10 @@ export async function processRosterRawText(
       * Use 'phoneticSimplified' for a readable, capitalized-stress guide.
       * USE 'phoneticIPA' ONLY IF REQUESTED (Network Tier). Use standard International Phonetic Alphabet symbols.
     - SPORT INFERENCE: If the sport is not explicitly named, INFER it from the positions.
+    - ODF COMPLIANCE (isNocMode):
+      * NORMALIZE: Use 3-letter IOC codes for Nations (organisationId) and Sports (position code).
+      * NAMES: Extract 'firstName' and 'lastName' (Proper Case).
+      * METADATA: BirthDate MUST be YYYY-MM-DD. heightCm and weightKg MUST be integers. Gender MUST be 'M' or 'W'.
 
     3. BRANDING & METADATA:
     - ${brandingInstruction}
