@@ -312,10 +312,10 @@ const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
   const usagePercent = Math.min(100, Math.round((profile.creditsUsed / usageLimit) * 100));
 
   return (
-    <div className="max-w-7xl mx-auto pb-24">
-      <div className="mb-10">
-        <h1 className="text-4xl font-extrabold tracking-tight mb-3 text-gray-900 dark:text-white">Settings</h1>
-        <p className="text-base text-gray-500 dark:text-gray-400 font-medium">Manage your organization's metadata and preferences.</p>
+    <div className="max-w-7xl mx-auto">
+      <div className="mb-6">
+        <h1 className="text-3xl font-extrabold tracking-tight mb-1 text-gray-900 dark:text-white">Settings</h1>
+        <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Manage your organization's metadata and preferences.</p>
       </div>
 
       <div className="flex flex-col md:flex-row gap-10">
@@ -477,23 +477,53 @@ const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
           )}
 
           {activeTab === 'roi' && (
-            <div className="space-y-12">
-              {/* Hero Savings Card */}
-              <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 p-8 rounded-2xl shadow-lg">
-                <div className="text-emerald-100 text-sm font-bold uppercase tracking-widest mb-2">
-                  Total Cost Savings
-                </div>
-                <div className="text-6xl font-black text-white mb-4">
-                  ${netSavings.toFixed(2)}
-                </div>
-                <div className="flex items-center gap-6 text-emerald-100">
-                  <div className="flex items-center gap-2">
-                    <TrendingUp size={18} />
-                    <span className="text-sm font-bold">vs ${(totalAthletes * 4 / 60 * 45).toFixed(2)} manual cost</span>
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Hero Savings Card */}
+                <div className="lg:col-span-2 bg-gradient-to-br from-emerald-500 to-emerald-600 p-6 rounded-2xl shadow-lg border border-emerald-400/20">
+                  <div className="text-emerald-100 text-[10px] font-black uppercase tracking-widest mb-1">
+                    Total Cost Savings
                   </div>
-                  <div className="h-4 w-px bg-emerald-400"></div>
-                  <div className="text-sm font-bold">
-                    {totalAthletes > 0 ? (((netSavings / (totalAthletes * 4 / 60 * 45)) * 100).toFixed(0)) : '0'}% reduction
+                  <div className="text-4xl font-black text-white mb-3">
+                    ${netSavings.toFixed(2)}
+                  </div>
+                  <div className="flex items-center gap-4 text-emerald-100">
+                    <div className="flex items-center gap-1.5">
+                      <TrendingUp size={14} />
+                      <span className="text-xs font-bold">vs ${(totalAthletes * 4 / 60 * 45).toFixed(2)} manual</span>
+                    </div>
+                    <div className="h-3 w-px bg-emerald-400/50"></div>
+                    <div className="text-xs font-bold">
+                      {totalAthletes > 0 ? (((netSavings / (totalAthletes * 4 / 60 * 45)) * 100).toFixed(0)) : '0'}% improved
+                    </div>
+                  </div>
+                </div>
+
+                {/* Compact Optimization Insights */}
+                <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-blue-100 dark:border-blue-900/30 flex flex-col justify-center">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-8 h-8 rounded-lg bg-blue-500 flex items-center justify-center shrink-0">
+                      <Lightbulb size={16} className="text-white" />
+                    </div>
+                    <h3 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-tight">
+                      Insights
+                    </h3>
+                  </div>
+                  <div className="space-y-2">
+                    {usagePercent > 80 && (
+                      <div className="flex items-start gap-2 text-[11px]">
+                        <AlertCircle size={12} className="text-amber-500 mt-0.5 shrink-0" />
+                        <span className="text-gray-600 dark:text-gray-400 leading-tight">High usage ({usagePercent}%). Upgrade soon.</span>
+                      </div>
+                    )}
+                    <div className="flex items-start gap-2 text-[11px]">
+                      <TrendingUp size={12} className="text-blue-500 mt-0.5 shrink-0" />
+                      <span className="text-gray-600 dark:text-gray-400 leading-tight">${(netSavings / Math.max(1, totalRosters)).toFixed(2)} saved per roster.</span>
+                    </div>
+                    <div className="flex items-start gap-2 text-[11px]">
+                      <CheckCircle2 size={12} className="text-emerald-500 mt-0.5 shrink-0" />
+                      <span className="text-gray-600 dark:text-gray-400 leading-tight">Processing is now 100% automated.</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -542,8 +572,8 @@ const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
               </div>
 
               {/* Enhanced Comparison Chart */}
-              <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-8 shadow-sm">
-                <h3 className="text-xl font-extrabold mb-6 text-gray-900 dark:text-white">
+              <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-6 shadow-sm">
+                <h3 className="text-lg font-extrabold mb-4 text-gray-900 dark:text-white">
                   Cost Breakdown
                 </h3>
 
@@ -616,56 +646,7 @@ const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
                   </div>
                 </div>
               </div>
-
-              {/* Optimization Insights */}
-              <div className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/10 dark:to-purple-900/10 rounded-2xl border border-blue-200 dark:border-blue-800 p-8">
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-blue-500 flex items-center justify-center shrink-0">
-                    <Lightbulb size={24} className="text-white" />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-lg font-black text-gray-900 dark:text-white mb-3">
-                      Optimization Insights
-                    </h3>
-                    <div className="space-y-2">
-                      {usagePercent > 80 && (
-                        <div className="flex items-start gap-2 text-sm">
-                          <AlertCircle size={16} className="text-amber-500 mt-0.5 shrink-0" />
-                          <span className="text-gray-700 dark:text-gray-300">
-                            You're using {usagePercent}% of your credits. Consider upgrading to avoid hitting limits.
-                          </span>
-                        </div>
-                      )}
-                      {totalRosters > 0 && totalAthletes / totalRosters < 20 && (
-                        <div className="flex items-start gap-2 text-sm">
-                          <TrendingUp size={16} className="text-blue-500 mt-0.5 shrink-0" />
-                          <span className="text-gray-700 dark:text-gray-300">
-                            Avg {(totalAthletes / totalRosters).toFixed(0)} athletes/roster. Larger rosters maximize your ROI.
-                          </span>
-                        </div>
-                      )}
-                      {totalRosters > 0 && (
-                        <div className="flex items-start gap-2 text-sm">
-                          <CheckCircle2 size={16} className="text-emerald-500 mt-0.5 shrink-0" />
-                          <span className="text-gray-700 dark:text-gray-300">
-                            You're saving ${(netSavings / totalRosters).toFixed(2)} per roster on average.
-                          </span>
-                        </div>
-                      )}
-                      {totalRosters === 0 && (
-                        <div className="flex items-start gap-2 text-sm">
-                          <Info size={16} className="text-blue-500 mt-0.5 shrink-0" />
-                          <span className="text-gray-700 dark:text-gray-300">
-                            Process your first roster to see personalized ROI insights and savings calculations.
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
             </div>
-
           )}
 
           {activeTab === 'api' && (
