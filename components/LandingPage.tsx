@@ -354,21 +354,33 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
             <h3 className="text-xl font-bold text-gray-900 dark:text-white">Supported Leagues</h3>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {SUPPORTED_LEAGUES.map((group, i) => (
-              <div key={i} className="p-6 rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-800/50 shadow-sm hover:shadow-md transition-shadow">
-                <h5 className="text-[10px] font-black uppercase tracking-widest text-[#5B5FFF] mb-4 border-l-2 border-[#5B5FFF] pl-3">
-                  {group.sport}
-                </h5>
-                <div className="flex flex-wrap gap-2">
-                  {group.leagues.map((league, j) => (
-                    <span key={j} className="px-3 py-1 bg-gray-50 dark:bg-gray-800 rounded-full text-[11px] font-bold text-gray-600 dark:text-gray-400 border border-gray-100 dark:border-gray-700">
-                      {league}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            ))}
+          <div className="overflow-x-auto">
+            <table className="w-full border-separate border-spacing-0 overflow-hidden rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm bg-white dark:bg-gray-800/50">
+              <thead>
+                <tr className="bg-gray-50/50 dark:bg-gray-800/50">
+                  <th className="p-4 text-left text-[10px] font-black uppercase tracking-widest text-[#5B5FFF] border-b border-gray-100 dark:border-gray-800 w-1/4">Sport</th>
+                  <th className="p-4 text-left text-[10px] font-black uppercase tracking-widest text-gray-400 border-b border-gray-100 dark:border-gray-800">Supported Leagues</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-50 dark:divide-gray-800/50">
+                {SUPPORTED_LEAGUES.map((group, i) => (
+                  <tr key={i} className="hover:bg-gray-50/30 dark:hover:bg-gray-800/20 transition-colors">
+                    <td className="p-4 text-xs font-black uppercase tracking-widest text-gray-900 dark:text-white border-r border-gray-50/50 dark:border-gray-800/50">
+                      {group.sport}
+                    </td>
+                    <td className="p-4">
+                      <div className="flex flex-wrap gap-2">
+                        {group.leagues.map((league, j) => (
+                          <span key={j} className="px-2.5 py-0.5 bg-gray-50 dark:bg-gray-800/50 rounded-md text-[10px] font-bold text-gray-500 dark:text-gray-400 border border-gray-100 dark:border-gray-700/50 uppercase tracking-tighter">
+                            {league}
+                          </span>
+                        ))}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
 
           <div className="mt-12 text-center">
