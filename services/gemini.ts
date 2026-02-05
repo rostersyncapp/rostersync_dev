@@ -417,11 +417,11 @@ function getSchemaForTier(tier: SubscriptionTier, isNocMode: boolean, findBrandi
   }
 
   const rootProperties: Record<string, any> = {
-    teamName: { type: SchemaType.STRING, description: isNocMode ? "National Olympic Committee Name (e.g. Team Jamaica)." : "Team Name." },
-    abbreviation: { type: SchemaType.STRING, description: isNocMode ? "3-letter IOC Code." : "3-letter Team Abbreviation." },
+    teamName: { type: SchemaType.STRING, description: isNocMode ? "National Olympic Committee Name (e.g. 'United States', 'Greece'). DO NOT return 'Unknown NOC'." : "Team Name." },
+    abbreviation: { type: SchemaType.STRING, description: isNocMode ? "3-letter IOC Code (e.g. 'USA', 'GRE')." : "3-letter Team Abbreviation." },
     countryCode: { type: SchemaType.STRING, description: "3-letter IOC Country Code." },
     conference: { type: SchemaType.STRING },
-    sport: { type: SchemaType.STRING },
+    sport: { type: SchemaType.STRING, description: isNocMode ? "Full sport name including Gender (e.g. 'Alpine Skiing - Men', 'Ice Hockey - Women')." : "Sport name." },
     seasonYear: {
       type: SchemaType.STRING,
       description: "The specific season year or range found in the text (e.g. '2025-26', '2024-25', '2026')."
@@ -510,9 +510,9 @@ export async function processRosterRawText(
 
   // SEARCH LOGIC: 
   // 1. Always enable search if the user wants branding (and it's not a major league where we have it).
-  // 2. ALWAYS enable search for professional leagues (MiLB, NWSL, USL, etc.) to handle trades and expansion, 
-  //    even if we have their branding seeded. Live data is better for player-to-team matching.
-  const shouldSearch = !isNocMode && (findBranding || !!league);
+  // 2. ALWAYS enable search for professional leagues (MiLB, NWSL, USL, etc.) to handle trades and expansion.
+  // 3. ALWAYS enable search for Olympic/NOC mode to leverage the official athlete hub.
+  const shouldSearch = isNocMode || findBranding || !!league;
 
   // brandingDiscovery is separate - we only tell it to deep-dive for logos if findBranding is true
   const shouldSearchForBranding = findBranding && !isMajorLeague;
@@ -591,9 +591,9 @@ export async function processRosterRawText(
       * USE 'phoneticIPA' ONLY IF REQUESTED (Network Tier). Use standard International Phonetic Alphabet symbols.
     - SPORT INFERENCE: If the sport is not explicitly named, INFER it from the positions.
     - ODF COMPLIANCE (isNocMode):
-      * TEAM NAME: Set 'teamName' to the Nation (e.g. "Jamaica").
-      * ABBREVIATION: Set 'abbreviation' to the 3-letter IOC code (e.g. "JAM").
-      * SPORT: Set 'sport' to include the Discipline + Gender (e.g. "Alpine Skiing - Men").
+      * TEAM NAME: Set 'teamName' to the Full Nation Name (e.g. "United States").
+      * ABBREVIATION: Set 'abbreviation' to the 3-letter IOC code (e.g. "USA").
+      * SPORT: Set 'sport' to the FULL discipline name + Gender. YOU MUST include "- Men" or "- Women" (e.g. "Alpine Skiing - Men").
       * NORMALIZE: Use 3-letter IOC codes for Nations (organisationId).
       * NAMES: Extract 'firstName' and 'lastName' (Proper Case).
       * METADATA: BirthDate MUST be YYYY-MM-DD. heightCm and weightKg MUST be integers. Gender MUST be 'M' or 'W'. Extract 'placeOfBirth' as the athlete's hometown.
