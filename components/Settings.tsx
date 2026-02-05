@@ -650,189 +650,168 @@ const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
           )}
 
           {activeTab === 'api' && (
-            <div className="space-y-8">
-              <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-10 shadow-sm">
-                <h3 className="text-2xl font-extrabold flex items-center gap-4 text-gray-900 dark:text-white mb-8">
-                  <Database size={24} className="text-[#5B5FFF]" /> MAM/DAM Configuration
-                </h3>
-
-                <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700 p-8">
-                  <div className="flex items-center gap-4 mb-8">
-                    <div className="w-14 h-14 rounded-xl bg-[#5B5FFF]/10 flex items-center justify-center shrink-0">
-                      <Database size={28} className="text-[#5B5FFF]" />
-                    </div>
-                    <div>
-                      <h4 className="text-lg font-black text-gray-900 dark:text-white">Iconik</h4>
-                      <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Configure connection to Iconik Media Gathering.</p>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Username</label>
-                      <input
-                        type="text"
-                        placeholder="Enter Username"
-                        value={iconikConfig.username}
-                        onChange={(e) => setIconikConfig(prev => ({ ...prev, username: e.target.value }))}
-                        className="w-full p-3.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-medium focus:ring-2 focus:ring-[#5B5FFF]/20 focus:border-[#5B5FFF] outline-none transition-all"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Password</label>
-                      <input
-                        type="password"
-                        placeholder="Enter Password"
-                        value={iconikConfig.password}
-                        onChange={(e) => setIconikConfig(prev => ({ ...prev, password: e.target.value }))}
-                        className="w-full p-3.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-medium focus:ring-2 focus:ring-[#5B5FFF]/20 focus:border-[#5B5FFF] outline-none transition-all"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Application ID</label>
-                      <input
-                        type="text"
-                        placeholder="Enter App ID"
-                        value={iconikConfig.appId}
-                        onChange={(e) => setIconikConfig(prev => ({ ...prev, appId: e.target.value }))}
-                        className="w-full p-3.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-medium focus:ring-2 focus:ring-[#5B5FFF]/20 focus:border-[#5B5FFF] outline-none transition-all"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Auth Token</label>
-                      <input
-                        type="password"
-                        placeholder="Enter Auth Token"
-                        value={iconikConfig.authToken}
-                        onChange={(e) => setIconikConfig(prev => ({ ...prev, authToken: e.target.value }))}
-                        className="w-full p-3.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-medium focus:ring-2 focus:ring-[#5B5FFF]/20 focus:border-[#5B5FFF] outline-none transition-all"
-                      />
-                    </div>
-
-                  </div>
-                  <div className="mt-8 flex items-center justify-between">
-                    <div className="flex-1 mr-4">
-                      {connectionStatus === 'error' && (
-                        <div className="flex items-center gap-2 text-red-500 text-sm font-bold animate-pulse">
-                          <AlertCircle size={16} />
-                          {connectionMessage}
-                        </div>
-                      )}
-                      {connectionStatus === 'success' && (
-                        <div className="flex items-center gap-2 text-emerald-500 text-sm font-bold">
-                          <CheckCircle2 size={16} />
-                          {connectionMessage}
-                        </div>
-                      )}
-                      {connectionStatus === 'testing' && (
-                        <div className="flex items-center gap-2 text-[#5B5FFF] text-sm font-bold">
-                          <Loader2 size={16} className="animate-spin" />
-                          Testing connection...
-                        </div>
-                      )}
-                    </div>
-                    <button
-                      onClick={handleSaveConfig}
-                      disabled={connectionStatus === 'testing'}
-                      className="px-8 py-3 bg-[#5B5FFF] text-white font-bold rounded-xl hover:bg-[#4a4eff] transition-all shadow-lg shadow-[#5B5FFF]/20 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-2"
-                    >
-                      {connectionStatus === 'testing' ? 'Testing...' : 'Save Configuration'}
-                    </button>
+            <div className="space-y-6">
+              <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-6 shadow-sm">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-xl font-extrabold flex items-center gap-4 text-gray-900 dark:text-white">
+                    <Database size={24} className="text-[#5B5FFF]" /> MAM/DAM Sync
+                  </h3>
+                  <div className="px-3 py-1 bg-[#5B5FFF]/10 text-[#5B5FFF] text-[10px] font-black uppercase tracking-widest rounded-full">
+                    Enterprise
                   </div>
                 </div>
 
-                {/* CatDV Configuration Card */}
-                <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700 p-8 mt-8">
-                  <div className="flex items-center gap-4 mb-8">
-                    <div className="w-14 h-14 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0">
-                      <Database size={28} className="text-emerald-500" />
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Iconik Configuration Card */}
+                  <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-700 p-6 flex flex-col h-full">
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="w-10 h-10 rounded-lg bg-[#5B5FFF]/10 flex items-center justify-center shrink-0">
+                        <Database size={20} className="text-[#5B5FFF]" />
+                      </div>
+                      <div>
+                        <h4 className="text-base font-black text-gray-900 dark:text-white">Iconik</h4>
+                        <p className="text-[11px] text-gray-500 font-medium">Cloud Media Gathering.</p>
+                      </div>
                     </div>
-                    <div>
-                      <h4 className="text-lg font-black text-gray-900 dark:text-white">CatDV</h4>
-                      <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Configure connection to CatDV Server.</p>
+
+                    <div className="grid grid-cols-1 gap-4 flex-1">
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Username</label>
+                        <input
+                          type="text"
+                          placeholder="Username"
+                          value={iconikConfig.username}
+                          onChange={(e) => setIconikConfig(prev => ({ ...prev, username: e.target.value }))}
+                          className="w-full p-2.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-xs font-medium focus:ring-2 focus:ring-[#5B5FFF]/20 outline-none transition-all"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Password</label>
+                        <input
+                          type="password"
+                          placeholder="Password"
+                          value={iconikConfig.password}
+                          onChange={(e) => setIconikConfig(prev => ({ ...prev, password: e.target.value }))}
+                          className="w-full p-2.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-xs font-medium focus:ring-2 focus:ring-[#5B5FFF]/20 outline-none transition-all"
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="space-y-1.5">
+                          <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">App ID</label>
+                          <input
+                            type="text"
+                            placeholder="App ID"
+                            value={iconikConfig.appId}
+                            onChange={(e) => setIconikConfig(prev => ({ ...prev, appId: e.target.value }))}
+                            className="w-full p-2.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-xs font-medium focus:ring-2 focus:ring-[#5B5FFF]/20 outline-none transition-all"
+                          />
+                        </div>
+                        <div className="space-y-1.5">
+                          <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Token</label>
+                          <input
+                            type="password"
+                            placeholder="Token"
+                            value={iconikConfig.authToken}
+                            onChange={(e) => setIconikConfig(prev => ({ ...prev, authToken: e.target.value }))}
+                            className="w-full p-2.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-xs font-medium focus:ring-2 focus:ring-[#5B5FFF]/20 outline-none transition-all"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mt-6">
+                      <button
+                        onClick={handleSaveConfig}
+                        disabled={connectionStatus === 'testing'}
+                        className="w-full py-2.5 bg-[#5B5FFF] text-white text-xs font-bold rounded-lg hover:bg-[#4a4eff] transition-all shadow-md active:scale-[0.98] disabled:opacity-70 flex items-center justify-center gap-2"
+                      >
+                        {connectionStatus === 'testing' ? <Loader2 size={14} className="animate-spin" /> : 'Connect Iconik'}
+                      </button>
+                      {(connectionStatus === 'error' || connectionStatus === 'success') && (
+                        <div className={`mt-2 text-[10px] font-bold text-center ${connectionStatus === 'error' ? 'text-red-500' : 'text-emerald-500'}`}>
+                          {connectionMessage}
+                        </div>
+                      )}
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Username</label>
-                      <input
-                        type="text"
-                        placeholder="Enter Username"
-                        value={catdvConfig.username}
-                        onChange={(e) => setCatdvConfig(prev => ({ ...prev, username: e.target.value }))}
-                        className="w-full p-3.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-medium focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all"
-                      />
+                  {/* CatDV Configuration Card */}
+                  <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-700 p-6 flex flex-col h-full">
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="w-10 h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center shrink-0">
+                        <Database size={20} className="text-emerald-500" />
+                      </div>
+                      <div>
+                        <h4 className="text-base font-black text-gray-900 dark:text-white">CatDV</h4>
+                        <p className="text-[11px] text-gray-500 font-medium">Local Asset Tracking.</p>
+                      </div>
                     </div>
-                    <div className="space-y-2">
-                      <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Password</label>
-                      <input
-                        type="password"
-                        placeholder="Enter Password"
-                        value={catdvConfig.password}
-                        onChange={(e) => setCatdvConfig(prev => ({ ...prev, password: e.target.value }))}
-                        className="w-full p-3.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-medium focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">IP Address</label>
-                      <input
-                        type="text"
-                        placeholder="Enter Server IP"
-                        value={catdvConfig.ipAddress}
-                        onChange={(e) => setCatdvConfig(prev => ({ ...prev, ipAddress: e.target.value }))}
-                        className="w-full p-3.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-medium focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Session ID</label>
-                      <input
-                        type="text"
-                        placeholder="Enter Session ID"
-                        value={catdvConfig.sessionId}
-                        onChange={(e) => setCatdvConfig(prev => ({ ...prev, sessionId: e.target.value }))}
-                        className="w-full p-3.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-medium focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all"
-                      />
-                    </div>
-                  </div>
 
-                  <div className="mt-8 flex items-center justify-between">
-                    <div className="flex-1 mr-4">
-                      {catdvStatus === 'error' && (
-                        <div className="flex items-center gap-2 text-red-500 text-sm font-bold animate-pulse">
-                          <AlertCircle size={16} />
-                          {catdvMessage}
+                    <div className="grid grid-cols-1 gap-4 flex-1">
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Username</label>
+                        <input
+                          type="text"
+                          placeholder="Username"
+                          value={catdvConfig.username}
+                          onChange={(e) => setCatdvConfig(prev => ({ ...prev, username: e.target.value }))}
+                          className="w-full p-2.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-xs font-medium focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Password</label>
+                        <input
+                          type="password"
+                          placeholder="Password"
+                          value={catdvConfig.password}
+                          onChange={(e) => setCatdvConfig(prev => ({ ...prev, password: e.target.value }))}
+                          className="w-full p-2.5 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-lg text-xs font-medium focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all"
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="space-y-1.5">
+                          <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Server IP</label>
+                          <input
+                            type="text"
+                            placeholder="Server IP"
+                            value={catdvConfig.ipAddress}
+                            onChange={(e) => setCatdvConfig(prev => ({ ...prev, ipAddress: e.target.value }))}
+                            className="w-full p-2.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-xs font-medium focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all"
+                          />
                         </div>
-                      )}
-                      {catdvStatus === 'success' && (
-                        <div className="flex items-center gap-2 text-emerald-500 text-sm font-bold">
-                          <CheckCircle2 size={16} />
-                          {catdvMessage}
+                        <div className="space-y-1.5">
+                          <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Session ID</label>
+                          <input
+                            type="text"
+                            placeholder="Session ID"
+                            value={catdvConfig.sessionId}
+                            onChange={(e) => setCatdvConfig(prev => ({ ...prev, sessionId: e.target.value }))}
+                            className="w-full p-2.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-xs font-medium focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all"
+                          />
                         </div>
-                      )}
-                      {isConnectingCatdv && (
-                        <div className="flex items-center gap-2 text-emerald-500 text-sm font-bold">
-                          <Loader2 size={16} className="animate-spin" />
-                          Connecting...
-                        </div>
-                      )}
+                      </div>
                     </div>
-                    <div className="flex gap-3">
+
+                    <div className="mt-6 flex gap-2">
                       <button
                         onClick={handleCatdvLogin}
                         disabled={isConnectingCatdv}
-                        className="px-6 py-3 bg-white border-2 border-emerald-500 text-emerald-600 font-bold rounded-xl hover:bg-emerald-50 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                        className="flex-1 py-2.5 bg-white border border-emerald-500 text-emerald-600 text-xs font-bold rounded-lg hover:bg-emerald-50 transition-all flex items-center justify-center gap-2"
                       >
-                        <LogIn size={18} />
-                        {isConnectingCatdv ? 'Logging in...' : 'Login & Get Session'}
+                        {isConnectingCatdv ? <Loader2 size={14} className="animate-spin" /> : 'Login'}
                       </button>
                       <button
                         onClick={handleSaveCatdvConfig}
-                        className="px-8 py-3 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-500/20 hover:scale-[1.02] active:scale-[0.98] flex items-center gap-2"
+                        className="flex-1 py-2.5 bg-emerald-600 text-white text-xs font-bold rounded-lg hover:bg-emerald-700 transition-all shadow-md active:scale-[0.98]"
                       >
-                        Save
+                        Save Local
                       </button>
                     </div>
+                    {catdvStatus !== 'idle' && (
+                      <div className={`mt-2 text-[10px] font-bold text-center ${catdvStatus === 'error' ? 'text-red-500' : 'text-emerald-500'}`}>
+                        {catdvMessage}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
