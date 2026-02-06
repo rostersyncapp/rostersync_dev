@@ -520,7 +520,15 @@ export const Dashboard: React.FC<Props> = ({
   const handleExport = async (format: ExportFormat) => {
     if (!selectedRoster) return;
     await logActivity(userId, 'ROSTER_EXPORT', `Exported ${selectedRoster.teamName} in ${format} format.`);
-    const { content, filename, mimeType } = generateExport(selectedRoster.rosterData, format, selectedRoster.teamName, exportLanguage, userTier);
+    const { content, filename, mimeType } = generateExport(
+      selectedRoster.rosterData,
+      format,
+      selectedRoster.teamName,
+      exportLanguage,
+      userTier,
+      selectedRoster.preferredAccentColor || selectedRoster.teamMetadata?.primaryColor,
+      selectedRoster.teamMetadata?.secondaryColor
+    );
     downloadFile(content, filename, mimeType);
     setShowExportDrawer(false);
   };

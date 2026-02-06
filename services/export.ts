@@ -7,7 +7,9 @@ export function generateExport(
   format: ExportFormat,
   teamName: string,
   language: string = 'EN',
-  tier: SubscriptionTier = 'BASIC'
+  tier: SubscriptionTier = 'BASIC',
+  primaryColor?: string,
+  secondaryColor?: string
 ): { content: string; filename: string; mimeType: string } {
   const timestamp = new Date().toISOString().slice(0, 10);
   const safeTeam = teamName.replace(/\s+/g, '_').toLowerCase();
@@ -21,7 +23,9 @@ export function generateExport(
           displayNameSafe: a.displayNameSafe,
           jerseyNumber: a.jerseyNumber,
           position: a.position,
-          seasonYear: a.seasonYear
+          seasonYear: a.seasonYear,
+          teamPrimaryColor: tier !== 'BASIC' ? (primaryColor || '') : '',
+          teamSecondaryColor: tier !== 'BASIC' ? (secondaryColor || '') : ''
         };
         if (tier !== 'BASIC') {
           row.phonetic = a.phoneticSimplified;
@@ -83,7 +87,7 @@ export function generateExport(
 
 
     case 'VIZRT_DATACENTER_CSV':
-      const vizHeaders = ["KEY", "ID", "NAME", "POS", "PHONETIC", "BIO_JSON"];
+      const vizHeaders = ["KEY", "ID", "NAME", "POS", "PHONETIC", "COLOR_PRI", "COLOR_SEC", "BIO_JSON"];
       const vizRows = athletes.map(a => {
         const bioData = {
           status: a.nilStatus,
@@ -96,6 +100,8 @@ export function generateExport(
           a.displayNameSafe.toUpperCase(),
           a.position.toUpperCase(),
           tier === 'NETWORK' ? a.phoneticIPA : a.phoneticSimplified || "",
+          tier !== 'BASIC' ? (primaryColor || "") : "",
+          tier !== 'BASIC' ? (secondaryColor || "") : "",
           JSON.stringify(bioData).replace(/"/g, '""')
         ].map(val => `"${val}"`).join(",");
       });
@@ -114,6 +120,8 @@ export function generateExport(
         vxml += `      <field name="NAME_CAPS">${a.displayNameSafe.toUpperCase()}</field>\n`;
         vxml += `      <field name="POSITION">${a.position.toUpperCase()}</field>\n`;
         vxml += `      <field name="PRONUNCIATION">${(tier === 'NETWORK' ? a.phoneticIPA : a.phoneticSimplified) || ''}</field>\n`;
+        vxml += `      <field name="PRIMARY_COLOR">${tier !== 'BASIC' ? (primaryColor || '') : ''}</field>\n`;
+        vxml += `      <field name="SECONDARY_COLOR">${tier !== 'BASIC' ? (secondaryColor || '') : ''}</field>\n`;
         vxml += `      <field name="STAT_LINE">${a.bioStats || ''}</field>\n`;
         vxml += `      <field name="HEADSHOT_URL">C:\\RosterSync\\Heads\\${a.jerseyNumber}.tga</field>\n`;
         vxml += `    </element>\n`;
@@ -126,13 +134,15 @@ export function generateExport(
       };
 
     case 'CHYRON_CSV':
-      const chyronHeaders = ["Index", "PlayerName", "PlayerNumber", "PositionAbbr", "Phonetic", "Bio_Stats", "SocialHandle"];
+      const chyronHeaders = ["Index", "PlayerName", "PlayerNumber", "PositionAbbr", "Phonetic", "PrimaryColor", "SecondaryColor", "Bio_Stats", "SocialHandle"];
       const chyronRows = athletes.map((a, idx) => [
         idx + 1,
         a.fullName,
         a.jerseyNumber,
         a.position.toUpperCase(),
         tier !== 'BASIC' ? a.phoneticSimplified || "" : "",
+        tier !== 'BASIC' ? (primaryColor || "") : "",
+        tier !== 'BASIC' ? (secondaryColor || "") : "",
         a.bioStats || "Production ready bio summary pending.",
         a.socialHandle || `@${a.fullName.toLowerCase().replace(/\s+/g, '')}`
       ].map(val => `"${val}"`).join(","));
@@ -144,11 +154,13 @@ export function generateExport(
       };
 
     case 'NEWBLUE_CSV':
-      const newBlueHeaders = ["Title", "Subtitle", "Description", "Image_URL"];
+      const newBlueHeaders = ["Title", "Subtitle", "Description", "PrimaryColor", "SecondaryColor", "Image_URL"];
       const newBlueRows = athletes.map(a => [
         a.fullName,
         `${a.position} | #${a.jerseyNumber}`,
         a.bioStats || `${a.fullName} is an ${a.nilStatus} athlete for ${teamName}.`,
+        tier !== 'BASIC' ? (primaryColor || "") : "",
+        tier !== 'BASIC' ? (secondaryColor || "") : "",
         ""
       ].map(val => `"${val}"`).join(","));
 
@@ -162,7 +174,7 @@ export function generateExport(
       // Tagboard DDG (Data Driven Graphics) format
       // Requires simple headers in Row 1.
       // Image URLs must be direct links.
-      const tagboardHeaders = ["Name", "Jersey", "Position", "Phonetic", "Team Name", "Headshot URL", "Team Logo URL"];
+      const tagboardHeaders = ["Name", "Jersey", "Position", "Phonetic", "PrimaryColor", "SecondaryColor", "Team Name", "Headshot URL", "Team Logo URL"];
 
       // We look for Branding metadata in the first athlete or pass it in if available in future refactors.
       // For now, we assume the logo might be attached to individual athletes if we enriched them, 
@@ -179,6 +191,8 @@ export function generateExport(
         a.jerseyNumber,
         a.position,
         tier !== 'BASIC' ? a.phoneticSimplified || "" : "",
+        tier !== 'BASIC' ? (primaryColor || "") : "",
+        tier !== 'BASIC' ? (secondaryColor || "") : "",
         teamName,
         // TODO: Add headshot logic if readily available. 
         // For now, use a placeholder or blank to avoid breaking the CSV if the user maps it manually.
@@ -219,6 +233,9 @@ export function generateExport(
 
     case 'ROSS_XML':
       let xml = `<?xml version="1.0" encoding="UTF-8"?>\n<ROSTER TEAM="${teamName.toUpperCase()}" LANGUAGE="${language.toUpperCase()}">\n`;
+      if (tier !== 'BASIC') {
+        xml += `  <COLORS PRIMARY="${primaryColor || ''}" SECONDARY="${secondaryColor || ''}" />\n`;
+      }
       athletes.forEach(a => {
         xml += `  <ATHLETE ID="${a.id}">\n`;
         xml += `    <NAME>${a.displayNameSafe}</NAME>\n`;
@@ -227,6 +244,8 @@ export function generateExport(
         xml += `    <STATUS>${a.nilStatus.toUpperCase()}</STATUS>\n`;
         if (tier !== 'BASIC') {
           xml += `    <PHONETIC>${a.phoneticSimplified || ''}</PHONETIC>\n`;
+          xml += `    <COLOR_PRIMARY>${primaryColor || ''}</COLOR_PRIMARY>\n`;
+          xml += `    <COLOR_SECONDARY>${secondaryColor || ''}</COLOR_SECONDARY>\n`;
         }
         xml += `  </ATHLETE>\n`;
       });
@@ -238,7 +257,7 @@ export function generateExport(
       };
 
     case 'VIZRT_JSON':
-      const vizrtData = {
+      const vizrtData: any = {
         team: teamName,
         players: athletes.map(a => {
           const safeImgName = a.displayNameSafe.toLowerCase().replace(/\s+/g, '_');
@@ -252,6 +271,12 @@ export function generateExport(
           };
         })
       };
+      if (tier !== 'BASIC') {
+        vizrtData.colors = {
+          primary: primaryColor || '',
+          secondary: secondaryColor || ''
+        };
+      }
       return {
         content: JSON.stringify(vizrtData, null, 2),
         filename: `${safeTeam}_vizrt_${langSuffix}_${timestamp}.json`,
