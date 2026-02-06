@@ -802,10 +802,10 @@ export const Dashboard: React.FC<Props> = ({
                   <div className="space-y-4">
                     <h4 className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-400 font-mono"><MonitorPlay size={14} className="text-[#5B5FFF]" /> Broadcast Hardwares</h4>
                     <div className="grid grid-cols-1 gap-3">
-                      <ExportItem icon={<MonitorPlay size={20} />} title="Ross DataLinq XML" desc="XPression & Dashboard native." onClick={() => handleExport('ROSS_XML')} disabled={isTierLocked(userTier, 'STUDIO')} requiredTier="STUDIO" />
-                      <ExportItem icon={<Database size={20} />} title="Vizrt DataCenter" desc="Trio & Pilot Key-Value CSV." onClick={() => handleExport('VIZRT_DATACENTER_CSV')} disabled={isTierLocked(userTier, 'STUDIO')} requiredTier="STUDIO" />
+                      <ExportItem icon={<MonitorPlay size={20} />} title="Ross DataLinq XML" desc="XPression & Dashboard native." onClick={() => handleExport('ROSS_XML')} disabled={isTierLocked(userTier, 'NETWORK')} requiredTier="NETWORK" />
+                      <ExportItem icon={<Database size={20} />} title="Vizrt DataCenter" desc="Trio & Pilot Key-Value CSV." onClick={() => handleExport('VIZRT_DATACENTER_CSV')} disabled={isTierLocked(userTier, 'NETWORK')} requiredTier="NETWORK" />
                       <ExportItem icon={<FileCode size={20} />} title="Olympic ODF XML" desc="High-compliance event XML." onClick={() => handleExport('ODF_XML')} disabled={isTierLocked(userTier, 'NETWORK')} requiredTier="NETWORK" />
-                      <ExportItem icon={<Zap size={20} />} title="Chyron Prime CSV" desc="Lyric & Prime automation." onClick={() => handleExport('CHYRON_CSV')} disabled={isTierLocked(userTier, 'STUDIO')} requiredTier="STUDIO" />
+                      <ExportItem icon={<Zap size={20} />} title="Chyron Prime CSV" desc="Lyric & Prime automation." onClick={() => handleExport('CHYRON_CSV')} disabled={isTierLocked(userTier, 'NETWORK')} requiredTier="NETWORK" />
                     </div>
                   </div>
 

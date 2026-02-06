@@ -63,7 +63,7 @@ export const PRICING_TIERS = [
     price: '$149',
     monthlyCredits: 500,
     description: 'For RSNs and creative agencies.',
-    features: ['500 Credits / Month', '3 Team Seats', 'Ross & Vizrt CSV', 'RGB/PMS/CMYK Colors', 'White-label Exports'],
+    features: ['500 Credits / Month', '3 Team Seats', 'Brand Colors (HEX/RGB)', 'Tagboard & NewBlue', 'White-label Exports'],
     polarCheckoutUrl: 'https://polar.sh/rostersync/products/studio-tier'
   },
   {
@@ -72,7 +72,7 @@ export const PRICING_TIERS = [
     price: '$249',
     monthlyCredits: 800,
     description: 'For national broadcasters.',
-    features: ['800 Credits / Month', '5 Team Seats', 'IPA Phonetics', 'Multi-Language (ES/ZH)', 'Enterprise XML + API'],
+    features: ['800 Credits / Month', '5 Team Seats', 'IPA Phonetics', 'Broadcast (Ross/Vizrt/Chyron)', 'Enterprise XML + API'],
     polarCheckoutUrl: 'https://polar.sh/rostersync/products/network-tier'
   }
 ];
