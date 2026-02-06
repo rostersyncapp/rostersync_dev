@@ -42,11 +42,10 @@ interface LandingPageProps {
 
 const FAQS = [
   { q: "Why upgrade from Free to Pro?", a: "Upgrade to Pro when you need more than 2 rosters per month, want to sync with Iconik or CatDV, or require automatic team logo and HEX color discovery with phonetic pronunciation guides." },
-  { q: "What does the Studio tier offer for agencies?", a: "The Studio tier ($149) is designed for teams and creative agencies. It includes 3 user seats, white-label exports, and direct support for cloud-ready graphics platforms like Tagboard and NewBlue." },
+  { q: "What does the Studio tier offer for agencies?", a: "The Studio tier ($149) is designed for teams and creative agencies. It includes 3 user seats, advanced branding, and direct support for cloud-ready graphics platforms like Tagboard and NewBlue." },
   { q: "When should I choose the Network tier?", a: "Choose Network for national or international broadcasts. It adds support for enterprise XML formats (Ross/Vizrt/Chyron), Olympic ODF compliance, API access, and IPA-grade phonetic guides." },
   { q: "Can I manage multiple projects?", a: "Yes. Starting with the Pro tier, you get unlimited folders and nested projects to help you organize rosters across different leagues, seasons, or production clients." },
-  { q: "What hardware systems do you support?", a: "We support nearly every major broadcast system. Studio tier provides direct data for cloud graphics (Tagboard/NewBlue), while Network adds native XML feeds for high-end Ross Xpression, Vizrt, and Chyron Prime hardware." },
-  { q: "What are 'White-label Exports'?", a: "Available in Studio and Network tiers, this feature removes all RosterSync branding from your exported files, ensuring a completely clean and professional delivery to your production hardware." }
+  { q: "What hardware systems do you support?", a: "We support nearly every major broadcast system. Studio tier provides direct data for cloud graphics (Tagboard/NewBlue), while Network adds native XML feeds for high-end Ross Xpression, Vizrt, and Chyron Prime hardware." }
 ];
 
 const FEATURES = [
@@ -68,7 +67,6 @@ const PRICING_MATRIX = [
   { feature: "Multi-language", free: false, pro: false, studio: false, network: "✅ ES + ZH" },
   { feature: "Logo discovery", free: false, pro: true, studio: true, network: true },
   { feature: "Colors", free: false, pro: "HEX", studio: "All formats", network: "All formats" },
-  { feature: "White-label exports", free: false, pro: false, studio: true, network: true },
   { feature: "MAM live sync", free: false, pro: true, studio: true, network: true },
   { feature: "API access", free: false, pro: false, studio: false, network: true },
   { feature: "Support", free: "Community", pro: "Email", studio: "Email", network: "Email + Quarterly" },

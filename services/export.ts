@@ -52,7 +52,7 @@ export function generateExport(
         "auto_set": true,
         "date_created": nowIso,
         "date_modified": nowIso,
-        "description": `Imported via RosterSync`,
+        "description": `Athlete Metadata`,
         "external_id": null,
         "field_type": "drop_down",
         "hide_if_not_set": false,
@@ -140,7 +140,7 @@ export function generateExport(
         vxml += `      <field name="SECONDARY_RGB">${(tier === 'STUDIO' || tier === 'NETWORK') ? hexToRgb(secondaryColor) : ''}</field>\n`;
         vxml += `      <field name="SEASON_YEAR">${a.seasonYear || ''}</field>\n`;
         vxml += `      <field name="STAT_LINE">${a.bioStats || ''}</field>\n`;
-        vxml += `      <field name="HEADSHOT_URL">C:\\RosterSync\\Heads\\${padJersey(a.jerseyNumber)}.tga</field>\n`;
+        vxml += `      <field name="HEADSHOT_URL">C:\\RosterData\\Heads\\${padJersey(a.jerseyNumber)}.tga</field>\n`;
         vxml += `    </element>\n`;
       });
       vxml += `  </playlist>\n</tickerfeed>`;

@@ -63,7 +63,7 @@ export const PRICING_TIERS = [
     price: '$149',
     monthlyCredits: 500,
     description: 'For RSNs and creative agencies.',
-    features: ['500 Credits / Month', '3 Team Seats', 'Brand Colors (HEX/RGB)', 'Tagboard & NewBlue', 'White-label Exports'],
+    features: ['500 Credits / Month', '3 Team Seats', 'Brand Colors (HEX/RGB)', 'Tagboard & NewBlue'],
     polarCheckoutUrl: 'https://polar.sh/rostersync/products/studio-tier'
   },
   {
