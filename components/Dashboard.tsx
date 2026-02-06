@@ -55,7 +55,8 @@ import {
   Database,
   Layers,
   FileText,
-  Shirt
+  Shirt,
+  AlertCircle
 } from 'lucide-react';
 
 interface Props {
@@ -675,8 +676,19 @@ export const Dashboard: React.FC<Props> = ({
                     <tr key={a.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors group">
                       <td className="px-4 py-4 text-center text-sm font-medium text-gray-400 dark:text-gray-500">{idx + 1}</td>
                       <td className="px-8 py-4 text-sm font-semibold text-gray-900 dark:text-white tracking-tight">
-                        {a.fullName}
-                        {selectedRoster.isNocMode && a.countryCode && <span className="ml-2 text-[10px] bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded font-mono font-bold text-gray-400 uppercase tracking-wider">{a.countryCode}</span>}
+                        <div className="flex items-center gap-2">
+                          {a.fullName}
+                          {a.dbStatus === 'NOT_FOUND' && (
+                            <span className="flex items-center gap-1 text-[10px] font-black text-red-500 bg-red-50 dark:bg-red-900/10 px-1.5 py-0.5 rounded border border-red-200 dark:border-red-900/30 animate-pulse">
+                              <AlertCircle size={10} /> NOT IN DB
+                            </span>
+                          )}
+                          {selectedRoster.isNocMode && a.countryCode && (
+                            <span className="text-[10px] bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded font-mono font-bold text-gray-400 uppercase tracking-wider">
+                              {a.countryCode}
+                            </span>
+                          )}
+                        </div>
                       </td>
                       <td className="px-8 py-4 text-center"><span className="inline-block w-10 py-1 rounded-lg bg-blue-600 dark:bg-blue-700 text-white text-xs font-bold shadow-sm">{a.jerseyNumber.toString().replace(/#/g, '')}</span></td>
                       <td className="px-8 py-4 text-center"><span className="inline-block px-3 py-1 rounded-lg bg-purple-600 dark:bg-purple-700 text-white text-[10px] font-black uppercase tracking-widest shadow-sm">{a.position}</span></td>

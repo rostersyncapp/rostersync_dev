@@ -38,6 +38,8 @@ export interface Athlete {
   weightKg?: number;
   placeOfBirth?: string;
   event?: string; // Specific Olympic Event
+  sportCode?: string; // 3-letter ODF Discipline Code (e.g. ALP, IHO)
+  dbStatus?: 'MATCHED' | 'NOT_FOUND'; // For UI flagging in ODF mode
   metadata?: Record<string, any>;
 }
 

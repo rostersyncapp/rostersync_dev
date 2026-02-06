@@ -70,6 +70,107 @@ function toTitleCase(str: string): string {
 }
 
 /**
+ * Authoritative Database Matching for Olympic Athletes
+ * Queries Supabase athletes table to find official matches and override AI data.
+ */
+export async function matchAthletesWithDB(extractedAthletes: Athlete[]): Promise<Athlete[]> {
+  if (!supabase || extractedAthletes.length === 0) return extractedAthletes;
+
+  console.log(`[OlympicMiddleware] Attempting to match ${extractedAthletes.length} athletes against master seed...`);
+
+  const matchedAthletes = await Promise.all(extractedAthletes.map(async (athlete) => {
+    try {
+      // 1. Exact Match Strategy (Case Insensitive)
+      // We look for athletes where first_name and last_name match the extracted name.
+      // AI sometimes returns firstName/lastName separately, or just fullName.
+      const firstName = athlete.firstName || athlete.fullName.split(' ')[0] || '';
+      const lastName = athlete.lastName || athlete.fullName.split(' ').slice(1).join(' ') || '';
+
+      const { data, error } = await supabase
+        .from('athletes')
+        .select(`
+          parent_id, 
+          first_name, 
+          last_name, 
+          print_name, 
+          gender, 
+          organisation_id, 
+          sport_code, 
+          birth_date, 
+          height_cm, 
+          weight_kg, 
+          placeOfBirth
+        `)
+        .ilike('first_name', firstName)
+        .ilike('last_name', lastName)
+        .limit(1)
+        .single();
+
+      if (data && !error) {
+        console.log(`[OlympicMiddleware] ✅ MATCHED: ${firstName} ${lastName} -> ${data.print_name} (${data.parent_id})`);
+
+        // Override with official production data
+        return {
+          ...athlete,
+          id: data.parent_id, // Authoritative ID
+          fullName: data.print_name, // Authoritative PrintName
+          firstName: data.first_name,
+          lastName: data.last_name.toUpperCase(), // Broadcaster Rule: Uppercase
+          gender: data.gender as 'M' | 'W',
+          organisationId: data.organisation_id,
+          sportCode: data.sport_code,
+          birthDate: data.birth_date,
+          heightCm: data.height_cm,
+          weightKg: data.weight_kg,
+          placeOfBirth: data.placeOfBirth,
+          dbStatus: 'MATCHED' as const
+        };
+      }
+
+      // 2. Fuzzy Match / Swap Strategy
+      // If no match, try swapping first/last names (common in messy text)
+      const { data: swapData } = await supabase
+        .from('athletes')
+        .select('*')
+        .ilike('first_name', lastName)
+        .ilike('last_name', firstName)
+        .limit(1)
+        .single();
+
+      if (swapData) {
+        console.log(`[OlympicMiddleware] 🔄 MATCHED (Swapped): ${firstName} ${lastName} -> ${swapData.print_name}`);
+        return {
+          ...athlete,
+          id: swapData.parent_id,
+          fullName: swapData.print_name,
+          firstName: swapData.first_name,
+          lastName: swapData.last_name.toUpperCase(),
+          gender: swapData.gender as 'M' | 'W',
+          organisationId: swapData.organisation_id,
+          sportCode: swapData.sport_code,
+          birthDate: swapData.birth_date,
+          heightCm: swapData.height_cm,
+          weightKg: swapData.weight_kg,
+          placeOfBirth: swapData.placeOfBirth,
+          dbStatus: 'MATCHED' as const
+        };
+      }
+
+      console.log(`[OlympicMiddleware] 🔴 NOT FOUND: ${firstName} ${lastName}`);
+      return {
+        ...athlete,
+        dbStatus: 'NOT_FOUND' as const
+      };
+    } catch (err) {
+      console.warn(`[OlympicMiddleware] Search error for ${athlete.fullName}:`, err);
+      return { ...athlete, dbStatus: 'NOT_FOUND' as const };
+    }
+  }));
+
+  return matchedAthletes;
+}
+
+/**
  * Robustly extract JSON from AI response text
  */
 function extractJSON(text: string): any {
@@ -1181,13 +1282,19 @@ export async function processRosterRawText(
     }
   }
 
+  // Determine final athletes list (Authoritative DB Match if in NOC mode)
+  let finalAthletes = athletesWithJerseys;
+  if (isNocMode) {
+    finalAthletes = await matchAthletesWithDB(athletesWithJerseys);
+  }
+
   return {
     teamName: parsedResult.teamName || (isNocMode ? "Unknown NOC" : "Unknown Team"),
     sport: standardizedSport,
     league: finalLeague || undefined,
     seasonYear: extractedSeason,
     isNocMode: isNocMode,
-    athletes: athletesWithJerseys,
+    athletes: finalAthletes,
     verificationSources,
     candidateTeams: candidateTeams.length > 1 ? candidateTeams : undefined,
     teamMetadata: finalBranding,

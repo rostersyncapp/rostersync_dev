@@ -38,26 +38,35 @@ export interface ODFAthlete extends Athlete {
 
 /**
  * Transforms athlete data into broadcaster-compliant ODF XML.
- * Official ODF Participant Feed for Milano Cortina 2026
+ * Official ODF Participant Feed for Milano Cortina 2026 (DT_PARTIC)
  */
 export function convertToODF(athletes: Athlete[]): string {
     const timestamp = new Date().toISOString().split('T');
     const [date, time] = [timestamp[0], timestamp[1].split('.')[0]];
 
     let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
+    // CompetitionCode="OWG2026" is mandatory for Milano Cortina 2026
     xml += `<OdfBody DocumentType="DT_PARTIC" CompetitionCode="OWG2026" FeedFlag="P" Version="1" Date="${date}" Time="${time}">\n`;
     xml += `  <Competition>\n`;
 
     for (const athlete of athletes) {
-        const familyCaps = (athlete.lastName || athlete.fullName.split(' ').pop() || '').toUpperCase();
-        const firstName = athlete.firstName || athlete.fullName.split(' ')[0] || '';
-        const printName = `${familyCaps} ${firstName}`;
-        const countryCode = athlete.countryCode || athlete.organisationId || 'AIN';
-        const sportCode = athlete.position?.substring(0, 3).toUpperCase() || 'GEN';
-        const athleteId = athlete.id.length >= 7 ? athlete.id.substring(0, 7) : athlete.id.padStart(7, '0');
+        // Broadcaster Rule: FamilyName MUST be UPPERCASE
+        const familyName = (athlete.lastName || '').toUpperCase();
+        const firstName = athlete.firstName || '';
+
+        // Broadcaster Rule: Code and Parent MUST be the official CompetitorCode (parent_id)
+        // If the athlete was matched against the DB, athlete.id will be the 7-digit parent_id
+        const athleteId = athlete.id;
+
+        // Broadcaster Rule: PrintName MUST match the DB exactly
+        // We use the fullName if it was overridden by the DB PrintName, or construct it as SURNAME GivenName
+        const printName = athlete.fullName;
+
+        const countryCode = athlete.organisationId || 'AIN';
+        const sportCode = athlete.sportCode || athlete.position?.substring(0, 3).toUpperCase() || 'GEN';
 
         xml += `    <Participant Code="${athleteId}" Parent="${athleteId}" Status="ACTIVE" Organisation="${countryCode}" `;
-        xml += `GivenName="${firstName}" FamilyName="${familyCaps}" PrintName="${familyCaps} ${firstName}" `;
+        xml += `GivenName="${firstName}" FamilyName="${familyName}" PrintName="${printName}" `;
         xml += `Gender="${athlete.gender || 'M'}" BirthDate="${athlete.birthDate || ''}"`;
 
         if (athlete.heightCm) xml += ` Height="${athlete.heightCm}"`;
