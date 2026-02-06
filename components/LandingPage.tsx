@@ -66,10 +66,10 @@ const PRICING_MATRIX = [
   { feature: "Team members", free: "1", pro: "1", studio: "3", network: "5" },
   { feature: "Phonetic guides", free: false, pro: "✅ Simple", studio: "✅ Simple", network: "✅ Simple + IPA" },
   { feature: "Multi-language", free: false, pro: false, studio: false, network: "✅ ES + ZH" },
-  { feature: "Logo discovery", free: false, pro: true, studio: true, network: true },
+
   { feature: "Colors", free: false, pro: "HEX", studio: "All formats", network: "All formats" },
   { feature: "MAM live sync", free: false, pro: true, studio: true, network: true },
-  { feature: "API access", free: false, pro: false, studio: false, network: true },
+
   { feature: "Support", free: "Community", pro: "Email", studio: "Email", network: "Email + Quarterly" },
 ];
 
