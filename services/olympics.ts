@@ -40,7 +40,7 @@ export interface ODFAthlete extends Athlete {
  * Transforms athlete data into broadcaster-compliant ODF XML.
  * Official ODF Participant Feed for Milano Cortina 2026 (DT_PARTIC)
  */
-export function convertToODF(athletes: Athlete[]): string {
+export function convertToODF(athletes: Athlete[], primaryColor?: string, secondaryColor?: string): string {
     const timestamp = new Date().toISOString().split('T');
     const [date, time] = [timestamp[0], timestamp[1].split('.')[0]];
 
@@ -55,23 +55,31 @@ export function convertToODF(athletes: Athlete[]): string {
         const firstName = athlete.firstName || '';
 
         // Broadcaster Rule: Code and Parent MUST be the official CompetitorCode (parent_id)
-        // If the athlete was matched against the DB, athlete.id will be the 7-digit parent_id
         const athleteId = athlete.id;
 
         // Broadcaster Rule: PrintName MUST match the DB exactly
-        // We use the fullName if it was overridden by the DB PrintName, or construct it as SURNAME GivenName
         const printName = athlete.fullName;
 
         const countryCode = athlete.organisationId || 'AIN';
         const sportCode = athlete.sportCode || athlete.position?.substring(0, 3).toUpperCase() || 'GEN';
 
+        // Custom Padding Logic for ODF
+        const padJersey = (n: string) => {
+            const s = String(n).replace(/[^0-9]/g, '');
+            return s ? s.padStart(2, '0') : n;
+        };
+
         xml += `    <Participant Code="${athleteId}" Parent="${athleteId}" Status="ACTIVE" Organisation="${countryCode}" `;
         xml += `GivenName="${firstName}" FamilyName="${familyName}" PrintName="${printName}" `;
-        xml += `Gender="${athlete.gender || 'M'}" BirthDate="${athlete.birthDate || ''}"`;
+        xml += `Gender="${athlete.gender || 'M'}" BirthDate="${athlete.birthDate || ''}" `;
+        xml += `Jersey="${padJersey(athlete.jerseyNumber)}" `;
 
-        if (athlete.heightCm) xml += ` Height="${athlete.heightCm}"`;
-        if (athlete.weightKg) xml += ` Weight="${athlete.weightKg}"`;
-        if (athlete.placeOfBirth) xml += ` PlaceOfBirth="${athlete.placeOfBirth}"`;
+        if (primaryColor) xml += `PrimaryColor="${primaryColor}" `;
+        if (secondaryColor) xml += `SecondaryColor="${secondaryColor}" `;
+
+        if (athlete.heightCm) xml += `Height="${athlete.heightCm}" `;
+        if (athlete.weightKg) xml += `Weight="${athlete.weightKg}" `;
+        if (athlete.placeOfBirth) xml += `PlaceOfBirth="${athlete.placeOfBirth}"`;
 
         xml += `>\n`;
         xml += `      <Discipline Code="${sportCode}" />\n`;

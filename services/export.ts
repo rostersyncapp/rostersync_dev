@@ -21,7 +21,7 @@ export function generateExport(
         const row: any = {
           fullName: a.fullName,
           displayNameSafe: a.displayNameSafe,
-          jerseyNumber: a.jerseyNumber,
+          jerseyNumber: padJersey(a.jerseyNumber),
           position: a.position,
           seasonYear: a.seasonYear,
           teamPrimaryColor: tier !== 'BASIC' ? (primaryColor || '') : '',
@@ -46,7 +46,7 @@ export function generateExport(
       const slugTeam = teamName.replace(/\s+/g, '-').toLowerCase();
       // Format equivalent to Iconik's ISO format
       const nowIso = new Date().toISOString().replace('Z', '+00:00');
-      const iconikMetadata = {
+      const iconikMetadata: any = {
         "auto_set": true,
         "date_created": nowIso,
         "date_modified": nowIso,
@@ -68,7 +68,7 @@ export function generateExport(
           const lnB = getLN(b.fullName).toLowerCase();
           return lnA !== lnB ? lnA.localeCompare(lnB) : a.fullName.localeCompare(b.fullName);
         }).map(a => ({
-          "label": a.fullName,
+          "label": `${padJersey(a.jerseyNumber)} - ${a.fullName}`,
           "value": a.fullName
         })),
         "read_only": false,
@@ -78,6 +78,13 @@ export function generateExport(
         "source_url": null,
         "use_as_facet": true
       };
+
+      if (tier !== 'BASIC') {
+        iconikMetadata.custom_metadata = {
+          "primaryColor": primaryColor || "",
+          "secondaryColor": secondaryColor || ""
+        };
+      }
 
       return {
         content: JSON.stringify(iconikMetadata, null, 2),
@@ -96,7 +103,7 @@ export function generateExport(
           handle: a.socialHandle || ""
         };
         return [
-          a.jerseyNumber,
+          padJersey(a.jerseyNumber),
           a.displayNameSafe.toUpperCase(),
           a.position.toUpperCase(),
           tier === 'NETWORK' ? a.phoneticIPA : a.phoneticSimplified || "",
@@ -116,14 +123,14 @@ export function generateExport(
       let vxml = `<?xml version="1.0" encoding="UTF-8"?>\n<tickerfeed version="2.4">\n  <playlist name="TeamRoster" type="scrolling_carousel" target="pool">\n`;
       athletes.forEach(a => {
         vxml += `    <element>\n`;
-        vxml += `      <field name="ID">${a.jerseyNumber}</field>\n`;
+        vxml += `      <field name="ID">${padJersey(a.jerseyNumber)}</field>\n`;
         vxml += `      <field name="NAME_CAPS">${a.displayNameSafe.toUpperCase()}</field>\n`;
         vxml += `      <field name="POSITION">${a.position.toUpperCase()}</field>\n`;
         vxml += `      <field name="PRONUNCIATION">${(tier === 'NETWORK' ? a.phoneticIPA : a.phoneticSimplified) || ''}</field>\n`;
         vxml += `      <field name="PRIMARY_COLOR">${tier !== 'BASIC' ? (primaryColor || '') : ''}</field>\n`;
         vxml += `      <field name="SECONDARY_COLOR">${tier !== 'BASIC' ? (secondaryColor || '') : ''}</field>\n`;
         vxml += `      <field name="STAT_LINE">${a.bioStats || ''}</field>\n`;
-        vxml += `      <field name="HEADSHOT_URL">C:\\RosterSync\\Heads\\${a.jerseyNumber}.tga</field>\n`;
+        vxml += `      <field name="HEADSHOT_URL">C:\\RosterSync\\Heads\\${padJersey(a.jerseyNumber)}.tga</field>\n`;
         vxml += `    </element>\n`;
       });
       vxml += `  </playlist>\n</tickerfeed>`;
@@ -138,7 +145,7 @@ export function generateExport(
       const chyronRows = athletes.map((a, idx) => [
         idx + 1,
         a.fullName,
-        a.jerseyNumber,
+        padJersey(a.jerseyNumber),
         a.position.toUpperCase(),
         tier !== 'BASIC' ? a.phoneticSimplified || "" : "",
         tier !== 'BASIC' ? (primaryColor || "") : "",
@@ -157,7 +164,7 @@ export function generateExport(
       const newBlueHeaders = ["Title", "Subtitle", "Description", "PrimaryColor", "SecondaryColor", "Image_URL"];
       const newBlueRows = athletes.map(a => [
         a.fullName,
-        `${a.position} | #${a.jerseyNumber}`,
+        `${a.position} | #${padJersey(a.jerseyNumber)}`,
         a.bioStats || `${a.fullName} is an ${a.nilStatus} athlete for ${teamName}.`,
         tier !== 'BASIC' ? (primaryColor || "") : "",
         tier !== 'BASIC' ? (secondaryColor || "") : "",
@@ -188,7 +195,7 @@ export function generateExport(
 
       const tagboardRows = athletes.map(a => [
         a.fullName,
-        a.jerseyNumber,
+        padJersey(a.jerseyNumber),
         a.position,
         tier !== 'BASIC' ? a.phoneticSimplified || "" : "",
         tier !== 'BASIC' ? (primaryColor || "") : "",
@@ -239,7 +246,7 @@ export function generateExport(
       athletes.forEach(a => {
         xml += `  <ATHLETE ID="${a.id}">\n`;
         xml += `    <NAME>${a.displayNameSafe}</NAME>\n`;
-        xml += `    <JERSEY>${a.jerseyNumber}</JERSEY>\n`;
+        xml += `    <JERSEY>${padJersey(a.jerseyNumber)}</JERSEY>\n`;
         xml += `    <POSITION>${a.position.toUpperCase()}</POSITION>\n`;
         xml += `    <STATUS>${a.nilStatus.toUpperCase()}</STATUS>\n`;
         if (tier !== 'BASIC') {
@@ -265,7 +272,7 @@ export function generateExport(
           return {
             id: a.id,
             name: a.fullName,
-            number: isNaN(number) ? a.jerseyNumber : number,
+            number: padJersey(a.jerseyNumber),
             pos: a.position,
             img: `${safeImgName}_cutout.png`
           };
@@ -284,7 +291,7 @@ export function generateExport(
       };
 
     case 'ODF_XML':
-      const odfContent = convertToODF(athletes);
+      const odfContent = convertToODF(athletes, primaryColor, secondaryColor);
       return {
         content: odfContent,
         filename: `${safeTeam}_odf_2026_${langSuffix}_${timestamp}.xml`,
@@ -294,6 +301,12 @@ export function generateExport(
     default:
       throw new Error("Unsupported format");
   }
+}
+
+function padJersey(num: string | number): string {
+  const s = String(num).replace(/[^0-9]/g, '');
+  if (!s) return String(num); // return original if not numeric
+  return s.padStart(2, '0');
 }
 
 function convertToCSV(data: any[]): string {
