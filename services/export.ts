@@ -126,12 +126,13 @@ export function generateExport(
       };
 
     case 'CHYRON_CSV':
-      const chyronHeaders = ["Index", "PlayerName", "PlayerNumber", "PositionAbbr", "Bio_Stats", "SocialHandle"];
+      const chyronHeaders = ["Index", "PlayerName", "PlayerNumber", "PositionAbbr", "Phonetic", "Bio_Stats", "SocialHandle"];
       const chyronRows = athletes.map((a, idx) => [
         idx + 1,
         a.fullName,
         a.jerseyNumber,
         a.position.toUpperCase(),
+        tier !== 'BASIC' ? a.phoneticSimplified || "" : "",
         a.bioStats || "Production ready bio summary pending.",
         a.socialHandle || `@${a.fullName.toLowerCase().replace(/\s+/g, '')}`
       ].map(val => `"${val}"`).join(","));
@@ -161,7 +162,7 @@ export function generateExport(
       // Tagboard DDG (Data Driven Graphics) format
       // Requires simple headers in Row 1.
       // Image URLs must be direct links.
-      const tagboardHeaders = ["Name", "Jersey", "Position", "Team Name", "Headshot URL", "Team Logo URL"];
+      const tagboardHeaders = ["Name", "Jersey", "Position", "Phonetic", "Team Name", "Headshot URL", "Team Logo URL"];
 
       // We look for Branding metadata in the first athlete or pass it in if available in future refactors.
       // For now, we assume the logo might be attached to individual athletes if we enriched them, 
@@ -177,6 +178,7 @@ export function generateExport(
         a.fullName,
         a.jerseyNumber,
         a.position,
+        tier !== 'BASIC' ? a.phoneticSimplified || "" : "",
         teamName,
         // TODO: Add headshot logic if readily available. 
         // For now, use a placeholder or blank to avoid breaking the CSV if the user maps it manually.
@@ -223,6 +225,9 @@ export function generateExport(
         xml += `    <JERSEY>${a.jerseyNumber}</JERSEY>\n`;
         xml += `    <POSITION>${a.position.toUpperCase()}</POSITION>\n`;
         xml += `    <STATUS>${a.nilStatus.toUpperCase()}</STATUS>\n`;
+        if (tier !== 'BASIC') {
+          xml += `    <PHONETIC>${a.phoneticSimplified || ''}</PHONETIC>\n`;
+        }
         xml += `  </ATHLETE>\n`;
       });
       xml += `</ROSTER>`;

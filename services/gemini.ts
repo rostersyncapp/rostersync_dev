@@ -509,10 +509,12 @@ function getSchemaForTier(tier: SubscriptionTier, isNocMode: boolean, findBrandi
     }
 
     baseAthleteProperties.phoneticSimplified = { type: SchemaType.STRING, description: "Simplified phonetic guide (e.g. 'fuh-NET-ik')." };
+    requiredFields.push("phoneticSimplified");
   }
 
   if (tier === 'NETWORK') {
     baseAthleteProperties.phoneticIPA = { type: SchemaType.STRING, description: "International Phonetic Alphabet (IPA) notation (e.g. /fəˈnɛtɪk/). Use standard symbols and slashes." };
+    requiredFields.push("phoneticIPA");
     baseAthleteProperties.nameSpanish = { type: SchemaType.STRING };
     baseAthleteProperties.nameMandarin = { type: SchemaType.STRING };
     baseAthleteProperties.bioStats = { type: SchemaType.STRING, description: "Summary of Olympic achievements/medals or career stats." };

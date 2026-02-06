@@ -470,7 +470,9 @@ export const Dashboard: React.FC<Props> = ({
 
     // Also check if any player name matches
     const matchesPlayerName = r.rosterData?.some(athlete =>
-      (athlete.fullName || '').toLowerCase().includes(searchLower)
+      (athlete.fullName || '').toLowerCase().includes(searchLower) ||
+      (athlete.phoneticSimplified || '').toLowerCase().includes(searchLower) ||
+      (athlete.phoneticIPA || '').toLowerCase().includes(searchLower)
     );
 
     const matchesSearch = matchesTeamOrSport || matchesPlayerName;
