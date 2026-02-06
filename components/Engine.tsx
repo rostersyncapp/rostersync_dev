@@ -37,8 +37,69 @@ import {
   History,
   Activity,
   ZapOff,
-  Search
+  Search,
+  UserPlus
 } from 'lucide-react';
+
+const MissingPlayersModal = ({
+  isOpen,
+  pastedCount,
+  officialCount,
+  missingCount,
+  onKeep,
+  onAdd
+}: {
+  isOpen: boolean;
+  pastedCount: number;
+  officialCount: number;
+  missingCount: number;
+  onKeep: () => void;
+  onAdd: () => void;
+}) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-300">
+      <div className="relative w-full max-w-md bg-white dark:bg-gray-900 rounded-3xl p-8 shadow-2xl animate-in zoom-in duration-300 border border-gray-100 dark:border-gray-800">
+        <div className="text-center mb-6">
+          <div className="w-16 h-16 rounded-2xl bg-amber-50 dark:bg-amber-900/30 text-amber-500 flex items-center justify-center mx-auto mb-4">
+            <UserPlus size={32} />
+          </div>
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white">Incomplete Roster Detected</h3>
+          <p className="text-sm text-gray-500 mt-2">
+            You pasted <strong className="text-gray-900 dark:text-gray-200">{pastedCount} players</strong>, but the official roster has <strong className="text-gray-900 dark:text-gray-200">{officialCount}</strong>.
+          </p>
+        </div>
+
+        <div className="bg-gray-50 dark:bg-gray-800/50 rounded-2xl p-4 mb-8 border border-gray-100 dark:border-gray-700">
+          <div className="flex items-center justify-between text-sm font-medium mb-1">
+            <span className="text-gray-500">Missing Players</span>
+            <span className="text-amber-600 font-bold">+{missingCount} Found</span>
+          </div>
+          <p className="text-xs text-gray-400">
+            We found {missingCount} additional active players from the official source. Would you like to add them?
+          </p>
+        </div>
+
+        <div className="flex gap-3">
+          <button
+            onClick={onKeep}
+            className="flex-1 h-12 rounded-xl font-bold text-sm text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+          >
+            Keep My {pastedCount}
+          </button>
+          <button
+            onClick={onAdd}
+            className="flex-1 h-12 rounded-xl font-bold text-sm bg-indigo-600 text-white hover:bg-indigo-700 hover:shadow-lg hover:shadow-indigo-500/20 transition-all flex items-center justify-center gap-2"
+          >
+            <UserPlus size={16} />
+            Add {missingCount} Players
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 interface Props {
   userTier: SubscriptionTier;
@@ -91,6 +152,14 @@ export const Engine: React.FC<Props> = ({
   // Team Selection Modal State
   const [showTeamSelection, setShowTeamSelection] = useState(false);
   const [candidateTeams, setCandidateTeams] = useState<any[]>([]);
+
+  // Missing Players Modal State
+  const [showMissingPlayersModal, setShowMissingPlayersModal] = useState(false);
+  const [missingAthletesData, setMissingAthletesData] = useState<{
+    pasted: number;
+    official: number;
+    missing: Athlete[];
+  } | null>(null);
 
   const [isSaving, setIsSaving] = useState(false);
 
@@ -194,6 +263,31 @@ export const Engine: React.FC<Props> = ({
       setStep(1);
     }
   }, [pendingRoster, isProcessing]);
+
+  // Effect to Check for Missing Players when Pending Roster loads
+  useEffect(() => {
+    if (pendingRoster && pendingRoster.officialRosterCount && pendingRoster.missingAthletes && pendingRoster.missingAthletes.length > 2) {
+      const pasted = pendingRoster.pastedRosterCount || pendingRoster.athletes.length;
+      const official = pendingRoster.officialRosterCount;
+      // Only show if the discrepancy is significant (e.g. at least 3 missing players)
+      // and official count is greater than pasted count
+      if (official > pasted && pendingRoster.missingAthletes.length > 0) {
+        setMissingAthletesData({
+          pasted,
+          official,
+          missing: pendingRoster.missingAthletes
+        });
+        setShowMissingPlayersModal(true);
+      }
+    }
+  }, [pendingRoster]);
+
+  const handleAddMissingPlayers = () => {
+    if (missingAthletesData && missingAthletesData.missing.length > 0) {
+      setProcessedAthletes(prev => [...prev, ...missingAthletesData.missing]);
+      setShowMissingPlayersModal(false);
+    }
+  };
 
   // Click outside handler for dropdown
   useEffect(() => {
@@ -703,6 +797,16 @@ export const Engine: React.FC<Props> = ({
         candidates={candidateTeams}
         onSelect={handleTeamSelected}
         onClose={() => setShowTeamSelection(false)}
+      />
+
+      {/* Missing Players Prompt */}
+      <MissingPlayersModal
+        isOpen={showMissingPlayersModal}
+        pastedCount={missingAthletesData?.pasted || 0}
+        officialCount={missingAthletesData?.official || 0}
+        missingCount={missingAthletesData?.missing.length || 0}
+        onKeep={() => setShowMissingPlayersModal(false)}
+        onAdd={handleAddMissingPlayers}
       />
 
 

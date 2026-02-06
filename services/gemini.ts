@@ -29,6 +29,16 @@ interface ProcessedRoster {
     logoUrl?: string;
     countryCode?: string;
   };
+  officialRosterCount?: number;
+  pastedRosterCount?: number;
+  missingAthletes?: Athlete[];
+}
+
+interface ExternalAthleteData {
+  jersey: string;
+  position: string;
+  headshot?: string;
+  id: string;
 }
 
 export type { ProcessedRoster };
@@ -301,7 +311,7 @@ function normalizePlayerName(name: string): string {
 /**
  * Fetch team roster from ESPN API
  */
-async function fetchESPNRoster(teamName: string): Promise<Map<string, string> | null> {
+async function fetchESPNRoster(teamName: string): Promise<Map<string, ExternalAthleteData> | null> {
   const teamUpper = teamName.toUpperCase().trim();
   const teamInfo = ESPN_TEAM_IDS[teamUpper];
 
@@ -318,12 +328,17 @@ async function fetchESPNRoster(teamName: string): Promise<Map<string, string> | 
     if (!response.ok) return null;
 
     const data = await response.json();
-    const rosterMap = new Map<string, string>();
+    const rosterMap = new Map<string, ExternalAthleteData>();
 
     if (data.athletes && Array.isArray(data.athletes)) {
       for (const athlete of data.athletes) {
-        if (athlete.fullName && athlete.jersey) {
-          rosterMap.set(normalizePlayerName(athlete.fullName), athlete.jersey);
+        if (athlete.fullName) {
+          rosterMap.set(normalizePlayerName(athlete.fullName), {
+            jersey: athlete.jersey || "00",
+            position: athlete.position?.abbreviation || "Athlete",
+            headshot: athlete.headshot?.href || "",
+            id: athlete.id
+          });
         }
       }
     }
@@ -385,7 +400,7 @@ function getKnownTeamsForLeague(league: string): string[] {
 /**
  * Fetch team roster from MLB Stats API (for MiLB)
  */
-async function fetchMilbRoster(teamName: string, league: string): Promise<Map<string, string> | null> {
+async function fetchMilbRoster(teamName: string, league: string): Promise<Map<string, ExternalAthleteData> | null> {
   const sportId = MILB_SPORT_IDS[league];
   if (!sportId) return null;
 
@@ -416,12 +431,17 @@ async function fetchMilbRoster(teamName: string, league: string): Promise<Map<st
     if (!rosterResponse.ok) return null;
 
     const rosterData = await rosterResponse.json();
-    const rosterMap = new Map<string, string>();
+    const rosterMap = new Map<string, ExternalAthleteData>();
 
     if (rosterData.roster && Array.isArray(rosterData.roster)) {
       for (const entry of rosterData.roster) {
-        if (entry.person?.fullName && entry.jerseyNumber) {
-          rosterMap.set(normalizePlayerName(entry.person.fullName), entry.jerseyNumber);
+        if (entry.person?.fullName) {
+          rosterMap.set(normalizePlayerName(entry.person.fullName), {
+            jersey: entry.jerseyNumber || "00",
+            position: entry.position?.abbreviation || "Athlete",
+            id: entry.person.id.toString(),
+            headshot: `https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:67:current.png/w_213,q_auto:best/v1/people/${entry.person.id}/headshot/67/current`
+          });
         }
       }
     }
@@ -437,17 +457,18 @@ async function fetchMilbRoster(teamName: string, league: string): Promise<Map<st
 /**
  * Fill in missing jersey numbers by matching against external roster data (ESPN or MiLB)
  */
-async function fillMissingJerseyNumbers(athletes: any[], teamName: string, league?: string): Promise<any[]> {
+async function fillMissingJerseyNumbers(
+  athletes: any[],
+  teamName: string,
+  league?: string
+): Promise<{
+  updatedAthletes: any[],
+  officialCount: number,
+  missingAthletes: Athlete[]
+}> {
   console.log(`[Roster Sync] fillMissingJerseyNumbers called with team: "${teamName}", league: ${league || 'unknown'}, athletes: ${athletes.length}`);
 
-  const missingJerseys = athletes.filter(a => !a.jerseyNumber || a.jerseyNumber === '00' || a.jerseyNumber === '');
-
-  if (missingJerseys.length === 0) {
-    console.log('[Roster Sync] All athletes have jersey numbers, skipping lookup');
-    return athletes;
-  }
-
-  let externalRoster: Map<string, string> | null = null;
+  let externalRoster: Map<string, ExternalAthleteData> | null = null;
 
   if (league && MILB_SPORT_IDS[league]) {
     externalRoster = await fetchMilbRoster(teamName, league);
@@ -457,26 +478,71 @@ async function fillMissingJerseyNumbers(athletes: any[], teamName: string, leagu
 
   if (!externalRoster || externalRoster.size === 0) {
     console.log('[Roster Sync] No external roster data available - returning original athletes');
-    return athletes;
+    return {
+      updatedAthletes: athletes,
+      officialCount: 0,
+      missingAthletes: []
+    };
   }
 
+  // 1. Fill missing jerseys
   let filledCount = 0;
   const updatedAthletes = athletes.map(athlete => {
     if (!athlete.jerseyNumber || athlete.jerseyNumber === '00' || athlete.jerseyNumber === '') {
       const normalizedName = normalizePlayerName(athlete.fullName || '');
-      const jerseyNumber = externalRoster?.get(normalizedName);
+      const externalData = externalRoster?.get(normalizedName);
 
-      if (jerseyNumber) {
-        console.log(`[Roster Sync] ✓ Found jersey for ${athlete.fullName}: #${jerseyNumber}`);
+      if (externalData?.jersey) {
+        console.log(`[Roster Sync] ✓ Found jersey for ${athlete.fullName}: #${externalData.jersey}`);
         filledCount++;
-        return { ...athlete, jerseyNumber: formatJerseyNumber(jerseyNumber) };
+        return { ...athlete, jerseyNumber: formatJerseyNumber(externalData.jersey) };
       }
     }
     return athlete;
   });
 
   console.log(`[Roster Sync] Filled ${filledCount} missing jersey numbers`);
-  return updatedAthletes;
+
+  // 2. Identify missing athletes
+  const pastedNames = new Set(athletes.map(a => normalizePlayerName(a.fullName || '')));
+  const missingAthletes: Athlete[] = [];
+
+  externalRoster.forEach((data, nameKey) => {
+    // Check if this normalized name exists in the pasted list
+    // Also skip if it seems like a duplicate/alias (simple check)
+    if (!pastedNames.has(nameKey)) {
+      // Reconstruct the name from key (since map key is normalized) 
+      // Actually we don't have the original name easily unless we stored it.
+      // Let's assume title case of the key is "good enough" or improved later.
+      // BETTER: We should probably store the original display name in ExternalAthleteData.
+      // For now, convert simple Title Case.
+      const displayName = toTitleCase(nameKey);
+
+      missingAthletes.push({
+        id: data.id,
+        fullName: displayName,
+        firstName: displayName.split(' ')[0],
+        lastName: displayName.split(' ').slice(1).join(' '),
+        jerseyNumber: formatJerseyNumber(data.jersey),
+        position: data.position || "Athlete",
+        nilStatus: 'Incoming',
+        dbStatus: 'NOT_FOUND',
+        originalName: displayName,
+        displayNameSafe: displayName.toUpperCase(),
+        phoneticSimplified: "",
+        phoneticIPA: "",
+        seasonYear: "2024" // Default or pass in
+      });
+    }
+  });
+
+  console.log(`[Roster Sync] Identified ${missingAthletes.length} athletes missing from input (Official Total: ${externalRoster.size})`);
+
+  return {
+    updatedAthletes,
+    officialCount: externalRoster.size,
+    missingAthletes
+  };
 }
 
 function getSchemaForTier(tier: SubscriptionTier, isNocMode: boolean, findBranding: boolean): any {
@@ -1213,7 +1279,7 @@ export async function processRosterRawText(
 
   // Fill missing jersey numbers from ESPN or MiLB roster data
   const teamNameForLookup = parsedResult.teamName || "";
-  const athletesWithJerseys = await fillMissingJerseyNumbers(athletes, teamNameForLookup, league);
+  const { updatedAthletes: athletesWithJerseys, officialCount, missingAthletes } = await fillMissingJerseyNumbers(athletes, teamNameForLookup, league);
 
   // Standardize Sport/League from MiLB or ESPN ID Mapping
   // IMPORTANT: Only do this if there are NO candidate teams (no ambiguity)
@@ -1302,6 +1368,9 @@ export async function processRosterRawText(
     verificationSources,
     candidateTeams: candidateTeams.length > 1 ? candidateTeams : undefined,
     teamMetadata: finalBranding,
-    abbreviation: finalBranding.abbreviation // Also include at root for easy UI access
+    abbreviation: finalBranding.abbreviation, // Also include at root for easy UI access
+    officialRosterCount: officialCount,
+    pastedRosterCount: athletes.length,
+    missingAthletes: missingAthletes
   };
 }
