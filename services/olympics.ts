@@ -1,5 +1,5 @@
-
 import { Athlete } from '../types.ts';
+import { hexToRgb, padJersey } from './utils.ts';
 
 /**
  * OFFICIAL 2026 MILANO CORTINA ODF CODES
@@ -63,19 +63,20 @@ export function convertToODF(athletes: Athlete[], primaryColor?: string, seconda
         const countryCode = athlete.organisationId || 'AIN';
         const sportCode = athlete.sportCode || athlete.position?.substring(0, 3).toUpperCase() || 'GEN';
 
-        // Custom Padding Logic for ODF
-        const padJersey = (n: string) => {
-            const s = String(n).replace(/[^0-9]/g, '');
-            return s ? s.padStart(2, '0') : n;
-        };
 
         xml += `    <Participant Code="${athleteId}" Parent="${athleteId}" Status="ACTIVE" Organisation="${countryCode}" `;
         xml += `GivenName="${firstName}" FamilyName="${familyName}" PrintName="${printName}" `;
         xml += `Gender="${athlete.gender || 'M'}" BirthDate="${athlete.birthDate || ''}" `;
         xml += `Jersey="${padJersey(athlete.jerseyNumber)}" `;
 
-        if (primaryColor) xml += `PrimaryColor="${primaryColor}" `;
-        if (secondaryColor) xml += `SecondaryColor="${secondaryColor}" `;
+        if (primaryColor) {
+            xml += `PrimaryColor="${primaryColor}" `;
+            xml += `PrimaryRGB="${hexToRgb(primaryColor)}" `;
+        }
+        if (secondaryColor) {
+            xml += `SecondaryColor="${secondaryColor}" `;
+            xml += `SecondaryRGB="${hexToRgb(secondaryColor)}" `;
+        }
 
         if (athlete.heightCm) xml += `Height="${athlete.heightCm}" `;
         if (athlete.weightKg) xml += `Weight="${athlete.weightKg}" `;
