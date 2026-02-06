@@ -1,4 +1,4 @@
-import { Athlete } from '../types.ts';
+import { Athlete, SubscriptionTier } from '../types.ts';
 import { hexToRgb, padJersey } from './utils.ts';
 
 /**
@@ -40,7 +40,7 @@ export interface ODFAthlete extends Athlete {
  * Transforms athlete data into broadcaster-compliant ODF XML.
  * Official ODF Participant Feed for Milano Cortina 2026 (DT_PARTIC)
  */
-export function convertToODF(athletes: Athlete[], primaryColor?: string, secondaryColor?: string): string {
+export function convertToODF(athletes: Athlete[], primaryColor?: string, secondaryColor?: string, tier: SubscriptionTier = 'NETWORK'): string {
     const timestamp = new Date().toISOString().split('T');
     const [date, time] = [timestamp[0], timestamp[1].split('.')[0]];
 
@@ -71,11 +71,15 @@ export function convertToODF(athletes: Athlete[], primaryColor?: string, seconda
 
         if (primaryColor) {
             xml += `PrimaryColor="${primaryColor}" `;
-            xml += `PrimaryRGB="${hexToRgb(primaryColor)}" `;
+            if (tier === 'STUDIO' || tier === 'NETWORK') {
+                xml += `PrimaryRGB="${hexToRgb(primaryColor)}" `;
+            }
         }
         if (secondaryColor) {
             xml += `SecondaryColor="${secondaryColor}" `;
-            xml += `SecondaryRGB="${hexToRgb(secondaryColor)}" `;
+            if (tier === 'STUDIO' || tier === 'NETWORK') {
+                xml += `SecondaryRGB="${hexToRgb(secondaryColor)}" `;
+            }
         }
 
         if (athlete.heightCm) xml += `Height="${athlete.heightCm}" `;
