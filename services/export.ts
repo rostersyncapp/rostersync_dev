@@ -25,7 +25,9 @@ export function generateExport(
           position: a.position,
           seasonYear: a.seasonYear,
           teamPrimaryColor: tier !== 'BASIC' ? (primaryColor || '') : '',
-          teamSecondaryColor: tier !== 'BASIC' ? (secondaryColor || '') : ''
+          teamSecondaryColor: tier !== 'BASIC' ? (secondaryColor || '') : '',
+          teamPrimaryRGB: tier !== 'BASIC' ? hexToRgb(primaryColor) : '',
+          teamSecondaryRGB: tier !== 'BASIC' ? hexToRgb(secondaryColor) : ''
         };
         if (tier !== 'BASIC') {
           row.phonetic = a.phoneticSimplified;
@@ -82,7 +84,9 @@ export function generateExport(
       if (tier !== 'BASIC') {
         iconikMetadata.custom_metadata = {
           "primaryColor": primaryColor || "",
-          "secondaryColor": secondaryColor || ""
+          "secondaryColor": secondaryColor || "",
+          "primaryRGB": hexToRgb(primaryColor),
+          "secondaryRGB": hexToRgb(secondaryColor)
         };
       }
 
@@ -94,7 +98,7 @@ export function generateExport(
 
 
     case 'VIZRT_DATACENTER_CSV':
-      const vizHeaders = ["KEY", "ID", "NAME", "POS", "PHONETIC", "COLOR_PRI", "COLOR_SEC", "BIO_JSON"];
+      const vizHeaders = ["KEY", "ID", "NAME", "POS", "PHONETIC", "COLOR_PRI", "COLOR_SEC", "RGB_PRI", "RGB_SEC", "BIO_JSON"];
       const vizRows = athletes.map(a => {
         const bioData = {
           status: a.nilStatus,
@@ -109,6 +113,8 @@ export function generateExport(
           tier === 'NETWORK' ? a.phoneticIPA : a.phoneticSimplified || "",
           tier !== 'BASIC' ? (primaryColor || "") : "",
           tier !== 'BASIC' ? (secondaryColor || "") : "",
+          tier !== 'BASIC' ? hexToRgb(primaryColor) : "",
+          tier !== 'BASIC' ? hexToRgb(secondaryColor) : "",
           JSON.stringify(bioData).replace(/"/g, '""')
         ].map(val => `"${val}"`).join(",");
       });
@@ -129,6 +135,8 @@ export function generateExport(
         vxml += `      <field name="PRONUNCIATION">${(tier === 'NETWORK' ? a.phoneticIPA : a.phoneticSimplified) || ''}</field>\n`;
         vxml += `      <field name="PRIMARY_COLOR">${tier !== 'BASIC' ? (primaryColor || '') : ''}</field>\n`;
         vxml += `      <field name="SECONDARY_COLOR">${tier !== 'BASIC' ? (secondaryColor || '') : ''}</field>\n`;
+        vxml += `      <field name="PRIMARY_RGB">${tier !== 'BASIC' ? hexToRgb(primaryColor) : ''}</field>\n`;
+        vxml += `      <field name="SECONDARY_RGB">${tier !== 'BASIC' ? hexToRgb(secondaryColor) : ''}</field>\n`;
         vxml += `      <field name="STAT_LINE">${a.bioStats || ''}</field>\n`;
         vxml += `      <field name="HEADSHOT_URL">C:\\RosterSync\\Heads\\${padJersey(a.jerseyNumber)}.tga</field>\n`;
         vxml += `    </element>\n`;
@@ -141,7 +149,7 @@ export function generateExport(
       };
 
     case 'CHYRON_CSV':
-      const chyronHeaders = ["Index", "PlayerName", "PlayerNumber", "PositionAbbr", "Phonetic", "PrimaryColor", "SecondaryColor", "Bio_Stats", "SocialHandle"];
+      const chyronHeaders = ["Index", "PlayerName", "PlayerNumber", "PositionAbbr", "Phonetic", "PrimaryColor", "SecondaryColor", "PrimaryRGB", "SecondaryRGB", "Bio_Stats", "SocialHandle"];
       const chyronRows = athletes.map((a, idx) => [
         idx + 1,
         a.fullName,
@@ -150,6 +158,8 @@ export function generateExport(
         tier !== 'BASIC' ? a.phoneticSimplified || "" : "",
         tier !== 'BASIC' ? (primaryColor || "") : "",
         tier !== 'BASIC' ? (secondaryColor || "") : "",
+        tier !== 'BASIC' ? hexToRgb(primaryColor) : "",
+        tier !== 'BASIC' ? hexToRgb(secondaryColor) : "",
         a.bioStats || "Production ready bio summary pending.",
         a.socialHandle || `@${a.fullName.toLowerCase().replace(/\s+/g, '')}`
       ].map(val => `"${val}"`).join(","));
@@ -161,13 +171,15 @@ export function generateExport(
       };
 
     case 'NEWBLUE_CSV':
-      const newBlueHeaders = ["Title", "Subtitle", "Description", "PrimaryColor", "SecondaryColor", "Image_URL"];
+      const newBlueHeaders = ["Title", "Subtitle", "Description", "PrimaryColor", "SecondaryColor", "PrimaryRGB", "SecondaryRGB", "Image_URL"];
       const newBlueRows = athletes.map(a => [
         a.fullName,
         `${a.position} | #${padJersey(a.jerseyNumber)}`,
         a.bioStats || `${a.fullName} is an ${a.nilStatus} athlete for ${teamName}.`,
         tier !== 'BASIC' ? (primaryColor || "") : "",
         tier !== 'BASIC' ? (secondaryColor || "") : "",
+        tier !== 'BASIC' ? hexToRgb(primaryColor) : "",
+        tier !== 'BASIC' ? hexToRgb(secondaryColor) : "",
         ""
       ].map(val => `"${val}"`).join(","));
 
@@ -181,7 +193,7 @@ export function generateExport(
       // Tagboard DDG (Data Driven Graphics) format
       // Requires simple headers in Row 1.
       // Image URLs must be direct links.
-      const tagboardHeaders = ["Name", "Jersey", "Position", "Phonetic", "PrimaryColor", "SecondaryColor", "Team Name", "Headshot URL", "Team Logo URL"];
+      const tagboardHeaders = ["Name", "Jersey", "Position", "Phonetic", "PrimaryColor", "SecondaryColor", "PrimaryRGB", "SecondaryRGB", "Team Name", "Headshot URL", "Team Logo URL"];
 
       // We look for Branding metadata in the first athlete or pass it in if available in future refactors.
       // For now, we assume the logo might be attached to individual athletes if we enriched them, 
@@ -200,6 +212,8 @@ export function generateExport(
         tier !== 'BASIC' ? a.phoneticSimplified || "" : "",
         tier !== 'BASIC' ? (primaryColor || "") : "",
         tier !== 'BASIC' ? (secondaryColor || "") : "",
+        tier !== 'BASIC' ? hexToRgb(primaryColor) : "",
+        tier !== 'BASIC' ? hexToRgb(secondaryColor) : "",
         teamName,
         // TODO: Add headshot logic if readily available. 
         // For now, use a placeholder or blank to avoid breaking the CSV if the user maps it manually.
@@ -241,7 +255,7 @@ export function generateExport(
     case 'ROSS_XML':
       let xml = `<?xml version="1.0" encoding="UTF-8"?>\n<ROSTER TEAM="${teamName.toUpperCase()}" LANGUAGE="${language.toUpperCase()}">\n`;
       if (tier !== 'BASIC') {
-        xml += `  <COLORS PRIMARY="${primaryColor || ''}" SECONDARY="${secondaryColor || ''}" />\n`;
+        xml += `  <COLORS PRIMARY="${primaryColor || ''}" SECONDARY="${secondaryColor || ''}" PRIMARY_RGB="${hexToRgb(primaryColor)}" SECONDARY_RGB="${hexToRgb(secondaryColor)}" />\n`;
       }
       athletes.forEach(a => {
         xml += `  <ATHLETE ID="${a.id}">\n`;
@@ -253,6 +267,8 @@ export function generateExport(
           xml += `    <PHONETIC>${a.phoneticSimplified || ''}</PHONETIC>\n`;
           xml += `    <COLOR_PRIMARY>${primaryColor || ''}</COLOR_PRIMARY>\n`;
           xml += `    <COLOR_SECONDARY>${secondaryColor || ''}</COLOR_SECONDARY>\n`;
+          xml += `    <RGB_PRIMARY>${hexToRgb(primaryColor)}</RGB_PRIMARY>\n`;
+          xml += `    <RGB_SECONDARY>${hexToRgb(secondaryColor)}</RGB_SECONDARY>\n`;
         }
         xml += `  </ATHLETE>\n`;
       });
@@ -281,7 +297,9 @@ export function generateExport(
       if (tier !== 'BASIC') {
         vizrtData.colors = {
           primary: primaryColor || '',
-          secondary: secondaryColor || ''
+          secondary: secondaryColor || '',
+          primaryRGB: hexToRgb(primaryColor),
+          secondaryRGB: hexToRgb(secondaryColor)
         };
       }
       return {
@@ -307,6 +325,15 @@ function padJersey(num: string | number): string {
   const s = String(num).replace(/[^0-9]/g, '');
   if (!s) return String(num); // return original if not numeric
   return s.padStart(2, '0');
+}
+
+function hexToRgb(hex?: string): string {
+  if (!hex || hex.length < 6) return "";
+  const h = hex.replace('#', '');
+  const r = parseInt(h.substring(0, 2), 16);
+  const g = parseInt(h.substring(2, 4), 16);
+  const b = parseInt(h.substring(4, 6), 16);
+  return isNaN(r) || isNaN(g) || isNaN(b) ? "" : `${r}, ${g}, ${b}`;
 }
 
 function convertToCSV(data: any[]): string {
