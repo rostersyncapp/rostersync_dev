@@ -76,7 +76,7 @@ const PRICING_MATRIX = [
 const MatrixCell: React.FC<{ value: any }> = ({ value }) => {
   if (value === true) return <span className="text-[#5B5FFF] dark:text-emerald-400 text-xs font-bold">[X]</span>;
   if (value === false) return <span className="text-gray-400/30 dark:text-gray-700 text-xs">[ ]</span>;
-  return <span className="text-xs font-bold text-gray-700 dark:text-amber-400/90">{value}</span>;
+  return <span className="text-xs font-bold text-gray-700 dark:text-gray-300">{value}</span>;
 };
 
 const BrandLogo: React.FC<{ siteConfig: SiteConfig; size?: 'sm' | 'md' }> = ({ siteConfig, size = 'md' }) => {
