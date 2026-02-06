@@ -86,7 +86,8 @@ export function generateExport(
           "primaryColor": primaryColor || "",
           "secondaryColor": secondaryColor || "",
           "primaryRGB": hexToRgb(primaryColor),
-          "secondaryRGB": hexToRgb(secondaryColor)
+          "secondaryRGB": hexToRgb(secondaryColor),
+          "seasonYear": athletes[0]?.seasonYear || ""
         };
       }
 
@@ -137,6 +138,7 @@ export function generateExport(
         vxml += `      <field name="SECONDARY_COLOR">${tier !== 'BASIC' ? (secondaryColor || '') : ''}</field>\n`;
         vxml += `      <field name="PRIMARY_RGB">${tier !== 'BASIC' ? hexToRgb(primaryColor) : ''}</field>\n`;
         vxml += `      <field name="SECONDARY_RGB">${tier !== 'BASIC' ? hexToRgb(secondaryColor) : ''}</field>\n`;
+        vxml += `      <field name="SEASON_YEAR">${a.seasonYear || ''}</field>\n`;
         vxml += `      <field name="STAT_LINE">${a.bioStats || ''}</field>\n`;
         vxml += `      <field name="HEADSHOT_URL">C:\\RosterSync\\Heads\\${padJersey(a.jerseyNumber)}.tga</field>\n`;
         vxml += `    </element>\n`;
@@ -149,7 +151,7 @@ export function generateExport(
       };
 
     case 'CHYRON_CSV':
-      const chyronHeaders = ["Index", "PlayerName", "PlayerNumber", "PositionAbbr", "Phonetic", "PrimaryColor", "SecondaryColor", "PrimaryRGB", "SecondaryRGB", "Bio_Stats", "SocialHandle"];
+      const chyronHeaders = ["Index", "PlayerName", "PlayerNumber", "PositionAbbr", "Phonetic", "PrimaryColor", "SecondaryColor", "PrimaryRGB", "SecondaryRGB", "SeasonYear", "Bio_Stats", "SocialHandle"];
       const chyronRows = athletes.map((a, idx) => [
         idx + 1,
         a.fullName,
@@ -160,6 +162,7 @@ export function generateExport(
         tier !== 'BASIC' ? (secondaryColor || "") : "",
         tier !== 'BASIC' ? hexToRgb(primaryColor) : "",
         tier !== 'BASIC' ? hexToRgb(secondaryColor) : "",
+        a.seasonYear || "",
         a.bioStats || "Production ready bio summary pending.",
         a.socialHandle || `@${a.fullName.toLowerCase().replace(/\s+/g, '')}`
       ].map(val => `"${val}"`).join(","));
@@ -171,7 +174,7 @@ export function generateExport(
       };
 
     case 'NEWBLUE_CSV':
-      const newBlueHeaders = ["Title", "Subtitle", "Description", "PrimaryColor", "SecondaryColor", "PrimaryRGB", "SecondaryRGB", "Image_URL"];
+      const newBlueHeaders = ["Title", "Subtitle", "Description", "PrimaryColor", "SecondaryColor", "PrimaryRGB", "SecondaryRGB", "Season", "Image_URL"];
       const newBlueRows = athletes.map(a => [
         a.fullName,
         `${a.position} | #${padJersey(a.jerseyNumber)}`,
@@ -180,6 +183,7 @@ export function generateExport(
         tier !== 'BASIC' ? (secondaryColor || "") : "",
         tier !== 'BASIC' ? hexToRgb(primaryColor) : "",
         tier !== 'BASIC' ? hexToRgb(secondaryColor) : "",
+        a.seasonYear || "",
         ""
       ].map(val => `"${val}"`).join(","));
 
@@ -193,7 +197,7 @@ export function generateExport(
       // Tagboard DDG (Data Driven Graphics) format
       // Requires simple headers in Row 1.
       // Image URLs must be direct links.
-      const tagboardHeaders = ["Name", "Jersey", "Position", "Phonetic", "PrimaryColor", "SecondaryColor", "PrimaryRGB", "SecondaryRGB", "Team Name", "Headshot URL", "Team Logo URL"];
+      const tagboardHeaders = ["Name", "Jersey", "Position", "Phonetic", "PrimaryColor", "SecondaryColor", "PrimaryRGB", "SecondaryRGB", "Season", "Team Name", "Headshot URL", "Team Logo URL"];
 
       // We look for Branding metadata in the first athlete or pass it in if available in future refactors.
       // For now, we assume the logo might be attached to individual athletes if we enriched them, 
@@ -214,6 +218,7 @@ export function generateExport(
         tier !== 'BASIC' ? (secondaryColor || "") : "",
         tier !== 'BASIC' ? hexToRgb(primaryColor) : "",
         tier !== 'BASIC' ? hexToRgb(secondaryColor) : "",
+        a.seasonYear || "",
         teamName,
         // TODO: Add headshot logic if readily available. 
         // For now, use a placeholder or blank to avoid breaking the CSV if the user maps it manually.
@@ -253,7 +258,7 @@ export function generateExport(
       };
 
     case 'ROSS_XML':
-      let xml = `<?xml version="1.0" encoding="UTF-8"?>\n<ROSTER TEAM="${teamName.toUpperCase()}" LANGUAGE="${language.toUpperCase()}">\n`;
+      let xml = `<?xml version="1.0" encoding="UTF-8"?>\n<ROSTER TEAM="${teamName.toUpperCase()}" LANGUAGE="${language.toUpperCase()}" SEASON="${(athletes[0]?.seasonYear || '').toUpperCase()}">\n`;
       if (tier !== 'BASIC') {
         xml += `  <COLORS PRIMARY="${primaryColor || ''}" SECONDARY="${secondaryColor || ''}" PRIMARY_RGB="${hexToRgb(primaryColor)}" SECONDARY_RGB="${hexToRgb(secondaryColor)}" />\n`;
       }
@@ -269,6 +274,7 @@ export function generateExport(
           xml += `    <COLOR_SECONDARY>${secondaryColor || ''}</COLOR_SECONDARY>\n`;
           xml += `    <RGB_PRIMARY>${hexToRgb(primaryColor)}</RGB_PRIMARY>\n`;
           xml += `    <RGB_SECONDARY>${hexToRgb(secondaryColor)}</RGB_SECONDARY>\n`;
+          xml += `    <SEASON_YEAR>${a.seasonYear || ''}</SEASON_YEAR>\n`;
         }
         xml += `  </ATHLETE>\n`;
       });
@@ -290,6 +296,7 @@ export function generateExport(
             name: a.fullName,
             number: padJersey(a.jerseyNumber),
             pos: a.position,
+            season: a.seasonYear,
             img: `${safeImgName}_cutout.png`
           };
         })

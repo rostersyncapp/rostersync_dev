@@ -426,11 +426,19 @@ export const Dashboard: React.FC<Props> = ({
 
   const handleUpdateMetadata = () => {
     if (!selectedRoster) return;
+
+    // Propagate seasonYear change to all athletes in the roster
+    const updatedRosterData = selectedRoster.rosterData.map(athlete => ({
+      ...athlete,
+      seasonYear: editSeason
+    }));
+
     onUpdateRoster({
       ...selectedRoster,
       teamName: editName,
       sport: editSport,
-      seasonYear: editSeason
+      seasonYear: editSeason,
+      rosterData: updatedRosterData
     });
     setIsEditingMetadata(false);
   };
