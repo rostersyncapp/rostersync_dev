@@ -56,7 +56,8 @@ import {
   Layers,
   FileText,
   Shirt,
-  AlertCircle
+  AlertCircle,
+  Lock
 } from 'lucide-react';
 
 interface Props {
