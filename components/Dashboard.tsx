@@ -790,35 +790,24 @@ export const Dashboard: React.FC<Props> = ({
                   </div>
                 </div>
 
-                <div className="space-y-8">
+                <div className="space-y-12">
+                  {/* BASIC TIER */}
                   <div className="space-y-4">
-                    <h4 className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-400 font-mono"><Table size={14} className="text-[#5B5FFF]" /> Generic Interchange</h4>
+                    <h4 className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-gray-400 font-mono">
+                      <span className="flex items-center gap-2"><Table size={14} className="text-[#5B5FFF]" /> Basic Tier</span>
+                      <span className="px-2 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-[8px]">Interchange</span>
+                    </h4>
                     <div className="grid grid-cols-1 gap-3">
                       <ExportItem icon={<FileText size={20} />} title="Standard CSV" desc="Clean, flat data for spreadsheets." onClick={() => handleExport('CSV_FLAT')} />
-                      <ExportItem icon={<FileJson size={20} />} title="JSON Blob" desc="Developer-friendly structured data." onClick={() => handleExport('VIZRT_JSON')} disabled={isTierLocked(userTier, 'NETWORK')} requiredTier="NETWORK" />
                     </div>
                   </div>
 
+                  {/* PRO TIER */}
                   <div className="space-y-4">
-                    <h4 className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-400 font-mono"><MonitorPlay size={14} className="text-[#5B5FFF]" /> Broadcast Hardwares</h4>
-                    <div className="grid grid-cols-1 gap-3">
-                      <ExportItem icon={<MonitorPlay size={20} />} title="Ross DataLinq XML" desc="XPression & Dashboard native." onClick={() => handleExport('ROSS_XML')} disabled={isTierLocked(userTier, 'NETWORK')} requiredTier="NETWORK" />
-                      <ExportItem icon={<Database size={20} />} title="Vizrt DataCenter" desc="Trio & Pilot Key-Value CSV." onClick={() => handleExport('VIZRT_DATACENTER_CSV')} disabled={isTierLocked(userTier, 'NETWORK')} requiredTier="NETWORK" />
-                      <ExportItem icon={<FileCode size={20} />} title="Olympic ODF XML" desc="High-compliance event XML." onClick={() => handleExport('ODF_XML')} disabled={isTierLocked(userTier, 'NETWORK')} requiredTier="NETWORK" />
-                      <ExportItem icon={<Zap size={20} />} title="Chyron Prime CSV" desc="Lyric & Prime automation." onClick={() => handleExport('CHYRON_CSV')} disabled={isTierLocked(userTier, 'NETWORK')} requiredTier="NETWORK" />
-                    </div>
-                  </div>
-
-                  <div className="space-y-4">
-                    <h4 className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-400 font-mono"><Palette size={14} className="text-[#5B5FFF]" /> Cloud Graphics</h4>
-                    <div className="grid grid-cols-1 gap-3">
-                      <ExportItem icon={<Palette size={20} />} title="Tagboard DDG CSV" desc="Direct import for Tagboard graphics." onClick={() => handleExport('TAGBOARD_CSV')} disabled={isTierLocked(userTier, 'STUDIO')} requiredTier="STUDIO" />
-                      <ExportItem icon={<Zap size={20} />} title="NewBlue Titler CSV" desc="Titler Live data source." onClick={() => handleExport('NEWBLUE_CSV')} disabled={isTierLocked(userTier, 'STUDIO')} requiredTier="STUDIO" />
-                    </div>
-                  </div>
-
-                  <div className="space-y-4">
-                    <h4 className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-400 font-mono"><Layers size={14} className="text-[#5B5FFF]" /> Asset Management (MAM)</h4>
+                    <h4 className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-gray-400 font-mono">
+                      <span className="flex items-center gap-2"><Layers size={14} className="text-[#5B5FFF]" /> Pro Tier</span>
+                      <span className="px-2 py-0.5 bg-amber-500/10 text-amber-500 rounded text-[8px]">MAM & Cloud</span>
+                    </h4>
                     <div className="grid grid-cols-1 gap-3">
                       <ExportItem icon={<Layers size={20} />} title="Iconik Metadata (JSON)" desc="Download JSON file." onClick={() => handleExport('ICONIK_JSON')} disabled={isTierLocked(userTier, 'PRO')} requiredTier="PRO" />
                       <button
@@ -878,6 +867,33 @@ export const Dashboard: React.FC<Props> = ({
                         {isTierLocked(userTier, 'PRO') && <Lock size={14} className="text-gray-400 shrink-0" />}
                       </button>
                       <ExportItem icon={<Cloud size={20} />} title="CatDV Schema" desc="JSON Picklist Definition." onClick={() => handleExport('CATDV_JSON')} disabled={isTierLocked(userTier, 'PRO')} requiredTier="PRO" />
+                    </div>
+                  </div>
+
+                  {/* STUDIO TIER */}
+                  <div className="space-y-4">
+                    <h4 className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-gray-400 font-mono">
+                      <span className="flex items-center gap-2"><Palette size={14} className="text-[#5B5FFF]" /> Studio Tier</span>
+                      <span className="px-2 py-0.5 bg-purple-500/10 text-purple-500 rounded text-[8px]">Cloud Graphics</span>
+                    </h4>
+                    <div className="grid grid-cols-1 gap-3">
+                      <ExportItem icon={<Palette size={20} />} title="Tagboard DDG CSV" desc="Direct import for Tagboard graphics." onClick={() => handleExport('TAGBOARD_CSV')} disabled={isTierLocked(userTier, 'STUDIO')} requiredTier="STUDIO" />
+                      <ExportItem icon={<Zap size={20} />} title="NewBlue Titler CSV" desc="Titler Live data source." onClick={() => handleExport('NEWBLUE_CSV')} disabled={isTierLocked(userTier, 'STUDIO')} requiredTier="STUDIO" />
+                    </div>
+                  </div>
+
+                  {/* NETWORK TIER */}
+                  <div className="space-y-4">
+                    <h4 className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-gray-400 font-mono">
+                      <span className="flex items-center gap-2"><MonitorPlay size={14} className="text-[#5B5FFF]" /> Network Tier</span>
+                      <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-500 rounded text-[8px]">Broadcast Ready</span>
+                    </h4>
+                    <div className="grid grid-cols-1 gap-3">
+                      <ExportItem icon={<MonitorPlay size={20} />} title="Ross DataLinq XML" desc="XPression & Dashboard native." onClick={() => handleExport('ROSS_XML')} disabled={isTierLocked(userTier, 'NETWORK')} requiredTier="NETWORK" />
+                      <ExportItem icon={<Database size={20} />} title="Vizrt DataCenter" desc="Trio & Pilot Key-Value CSV." onClick={() => handleExport('VIZRT_DATACENTER_CSV')} disabled={isTierLocked(userTier, 'NETWORK')} requiredTier="NETWORK" />
+                      <ExportItem icon={<FileCode size={20} />} title="Olympic ODF XML" desc="High-compliance event XML." onClick={() => handleExport('ODF_XML')} disabled={isTierLocked(userTier, 'NETWORK')} requiredTier="NETWORK" />
+                      <ExportItem icon={<Zap size={20} />} title="Chyron Prime CSV" desc="Lyric & Prime automation." onClick={() => handleExport('CHYRON_CSV')} disabled={isTierLocked(userTier, 'NETWORK')} requiredTier="NETWORK" />
+                      <ExportItem icon={<FileJson size={20} />} title="JSON Blob" desc="Developer-friendly structured data." onClick={() => handleExport('VIZRT_JSON')} disabled={isTierLocked(userTier, 'NETWORK')} requiredTier="NETWORK" />
                     </div>
                   </div>
                 </div>
