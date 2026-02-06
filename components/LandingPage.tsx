@@ -20,7 +20,8 @@ import {
   Twitter,
   Linkedin,
   Sparkles,
-  Terminal as TerminalIcon
+  Terminal as TerminalIcon,
+  Check
 } from 'lucide-react';
 import { useClerk, SignUpButton } from '@clerk/clerk-react';
 import { WavyBackground } from './ui/wavy-background';
@@ -74,8 +75,8 @@ const PRICING_MATRIX = [
 
 
 const MatrixCell: React.FC<{ value: any }> = ({ value }) => {
-  if (value === true) return <span className="text-[#5B5FFF] dark:text-emerald-400 text-xs font-bold">[X]</span>;
-  if (value === false) return <span className="text-gray-400/30 dark:text-gray-700 text-xs">[ ]</span>;
+  if (value === true) return <div className="flex justify-center"><Check size={16} className="text-emerald-500 font-bold" strokeWidth={3} /></div>;
+  if (value === false) return null;
   return <span className="text-xs font-bold text-gray-700 dark:text-gray-300">{value}</span>;
 };
 
