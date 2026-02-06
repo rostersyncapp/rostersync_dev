@@ -125,7 +125,20 @@ const TeamLogo: React.FC<{
   );
 };
 
-const ExportItem: React.FC<{ icon: React.ReactNode; title: string; desc: string; onClick: () => void; disabled?: boolean }> = ({ icon, title, desc, onClick, disabled }) => (
+const TIER_ORDER: SubscriptionTier[] = ['BASIC', 'PRO', 'STUDIO', 'NETWORK'];
+
+const isTierLocked = (current: SubscriptionTier, required: SubscriptionTier): boolean => {
+  return TIER_ORDER.indexOf(current) < TIER_ORDER.indexOf(required);
+};
+
+const ExportItem: React.FC<{
+  icon: React.ReactNode;
+  title: string;
+  desc: string;
+  onClick: () => void;
+  disabled?: boolean;
+  requiredTier?: SubscriptionTier;
+}> = ({ icon, title, desc, onClick, disabled, requiredTier = 'PRO' }) => (
   <button
     onClick={disabled ? undefined : onClick}
     disabled={disabled}
@@ -144,7 +157,11 @@ const ExportItem: React.FC<{ icon: React.ReactNode; title: string; desc: string;
       <div className="text-left min-w-0">
         <div className="flex items-center gap-2">
           <div className="text-sm font-extrabold text-gray-900 dark:text-white truncate">{title}</div>
-          {disabled && <span className="px-1.5 py-0.5 bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 rounded text-[8px] font-black uppercase tracking-tighter shadow-sm border border-amber-200 dark:border-amber-900/50">PRO</span>}
+          {disabled && (
+            <span className="px-1.5 py-0.5 bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 rounded text-[8px] font-black uppercase tracking-tighter shadow-sm border border-amber-200 dark:border-amber-900/50">
+              {requiredTier}
+            </span>
+          )}
         </div>
         <div className="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-tight mt-0.5 truncate">{desc}</div>
       </div>
@@ -778,42 +795,42 @@ export const Dashboard: React.FC<Props> = ({
                     <h4 className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-400 font-mono"><Table size={14} className="text-[#5B5FFF]" /> Generic Interchange</h4>
                     <div className="grid grid-cols-1 gap-3">
                       <ExportItem icon={<FileText size={20} />} title="Standard CSV" desc="Clean, flat data for spreadsheets." onClick={() => handleExport('CSV_FLAT')} />
-                      <ExportItem icon={<FileJson size={20} />} title="JSON Blob" desc="Developer-friendly structured data." onClick={() => handleExport('VIZRT_JSON')} disabled={userTier === 'BASIC' || userTier === 'PRO'} />
+                      <ExportItem icon={<FileJson size={20} />} title="JSON Blob" desc="Developer-friendly structured data." onClick={() => handleExport('VIZRT_JSON')} disabled={isTierLocked(userTier, 'NETWORK')} requiredTier="NETWORK" />
                     </div>
                   </div>
 
                   <div className="space-y-4">
                     <h4 className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-400 font-mono"><MonitorPlay size={14} className="text-[#5B5FFF]" /> Broadcast Hardwares</h4>
                     <div className="grid grid-cols-1 gap-3">
-                      <ExportItem icon={<MonitorPlay size={20} />} title="Ross DataLinq XML" desc="XPression & Dashboard native." onClick={() => handleExport('ROSS_XML')} disabled={userTier === 'BASIC' || userTier === 'PRO'} />
-                      <ExportItem icon={<Database size={20} />} title="Vizrt DataCenter" desc="Trio & Pilot Key-Value CSV." onClick={() => handleExport('VIZRT_DATACENTER_CSV')} disabled={userTier === 'BASIC' || userTier === 'PRO'} />
-                      <ExportItem icon={<FileCode size={20} />} title="Olympic ODF XML" desc="High-compliance event XML." onClick={() => handleExport('ODF_XML')} disabled={userTier === 'BASIC' || userTier === 'PRO'} />
-                      <ExportItem icon={<Zap size={20} />} title="Chyron Prime CSV" desc="Lyric & Prime automation." onClick={() => handleExport('CHYRON_CSV')} disabled={userTier === 'BASIC' || userTier === 'PRO'} />
+                      <ExportItem icon={<MonitorPlay size={20} />} title="Ross DataLinq XML" desc="XPression & Dashboard native." onClick={() => handleExport('ROSS_XML')} disabled={isTierLocked(userTier, 'STUDIO')} requiredTier="STUDIO" />
+                      <ExportItem icon={<Database size={20} />} title="Vizrt DataCenter" desc="Trio & Pilot Key-Value CSV." onClick={() => handleExport('VIZRT_DATACENTER_CSV')} disabled={isTierLocked(userTier, 'STUDIO')} requiredTier="STUDIO" />
+                      <ExportItem icon={<FileCode size={20} />} title="Olympic ODF XML" desc="High-compliance event XML." onClick={() => handleExport('ODF_XML')} disabled={isTierLocked(userTier, 'NETWORK')} requiredTier="NETWORK" />
+                      <ExportItem icon={<Zap size={20} />} title="Chyron Prime CSV" desc="Lyric & Prime automation." onClick={() => handleExport('CHYRON_CSV')} disabled={isTierLocked(userTier, 'STUDIO')} requiredTier="STUDIO" />
                     </div>
                   </div>
 
                   <div className="space-y-4">
                     <h4 className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-400 font-mono"><Palette size={14} className="text-[#5B5FFF]" /> Cloud Graphics</h4>
                     <div className="grid grid-cols-1 gap-3">
-                      <ExportItem icon={<Palette size={20} />} title="Tagboard DDG CSV" desc="Direct import for Tagboard graphics." onClick={() => handleExport('TAGBOARD_CSV')} disabled={userTier === 'BASIC' || userTier === 'PRO'} />
-                      <ExportItem icon={<Zap size={20} />} title="NewBlue Titler CSV" desc="Titler Live data source." onClick={() => handleExport('NEWBLUE_CSV')} disabled={userTier === 'BASIC' || userTier === 'PRO'} />
+                      <ExportItem icon={<Palette size={20} />} title="Tagboard DDG CSV" desc="Direct import for Tagboard graphics." onClick={() => handleExport('TAGBOARD_CSV')} disabled={isTierLocked(userTier, 'STUDIO')} requiredTier="STUDIO" />
+                      <ExportItem icon={<Zap size={20} />} title="NewBlue Titler CSV" desc="Titler Live data source." onClick={() => handleExport('NEWBLUE_CSV')} disabled={isTierLocked(userTier, 'STUDIO')} requiredTier="STUDIO" />
                     </div>
                   </div>
 
                   <div className="space-y-4">
                     <h4 className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-400 font-mono"><Layers size={14} className="text-[#5B5FFF]" /> Asset Management (MAM)</h4>
                     <div className="grid grid-cols-1 gap-3">
-                      <ExportItem icon={<Layers size={20} />} title="Iconik Metadata (JSON)" desc="Download JSON file." onClick={() => handleExport('ICONIK_JSON')} disabled={userTier === 'BASIC'} />
+                      <ExportItem icon={<Layers size={20} />} title="Iconik Metadata (JSON)" desc="Download JSON file." onClick={() => handleExport('ICONIK_JSON')} disabled={isTierLocked(userTier, 'PRO')} requiredTier="PRO" />
                       <button
-                        onClick={userTier === 'BASIC' ? undefined : handleIconikSync}
-                        disabled={isSyncingIconik || userTier === 'BASIC'}
-                        className={`w-full flex items-center justify-between p-4 rounded-lg transition-all group border ${userTier === 'BASIC'
+                        onClick={isTierLocked(userTier, 'PRO') ? undefined : handleIconikSync}
+                        disabled={isSyncingIconik || isTierLocked(userTier, 'PRO')}
+                        className={`w-full flex items-center justify-between p-4 rounded-lg transition-all group border ${isTierLocked(userTier, 'PRO')
                           ? 'bg-gray-50/50 dark:bg-gray-900/50 border-gray-100 dark:border-gray-800 opacity-60 cursor-not-allowed'
                           : 'bg-gray-50 dark:bg-gray-900 hover:bg-[#5B5FFF]/5 dark:hover:bg-[#5B5FFF]/10 border-gray-100 dark:border-gray-800 hover:border-[#5B5FFF]/20'
                           }`}
                       >
                         <div className="flex items-center gap-4">
-                          <div className={`w-12 h-12 rounded-lg flex items-center justify-center shadow-sm transition-colors ${userTier === 'BASIC'
+                          <div className={`w-12 h-12 rounded-lg flex items-center justify-center shadow-sm transition-colors ${isTierLocked(userTier, 'PRO')
                             ? 'bg-gray-200 dark:bg-gray-800 text-gray-400'
                             : isSyncIconikSuccess ? 'bg-green-100 text-green-600' : 'bg-white dark:bg-gray-800 text-gray-400 group-hover:text-[#5B5FFF] group-hover:scale-110'
                             }`}>
@@ -822,26 +839,26 @@ export const Dashboard: React.FC<Props> = ({
                           <div className="text-left min-w-0">
                             <div className="flex items-center gap-2">
                               <div className="text-sm font-extrabold text-gray-900 dark:text-white truncate">Sync to Iconik</div>
-                              {userTier === 'BASIC' && <span className="px-1.5 py-0.5 bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 rounded text-[8px] font-black uppercase tracking-tighter shadow-sm border border-amber-200 dark:border-amber-900/50">PRO</span>}
+                              {isTierLocked(userTier, 'PRO') && <span className="px-1.5 py-0.5 bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 rounded text-[8px] font-black uppercase tracking-tighter shadow-sm border border-amber-200 dark:border-amber-900/50">PRO</span>}
                             </div>
                             <div className="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-tight mt-0.5 truncate">
-                              {userTier === 'BASIC' ? 'Premium Feature' : isSyncingIconik ? 'Syncing...' : isSyncIconikSuccess ? 'Synced Successfully!' : 'Push via API'}
+                              {isTierLocked(userTier, 'PRO') ? 'Premium Feature' : isSyncingIconik ? 'Syncing...' : isSyncIconikSuccess ? 'Synced Successfully!' : 'Push via API'}
                             </div>
                           </div>
                         </div>
-                        {userTier !== 'BASIC' && <ArrowRight size={18} className="text-gray-300 group-hover:text-[#5B5FFF] group-hover:translate-x-1 transition-all shrink-0" />}
-                        {userTier === 'BASIC' && <Lock size={14} className="text-gray-400 shrink-0" />}
+                        {!isTierLocked(userTier, 'PRO') && <ArrowRight size={18} className="text-gray-300 group-hover:text-[#5B5FFF] group-hover:translate-x-1 transition-all shrink-0" />}
+                        {isTierLocked(userTier, 'PRO') && <Lock size={14} className="text-gray-400 shrink-0" />}
                       </button>
                       <button
-                        onClick={userTier === 'BASIC' ? undefined : handleCatdvSync}
-                        disabled={isSyncingCatdv || userTier === 'BASIC'}
-                        className={`w-full flex items-center justify-between p-4 rounded-lg transition-all group border ${userTier === 'BASIC'
+                        onClick={isTierLocked(userTier, 'PRO') ? undefined : handleCatdvSync}
+                        disabled={isSyncingCatdv || isTierLocked(userTier, 'PRO')}
+                        className={`w-full flex items-center justify-between p-4 rounded-lg transition-all group border ${isTierLocked(userTier, 'PRO')
                           ? 'bg-gray-50/50 dark:bg-gray-900/50 border-gray-100 dark:border-gray-800 opacity-60 cursor-not-allowed'
                           : 'bg-gray-50 dark:bg-gray-900 hover:bg-emerald-500/5 dark:hover:bg-emerald-500/10 border-gray-100 dark:border-gray-800 hover:border-emerald-500/20'
                           }`}
                       >
                         <div className="flex items-center gap-4">
-                          <div className={`w-12 h-12 rounded-lg flex items-center justify-center shadow-sm transition-colors ${userTier === 'BASIC'
+                          <div className={`w-12 h-12 rounded-lg flex items-center justify-center shadow-sm transition-colors ${isTierLocked(userTier, 'PRO')
                             ? 'bg-gray-200 dark:bg-gray-800 text-gray-400'
                             : isSyncCatdvSuccess ? 'bg-green-100 text-green-600' : 'bg-white dark:bg-gray-800 text-gray-400 group-hover:text-emerald-500 group-hover:scale-110'
                             }`}>
@@ -850,17 +867,17 @@ export const Dashboard: React.FC<Props> = ({
                           <div className="text-left min-w-0">
                             <div className="flex items-center gap-2">
                               <div className="text-sm font-extrabold text-gray-900 dark:text-white truncate">Sync to CatDV</div>
-                              {userTier === 'BASIC' && <span className="px-1.5 py-0.5 bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 rounded text-[8px] font-black uppercase tracking-tighter shadow-sm border border-amber-200 dark:border-amber-900/50">PRO</span>}
+                              {isTierLocked(userTier, 'PRO') && <span className="px-1.5 py-0.5 bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 rounded text-[8px] font-black uppercase tracking-tighter shadow-sm border border-amber-200 dark:border-amber-900/50">PRO</span>}
                             </div>
                             <div className="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-tight mt-0.5 truncate">
-                              {userTier === 'BASIC' ? 'Premium Feature' : isSyncingCatdv ? 'Syncing...' : isSyncCatdvSuccess ? 'Synced Successfully!' : 'Update Picklist'}
+                              {isTierLocked(userTier, 'PRO') ? 'Premium Feature' : isSyncingCatdv ? 'Syncing...' : isSyncCatdvSuccess ? 'Synced Successfully!' : 'Update Picklist'}
                             </div>
                           </div>
                         </div>
-                        {userTier !== 'BASIC' && <ArrowRight size={18} className="text-gray-300 group-hover:text-emerald-500 group-hover:translate-x-1 transition-all shrink-0" />}
-                        {userTier === 'BASIC' && <Lock size={14} className="text-gray-400 shrink-0" />}
+                        {!isTierLocked(userTier, 'PRO') && <ArrowRight size={18} className="text-gray-300 group-hover:text-emerald-500 group-hover:translate-x-1 transition-all shrink-0" />}
+                        {isTierLocked(userTier, 'PRO') && <Lock size={14} className="text-gray-400 shrink-0" />}
                       </button>
-                      <ExportItem icon={<Cloud size={20} />} title="CatDV Schema" desc="JSON Picklist Definition." onClick={() => handleExport('CATDV_JSON')} disabled={userTier === 'BASIC'} />
+                      <ExportItem icon={<Cloud size={20} />} title="CatDV Schema" desc="JSON Picklist Definition." onClick={() => handleExport('CATDV_JSON')} disabled={isTierLocked(userTier, 'PRO')} requiredTier="PRO" />
                     </div>
                   </div>
                 </div>
