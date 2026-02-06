@@ -484,33 +484,35 @@ function getSchemaForTier(tier: SubscriptionTier, isNocMode: boolean, findBrandi
     fullName: { type: SchemaType.STRING },
     jerseyNumber: { type: SchemaType.STRING, description: isNocMode ? "Bib number for the athlete. Always use two digits (pad with 0 if needed)." : "Jersey number. Always use two digits (pad with 0 if needed)." },
     position: { type: SchemaType.STRING, description: isNocMode ? "Main sport/discipline (e.g. Swimming)." : "Player position." },
-    nilStatus: { type: SchemaType.STRING },
   };
 
-  const requiredFields = ["fullName", "jerseyNumber", "position", "nilStatus"];
+  const requiredFields = ["fullName", "jerseyNumber", "position"];
 
-  if (isNocMode) {
-    baseAthleteProperties.countryCode = { type: SchemaType.STRING, description: "3-letter IOC Country Code (e.g. JAM, USA)." };
-    baseAthleteProperties.organisationId = { type: SchemaType.STRING, description: "IOC Country Code. Same as countryCode." };
-    baseAthleteProperties.firstName = { type: SchemaType.STRING };
-    baseAthleteProperties.lastName = { type: SchemaType.STRING, description: "Athlete's Family Name." };
-    baseAthleteProperties.gender = { type: SchemaType.STRING, description: "'M' or 'W'." };
-    baseAthleteProperties.birthDate = { type: SchemaType.STRING, description: "BirthDate (YYYY-MM-DD). Use NULL if unknown." };
-    baseAthleteProperties.heightCm = { type: SchemaType.NUMBER, description: "Height in CM. Use NULL if unknown." };
-    baseAthleteProperties.weightKg = { type: SchemaType.NUMBER, description: "Weight in KG. Use NULL if unknown." };
-    baseAthleteProperties.placeOfBirth = { type: SchemaType.STRING, description: "Athlete's hometown or birthplace (e.g. 'Park City, UT')." };
-    baseAthleteProperties.event = { type: SchemaType.STRING, description: "Specific discipline (e.g. 'ALP', 'IHO', 'FSK')." };
-  }
-
+  // BASIC TIER LIMITATION: Name, Jersey, Position only.
+  // NOC mode fields and phonetics are locked behind PRO/STUDIO/NETWORK.
   if (tier !== 'BASIC') {
+    baseAthleteProperties.displayNameSafe = { type: SchemaType.STRING, description: "Name sanitized for broadcast hardware (ALL CAPS, no accents, special characters removed)." };
+    baseAthleteProperties.nilStatus = { type: SchemaType.STRING };
+    requiredFields.push("displayNameSafe", "nilStatus");
+
+    if (isNocMode && (tier === 'STUDIO' || tier === 'NETWORK')) {
+      baseAthleteProperties.countryCode = { type: SchemaType.STRING, description: "3-letter IOC Country Code (e.g. JAM, USA)." };
+      baseAthleteProperties.organisationId = { type: SchemaType.STRING, description: "IOC Country Code. Same as countryCode." };
+      baseAthleteProperties.firstName = { type: SchemaType.STRING };
+      baseAthleteProperties.lastName = { type: SchemaType.STRING, description: "Athlete's Family Name." };
+      baseAthleteProperties.gender = { type: SchemaType.STRING, description: "'M' or 'W'." };
+      baseAthleteProperties.birthDate = { type: SchemaType.STRING, description: "BirthDate (YYYY-MM-DD). Use NULL if unknown." };
+      baseAthleteProperties.heightCm = { type: SchemaType.NUMBER, description: "Height in CM. Use NULL if unknown." };
+      baseAthleteProperties.weightKg = { type: SchemaType.NUMBER, description: "Weight in KG. Use NULL if unknown." };
+      baseAthleteProperties.placeOfBirth = { type: SchemaType.STRING, description: "Athlete's hometown or birthplace (e.g. 'Park City, UT')." };
+      baseAthleteProperties.event = { type: SchemaType.STRING, description: "Specific discipline (e.g. 'ALP', 'IHO', 'FSK')." };
+    }
+
     baseAthleteProperties.phoneticSimplified = { type: SchemaType.STRING, description: "Simplified phonetic guide (e.g. 'fuh-NET-ik')." };
   }
 
   if (tier === 'NETWORK') {
     baseAthleteProperties.phoneticIPA = { type: SchemaType.STRING, description: "International Phonetic Alphabet (IPA) notation (e.g. /fəˈnɛtɪk/). Use standard symbols and slashes." };
-  }
-
-  if (tier === 'NETWORK') {
     baseAthleteProperties.nameSpanish = { type: SchemaType.STRING };
     baseAthleteProperties.nameMandarin = { type: SchemaType.STRING };
     baseAthleteProperties.bioStats = { type: SchemaType.STRING, description: "Summary of Olympic achievements/medals or career stats." };

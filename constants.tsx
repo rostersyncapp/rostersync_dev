@@ -54,7 +54,7 @@ export const PRICING_TIERS = [
     price: '$79',
     monthlyCredits: 150,
     description: 'For solo motion designers.',
-    features: ['150 Credits / Month', 'Logo & HEX Colors', 'Simplified Phonetics', 'After Effects & MAM Support', 'Unlimited Storage'],
+    features: ['150 Credits / Month', 'Logo & HEX Colors', 'Simplified Phonetics', 'MAM Sync (Iconik/CatDV)', 'Unlimited Storage'],
     polarCheckoutUrl: 'https://polar.sh/rostersync/products/pro-tier'
   },
   {

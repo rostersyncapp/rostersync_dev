@@ -81,38 +81,6 @@ export function generateExport(
         mimeType: 'application/json'
       };
 
-    case 'AFTER_EFFECTS_CSV':
-      const aeHeaders = ["Name", "DisplayName", "Jersey", "Position", "Phonetic", "Language"];
-      const aeRows = athletes.map(a => [
-        a.fullName,
-        a.displayNameSafe,
-        a.jerseyNumber,
-        a.position,
-        tier === 'NETWORK' ? a.phoneticIPA : a.phoneticSimplified,
-        language
-      ].join(","));
-      return {
-        content: [aeHeaders.join(","), ...aeRows].join("\n"),
-        filename: `${safeTeam}_after_effects_${langSuffix}_${timestamp}.csv`,
-        mimeType: 'text/csv'
-      };
-
-    case 'ROSS_XP_CSV':
-      const rossXPHeaders = ["ID", "NAME_CAPS", "JERSEY", "POS", "PHONETIC", "HEADSHOT"];
-      const rossXPRows = athletes.map(a => [
-        a.jerseyNumber || a.id.split('-')[1] || "0",
-        a.displayNameSafe.toUpperCase(),
-        a.jerseyNumber,
-        a.position.toUpperCase(),
-        tier === 'NETWORK' ? a.phoneticIPA : a.phoneticSimplified || "",
-        `C:\\Rosters\\Heads\\${a.jerseyNumber}.tga`
-      ].map(val => `"${val}"`).join(","));
-
-      return {
-        content: [rossXPHeaders.join(","), ...rossXPRows].join("\n"),
-        filename: `${safeTeam}_ross_xpression_${langSuffix}_${timestamp}.csv`,
-        mimeType: 'text/csv'
-      };
 
     case 'VIZRT_DATACENTER_CSV':
       const vizHeaders = ["KEY", "ID", "NAME", "POS", "PHONETIC", "BIO_JSON"];

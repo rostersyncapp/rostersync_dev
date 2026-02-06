@@ -62,7 +62,7 @@ const PRICING_MATRIX = [
   { feature: "Monthly Price", free: "$0", pro: "$79", studio: "$149", network: "$249" },
   { feature: "AI Credits", free: "20", pro: "150", studio: "500", network: "800" },
   { feature: "Rosters/month", free: "~1-2", pro: "~10", studio: "~33", network: "~53" },
-  { feature: "Export formats", free: "CSV (Flat)", pro: "CSV, After Effects, Iconik, CatDV", studio: "Pro + Ross, Vizrt, Chyron, NewBlue", network: "Studio + XML, ODF, Tagboard" },
+  { feature: "Export formats", free: "CSV (Flat)", pro: "CSV, Iconik, CatDV", studio: "Pro + Ross, Vizrt, Chyron, NewBlue", network: "Studio + XML, ODF, Tagboard" },
   { feature: "Team members", free: "1", pro: "1", studio: "3", network: "5" },
   { feature: "Phonetic guides", free: false, pro: "✅ Simple", studio: "✅ Simple", network: "✅ Simple + IPA" },
   { feature: "Multi-language", free: false, pro: false, studio: false, network: "✅ ES + ZH" },

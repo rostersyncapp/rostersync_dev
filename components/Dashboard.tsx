@@ -124,18 +124,32 @@ const TeamLogo: React.FC<{
   );
 };
 
-const ExportItem: React.FC<{ icon: React.ReactNode; title: string; desc: string; onClick: () => void }> = ({ icon, title, desc, onClick }) => (
-  <button onClick={onClick} className="w-full flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 hover:bg-[#5B5FFF]/5 dark:hover:bg-[#5B5FFF]/10 rounded-lg transition-all group border border-gray-100 dark:border-gray-800 hover:border-[#5B5FFF]/20">
+const ExportItem: React.FC<{ icon: React.ReactNode; title: string; desc: string; onClick: () => void; disabled?: boolean }> = ({ icon, title, desc, onClick, disabled }) => (
+  <button
+    onClick={disabled ? undefined : onClick}
+    disabled={disabled}
+    className={`w-full flex items-center justify-between p-4 rounded-lg transition-all group border ${disabled
+      ? 'bg-gray-50/50 dark:bg-gray-900/50 border-gray-100 dark:border-gray-800 opacity-60 cursor-not-allowed'
+      : 'bg-gray-50 dark:bg-gray-900 hover:bg-[#5B5FFF]/5 dark:hover:bg-[#5B5FFF]/10 border-gray-100 dark:border-gray-800 hover:border-[#5B5FFF]/20'
+      }`}
+  >
     <div className="flex items-center gap-4">
-      <div className="w-12 h-12 rounded-lg bg-white dark:bg-gray-800 flex items-center justify-center text-gray-400 group-hover:text-[#5B5FFF] shadow-sm transition-colors group-hover:scale-110">
+      <div className={`w-12 h-12 rounded-lg flex items-center justify-center shadow-sm transition-colors ${disabled
+        ? 'bg-gray-200 dark:bg-gray-800 text-gray-400'
+        : 'bg-white dark:bg-gray-800 text-gray-400 group-hover:text-[#5B5FFF] group-hover:scale-110'
+        }`}>
         {icon}
       </div>
       <div className="text-left min-w-0">
-        <div className="text-sm font-extrabold text-gray-900 dark:text-white truncate">{title}</div>
+        <div className="flex items-center gap-2">
+          <div className="text-sm font-extrabold text-gray-900 dark:text-white truncate">{title}</div>
+          {disabled && <span className="px-1.5 py-0.5 bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 rounded text-[8px] font-black uppercase tracking-tighter shadow-sm border border-amber-200 dark:border-amber-900/50">PRO</span>}
+        </div>
         <div className="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-tight mt-0.5 truncate">{desc}</div>
       </div>
     </div>
-    <ArrowRight size={18} className="text-gray-300 group-hover:text-[#5B5FFF] group-hover:translate-x-1 transition-all shrink-0" />
+    {!disabled && <ArrowRight size={18} className="text-gray-300 group-hover:text-[#5B5FFF] group-hover:translate-x-1 transition-all shrink-0" />}
+    {disabled && <Lock size={14} className="text-gray-400 shrink-0" />}
   </button>
 );
 
@@ -653,11 +667,13 @@ export const Dashboard: React.FC<Props> = ({
                   <th className="px-8 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] text-center">{selectedRoster.isNocMode ? 'Bib' : 'Jersey'}</th>
                   <th className="px-8 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] text-center">{selectedRoster.isNocMode ? 'Event' : 'Position'}</th>
                   <th className="px-8 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] text-center">Hardware Safe</th>
-                  {selectedRoster.isNocMode && (
+                  {selectedRoster.isNocMode && (userTier === 'STUDIO' || userTier === 'NETWORK') && (
                     <th className="px-8 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] text-center">Birth Date</th>
                   )}
                   {userTier !== 'BASIC' && (
-                    <th className="px-8 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] text-center">Phonetic</th>
+                    <th className="px-8 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] text-center">
+                      {userTier === 'PRO' ? 'Phonetic' : 'Advanced Phonetic'}
+                    </th>
                   )}
                   <th className="px-8 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] text-left">Colors</th>
                   <th className="px-4 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] text-center w-16"></th>
@@ -693,7 +709,7 @@ export const Dashboard: React.FC<Props> = ({
                       <td className="px-8 py-4 text-center"><span className="inline-block w-10 py-1 rounded-lg bg-blue-600 dark:bg-blue-700 text-white text-xs font-bold shadow-sm">{a.jerseyNumber.toString().replace(/#/g, '')}</span></td>
                       <td className="px-8 py-4 text-center"><span className="inline-block px-3 py-1 rounded-lg bg-purple-600 dark:bg-purple-700 text-white text-[10px] font-black uppercase tracking-widest shadow-sm">{a.position}</span></td>
                       <td className="px-8 py-4 text-center"><span className="bg-emerald-600 dark:bg-emerald-700 px-3 py-1 rounded-lg text-[10px] font-black text-white tracking-widest font-mono shadow-sm">{a.displayNameSafe}</span></td>
-                      {selectedRoster.isNocMode && (
+                      {selectedRoster.isNocMode && (userTier === 'STUDIO' || userTier === 'NETWORK') && (
                         <td className="px-8 py-4 text-center">
                           <span className="bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded-lg text-[10px] font-bold text-gray-500 tracking-tighter tabular-nums shadow-sm border border-gray-100 dark:border-gray-700">
                             {a.birthDate || 'Unknown'}
@@ -751,69 +767,89 @@ export const Dashboard: React.FC<Props> = ({
                     <h4 className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-400 font-mono"><Table size={14} className="text-[#5B5FFF]" /> Generic Interchange</h4>
                     <div className="grid grid-cols-1 gap-3">
                       <ExportItem icon={<FileText size={20} />} title="Standard CSV" desc="Clean, flat data for spreadsheets." onClick={() => handleExport('CSV_FLAT')} />
-                      <ExportItem icon={<FileJson size={20} />} title="JSON Blob" desc="Developer-friendly structured data." onClick={() => handleExport('VIZRT_JSON')} />
+                      <ExportItem icon={<FileJson size={20} />} title="JSON Blob" desc="Developer-friendly structured data." onClick={() => handleExport('VIZRT_JSON')} disabled={userTier === 'BASIC' || userTier === 'PRO'} />
                     </div>
                   </div>
 
                   <div className="space-y-4">
                     <h4 className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-400 font-mono"><MonitorPlay size={14} className="text-[#5B5FFF]" /> Broadcast Hardwares</h4>
                     <div className="grid grid-cols-1 gap-3">
-                      <ExportItem icon={<MonitorPlay size={20} />} title="Ross DataLinq XML" desc="XPression & Dashboard native." onClick={() => handleExport('ROSS_XML')} />
-                      <ExportItem icon={<Database size={20} />} title="Vizrt DataCenter" desc="Trio & Pilot Key-Value CSV." onClick={() => handleExport('VIZRT_DATACENTER_CSV')} />
-                      <ExportItem icon={<FileCode size={20} />} title="Olympic ODF XML" desc="High-compliance event XML." onClick={() => handleExport('ODF_XML')} />
-                      <ExportItem icon={<Zap size={20} />} title="Chyron Prime CSV" desc="Lyric & Prime automation." onClick={() => handleExport('CHYRON_CSV')} />
+                      <ExportItem icon={<MonitorPlay size={20} />} title="Ross DataLinq XML" desc="XPression & Dashboard native." onClick={() => handleExport('ROSS_XML')} disabled={userTier === 'BASIC' || userTier === 'PRO'} />
+                      <ExportItem icon={<Database size={20} />} title="Vizrt DataCenter" desc="Trio & Pilot Key-Value CSV." onClick={() => handleExport('VIZRT_DATACENTER_CSV')} disabled={userTier === 'BASIC' || userTier === 'PRO'} />
+                      <ExportItem icon={<FileCode size={20} />} title="Olympic ODF XML" desc="High-compliance event XML." onClick={() => handleExport('ODF_XML')} disabled={userTier === 'BASIC' || userTier === 'PRO'} />
+                      <ExportItem icon={<Zap size={20} />} title="Chyron Prime CSV" desc="Lyric & Prime automation." onClick={() => handleExport('CHYRON_CSV')} disabled={userTier === 'BASIC' || userTier === 'PRO'} />
                     </div>
                   </div>
 
                   <div className="space-y-4">
                     <h4 className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-400 font-mono"><Palette size={14} className="text-[#5B5FFF]" /> Cloud Graphics</h4>
                     <div className="grid grid-cols-1 gap-3">
-                      <ExportItem icon={<Palette size={20} />} title="Tagboard DDG CSV" desc="Direct import for Tagboard graphics." onClick={() => handleExport('TAGBOARD_CSV')} />
-                      <ExportItem icon={<Zap size={20} />} title="NewBlue Titler CSV" desc="Titler Live data source." onClick={() => handleExport('NEWBLUE_CSV')} />
+                      <ExportItem icon={<Palette size={20} />} title="Tagboard DDG CSV" desc="Direct import for Tagboard graphics." onClick={() => handleExport('TAGBOARD_CSV')} disabled={userTier === 'BASIC' || userTier === 'PRO'} />
+                      <ExportItem icon={<Zap size={20} />} title="NewBlue Titler CSV" desc="Titler Live data source." onClick={() => handleExport('NEWBLUE_CSV')} disabled={userTier === 'BASIC' || userTier === 'PRO'} />
                     </div>
                   </div>
 
                   <div className="space-y-4">
                     <h4 className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-400 font-mono"><Layers size={14} className="text-[#5B5FFF]" /> Asset Management (MAM)</h4>
                     <div className="grid grid-cols-1 gap-3">
-                      <ExportItem icon={<Layers size={20} />} title="Iconik Metadata (JSON)" desc="Download JSON file." onClick={() => handleExport('ICONIK_JSON')} />
+                      <ExportItem icon={<Layers size={20} />} title="Iconik Metadata (JSON)" desc="Download JSON file." onClick={() => handleExport('ICONIK_JSON')} disabled={userTier === 'BASIC'} />
                       <button
-                        onClick={handleIconikSync}
-                        disabled={isSyncingIconik}
-                        className="w-full flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 hover:bg-[#5B5FFF]/5 dark:hover:bg-[#5B5FFF]/10 rounded-lg transition-all group border border-gray-100 dark:border-gray-800 hover:border-[#5B5FFF]/20"
+                        onClick={userTier === 'BASIC' ? undefined : handleIconikSync}
+                        disabled={isSyncingIconik || userTier === 'BASIC'}
+                        className={`w-full flex items-center justify-between p-4 rounded-lg transition-all group border ${userTier === 'BASIC'
+                          ? 'bg-gray-50/50 dark:bg-gray-900/50 border-gray-100 dark:border-gray-800 opacity-60 cursor-not-allowed'
+                          : 'bg-gray-50 dark:bg-gray-900 hover:bg-[#5B5FFF]/5 dark:hover:bg-[#5B5FFF]/10 border-gray-100 dark:border-gray-800 hover:border-[#5B5FFF]/20'
+                          }`}
                       >
                         <div className="flex items-center gap-4">
-                          <div className={`w-12 h-12 rounded-lg flex items-center justify-center shadow-sm transition-colors group-hover:scale-110 ${isSyncIconikSuccess ? 'bg-green-100 text-green-600' : 'bg-white dark:bg-gray-800 text-gray-400 group-hover:text-[#5B5FFF]'}`}>
+                          <div className={`w-12 h-12 rounded-lg flex items-center justify-center shadow-sm transition-colors ${userTier === 'BASIC'
+                            ? 'bg-gray-200 dark:bg-gray-800 text-gray-400'
+                            : isSyncIconikSuccess ? 'bg-green-100 text-green-600' : 'bg-white dark:bg-gray-800 text-gray-400 group-hover:text-[#5B5FFF] group-hover:scale-110'
+                            }`}>
                             {isSyncingIconik ? <Loader2 size={24} className="animate-spin" /> : isSyncIconikSuccess ? <Check size={24} /> : <Globe size={20} />}
                           </div>
                           <div className="text-left min-w-0">
-                            <div className="text-sm font-extrabold text-gray-900 dark:text-white truncate">Sync to Iconik</div>
+                            <div className="flex items-center gap-2">
+                              <div className="text-sm font-extrabold text-gray-900 dark:text-white truncate">Sync to Iconik</div>
+                              {userTier === 'BASIC' && <span className="px-1.5 py-0.5 bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 rounded text-[8px] font-black uppercase tracking-tighter shadow-sm border border-amber-200 dark:border-amber-900/50">PRO</span>}
+                            </div>
                             <div className="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-tight mt-0.5 truncate">
-                              {isSyncingIconik ? 'Syncing...' : isSyncIconikSuccess ? 'Synced Successfully!' : 'Push via API'}
+                              {userTier === 'BASIC' ? 'Premium Feature' : isSyncingIconik ? 'Syncing...' : isSyncIconikSuccess ? 'Synced Successfully!' : 'Push via API'}
                             </div>
                           </div>
                         </div>
-                        <ArrowRight size={18} className="text-gray-300 group-hover:text-[#5B5FFF] group-hover:translate-x-1 transition-all shrink-0" />
+                        {userTier !== 'BASIC' && <ArrowRight size={18} className="text-gray-300 group-hover:text-[#5B5FFF] group-hover:translate-x-1 transition-all shrink-0" />}
+                        {userTier === 'BASIC' && <Lock size={14} className="text-gray-400 shrink-0" />}
                       </button>
                       <button
-                        onClick={handleCatdvSync}
-                        disabled={isSyncingCatdv}
-                        className="w-full flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 hover:bg-emerald-500/5 dark:hover:bg-emerald-500/10 rounded-lg transition-all group border border-gray-100 dark:border-gray-800 hover:border-emerald-500/20"
+                        onClick={userTier === 'BASIC' ? undefined : handleCatdvSync}
+                        disabled={isSyncingCatdv || userTier === 'BASIC'}
+                        className={`w-full flex items-center justify-between p-4 rounded-lg transition-all group border ${userTier === 'BASIC'
+                          ? 'bg-gray-50/50 dark:bg-gray-900/50 border-gray-100 dark:border-gray-800 opacity-60 cursor-not-allowed'
+                          : 'bg-gray-50 dark:bg-gray-900 hover:bg-emerald-500/5 dark:hover:bg-emerald-500/10 border-gray-100 dark:border-gray-800 hover:border-emerald-500/20'
+                          }`}
                       >
                         <div className="flex items-center gap-4">
-                          <div className={`w-12 h-12 rounded-lg flex items-center justify-center shadow-sm transition-colors group-hover:scale-110 ${isSyncCatdvSuccess ? 'bg-green-100 text-green-600' : 'bg-white dark:bg-gray-800 text-gray-400 group-hover:text-emerald-500'}`}>
+                          <div className={`w-12 h-12 rounded-lg flex items-center justify-center shadow-sm transition-colors ${userTier === 'BASIC'
+                            ? 'bg-gray-200 dark:bg-gray-800 text-gray-400'
+                            : isSyncCatdvSuccess ? 'bg-green-100 text-green-600' : 'bg-white dark:bg-gray-800 text-gray-400 group-hover:text-emerald-500 group-hover:scale-110'
+                            }`}>
                             {isSyncingCatdv ? <Loader2 size={24} className="animate-spin" /> : isSyncCatdvSuccess ? <Check size={24} /> : <Database size={20} />}
                           </div>
                           <div className="text-left min-w-0">
-                            <div className="text-sm font-extrabold text-gray-900 dark:text-white truncate">Sync to CatDV</div>
+                            <div className="flex items-center gap-2">
+                              <div className="text-sm font-extrabold text-gray-900 dark:text-white truncate">Sync to CatDV</div>
+                              {userTier === 'BASIC' && <span className="px-1.5 py-0.5 bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 rounded text-[8px] font-black uppercase tracking-tighter shadow-sm border border-amber-200 dark:border-amber-900/50">PRO</span>}
+                            </div>
                             <div className="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-tight mt-0.5 truncate">
-                              {isSyncingCatdv ? 'Syncing...' : isSyncCatdvSuccess ? 'Synced Successfully!' : 'Update Picklist'}
+                              {userTier === 'BASIC' ? 'Premium Feature' : isSyncingCatdv ? 'Syncing...' : isSyncCatdvSuccess ? 'Synced Successfully!' : 'Update Picklist'}
                             </div>
                           </div>
                         </div>
-                        <ArrowRight size={18} className="text-gray-300 group-hover:text-emerald-500 group-hover:translate-x-1 transition-all shrink-0" />
+                        {userTier !== 'BASIC' && <ArrowRight size={18} className="text-gray-300 group-hover:text-emerald-500 group-hover:translate-x-1 transition-all shrink-0" />}
+                        {userTier === 'BASIC' && <Lock size={14} className="text-gray-400 shrink-0" />}
                       </button>
-                      <ExportItem icon={<Cloud size={20} />} title="CatDV Schema" desc="JSON Picklist Definition." onClick={() => handleExport('CATDV_JSON')} />
+                      <ExportItem icon={<Cloud size={20} />} title="CatDV Schema" desc="JSON Picklist Definition." onClick={() => handleExport('CATDV_JSON')} disabled={userTier === 'BASIC'} />
                     </div>
                   </div>
                 </div>
