@@ -41,11 +41,11 @@ interface LandingPageProps {
 }
 
 const FAQS = [
-  { q: "Why upgrade from Free to Pro?", a: "Upgrade to Pro when you need more than 2 rosters per month, want to export for Adobe After Effects, or require automatic team logo and HEX color discovery with phonetic pronunciation guides." },
-  { q: "What does the Studio tier offer for agencies?", a: "The Studio tier ($149) is designed for teams and creative agencies. It includes 3 user seats, white-label exports for your clients, and support for all color formats including RGB, Pantone, and CMYK." },
-  { q: "When should I choose the Network tier?", a: "Choose Network for national or international broadcasts. It adds support for Spanish and Mandarin name variants, enterprise XML formats (ODF/Chyron), API access, and IPA-grade phonetic guides." },
+  { q: "Why upgrade from Free to Pro?", a: "Upgrade to Pro when you need more than 2 rosters per month, want to sync with Iconik or CatDV, or require automatic team logo and HEX color discovery with phonetic pronunciation guides." },
+  { q: "What does the Studio tier offer for agencies?", a: "The Studio tier ($149) is designed for teams and creative agencies. It includes 3 user seats, white-label exports, and direct support for cloud-ready graphics platforms like Tagboard and NewBlue." },
+  { q: "When should I choose the Network tier?", a: "Choose Network for national or international broadcasts. It adds support for enterprise XML formats (Ross/Vizrt/Chyron), Olympic ODF compliance, API access, and IPA-grade phonetic guides." },
   { q: "Can I manage multiple projects?", a: "Yes. Starting with the Pro tier, you get unlimited folders and nested projects to help you organize rosters across different leagues, seasons, or production clients." },
-  { q: "What hardware systems do you support?", a: "We support nearly every major broadcast system. Studio tier provides direct data for Ross Xpression and Vizrt via CSV, while Network adds native XML feeds for high-end ticker and graphics pipelines." },
+  { q: "What hardware systems do you support?", a: "We support nearly every major broadcast system. Studio tier provides direct data for cloud graphics (Tagboard/NewBlue), while Network adds native XML feeds for high-end Ross Xpression, Vizrt, and Chyron Prime hardware." },
   { q: "What are 'White-label Exports'?", a: "Available in Studio and Network tiers, this feature removes all RosterSync branding from your exported files, ensuring a completely clean and professional delivery to your production hardware." }
 ];
 
@@ -62,7 +62,7 @@ const PRICING_MATRIX = [
   { feature: "Monthly Price", free: "$0", pro: "$79", studio: "$149", network: "$249" },
   { feature: "AI Credits", free: "20", pro: "150", studio: "500", network: "800" },
   { feature: "Rosters/month", free: "~1-2", pro: "~10", studio: "~33", network: "~53" },
-  { feature: "Export formats", free: "CSV (Flat)", pro: "CSV, Iconik, CatDV", studio: "Pro + Ross, Vizrt, Chyron, NewBlue", network: "Studio + XML, ODF, Tagboard" },
+  { feature: "Export formats", free: "CSV (Flat)", pro: "CSV, Iconik, CatDV", studio: "Pro + Tagboard, NewBlue", network: "Studio + Ross, Vizrt, Chyron, ODF XML" },
   { feature: "Team members", free: "1", pro: "1", studio: "3", network: "5" },
   { feature: "Phonetic guides", free: false, pro: "✅ Simple", studio: "✅ Simple", network: "✅ Simple + IPA" },
   { feature: "Multi-language", free: false, pro: false, studio: false, network: "✅ ES + ZH" },
