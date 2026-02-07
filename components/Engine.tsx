@@ -311,7 +311,7 @@ export const Engine: React.FC<Props> = ({
     {
       category: "🏀 Basketball",
       options: [
-        { value: "euroleague", label: "EuroLeague" },
+        // { value: "euroleague", label: "EuroLeague" },
         { value: "nba", label: "NBA" },
         { value: "wnba", label: "WNBA" }
       ]
@@ -325,27 +325,27 @@ export const Engine: React.FC<Props> = ({
     {
       category: "⚽ Soccer",
       options: [
-        { value: "bundesliga", label: "Bundesliga" },
-        { value: "efl-championship", label: "EFL Championship" },
-        { value: "eredivisie", label: "Eredivisie" },
-        { value: "la-liga", label: "La Liga" },
-        { value: "liga-mx", label: "Liga MX" },
-        { value: "ligue-1", label: "Ligue 1" },
+        // { value: "bundesliga", label: "Bundesliga" },
+        // { value: "efl-championship", label: "EFL Championship" },
+        // { value: "eredivisie", label: "Eredivisie" },
+        // { value: "la-liga", label: "La Liga" },
+        // { value: "liga-mx", label: "Liga MX" },
+        // { value: "ligue-1", label: "Ligue 1" },
         { value: "mls", label: "MLS" },
         { value: "nwsl", label: "NWSL" },
-        { value: "premier-league", label: "Premier League" },
-        { value: "scottish-premiership", label: "Scottish Premiership" },
-        { value: "serie-a", label: "Serie A" },
+        // { value: "premier-league", label: "Premier League" },
+        // { value: "scottish-premiership", label: "Scottish Premiership" },
+        // { value: "serie-a", label: "Serie A" },
         { value: "usl", label: "USL Championship" },
-        { value: "wsl", label: "Women's Super League (WSL)" }
+        // { value: "wsl", label: "Women's Super League (WSL)" }
       ]
     },
-    {
-      category: "🏏 Cricket",
-      options: [
-        { value: "ipl", label: "IPL" }
-      ]
-    },
+    // {
+    //   category: "🏏 Cricket",
+    //   options: [
+    //     { value: "ipl", label: "IPL" }
+    //   ]
+    // },
     {
       category: "🏒 Hockey",
       options: [

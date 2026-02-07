@@ -22,15 +22,18 @@ interface Logos3Props {
 }
 
 const DEFAULT_LOGOS: Logo[] = [
+    // International Leagues (Commented out for NA-only launch)
+    // { id: "pl", description: "Premier League", image: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/league_logos/premier1.png", className: "h-12 w-auto grayscale opacity-50 hover:opacity-100 hover:grayscale-0 transition-all duration-300" },
+    // { id: "laliga", description: "La Liga", image: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/league_logos/la-liga.svg", className: "h-12 w-auto grayscale opacity-50 hover:opacity-100 hover:grayscale-0 transition-all duration-300" },
+    // { id: "bundesliga", description: "Bundesliga", image: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/league_logos/bundesliga.svg", className: "h-12 w-auto grayscale opacity-50 hover:opacity-100 hover:grayscale-0 transition-all duration-300" },
+    // { id: "seriea", description: "Serie A", image: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/league_logos/serieA.png", className: "h-12 w-auto grayscale opacity-50 hover:opacity-100 hover:grayscale-0 transition-all duration-300" },
+    // { id: "ligue1", description: "Ligue 1", image: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/league_logos/ligue1.png", className: "h-12 w-auto grayscale opacity-50 hover:opacity-100 hover:grayscale-0 transition-all duration-300" },
+    // { id: "ligamx", description: "Liga MX", image: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/league_logos/liga-mx.svg", className: "h-12 w-auto grayscale opacity-50 hover:opacity-100 hover:grayscale-0 transition-all duration-300" },
+    // { id: "eredivisie", description: "Eredivisie", image: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/league_logos/eredivisie.svg", className: "h-12 w-auto grayscale opacity-50 hover:opacity-100 hover:grayscale-0 transition-all duration-300" },
+    // { id: "ipl", description: "IPL", image: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/league_logos/ipl.svg", className: "h-12 w-auto grayscale opacity-50 hover:opacity-100 hover:grayscale-0 transition-all duration-300" },
+    // North American Leagues
     { id: "mls", description: "MLS", image: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/league_logos/mls.svg", className: "h-12 w-auto grayscale opacity-50 hover:opacity-100 hover:grayscale-0 transition-all duration-300" },
     { id: "nwsl", description: "NWSL", image: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/league_logos/nwsl.svg", className: "h-12 w-auto grayscale opacity-50 hover:opacity-100 hover:grayscale-0 transition-all duration-300" },
-    { id: "pl", description: "Premier League", image: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/league_logos/premier1.png", className: "h-12 w-auto grayscale opacity-50 hover:opacity-100 hover:grayscale-0 transition-all duration-300" },
-    { id: "laliga", description: "La Liga", image: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/league_logos/la-liga.svg", className: "h-12 w-auto grayscale opacity-50 hover:opacity-100 hover:grayscale-0 transition-all duration-300" },
-    { id: "bundesliga", description: "Bundesliga", image: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/league_logos/bundesliga.svg", className: "h-12 w-auto grayscale opacity-50 hover:opacity-100 hover:grayscale-0 transition-all duration-300" },
-    { id: "seriea", description: "Serie A", image: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/league_logos/serieA.png", className: "h-12 w-auto grayscale opacity-50 hover:opacity-100 hover:grayscale-0 transition-all duration-300" },
-    { id: "ligue1", description: "Ligue 1", image: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/league_logos/ligue1.png", className: "h-12 w-auto grayscale opacity-50 hover:opacity-100 hover:grayscale-0 transition-all duration-300" },
-    { id: "ligamx", description: "Liga MX", image: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/league_logos/liga-mx.svg", className: "h-12 w-auto grayscale opacity-50 hover:opacity-100 hover:grayscale-0 transition-all duration-300" },
-    { id: "eredivisie", description: "Eredivisie", image: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/league_logos/eredivisie.svg", className: "h-12 w-auto grayscale opacity-50 hover:opacity-100 hover:grayscale-0 transition-all duration-300" },
     { id: "usl", description: "USL", image: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/league_logos/usl.png", className: "h-12 w-auto grayscale opacity-50 hover:opacity-100 hover:grayscale-0 transition-all duration-300" },
     { id: "nba", description: "NBA", image: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/league_logos/nba.svg", className: "h-12 w-auto grayscale opacity-50 hover:opacity-100 hover:grayscale-0 transition-all duration-300" },
     { id: "wnba", description: "WNBA", image: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/league_logos/wnba.svg", className: "h-12 w-auto grayscale opacity-50 hover:opacity-100 hover:grayscale-0 transition-all duration-300" },
@@ -38,7 +41,6 @@ const DEFAULT_LOGOS: Logo[] = [
     { id: "milb", description: "MiLB", image: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/league_logos/milb.svg", className: "h-12 w-auto grayscale opacity-50 hover:opacity-100 hover:grayscale-0 transition-all duration-300" },
     { id: "nfl", description: "NFL", image: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/league_logos/nfl.svg", className: "h-12 w-auto grayscale opacity-50 hover:opacity-100 hover:grayscale-0 transition-all duration-300" },
     { id: "nhl", description: "NHL", image: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/league_logos/nhl.svg", className: "h-12 w-auto grayscale opacity-50 hover:opacity-100 hover:grayscale-0 transition-all duration-300" },
-    { id: "ipl", description: "IPL", image: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/league_logos/ipl.svg", className: "h-12 w-auto grayscale opacity-50 hover:opacity-100 hover:grayscale-0 transition-all duration-300" },
 ];
 
 const Logos3 = ({
