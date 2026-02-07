@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Athlete, SubscriptionTier, Roster, ExportFormat, Project } from '../types.ts';
 import { ProcessedRoster } from '../services/gemini.ts';
 import { getLeagues, getConferences, getTeams } from '../services/supabase.ts';
+import { ESPN_TEAM_IDS } from '../services/teamData.ts';
 import { TeamSelectionModal } from './TeamSelectionModal';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -399,6 +400,24 @@ export const Engine: React.FC<Props> = ({
     } else if (!selectedLeague) {
       setSport('');
     }
+
+    // Populate teams for non-NCAA leagues from ESPN_TEAM_IDS
+    if (selectedLeague && selectedLeague !== 'ncaa') {
+      const normalizedInputLeague = selectedLeague.replace(/^usa\./, '');
+      const leagueTeams = Object.entries(ESPN_TEAM_IDS)
+        .filter(([_, info]) => {
+          const normalizedTeamLeague = (info.league || '').replace(/^usa\./, '');
+          return normalizedTeamLeague === normalizedInputLeague;
+        })
+        .map(([name, info]) => ({
+          id: info.id,
+          name: name,
+          logo_url: info.logoUrl,
+          primary_color: info.primaryColor,
+          secondary_color: info.secondaryColor
+        }));
+      setAvailableTeams(leagueTeams);
+    }
   };
 
   const handleProcess = () => {
@@ -742,8 +761,48 @@ export const Engine: React.FC<Props> = ({
                 </div>
               </div>
 
-              {/* NCAA Cascading Selectors */}
-              {league === 'ncaa' && (
+                  {/* Team Selector (All Leagues) */}
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-gray-400 uppercase tracking-widest font-mono flex items-center gap-2">
+                      <Trophy size={12} /> Team
+                    </label>
+                    <div className="relative">
+                      <select
+                        value={ncaaTeamId}
+                        onChange={(e) => {
+                          const teamId = e.target.value;
+                          setNcaaTeamId(teamId);
+
+                          if (teamId) {
+                            const team = availableTeams.find(t => t.id === teamId);
+                            if (team) {
+                              setManualTeamName(team.name);
+                              setPrimaryColor(team.primary_color || '#5B5FFF');
+                              setSecondaryColor(team.secondary_color || '#1A1A1A');
+                              setLogoUrl(team.logo_url);
+                            }
+                          } else {
+                            setManualTeamName('');
+                            setPrimaryColor('#5B5FFF');
+                            setSecondaryColor('#1A1A1A');
+                            setLogoUrl('');
+                          }
+                        }}
+                        className="w-full h-14 px-5 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl text-base font-medium outline-none focus:ring-2 focus:ring-[#5B5FFF]/20 pl-4 appearance-none"
+                      >
+                        <option value="">Select Team...</option>
+                        {availableTeams.map(t => (
+                          <option key={t.id} value={t.id}>{t.name}</option>
+                        ))}
+                      </select>
+                      <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                        <ChevronDown size={16} className="text-gray-400" />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* NCAA Cascading Selectors */}
+                  {league === 'ncaa' && (
                 <div className="space-y-4 animate-in slide-in-from-top-2">
                   {/* Sport Selector */}
                   <div className="space-y-2">
@@ -802,47 +861,6 @@ export const Engine: React.FC<Props> = ({
                     </div>
                   </div>
 
-                  {/* Team Selector (Optional) */}
-                  <div className="space-y-2">
-                    <label className="text-xs font-bold text-gray-400 uppercase tracking-widest font-mono flex items-center gap-2">
-                      <Trophy size={12} /> Select Team <span className="text-gray-300 dark:text-gray-600">(Optional)</span>
-                    </label>
-                    <div className="relative">
-                      <select
-                        value={ncaaTeamId}
-                        onChange={(e) => {
-                          const teamId = e.target.value;
-                          setNcaaTeamId(teamId);
-
-                          if (teamId) {
-                            const team = availableTeams.find(t => t.id === teamId);
-                            if (team) {
-                              setManualTeamName(team.name);
-                              setPrimaryColor(team.primary_color || '#5B5FFF');
-                              setSecondaryColor(team.secondary_color || '#1A1A1A');
-                              setLogoUrl(team.logo_url);
-                            }
-                          } else {
-                            setManualTeamName('');
-                            setPrimaryColor('#5B5FFF');
-                            setSecondaryColor('#1A1A1A');
-                            setLogoUrl('');
-                          }
-                        }}
-                        className="w-full h-14 px-5 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl text-base font-medium outline-none focus:ring-2 focus:ring-[#5B5FFF]/20 pl-4 appearance-none"
-                        disabled={!ncaaConference}
-                      >
-                        <option value="">Select Team...</option>
-                        {availableTeams.map(t => (
-                          <option key={t.id} value={t.id}>{t.name}</option>
-                        ))}
-                      </select>
-                      <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
-                        <ChevronDown size={16} className="text-gray-400" />
-                      </div>
-                    </div>
-                  </div>
-
                 </div>
               )}
 
@@ -861,7 +879,7 @@ export const Engine: React.FC<Props> = ({
 
               <div className="space-y-2">
                 <label className="text-xs font-bold text-gray-400 uppercase tracking-widest font-mono flex items-center gap-2">
-                  <Trophy size={12} /> Team Name <span className="text-gray-300 dark:text-gray-600">(optional)</span>
+                  <Trophy size={12} /> Team Name
                 </label>
                 <input
                   type="text"
