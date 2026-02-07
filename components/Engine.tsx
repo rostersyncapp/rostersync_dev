@@ -108,7 +108,7 @@ interface Props {
   creditsUsed: number;
   maxCredits: number;
   onSave: (roster: Roster) => void;
-  onStartProcessing: (text: string, isNocMode: boolean, seasonYear: string, findBranding: boolean, league?: string) => void;
+  onStartProcessing: (text: string, seasonYear: string, findBranding: boolean, league?: string) => void;
   isProcessing: boolean;
   pendingRoster: ProcessedRoster | null;
   onClearPending: () => void;
@@ -133,7 +133,6 @@ export const Engine: React.FC<Props> = ({
   const [step, setStep] = useState(1);
   const [rawInput, setRawInput] = useState(initialText);
   const [selectedProjectId, setSelectedProjectId] = useState<string>('');
-  const [isNocMode, setIsNocMode] = useState(false);
   const [showSeasonModal, setShowSeasonModal] = useState(false);
   const [manualTeamName, setManualTeamName] = useState('');
 
@@ -213,7 +212,7 @@ export const Engine: React.FC<Props> = ({
   const [scoutHistory, setScoutHistory] = useState<{ name: string, date: string, count: number }[]>([]);
   const [inputQuality, setInputQuality] = useState(0); // 0 to 100
   const [detections, setDetections] = useState<string[]>([]);
-  const [isOlympicFastMode, setIsOlympicFastMode] = useState(false);
+
 
   const [currentTipIndex, setCurrentTipIndex] = useState(0);
 
@@ -298,7 +297,6 @@ export const Engine: React.FC<Props> = ({
       const safeLogo = pendingRoster.teamMetadata?.logoUrl === 'Unknown' ? '' : pendingRoster.teamMetadata?.logoUrl || '';
       setLogoUrl(safeLogo);
       setProcessedAthletes(pendingRoster.athletes);
-      setIsNocMode(pendingRoster.isNocMode || false);
 
       // Check for ambiguous teams
       if (pendingRoster.candidateTeams && pendingRoster.candidateTeams.length > 1) {
@@ -407,10 +405,8 @@ export const Engine: React.FC<Props> = ({
     if (!rawInput || isProcessing) return;
     setShowSeasonModal(false);
 
-    // If Olympic fast mode is checked, bypass modal and use defaults
-    const finalNocMode = isOlympicFastMode ? true : isNocMode;
-    const finalSeason = isOlympicFastMode ? "2026" : seasonYear;
-    const finalLeague = isOlympicFastMode ? "milano-cortina-2026" : league;
+    const finalSeason = seasonYear;
+    const finalLeague = league;
 
     // Prepend team name and conference to raw input
     let promptPrefix = "";
@@ -419,15 +415,11 @@ export const Engine: React.FC<Props> = ({
 
     const inputWithTeam = promptPrefix ? `${promptPrefix}\n${rawInput}` : rawInput;
 
-    onStartProcessing(inputWithTeam, finalNocMode, finalSeason, true, finalLeague);
+    onStartProcessing(inputWithTeam, finalSeason, true, finalLeague);
   };
 
   const handleStartScout = () => {
-    if (isOlympicFastMode) {
-      handleProcess();
-    } else {
-      setShowSeasonModal(true);
-    }
+    setShowSeasonModal(true);
   };
 
   const handleSaveToLibrary = () => {
@@ -441,9 +433,9 @@ export const Engine: React.FC<Props> = ({
       sport,
       league: league || undefined, // Include user-selected league
       seasonYear,
-      isNocMode,
-      athleteCount: processedAthletes.length,
       rosterData: processedAthletes,
+      athleteCount: processedAthletes.length,
+
       versionDescription: `[${seasonYear}] ${teamName} - ${processedAthletes.length} Athletes`,
       createdAt: new Date().toISOString(),
       teamMetadata: {
@@ -451,8 +443,7 @@ export const Engine: React.FC<Props> = ({
         secondaryColor,
         abbreviation,
         conference: (league === 'ncaa' && ncaaConference) ? ncaaConference : (pendingRoster?.teamMetadata?.conference || 'General'),
-        logoUrl,
-        countryCode: pendingRoster?.teamMetadata?.countryCode
+        logoUrl
       }
     };
 
@@ -595,21 +586,7 @@ export const Engine: React.FC<Props> = ({
               />
 
               <div className="p-6 bg-gray-50/50 dark:bg-gray-800/30 border-t border-gray-50 dark:border-gray-800 flex items-center justify-between">
-                <label className="flex items-center gap-3 cursor-pointer group">
-                  <div className={`w-5 h-5 rounded border transition-all flex items-center justify-center ${isOlympicFastMode ? 'bg-[#5B5FFF] border-[#5B5FFF] shadow-sm' : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 group-hover:border-[#5B5FFF]'}`}>
-                    <input
-                      type="checkbox"
-                      className="sr-only"
-                      checked={isOlympicFastMode}
-                      onChange={(e) => setIsOlympicFastMode(e.target.checked)}
-                    />
-                    {isOlympicFastMode && <Check size={14} className="text-white" />}
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-[10px] font-black uppercase tracking-wider text-gray-700 dark:text-gray-300">Olympic Search</span>
-                    <span className="text-[9px] text-gray-400 font-medium">Bypass modal & use ODF standards</span>
-                  </div>
-                </label>
+
 
                 <button
                   onClick={handleStartScout}
@@ -938,7 +915,7 @@ export const Engine: React.FC<Props> = ({
               <div className="p-8 md:p-10 flex flex-col md:flex-row gap-10 bg-gray-50/30 dark:bg-gray-800/20">
                 <div className="flex-1 flex flex-col md:flex-row gap-8">
                   <div className="w-28 h-28 rounded-3xl text-white flex items-center justify-center shadow-lg shrink-0 overflow-hidden relative group bg-white border border-gray-100 dark:border-gray-800">
-                    {logoUrl && logoUrl !== 'Unknown' && !isNocMode ? (
+                    {logoUrl && logoUrl !== 'Unknown' ? (
                       <img src={logoUrl} alt={teamName} className="w-full h-full object-contain p-4" onError={() => setLogoUrl('')} />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-white font-mono font-black text-4xl" style={{ backgroundColor: primaryColor }}>

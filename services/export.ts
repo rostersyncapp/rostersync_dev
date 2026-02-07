@@ -1,5 +1,4 @@
 import { Athlete, ExportFormat, SubscriptionTier } from "../types.ts";
-import { convertToODF } from "./olympics.ts";
 import { hexToRgb, padJersey } from "./utils.ts";
 
 export function generateExport(
@@ -317,13 +316,7 @@ export function generateExport(
         mimeType: 'application/json'
       };
 
-    case 'ODF_XML':
-      const odfContent = convertToODF(athletes, primaryColor, secondaryColor, tier);
-      return {
-        content: odfContent,
-        filename: `${safeTeam}_odf_2026_${langSuffix}_${timestamp}.xml`,
-        mimeType: 'application/xml'
-      };
+
 
     default:
       throw new Error("Unsupported format");

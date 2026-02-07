@@ -28,18 +28,6 @@ export interface Athlete {
   nameMandarin?: string;
   bioStats?: string;
   socialHandle?: string;
-  countryCode?: string; // IOC Country Code (e.g., USA, FRA)
-  organisationId?: string; // FK -> Nations.id (IOC Code)
-  firstName?: string;
-  lastName?: string;
-  gender?: 'M' | 'W';
-  birthDate?: string;
-  heightCm?: number;
-  weightKg?: number;
-  placeOfBirth?: string;
-  event?: string; // Specific Olympic Event
-  sportCode?: string; // 3-letter ODF Discipline Code (e.g. ALP, IHO)
-  dbStatus?: 'MATCHED' | 'NOT_FOUND'; // For UI flagging in ODF mode
   metadata?: Record<string, any>;
 }
 
@@ -49,7 +37,6 @@ export interface TeamMetadata {
   conference: string;
   abbreviation: string;
   logoUrl?: string;
-  countryCode?: string; // IOC Country Code for NOC mode
 }
 
 export interface Roster {
@@ -66,7 +53,6 @@ export interface Roster {
   createdAt: string;
   teamMetadata?: TeamMetadata;
   isSynced?: boolean;
-  isNocMode?: boolean;
   preferredAccentColor?: string; // User selected accent color
 }
 
@@ -80,4 +66,4 @@ export interface Profile {
   creditsUsed: number;
 }
 
-export type ExportFormat = 'CSV_FLAT' | 'ICONIK_JSON' | 'CATDV_JSON' | 'ROSS_XML' | 'VIZRT_JSON' | 'VIZRT_DATACENTER_CSV' | 'VIZRT_XML' | 'CHYRON_CSV' | 'NEWBLUE_CSV' | 'TAGBOARD_CSV' | 'ODF_XML';
+export type ExportFormat = 'CSV_FLAT' | 'ICONIK_JSON' | 'CATDV_JSON' | 'ROSS_XML' | 'VIZRT_JSON' | 'VIZRT_DATACENTER_CSV' | 'VIZRT_XML' | 'CHYRON_CSV' | 'NEWBLUE_CSV' | 'TAGBOARD_CSV';

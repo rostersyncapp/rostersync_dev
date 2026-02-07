@@ -457,7 +457,7 @@ export const Dashboard: React.FC<Props> = ({
       phoneticSimplified: newPlayerPhonetic,
       nilStatus: 'Active',
       seasonYear: selectedRoster.seasonYear,
-      birthDate: ''
+
     };
     const updatedRosterData = [...selectedRoster.rosterData, newAthlete];
     onUpdateRoster({
@@ -700,12 +700,10 @@ export const Dashboard: React.FC<Props> = ({
                 <tr className="bg-gray-50/50 dark:bg-gray-800/50" style={{ backgroundImage: `linear-gradient(${primaryColor}25, ${primaryColor}25)`, borderBottom: `2px solid ${primaryColor}40` }}>
                   <th className="px-4 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] text-center w-12">#</th>
                   <th className="px-8 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">Athlete Name</th>
-                  <th className="px-8 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] text-center">{selectedRoster.isNocMode ? 'Bib' : 'Jersey'}</th>
-                  <th className="px-8 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] text-center">{selectedRoster.isNocMode ? 'Event' : 'Position'}</th>
+                  <th className="px-8 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] text-center">Jersey</th>
+                  <th className="px-8 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] text-center">Position</th>
                   <th className="px-8 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] text-center">Hardware Safe</th>
-                  {selectedRoster.isNocMode && (userTier === 'STUDIO' || userTier === 'NETWORK') && (
-                    <th className="px-8 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] text-center">Birth Date</th>
-                  )}
+
                   {userTier !== 'BASIC' && (
                     <th className="px-8 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] text-center">
                       {userTier === 'PRO' ? 'Phonetic' : 'Advanced Phonetic'}
@@ -730,28 +728,14 @@ export const Dashboard: React.FC<Props> = ({
                       <td className="px-8 py-4 text-sm font-semibold text-gray-900 dark:text-white tracking-tight">
                         <div className="flex items-center gap-2">
                           {a.fullName}
-                          {a.dbStatus === 'NOT_FOUND' && (
-                            <span className="flex items-center gap-1 text-[10px] font-black text-red-500 bg-red-50 dark:bg-red-900/10 px-1.5 py-0.5 rounded border border-red-200 dark:border-red-900/30 animate-pulse">
-                              <AlertCircle size={10} /> NOT IN DB
-                            </span>
-                          )}
-                          {selectedRoster.isNocMode && a.countryCode && (
-                            <span className="text-[10px] bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded font-mono font-bold text-gray-400 uppercase tracking-wider">
-                              {a.countryCode}
-                            </span>
-                          )}
+
+
                         </div>
                       </td>
                       <td className="px-8 py-4 text-center"><span className="inline-block w-10 py-1 rounded-lg bg-blue-600 dark:bg-blue-700 text-white text-xs font-bold shadow-sm">{a.jerseyNumber.toString().replace(/#/g, '')}</span></td>
                       <td className="px-8 py-4 text-center"><span className="inline-block px-3 py-1 rounded-lg bg-purple-600 dark:bg-purple-700 text-white text-[10px] font-black uppercase tracking-widest shadow-sm">{a.position}</span></td>
                       <td className="px-8 py-4 text-center"><span className="bg-emerald-600 dark:bg-emerald-700 px-3 py-1 rounded-lg text-[10px] font-black text-white tracking-widest font-mono shadow-sm">{a.displayNameSafe}</span></td>
-                      {selectedRoster.isNocMode && (userTier === 'STUDIO' || userTier === 'NETWORK') && (
-                        <td className="px-8 py-4 text-center">
-                          <span className="bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded-lg text-[10px] font-bold text-gray-500 tracking-tighter tabular-nums shadow-sm border border-gray-100 dark:border-gray-700">
-                            {a.birthDate || 'Unknown'}
-                          </span>
-                        </td>
-                      )}
+
                       {userTier !== 'BASIC' && (
                         <td className="px-8 py-4 text-center">
                           <span className={`px-3 py-1 rounded-lg text-[10px] font-bold tracking-tight shadow-sm ${userTier === 'NETWORK' ? 'bg-indigo-600 dark:bg-indigo-700 text-white font-mono' : 'bg-amber-500 dark:bg-amber-600 text-white'}`}>
@@ -899,7 +883,7 @@ export const Dashboard: React.FC<Props> = ({
                     <div className="grid grid-cols-1 gap-3">
                       <ExportItem icon={<MonitorPlay size={20} />} title="Ross DataLinq XML" desc="XPression & Dashboard native." onClick={() => handleExport('ROSS_XML')} disabled={isTierLocked(userTier, 'NETWORK')} requiredTier="NETWORK" />
                       <ExportItem icon={<Database size={20} />} title="Vizrt DataCenter" desc="Trio & Pilot Key-Value CSV." onClick={() => handleExport('VIZRT_DATACENTER_CSV')} disabled={isTierLocked(userTier, 'NETWORK')} requiredTier="NETWORK" />
-                      <ExportItem icon={<FileCode size={20} />} title="Olympic ODF XML" desc="High-compliance event XML." onClick={() => handleExport('ODF_XML')} disabled={isTierLocked(userTier, 'NETWORK')} requiredTier="NETWORK" />
+
                       <ExportItem icon={<Zap size={20} />} title="Chyron Prime CSV" desc="Lyric & Prime automation." onClick={() => handleExport('CHYRON_CSV')} disabled={isTierLocked(userTier, 'NETWORK')} requiredTier="NETWORK" />
                       <ExportItem icon={<FileJson size={20} />} title="JSON Blob" desc="Developer-friendly structured data." onClick={() => handleExport('VIZRT_JSON')} disabled={isTierLocked(userTier, 'NETWORK')} requiredTier="NETWORK" />
                     </div>

@@ -16,7 +16,6 @@ interface ProcessedRoster {
   sport: string;
   seasonYear: string;
   athletes: Athlete[];
-  isNocMode?: boolean;
   verificationSources?: { title: string; uri: string }[];
   candidateTeams?: { name: string; logoUrl: string; primaryColor: string; secondaryColor: string; sport?: string; league?: string }[];
   league?: string;
@@ -83,102 +82,7 @@ function toTitleCase(str: string): string {
  * Authoritative Database Matching for Olympic Athletes
  * Queries Supabase athletes table to find official matches and override AI data.
  */
-export async function matchAthletesWithDB(extractedAthletes: Athlete[]): Promise<Athlete[]> {
-  if (!supabase || extractedAthletes.length === 0) return extractedAthletes;
 
-  console.log(`[OlympicMiddleware] Attempting to match ${extractedAthletes.length} athletes against master seed...`);
-
-  const matchedAthletes = await Promise.all(extractedAthletes.map(async (athlete) => {
-    try {
-      // 1. Exact Match Strategy (Case Insensitive)
-      // We look for athletes where first_name and last_name match the extracted name.
-      // AI sometimes returns firstName/lastName separately, or just fullName.
-      const firstName = athlete.firstName || athlete.fullName.split(' ')[0] || '';
-      const lastName = athlete.lastName || athlete.fullName.split(' ').slice(1).join(' ') || '';
-
-      const { data, error } = await supabase
-        .from('athletes')
-        .select(`
-          parent_id, 
-          first_name, 
-          last_name, 
-          print_name, 
-          gender, 
-          organisation_id, 
-          sport_code, 
-          birth_date, 
-          height_cm, 
-          weight_kg, 
-          placeOfBirth
-        `)
-        .ilike('first_name', firstName)
-        .ilike('last_name', lastName)
-        .limit(1)
-        .single();
-
-      if (data && !error) {
-        console.log(`[OlympicMiddleware] ✅ MATCHED: ${firstName} ${lastName} -> ${data.print_name} (${data.parent_id})`);
-
-        // Override with official production data
-        return {
-          ...athlete,
-          id: data.parent_id, // Authoritative ID
-          fullName: data.print_name, // Authoritative PrintName
-          firstName: data.first_name,
-          lastName: data.last_name.toUpperCase(), // Broadcaster Rule: Uppercase
-          gender: data.gender as 'M' | 'W',
-          organisationId: data.organisation_id,
-          sportCode: data.sport_code,
-          birthDate: data.birth_date,
-          heightCm: data.height_cm,
-          weightKg: data.weight_kg,
-          placeOfBirth: data.placeOfBirth,
-          dbStatus: 'MATCHED' as const
-        };
-      }
-
-      // 2. Fuzzy Match / Swap Strategy
-      // If no match, try swapping first/last names (common in messy text)
-      const { data: swapData } = await supabase
-        .from('athletes')
-        .select('*')
-        .ilike('first_name', lastName)
-        .ilike('last_name', firstName)
-        .limit(1)
-        .single();
-
-      if (swapData) {
-        console.log(`[OlympicMiddleware] 🔄 MATCHED (Swapped): ${firstName} ${lastName} -> ${swapData.print_name}`);
-        return {
-          ...athlete,
-          id: swapData.parent_id,
-          fullName: swapData.print_name,
-          firstName: swapData.first_name,
-          lastName: swapData.last_name.toUpperCase(),
-          gender: swapData.gender as 'M' | 'W',
-          organisationId: swapData.organisation_id,
-          sportCode: swapData.sport_code,
-          birthDate: swapData.birth_date,
-          heightCm: swapData.height_cm,
-          weightKg: swapData.weight_kg,
-          placeOfBirth: swapData.placeOfBirth,
-          dbStatus: 'MATCHED' as const
-        };
-      }
-
-      console.log(`[OlympicMiddleware] 🔴 NOT FOUND: ${firstName} ${lastName}`);
-      return {
-        ...athlete,
-        dbStatus: 'NOT_FOUND' as const
-      };
-    } catch (err) {
-      console.warn(`[OlympicMiddleware] Search error for ${athlete.fullName}:`, err);
-      return { ...athlete, dbStatus: 'NOT_FOUND' as const };
-    }
-  }));
-
-  return matchedAthletes;
-}
 
 /**
  * Robustly extract JSON from AI response text
@@ -521,12 +425,9 @@ async function fillMissingJerseyNumbers(
       missingAthletes.push({
         id: data.id,
         fullName: displayName,
-        firstName: displayName.split(' ')[0],
-        lastName: displayName.split(' ').slice(1).join(' '),
         jerseyNumber: formatJerseyNumber(data.jersey),
         position: data.position || "Athlete",
         nilStatus: 'Incoming',
-        dbStatus: 'NOT_FOUND',
         originalName: displayName,
         displayNameSafe: displayName.toUpperCase(),
         phoneticSimplified: "",
@@ -545,34 +446,20 @@ async function fillMissingJerseyNumbers(
   };
 }
 
-function getSchemaForTier(tier: SubscriptionTier, isNocMode: boolean, findBranding: boolean): any {
+function getSchemaForTier(tier: SubscriptionTier, findBranding: boolean): any {
   const baseAthleteProperties: Record<string, any> = {
     fullName: { type: SchemaType.STRING },
-    jerseyNumber: { type: SchemaType.STRING, description: isNocMode ? "Bib number for the athlete. Always use two digits (pad with 0 if needed)." : "Jersey number. Always use two digits (pad with 0 if needed)." },
-    position: { type: SchemaType.STRING, description: isNocMode ? "Main sport/discipline (e.g. Swimming)." : "Player position." },
+    jerseyNumber: { type: SchemaType.STRING, description: "Jersey number. Always use two digits (pad with 0 if needed)." },
+    position: { type: SchemaType.STRING, description: "Player position." },
   };
 
   const requiredFields = ["fullName", "jerseyNumber", "position"];
 
   // BASIC TIER LIMITATION: Name, Jersey, Position only.
-  // NOC mode fields and phonetics are locked behind PRO/STUDIO/NETWORK.
   if (tier !== 'BASIC') {
     baseAthleteProperties.displayNameSafe = { type: SchemaType.STRING, description: "Name sanitized for broadcast hardware (ALL CAPS, no accents, special characters removed)." };
     baseAthleteProperties.nilStatus = { type: SchemaType.STRING };
     requiredFields.push("displayNameSafe", "nilStatus");
-
-    if (isNocMode && (tier === 'STUDIO' || tier === 'NETWORK')) {
-      baseAthleteProperties.countryCode = { type: SchemaType.STRING, description: "3-letter IOC Country Code (e.g. JAM, USA)." };
-      baseAthleteProperties.organisationId = { type: SchemaType.STRING, description: "IOC Country Code. Same as countryCode." };
-      baseAthleteProperties.firstName = { type: SchemaType.STRING };
-      baseAthleteProperties.lastName = { type: SchemaType.STRING, description: "Athlete's Family Name." };
-      baseAthleteProperties.gender = { type: SchemaType.STRING, description: "'M' or 'W'." };
-      baseAthleteProperties.birthDate = { type: SchemaType.STRING, description: "BirthDate (YYYY-MM-DD). Use NULL if unknown." };
-      baseAthleteProperties.heightCm = { type: SchemaType.NUMBER, description: "Height in CM. Use NULL if unknown." };
-      baseAthleteProperties.weightKg = { type: SchemaType.NUMBER, description: "Weight in KG. Use NULL if unknown." };
-      baseAthleteProperties.placeOfBirth = { type: SchemaType.STRING, description: "Athlete's hometown or birthplace (e.g. 'Park City, UT')." };
-      baseAthleteProperties.event = { type: SchemaType.STRING, description: "Specific discipline (e.g. 'ALP', 'IHO', 'FSK')." };
-    }
 
     baseAthleteProperties.phoneticSimplified = { type: SchemaType.STRING, description: "Simplified phonetic guide (e.g. 'fuh-NET-ik')." };
     requiredFields.push("phoneticSimplified");
@@ -583,16 +470,15 @@ function getSchemaForTier(tier: SubscriptionTier, isNocMode: boolean, findBrandi
     requiredFields.push("phoneticIPA");
     baseAthleteProperties.nameSpanish = { type: SchemaType.STRING };
     baseAthleteProperties.nameMandarin = { type: SchemaType.STRING };
-    baseAthleteProperties.bioStats = { type: SchemaType.STRING, description: "Summary of Olympic achievements/medals or career stats." };
+    baseAthleteProperties.bioStats = { type: SchemaType.STRING, description: "Summary of achievements/medals or career stats." };
     baseAthleteProperties.socialHandle = { type: SchemaType.STRING, description: "Likely social media handle (e.g. @name)." };
   }
 
   const rootProperties: Record<string, any> = {
-    teamName: { type: SchemaType.STRING, description: isNocMode ? "National Olympic Committee Name (e.g. 'United States', 'Greece'). DO NOT return 'Unknown NOC'." : "Team Name." },
-    abbreviation: { type: SchemaType.STRING, description: isNocMode ? "3-letter IOC Code (e.g. 'USA', 'GRE')." : "3-letter Team Abbreviation." },
-    countryCode: { type: SchemaType.STRING, description: "3-letter IOC Country Code." },
+    teamName: { type: SchemaType.STRING, description: "Team Name." },
+    abbreviation: { type: SchemaType.STRING, description: "3-letter Team Abbreviation." },
     conference: { type: SchemaType.STRING },
-    sport: { type: SchemaType.STRING, description: isNocMode ? "Full sport name including Gender (e.g. 'Alpine Skiing - Men', 'Ice Hockey - Women')." : "Sport name." },
+    sport: { type: SchemaType.STRING, description: "Sport name." },
     seasonYear: {
       type: SchemaType.STRING,
       description: "The specific season year or range found in the text (e.g. '2025-26', '2024-25', '2026')."
@@ -646,7 +532,6 @@ function formatJerseyNumber(num: any): string {
 export async function processRosterRawText(
   text: string,
   tier: SubscriptionTier = 'BASIC',
-  isNocMode: boolean = false,
   overrideSeason: string = '',
   findBranding: boolean = false,
   userId?: string,
@@ -658,7 +543,7 @@ export async function processRosterRawText(
   }
 
   const genAI = new GoogleGenerativeAI(apiKey);
-  const schema = getSchemaForTier(tier, isNocMode, findBranding);
+  const schema = getSchemaForTier(tier, findBranding);
 
   console.log("[Gemini] processRosterRawText called. TeamData loaded?", {
     espnIdsCount: Object.keys(ESPN_TEAM_IDS || {}).length,
@@ -679,36 +564,12 @@ export async function processRosterRawText(
 
   const isMajorLeague = league && FULLY_SEEDED_LEAGUES.includes(league);
 
-  // COST OPTIMIZATION: Smart Search Sniffer
-  // Check if we can identify the Nation and Sport from the raw text alone.
-  // If we can, we bypass the $0.01 Google Search tool fee.
-  let detectionHint = "";
-  let bypassSearchForNoc = false;
 
-  if (isNocMode) {
-    // Basic sniffer for the first 1000 chars
-    const sniffText = text.substring(0, 1000).toUpperCase();
-
-    // Check for common IOC Codes (USA, CAN, ITA, FRA, etc.)
-    const IOC_CODES = ['USA', 'CAN', 'ITA', 'FRA', 'GER', 'GBR', 'CHN', 'JPN', 'NOR', 'SWE', 'FIN', 'SUI', 'AUT', 'NED', 'AUS', 'KOR', 'KAZ', 'SLO', 'SVK', 'CZE', 'LAT', 'EST', 'POL', 'BRA', 'MEX', 'AIN'];
-    const detectedNoc = IOC_CODES.find(code => new RegExp(`\\b${code}\\b`).test(sniffText));
-
-    // Check for common Sport keywords
-    const SPORTS = ['ALPINE', 'HOCKEY', 'SKATTING', 'CURLING', 'BIATHLON', 'BOBSLEIGH', 'LUGE', 'SKELETON', 'SNOWBOARD', 'SKI JUMPING'];
-    const detectedSport = SPORTS.find(sport => sniffText.includes(sport));
-
-    if (detectedNoc && detectedSport) {
-      bypassSearchForNoc = true;
-      detectionHint = `SMART DETECTION: Identified ${detectedNoc} for ${detectedSport}. Skipping live search to save cost. Extract metadata based on this identity.`;
-      console.log(`[Gemini] Smart Search: Bypassing tool fee for ${detectedNoc} ${detectedSport}`);
-    }
-  }
 
   // SEARCH LOGIC: 
   // 1. Always enable search if the user wants branding (and it's not a major league where we have it).
   // 2. ALWAYS enable search for professional leagues (MiLB, NWSL, USL, etc.) to handle trades and expansion.
-  // 3. Enable search for Olympic/NOC mode UNLESS the sniffer was 100% confident.
-  const shouldSearch = (isNocMode && !bypassSearchForNoc) || findBranding || !!league;
+  const shouldSearch = findBranding || !!league;
 
   // brandingDiscovery is separate - we only tell it to deep-dive for logos if findBranding is true
   const shouldSearchForBranding = findBranding && !isMajorLeague;
@@ -775,14 +636,7 @@ export async function processRosterRawText(
       
     - DO NOT return "Unknown Team" without attempting a player-based search (if search is enabled).
 
-    ${isNocMode ? `3. ODF DATA ENGINEER ROLE (MANDATORY):
-    - persona: You are an Olympic ODF Data Engineer for Milano Cortina 2026.
-    - GOAL: Ingest raw data and output broadcaster-compliant DT_PARTIC JSON.
-    - ATHLETE ID: Generate a permanent 7-digit ID (Primary Key) for 'id' and 'organisationId'.
-    - NAMES: 'lastName' (FamilyName) MUST be ALL CAPS. 'fullName' (PrintName) is "SURNAME GivenName".
-    - CODES: Use official 3-letter Discipline codes (ALP, BTH, BOB, CCS, CUR, FSK, FRS, IHO, LUG, NCB, STK, SKN, SJP, SMT, SBD, SSK).
-    - NEUTRAL ATHLETES: Use code 'AIN' for Individual Neutral Athletes.
-    - SEARCH: Use 'googleSearch' to find missing metadata: Birthdates (YYYY-MM-DD), Heights (cm), Weight (kg), and Hometowns.` : ''}
+
 
     4. ROSTER EXTRACTION (MANDATORY):
     - CRITICAL: YOU MUST EXTRACT EVERY ATHLETE LISTED IN THE 'DATA' BLOCK BELOW.
@@ -845,7 +699,7 @@ export async function processRosterRawText(
     const model = genAI.getGenerativeModel(modelParams);
     const identificationInstruction = shouldSearch
       ? `1. Identification: Use 'googleSearch' to identify the team name (e.g. "Bay FC") by searching for the athletes in 'DATA'.
-         - ${isNocMode ? 'PRIMARY SOURCES: Use https://www.olympics.com/en/milano-cortina-2026/results/hubs/individuals/athletes?showAll=true and https://www.nbcolympics.com/athletes to identify athletes.' : ''}
+
          - Select 2-3 unique player names and search for: "roster {Player 1} {Player 2} {Player 3}".
          - Use the search results to find the specific professional team (NWSL, MiLB, etc.).
          - Cross-reference the identified team with the VALID TEAM LIST provided above.
@@ -862,11 +716,11 @@ export async function processRosterRawText(
       const regex = new RegExp(`\\b${escaped}\\b`, 'i');
       return regex.test(text.substring(0, 1000)); // Check first 1000 chars
     });
-    const teamHint = (detectedTeam || detectionHint)
-      ? `DETECTION HINT: I found context suggesting this is "${detectedTeam || detectionHint}". Use this if the athletes match.`
+    const teamHint = (detectedTeam)
+      ? `DETECTION HINT: I found context suggesting this is "${detectedTeam}". Use this if the athletes match.`
       : '';
 
-    const userPrompt = `DATA:\n${text}\n\n${context}\nTier: ${tier}. Mode: ${isNocMode ? 'NOC' : 'Standard'}.\n\n` +
+    const userPrompt = `DATA:\n${text}\n\n${context}\nTier: ${tier}.\n\n` +
       `FINAL INSTRUCTIONS:\n` +
       `${teamHint}\n` +
       `${identificationInstruction}\n` +
@@ -1105,10 +959,7 @@ export async function processRosterRawText(
     nameSpanish: a.nameSpanish,
     nameMandarin: a.nameMandarin,
     bioStats: a.bioStats,
-    socialHandle: a.socialHandle,
-    countryCode: a.countryCode || parsedResult.countryCode,
-    event: a.event,
-    placeOfBirth: a.placeOfBirth
+    socialHandle: a.socialHandle
   }));
   // Check branding cache if branding was enabled
   let finalBranding = {
@@ -1116,7 +967,6 @@ export async function processRosterRawText(
     secondaryColor: parsedResult.secondaryColor || "#1A1A1A",
     conference: parsedResult.conference || "General",
     abbreviation: parsedResult.abbreviation || "UNK",
-    countryCode: parsedResult.countryCode,
     logoUrl: parsedResult.logoUrl
   };
 
@@ -1254,7 +1104,6 @@ export async function processRosterRawText(
         secondaryColor: cachedBranding.secondary_color || finalBranding.secondaryColor,
         conference: finalBranding.conference,
         abbreviation: cachedBranding.abbreviation || finalBranding.abbreviation,
-        countryCode: parsedResult.countryCode,
         logoUrl: cachedBranding.logo_url || finalBranding.logoUrl
       };
     } else if (parsedResult.logoUrl || parsedResult.primaryColor) {
@@ -1288,7 +1137,7 @@ export async function processRosterRawText(
   let standardizedSport = parsedResult.sport || "";
 
   // Guard: For Olympics (NOC Mode), do not overwrite the AI's sport/gender string
-  if (candidateTeams.length <= 1 && !isNocMode) {
+  if (candidateTeams.length <= 1) {
     // PRIORITY 1: Check if a MiLB league was explicitly selected
     if (league && LEAGUE_TO_SPORT[league]) {
       standardizedSport = LEAGUE_TO_SPORT[league];
@@ -1352,19 +1201,14 @@ export async function processRosterRawText(
     }
   }
 
-  // Determine final athletes list (Authoritative DB Match if in NOC mode)
-  let finalAthletes = athletesWithJerseys;
-  if (isNocMode) {
-    finalAthletes = await matchAthletesWithDB(athletesWithJerseys);
-  }
+
 
   return {
-    teamName: parsedResult.teamName || (isNocMode ? "Unknown NOC" : "Unknown Team"),
+    teamName: parsedResult.teamName || "Unknown Team",
     sport: standardizedSport,
     league: finalLeague || undefined,
     seasonYear: extractedSeason,
-    isNocMode: isNocMode,
-    athletes: finalAthletes,
+    athletes: athletesWithJerseys,
     verificationSources,
     candidateTeams: candidateTeams.length > 1 ? candidateTeams : undefined,
     teamMetadata: finalBranding,

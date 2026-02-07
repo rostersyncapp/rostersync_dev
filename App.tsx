@@ -520,7 +520,6 @@ const App: React.FC = () => {
           sport: r.sport,
           league: r.league,
           seasonYear: r.season_year || '',
-          isNocMode: r.is_noc_mode || false,
           athleteCount: r.athlete_count || 0,
           rosterData: r.roster_data || [],
           versionDescription: r.version_description || '',
@@ -627,13 +626,13 @@ const App: React.FC = () => {
   const [teamSelectionCandidates, setTeamSelectionCandidates] = useState<{ name: string; logoUrl: string; primaryColor: string; secondaryColor: string }[]>([]);
   const [pendingRosterWithCandidates, setPendingRosterWithCandidates] = useState<ProcessedRoster | null>(null);
 
-  const handleStartProcessing = async (text: string, isNocMode: boolean = false, seasonYear: string = '', findBranding: boolean = false, league?: string) => {
+  const handleStartProcessing = async (text: string, seasonYear: string = '', findBranding: boolean = false, league?: string) => {
     const limit = getTierLimit(profile.subscriptionTier);
     if (profile.creditsUsed >= limit) { alert(`Limit Reached! ${profile.creditsUsed}/${limit}`); return; }
     setIsProcessing(true);
     handleSetView('engine');
     try {
-      const result = await processRosterRawText(text, profile.subscriptionTier, isNocMode, seasonYear, findBranding, profile.id, league);
+      const result = await processRosterRawText(text, profile.subscriptionTier, seasonYear, findBranding, profile.id, league);
 
       // Check if there are multiple team candidates
       if (result.candidateTeams && result.candidateTeams.length > 1) {
@@ -672,41 +671,7 @@ const App: React.FC = () => {
     }
   };
 
-  const resolveOlympicProject = async (userId: string, sport: string, rosterData: Athlete[]): Promise<string> => {
-    // 1. Ensure root "Olympics" folder exists
-    let olympicsFolder = projects.find(p => p.name === 'Olympics' && !p.parentId);
-    if (!olympicsFolder) {
-      const { data, error } = await supabase.from('projects').insert({ user_id: userId, name: 'Olympics' }).select().single();
-      if (error) throw error;
-      olympicsFolder = { id: data.id, userId: data.user_id, name: data.name, createdAt: data.created_at };
-      setProjects(prev => [olympicsFolder!, ...prev]);
-    }
 
-    // 2. Ensure sub-folder for Sport exists (e.g., "Alpine Skiing")
-    let sportFolder = projects.find(p => p.name === sport && p.parentId === olympicsFolder?.id);
-    if (!sportFolder) {
-      const { data, error } = await supabase.from('projects').insert({ user_id: userId, name: sport, parent_id: olympicsFolder?.id }).select().single();
-      if (error) throw error;
-      sportFolder = { id: data.id, userId: data.user_id, name: data.name, parentId: data.parent_id, createdAt: data.created_at };
-      setProjects(prev => [sportFolder!, ...prev]);
-    }
-
-    // 3. Determine majority Gender
-    const maleCount = rosterData.filter(a => a.gender === 'M').length;
-    const femaleCount = rosterData.filter(a => a.gender === 'W').length;
-    const genderName = femaleCount > maleCount ? 'Women' : 'Men';
-
-    // 4. Ensure gender sub-folder exists
-    let genderFolder = projects.find(p => p.name === genderName && p.parentId === sportFolder?.id);
-    if (!genderFolder) {
-      const { data, error } = await supabase.from('projects').insert({ user_id: userId, name: genderName, parent_id: sportFolder?.id }).select().single();
-      if (error) throw error;
-      genderFolder = { id: data.id, userId: data.user_id, name: data.name, parentId: data.parent_id, createdAt: data.created_at };
-      setProjects(prev => [genderFolder!, ...prev]);
-    }
-
-    return genderFolder!.id;
-  };
 
   const handleSaveRoster = async (newRoster: Roster) => {
     console.log("Saving Roster...", { user: user?.id, isSupabaseConfigured });
@@ -722,15 +687,7 @@ const App: React.FC = () => {
 
       // Handle Automated Olympic Folder Structure
       let finalProjectId = newRoster.projectId;
-      if (newRoster.isNocMode) {
-        try {
-          finalProjectId = await resolveOlympicProject(user.id, newRoster.sport, newRoster.rosterData);
-          console.log("Resolved Olympic Folder ID:", finalProjectId);
-        } catch (err) {
-          console.error("Failed to auto-organize Olympic folder:", err);
-          // Fallback to whatever was selected
-        }
-      }
+
 
       console.log("Saving Roster Payload:", {
         teamName: newRoster.teamName,
@@ -746,7 +703,6 @@ const App: React.FC = () => {
         sport: newRoster.sport,
         league: newRoster.league,
         season_year: newRoster.seasonYear,
-        is_noc_mode: newRoster.isNocMode,
         athlete_count: newRoster.athleteCount,
         roster_data: newRoster.rosterData,
         team_metadata: newRoster.teamMetadata,
