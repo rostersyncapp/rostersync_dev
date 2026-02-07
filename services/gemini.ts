@@ -913,7 +913,7 @@ export async function processRosterRawText(
     primaryColor: parsedResult.primaryColor || "#5B5FFF",
     secondaryColor: parsedResult.secondaryColor || "#1A1A1A",
     conference: parsedResult.conference || "General",
-    abbreviation: parsedResult.abbreviation || "UNK",
+    abbreviation: parsedResult.teamName === "Unknown Team" ? "" : (parsedResult.abbreviation || "---"),
     logoUrl: parsedResult.logoUrl
   };
 
@@ -1151,8 +1151,13 @@ export async function processRosterRawText(
   // NEW: If team is Unknown and league is selected, populate all teams for user selection
   if (parsedResult.teamName === "Unknown Team" && league && candidateTeams.length === 0) {
     console.log(`[Gemini] Team is Unknown, populating all teams for league: ${league}`);
+    // Normalize league ID to handle both formats: "nwsl" and "usa.nwsl"
+    const normalizedInputLeague = league.replace(/^usa\./, '');
     candidateTeams = Object.entries(ESPN_TEAM_IDS)
-      .filter(([_, info]) => info.league === league || info.league === `usa.${league}`)
+      .filter(([_, info]) => {
+        const normalizedTeamLeague = (info.league || '').replace(/^usa\./, '');
+        return normalizedTeamLeague === normalizedInputLeague;
+      })
       .map(([name, info]) => ({
         id: info.id,
         name: name,
