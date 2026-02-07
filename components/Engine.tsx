@@ -344,7 +344,7 @@ export const Engine: React.FC<Props> = ({
 
   const getLeagueLabel = (value: string) => {
     const found = availableLeagues.find(l => l.id === value);
-    return found ? found.name : (value || 'Select League');
+    return found ? (found.abbreviation || found.name) : (value || 'Select League');
   };
 
   // Group available leagues by sport
@@ -353,7 +353,7 @@ export const Engine: React.FC<Props> = ({
     availableLeagues.forEach(l => {
       const sport = LEAGUE_SPORT_MAP[l.id] || 'Other';
       if (!groups[sport]) groups[sport] = [];
-      groups[sport].push({ value: l.id, label: l.name });
+      groups[sport].push({ value: l.id, label: l.abbreviation || l.name });
     });
     return Object.entries(groups).map(([category, options]) => ({ category, options }));
   }, [availableLeagues]);
