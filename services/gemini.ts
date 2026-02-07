@@ -1149,7 +1149,7 @@ export async function processRosterRawText(
   }
 
   // NEW: If team is Unknown and league is selected, populate all teams for user selection
-  if (parsedResult.teamName === "Unknown Team" && league && candidateTeams.length === 0) {
+  if (parsedResult.teamName === "Unknown Team" && league) {
     console.log(`[Gemini] Team is Unknown, populating all teams for league: ${league}`);
     // Normalize league ID to handle both formats: "nwsl" and "usa.nwsl"
     const normalizedInputLeague = league.replace(/^usa\./, '');
