@@ -404,6 +404,11 @@ export const Engine: React.FC<Props> = ({
     // Populate teams for non-NCAA leagues from ESPN_TEAM_IDS
     if (selectedLeague && selectedLeague !== 'ncaa') {
       const normalizedInputLeague = selectedLeague.replace(/^usa\./, '');
+      console.log(`[Engine] Selected league: ${selectedLeague}, Normalized: ${normalizedInputLeague}`);
+      
+      const allTeams = Object.entries(ESPN_TEAM_IDS).filter(([_, info]) => info.league?.includes('nwsl'));
+      console.log(`[Engine] NWSL teams found in ESPN_TEAM_IDS: ${allTeams.length}`);
+      
       const leagueTeams = Object.entries(ESPN_TEAM_IDS)
         .filter(([_, info]) => {
           const normalizedTeamLeague = (info.league || '').replace(/^usa\./, '');
@@ -416,7 +421,11 @@ export const Engine: React.FC<Props> = ({
           primary_color: info.primaryColor,
           secondary_color: info.secondaryColor
         }));
+      console.log(`[Engine] Teams to populate: ${leagueTeams.length}`, leagueTeams.slice(0, 3));
       setAvailableTeams(leagueTeams);
+    } else {
+      console.log(`[Engine] Clearing availableTeams (NCAA or no league selected)`);
+      setAvailableTeams([]);
     }
   };
 
