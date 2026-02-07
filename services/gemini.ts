@@ -597,44 +597,14 @@ export async function processRosterRawText(
 
   const leagueHint = league ? `The user has indicated this is likely a roster for the ${LEAGUE_DISPLAY_NAMES[league] || league} league. ` : '';
 
-  const systemInstruction = `You are an expert broadcast metadata extractor. Your PRIMARY GOAL is to identify the team and extract the roster.
+  const systemInstruction = `You are an expert broadcast metadata extractor. Your PRIMARY GOAL is to extract the roster data.
     
-    1. TEAM IDENTIFICATION (HIGHEST PRIORITY):
-    - ${leagueHint}
-    - ${knownTeamsList}
-    - Identification Strategy:
-      * Use the 'googleSearch' tool ONLY if the team name is not obvious from the text.
-      * Look at the player names. ${knownTeams.length > 0 ? 'Compare the athletes against your knowledge of the VALID TEAM LIST provided above.' : ''}
-    - Identification Strategy:
-      * Use the 'googleSearch' tool ONLY if the team name is not obvious from the text.
-      * Compare the players against the VALID TEAM LIST provided above.
-      * TRUST THE VALID TEAM LIST: The provided list is the ONLY authoritative set of professional teams for this league. 
-      * TRADES/TRANSFERS: If you recognize players as belonging to a different team in your training data, assume they have been transferred/traded to one of the teams in the VALID TEAM LIST.
-      * NEW TEAMS: If the VALID TEAM LIST contains a team you do not recognize (e.g. "Bay FC"), it is a real expansion team. Trust that it exists in the provided list.
-      * MANDATORY: If the text mentions a team from the VALID TEAM LIST (even with a year like "2025"), you MUST identify it as that team.
-      * DO NOT return "Unknown Team" if "Bay FC", "Angel City", "ACFC", "Gotham", "Thorns", "Wave", "Spirit", "Sacramento", or "River Cats" appears in the player names or header.
-    - MiLB VALIDATION LIST (Reference these EXACT names):
-      [Buffalo Bisons, Charlotte Knights, Columbus Clippers, Durham Bulls, Gwinnett Stripers, Indianapolis Indians, Iowa Cubs, Jacksonville Jumbo Shrimp, Lehigh Valley IronPigs, Louisville Bats, Memphis Redbirds, Nashville Sounds, Norfolk Tides, Omaha Storm Chasers, Rochester Red Wings, Scranton/Wilkes-Barre RailRiders, St. Paul Saints, Syracuse Mets, Toledo Mud Hens, Worcester Red Sox, Albuquerque Isotopes, El Paso Chihuahuas, Las Vegas Aviators, Oklahoma City Comets, Reno Aces, Round Rock Express, Sacramento River Cats, Salt Lake Bees, Sugar Land Space Cowboys, Tacoma Rainiers]
-    - NWSL VALIDATION LIST (Reference these EXACT names):
-      [Angel City FC, Bay FC, Boston Legacy FC, Chicago Stars FC, Denver Summit FC, Houston Dash, Kansas City Current, NJ/NY Gotham FC, North Carolina Courage, Orlando Pride, Portland Thorns FC, Racing Louisville FC, San Diego Wave FC, Seattle Reign FC, Utah Royals, Washington Spirit]
+    1. TEAM IDENTIFICATION:
+    - DO NOT attempt to identify the team from player names or context.
+    - ALWAYS set teamName to "Unknown Team".
+    - The user will select the correct team manually after extraction.
     
-    - SEARCH STRATEGY:
-      * If unknown, pick 3 athletes. Search Google for: "{Name 1}" "{Name 2}" "{Name 3}" roster.
-      * Pinpoint the specific professional team (MiLB, NWSL, USL, MLS, etc.). 
-      * Once identified, STOP searching. Do NOT search for logos or colors.
-    - VALIDATION: Ensure at least 3 names from the input match the identified team's official roster.
-    - SEARCH STRATEGY:
-      * If unknown, pick 3 athletes. Search Google for: "{Name 1}" "{Name 2}" "{Name 3}" roster.
-      * Pinpoint the specific professional team (MiLB, NWSL, USL, MLS, etc.). 
-      * Once identified, STOP searching. Do NOT search for logos or colors.
-    - VALIDATION: Ensure at least 3 names from the input match the identified team's official roster.
-    
-    - HANDLING YEARS / SEASONS:
-      * IGNORE years or season labels in the Team Name (e.g. "Houston Dynamo 2025" -> "Houston Dynamo").
-      * If the input says "Houston Dynamo 2025", the Team Name is "Houston Dynamo".
-      * Do NOT result "Unknown Team" just because the year makes it an inexact string match. Find the closest match in the VALID TEAM LIST.
-      
-    - DO NOT return "Unknown Team" without attempting a player-based search (if search is enabled).
+    2. ROSTER EXTRACTION (MANDATORY):
 
 
 
@@ -687,45 +657,22 @@ export async function processRosterRawText(
 
   modelParams.generationConfig = generationConfig;
 
-  // Enable tools if we need to search for branding OR for robust team identification
-  if (shouldSearch) {
-    modelParams.tools = [{ googleSearch: {} }];
-  }
+  // Note: googleSearch tool removed - team identification is now manual
+  // No tools needed for roster extraction
 
 
   const context = league ? `Context: League is ${league}.` : '';
   let result;
   try {
     const model = genAI.getGenerativeModel(modelParams);
-    const identificationInstruction = shouldSearch
-      ? `1. Identification: Use 'googleSearch' to identify the team name (e.g. "Bay FC") by searching for the athletes in 'DATA'.
-
-         - Select 2-3 unique player names and search for: "roster {Player 1} {Player 2} {Player 3}".
-         - Use the search results to find the specific professional team (NWSL, MiLB, etc.).
-         - Cross-reference the identified team with the VALID TEAM LIST provided above.
-         - TRUST THE SEARCH RESULTS for team identification; professional rosters change frequently, and expansion teams like "Bay FC" may not be in your training data.`
-      : `1. Identification: Identify the team name (e.g. "Boston Bruins") from the roster data. 
-         - Search tool is DISABLED for this request. 
-         - Compare the players in 'DATA' against the VALID TEAM LIST in your instructions. 
-         - Choose the closest matching team name from that list. 
-         - IGNORE years or extra metadata (e.g. "2025", "U18") when matching.
-         - Do NOT return "Unknown Team" if the players match a known professional team.`;
-
-    const detectedTeam = knownTeams.find(name => {
-      const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      const regex = new RegExp(`\\b${escaped}\\b`, 'i');
-      return regex.test(text.substring(0, 1000)); // Check first 1000 chars
-    });
-    const teamHint = (detectedTeam)
-      ? `DETECTION HINT: I found context suggesting this is "${detectedTeam}". Use this if the athletes match.`
-      : '';
+    // Note: Team identification is now manual - AI always returns "Unknown Team"
+    const extractionInstruction = `Extract roster data from the provided text. Set teamName to "Unknown Team".`;
 
     const userPrompt = `DATA:\n${text}\n\n${context}\nTier: ${tier}.\n\n` +
       `FINAL INSTRUCTIONS:\n` +
-      `${teamHint}\n` +
-      `${identificationInstruction}\n` +
-      `2. Extraction (MANDATORY): CRITICAL - You MUST extract EVERY SINGLE athlete from the 'DATA' block into the athletes array.
-         - NO SKIPPING: If a name is in DATA, it MUST be in the JSON results. 
+      `${extractionInstruction}\n` +
+      `Extraction (MANDATORY): CRITICAL - You MUST extract EVERY SINGLE athlete from the 'DATA' block into the athletes array. Always set teamName to "Unknown Team".
+         - NO SKIPPING: If a name is in DATA, it MUST be in the JSON results.
          - Use "00" for jersey/bib and "Athlete" as defaults for missing metadata.
          - Only provide birthDate, height, and weight if found in text or via search. Do NOT use fake placeholders.
          - THE DATA BLOCK IS YOUR ONLY AUTHORITATIVE SOURCE FOR NAMES.\n` +
@@ -1201,7 +1148,22 @@ export async function processRosterRawText(
     }
   }
 
-
+  // NEW: If team is Unknown and league is selected, populate all teams for user selection
+  if (parsedResult.teamName === "Unknown Team" && league && candidateTeams.length === 0) {
+    console.log(`[Gemini] Team is Unknown, populating all teams for league: ${league}`);
+    candidateTeams = Object.entries(ESPN_TEAM_IDS)
+      .filter(([_, info]) => info.league === league || info.league === `usa.${league}`)
+      .map(([name, info]) => ({
+        id: info.id,
+        name: name,
+        league: info.league,
+        logoUrl: info.logoUrl,
+        sport: info.sport,
+        primaryColor: info.primaryColor,
+        secondaryColor: info.secondaryColor
+      }));
+    console.log(`[Gemini] Populated ${candidateTeams.length} teams for selection`);
+  }
 
   return {
     teamName: parsedResult.teamName || "Unknown Team",
@@ -1210,7 +1172,7 @@ export async function processRosterRawText(
     seasonYear: extractedSeason,
     athletes: athletesWithJerseys,
     verificationSources,
-    candidateTeams: candidateTeams.length > 1 ? candidateTeams : undefined,
+    candidateTeams: candidateTeams.length > 0 ? candidateTeams : undefined,
     teamMetadata: finalBranding,
     abbreviation: finalBranding.abbreviation, // Also include at root for easy UI access
     officialRosterCount: officialCount,
