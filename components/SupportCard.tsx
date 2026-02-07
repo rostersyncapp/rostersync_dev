@@ -40,7 +40,7 @@ const SupportCard: React.FC<SupportCardProps> = ({ darkMode, onClose }) => {
     };
 
     return (
-        <div className="w-full min-h-[380px] shadow-2xl rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-800 flex flex-col md:flex-row relative group">
+        <div className="w-full h-full min-h-[420px] shadow-2xl rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-800 flex flex-col md:flex-row relative group">
             {onClose && (
                 <button
                     onClick={onClose}

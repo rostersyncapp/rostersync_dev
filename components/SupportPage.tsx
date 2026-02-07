@@ -9,7 +9,7 @@ interface SupportPageProps {
 
 const SupportPage: React.FC<SupportPageProps> = ({ darkMode }) => {
     return (
-        <div className="p-6 max-w-5xl mx-auto space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div className="p-6 w-full mx-auto space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
 
             {/* Header */}
             <div className="mb-4">
@@ -18,7 +18,7 @@ const SupportPage: React.FC<SupportPageProps> = ({ darkMode }) => {
             </div>
 
             {/* Side by Side Cards */}
-            <div className="flex flex-col lg:flex-row gap-4">
+            <div className="flex flex-col lg:flex-row gap-6 items-stretch">
                 {/* AI Agent Chat */}
                 <div className="flex-1">
                     <ChatSupport />
