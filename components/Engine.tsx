@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Athlete, SubscriptionTier, Roster, ExportFormat, Project } from '../types.ts';
 import { ProcessedRoster } from '../services/gemini.ts';
+import { getLeagues, getConferences } from '../services/supabase.ts';
 import { TeamSelectionModal } from './TeamSelectionModal';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -145,6 +146,30 @@ export const Engine: React.FC<Props> = ({
   const [primaryColor, setPrimaryColor] = useState('#5B5FFF');
   const [secondaryColor, setSecondaryColor] = useState('#1A1A1A');
   const [logoUrl, setLogoUrl] = useState('');
+
+  // Dynamic League Data State
+  const [availableLeagues, setAvailableLeagues] = useState<any[]>([]);
+  const [availableConferences, setAvailableConferences] = useState<any[]>([]);
+
+  // NCAA Specific State
+  const [ncaaSport, setNcaaSport] = useState<string>('Football');
+  const [ncaaDivision, setNcaaDivision] = useState<string>('Division I');
+  const [ncaaConference, setNcaaConference] = useState<string>('');
+
+  useEffect(() => {
+    // Fetch supported leagues on mount
+    getLeagues().then(data => {
+      // Filter for NA region if needed, but the table should mostly be NA now
+      setAvailableLeagues(data);
+    });
+  }, []);
+
+  useEffect(() => {
+    // Fetch conferences when NCAA is selected or division changes
+    if (league === 'ncaa') {
+      getConferences('ncaa', ncaaDivision).then(data => setAvailableConferences(data));
+    }
+  }, [league, ncaaDivision]);
 
   const [isEditingMetadata, setIsEditingMetadata] = useState(false);
   const [processedAthletes, setProcessedAthletes] = useState<Athlete[]>([]);
@@ -307,67 +332,31 @@ export const Engine: React.FC<Props> = ({
     };
   }, [isLeagueDropdownOpen]);
 
-  const LEAGUE_OPTIONS = [
-    {
-      category: "🏀 Basketball",
-      options: [
-        // { value: "euroleague", label: "EuroLeague" },
-        { value: "nba", label: "NBA" },
-        { value: "wnba", label: "WNBA" }
-      ]
-    },
-    {
-      category: "🏈 Football (American)",
-      options: [
-        { value: "nfl", label: "NFL" }
-      ]
-    },
-    {
-      category: "⚽ Soccer",
-      options: [
-        // { value: "bundesliga", label: "Bundesliga" },
-        // { value: "efl-championship", label: "EFL Championship" },
-        // { value: "eredivisie", label: "Eredivisie" },
-        // { value: "la-liga", label: "La Liga" },
-        // { value: "liga-mx", label: "Liga MX" },
-        // { value: "ligue-1", label: "Ligue 1" },
-        { value: "mls", label: "MLS" },
-        { value: "nwsl", label: "NWSL" },
-        // { value: "premier-league", label: "Premier League" },
-        // { value: "scottish-premiership", label: "Scottish Premiership" },
-        // { value: "serie-a", label: "Serie A" },
-        { value: "usl", label: "USL Championship" },
-        // { value: "wsl", label: "Women's Super League (WSL)" }
-      ]
-    },
-    // {
-    //   category: "🏏 Cricket",
-    //   options: [
-    //     { value: "ipl", label: "IPL" }
-    //   ]
-    // },
-    {
-      category: "🏒 Hockey",
-      options: [
-        { value: "nhl", label: "NHL" }
-      ]
-    },
-    {
-      category: "⚾ Baseball",
-      options: [
-        { value: "milb", label: "MiLB" },
-        { value: "mlb", label: "MLB" }
-      ]
-    }
-  ];
+  // Hardcoded map for grouping (since DB doesn't have sport column yet)
+  const LEAGUE_SPORT_MAP: Record<string, string> = {
+    nba: 'Basketball', wnba: 'Basketball',
+    nfl: 'Football',
+    mlb: 'Baseball', milb: 'Baseball',
+    nhl: 'Hockey',
+    mls: 'Soccer', nwsl: 'Soccer', usl: 'Soccer',
+    ncaa: 'College Sports'
+  };
 
   const getLeagueLabel = (value: string) => {
-    for (const group of LEAGUE_OPTIONS) {
-      const found = group.options.find(opt => opt.value === value);
-      if (found) return found.label;
-    }
-    return value || 'Select League';
+    const found = availableLeagues.find(l => l.id === value);
+    return found ? found.name : (value || 'Select League');
   };
+
+  // Group available leagues by sport
+  const groupedLeagues = useMemo(() => {
+    const groups: Record<string, any[]> = {};
+    availableLeagues.forEach(l => {
+      const sport = LEAGUE_SPORT_MAP[l.id] || 'Other';
+      if (!groups[sport]) groups[sport] = [];
+      groups[sport].push({ value: l.id, label: l.name });
+    });
+    return Object.entries(groups).map(([category, options]) => ({ category, options }));
+  }, [availableLeagues]);
 
   const handleLeagueSelect = (selectedLeague: string) => {
     setLeague(selectedLeague);
@@ -383,7 +372,8 @@ export const Engine: React.FC<Props> = ({
       'ipl': 'Cricket',
       'nhl': 'Hockey',
       'mlb': 'Baseball',
-      'milb': 'Baseball'
+      'milb': 'Baseball',
+      'ncaa': ncaaSport // Default for NCAA
     };
 
     if (selectedLeague && leagueToSport[selectedLeague]) {
@@ -403,9 +393,12 @@ export const Engine: React.FC<Props> = ({
     const finalLeague = isOlympicFastMode ? "milano-cortina-2026" : league;
 
     // Prepend team name to raw input if provided (helps AI identification)
-    const inputWithTeam = manualTeamName.trim()
-      ? `Team: ${manualTeamName.trim()}\n\n${rawInput}`
-      : rawInput;
+    // Prepend team name and conference to raw input
+    let promptPrefix = "";
+    if (manualTeamName.trim()) promptPrefix += `Team: ${manualTeamName.trim()}\n`;
+    if (league === 'ncaa' && ncaaConference) promptPrefix += `Conference: ${ncaaConference}\n`;
+
+    const inputWithTeam = promptPrefix ? `${promptPrefix}\n${rawInput}` : rawInput;
 
     onStartProcessing(inputWithTeam, finalNocMode, finalSeason, true, finalLeague);
   };
@@ -438,7 +431,7 @@ export const Engine: React.FC<Props> = ({
         primaryColor,
         secondaryColor,
         abbreviation,
-        conference: pendingRoster?.teamMetadata?.conference || 'General',
+        conference: (league === 'ncaa' && ncaaConference) ? ncaaConference : (pendingRoster?.teamMetadata?.conference || 'General'),
         logoUrl,
         countryCode: pendingRoster?.teamMetadata?.countryCode
       }
@@ -731,7 +724,7 @@ export const Engine: React.FC<Props> = ({
                         >
                           Select League
                         </button>
-                        {LEAGUE_OPTIONS.map((group, groupIdx) => (
+                        {groupedLeagues.map((group, groupIdx) => (
                           <div key={groupIdx}>
                             <div className="px-5 py-2 text-xs font-extrabold uppercase tracking-widest text-[#5B5FFF] bg-gray-50/50 dark:bg-gray-900/50 mt-1 first:mt-0">
                               {group.category}
@@ -752,6 +745,68 @@ export const Engine: React.FC<Props> = ({
                   )}
                 </div>
               </div>
+
+              {/* NCAA Cascading Selectors */}
+              {league === 'ncaa' && (
+                <div className="space-y-4 animate-in slide-in-from-top-2">
+                  {/* Sport Selector */}
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-gray-400 uppercase tracking-widest font-mono flex items-center gap-2">
+                      <Trophy size={12} /> Sport
+                    </label>
+                    <select
+                      value={ncaaSport}
+                      onChange={(e) => {
+                        setNcaaSport(e.target.value);
+                        setSport(e.target.value); // Update metadata sport too
+                      }}
+                      className="w-full h-14 px-5 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl text-base font-medium outline-none focus:ring-2 focus:ring-[#5B5FFF]/20 pl-4 appearance-none"
+                    >
+                      {['Football', 'Basketball', 'Baseball', 'Soccer', 'Volleyball', 'Softball', 'Lacrosse'].map(s => (
+                        <option key={s} value={s}>{s}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Division Selector */}
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-gray-400 uppercase tracking-widest font-mono flex items-center gap-2">
+                      <Hash size={12} /> Division
+                    </label>
+                    <select
+                      value={ncaaDivision}
+                      onChange={(e) => setNcaaDivision(e.target.value)}
+                      className="w-full h-14 px-5 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl text-base font-medium outline-none focus:ring-2 focus:ring-[#5B5FFF]/20 pl-4 appearance-none"
+                    >
+                      {['Division I', 'Division II', 'Division III'].map(d => (
+                        <option key={d} value={d}>{d}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Conference Selector */}
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-gray-400 uppercase tracking-widest font-mono flex items-center gap-2">
+                      <Flag size={12} /> Conference
+                    </label>
+                    <div className="relative">
+                      <select
+                        value={ncaaConference}
+                        onChange={(e) => setNcaaConference(e.target.value)}
+                        className="w-full h-14 px-5 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl text-base font-medium outline-none focus:ring-2 focus:ring-[#5B5FFF]/20 pl-4 appearance-none"
+                      >
+                        <option value="">Select Conference...</option>
+                        {availableConferences.map(c => (
+                          <option key={c.id} value={c.name}>{c.name} ({c.abbreviation})</option>
+                        ))}
+                      </select>
+                      <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                        <ChevronDown size={16} className="text-gray-400" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               <div className="space-y-2">
                 <label className="text-xs font-bold text-gray-400 uppercase tracking-widest font-mono flex items-center gap-2">
@@ -810,207 +865,209 @@ export const Engine: React.FC<Props> = ({
       />
 
 
-      {step === 2 && (
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          className="space-y-8 pb-24"
-        >
-          {/* Detailed Metadata Header */}
-          <div className="bg-white dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
-            <div className="p-8 md:p-10 flex flex-col md:flex-row gap-10 bg-gray-50/30 dark:bg-gray-800/20">
-              <div className="flex-1 flex flex-col md:flex-row gap-8">
-                <div className="w-28 h-28 rounded-3xl text-white flex items-center justify-center shadow-lg shrink-0 overflow-hidden relative group bg-white border border-gray-100 dark:border-gray-800">
-                  {logoUrl && logoUrl !== 'Unknown' && !isNocMode ? (
-                    <img src={logoUrl} alt={teamName} className="w-full h-full object-contain p-4" onError={() => setLogoUrl('')} />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-white font-mono font-black text-4xl" style={{ backgroundColor: primaryColor }}>
-                      {abbreviation || '??'}
+      {
+        step === 2 && (
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="space-y-8 pb-24"
+          >
+            {/* Detailed Metadata Header */}
+            <div className="bg-white dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
+              <div className="p-8 md:p-10 flex flex-col md:flex-row gap-10 bg-gray-50/30 dark:bg-gray-800/20">
+                <div className="flex-1 flex flex-col md:flex-row gap-8">
+                  <div className="w-28 h-28 rounded-3xl text-white flex items-center justify-center shadow-lg shrink-0 overflow-hidden relative group bg-white border border-gray-100 dark:border-gray-800">
+                    {logoUrl && logoUrl !== 'Unknown' && !isNocMode ? (
+                      <img src={logoUrl} alt={teamName} className="w-full h-full object-contain p-4" onError={() => setLogoUrl('')} />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-white font-mono font-black text-4xl" style={{ backgroundColor: primaryColor }}>
+                        {abbreviation || '??'}
+                      </div>
+                    )}
+                    <button onClick={() => setIsEditingMetadata(!isEditingMetadata)} className="absolute inset-0 bg-black/40 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                      <Edit2 size={24} />
+                    </button>
+                  </div>
+
+                  <div className="flex-1 space-y-4">
+                    <div className="flex items-center gap-4 flex-wrap">
+                      <h2 className="text-4xl font-black tracking-tight text-gray-900 dark:text-white">
+                        {teamName}
+                      </h2>
+                      <span className="px-4 py-1.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-xl text-[10px] font-black uppercase tracking-[0.2em]">{sport}</span>
                     </div>
-                  )}
-                  <button onClick={() => setIsEditingMetadata(!isEditingMetadata)} className="absolute inset-0 bg-black/40 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
-                    <Edit2 size={24} />
-                  </button>
+
+                    <div className="flex items-center gap-6 text-gray-400 dark:text-gray-500 text-sm font-bold">
+                      <div className="flex items-center gap-2">
+                        <Calendar size={18} className="text-indigo-500/50" />
+                        <span>{seasonYear} Season</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Users size={18} className="text-indigo-500/50" />
+                        <span>{processedAthletes.length} Athletes Found</span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-4 pt-2">
+                      <button onClick={() => setIsEditingMetadata(!isEditingMetadata)} className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl text-xs font-bold text-gray-600 dark:text-gray-300 hover:border-indigo-500 transition-all flex items-center gap-2">
+                        <Palette size={14} className="text-indigo-500" /> Branding
+                      </button>
+                      {pendingRoster?.verificationSources && pendingRoster.verificationSources.length > 0 && (
+                        <div className="flex items-center gap-2 pl-4 border-l border-gray-100 dark:border-gray-800">
+                          <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">AI Sources</span>
+                          <div className="flex gap-2">
+                            {pendingRoster.verificationSources.slice(0, 3).map((src, i) => (
+                              <a key={i} href={src.uri} target="_blank" rel="noopener noreferrer" className="w-7 h-7 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center text-gray-400 hover:text-indigo-500 transition-colors" title={src.title}>
+                                <ExternalLink size={12} />
+                              </a>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
 
-                <div className="flex-1 space-y-4">
-                  <div className="flex items-center gap-4 flex-wrap">
-                    <h2 className="text-4xl font-black tracking-tight text-gray-900 dark:text-white">
-                      {teamName}
-                    </h2>
-                    <span className="px-4 py-1.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-xl text-[10px] font-black uppercase tracking-[0.2em]">{sport}</span>
-                  </div>
+                <div className="flex flex-col justify-center min-w-[240px] pt-6 md:pt-0 border-t md:border-t-0 md:border-l border-gray-100 dark:border-gray-800 md:pl-10">
+                  <button onClick={handleSaveToLibrary} disabled={isSaving} className="w-full h-14 rounded-2xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-bold text-sm hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-gray-900/10 dark:shadow-white/5 transition-all flex items-center justify-center gap-3 uppercase tracking-[0.2em]">
+                    {isSaving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />} Save To Library
+                  </button>
+                  <p className="text-[10px] text-gray-400 text-center mt-4 font-medium uppercase tracking-widest">Ready for export and sync</p>
+                </div>
+              </div>
 
-                  <div className="flex items-center gap-6 text-gray-400 dark:text-gray-500 text-sm font-bold">
-                    <div className="flex items-center gap-2">
-                      <Calendar size={18} className="text-indigo-500/50" />
-                      <span>{seasonYear} Season</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Users size={18} className="text-indigo-500/50" />
-                      <span>{processedAthletes.length} Athletes Found</span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-4 pt-2">
-                    <button onClick={() => setIsEditingMetadata(!isEditingMetadata)} className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl text-xs font-bold text-gray-600 dark:text-gray-300 hover:border-indigo-500 transition-all flex items-center gap-2">
-                      <Palette size={14} className="text-indigo-500" /> Branding
-                    </button>
-                    {pendingRoster?.verificationSources && pendingRoster.verificationSources.length > 0 && (
-                      <div className="flex items-center gap-2 pl-4 border-l border-gray-100 dark:border-gray-800">
-                        <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">AI Sources</span>
+              {/* Editing Pane */}
+              <AnimatePresence>
+                {isEditingMetadata && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    className="overflow-hidden bg-gray-50/50 dark:bg-gray-800/40 border-t border-gray-50 dark:border-gray-800"
+                  >
+                    <div className="p-8 md:p-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                      <div className="space-y-2">
+                        <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-1">Team Name</label>
+                        <input type="text" value={teamName} onChange={(e) => setTeamName(e.target.value)} className="w-full px-5 py-3.5 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-indigo-500/20" />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-1">Season</label>
+                        <input type="text" value={seasonYear} onChange={(e) => setSeasonYear(e.target.value)} className="w-full px-5 py-3.5 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-indigo-500/20" />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-1">Brand Colors</label>
                         <div className="flex gap-2">
-                          {pendingRoster.verificationSources.slice(0, 3).map((src, i) => (
-                            <a key={i} href={src.uri} target="_blank" rel="noopener noreferrer" className="w-7 h-7 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center text-gray-400 hover:text-indigo-500 transition-colors" title={src.title}>
-                              <ExternalLink size={12} />
-                            </a>
-                          ))}
+                          <input type="color" value={primaryColor} onChange={(e) => setPrimaryColor(e.target.value)} className="w-full h-12 rounded-xl border-none cursor-pointer bg-transparent" />
+                          <input type="color" value={secondaryColor} onChange={(e) => setSecondaryColor(e.target.value)} className="w-full h-12 rounded-xl border-none cursor-pointer bg-transparent" />
                         </div>
                       </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex flex-col justify-center min-w-[240px] pt-6 md:pt-0 border-t md:border-t-0 md:border-l border-gray-100 dark:border-gray-800 md:pl-10">
-                <button onClick={handleSaveToLibrary} disabled={isSaving} className="w-full h-14 rounded-2xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-bold text-sm hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-gray-900/10 dark:shadow-white/5 transition-all flex items-center justify-center gap-3 uppercase tracking-[0.2em]">
-                  {isSaving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />} Save To Library
-                </button>
-                <p className="text-[10px] text-gray-400 text-center mt-4 font-medium uppercase tracking-widest">Ready for export and sync</p>
-              </div>
-            </div>
-
-            {/* Editing Pane */}
-            <AnimatePresence>
-              {isEditingMetadata && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: "auto", opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  className="overflow-hidden bg-gray-50/50 dark:bg-gray-800/40 border-t border-gray-50 dark:border-gray-800"
-                >
-                  <div className="p-8 md:p-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                    <div className="space-y-2">
-                      <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-1">Team Name</label>
-                      <input type="text" value={teamName} onChange={(e) => setTeamName(e.target.value)} className="w-full px-5 py-3.5 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-indigo-500/20" />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-1">Season</label>
-                      <input type="text" value={seasonYear} onChange={(e) => setSeasonYear(e.target.value)} className="w-full px-5 py-3.5 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-indigo-500/20" />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-1">Brand Colors</label>
-                      <div className="flex gap-2">
-                        <input type="color" value={primaryColor} onChange={(e) => setPrimaryColor(e.target.value)} className="w-full h-12 rounded-xl border-none cursor-pointer bg-transparent" />
-                        <input type="color" value={secondaryColor} onChange={(e) => setSecondaryColor(e.target.value)} className="w-full h-12 rounded-xl border-none cursor-pointer bg-transparent" />
+                      <div className="space-y-2">
+                        <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-1">Logo URL</label>
+                        <input type="text" value={logoUrl} onChange={(e) => setLogoUrl(e.target.value)} className="w-full px-5 py-3.5 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl text-xs font-medium outline-none focus:ring-2 focus:ring-indigo-500/20" placeholder="https://..." />
                       </div>
                     </div>
-                    <div className="space-y-2">
-                      <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-1">Logo URL</label>
-                      <input type="text" value={logoUrl} onChange={(e) => setLogoUrl(e.target.value)} className="w-full px-5 py-3.5 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl text-xs font-medium outline-none focus:ring-2 focus:ring-indigo-500/20" placeholder="https://..." />
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-
-          {/* Roster Table */}
-          <div className="bg-white dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="bg-gray-50/50 dark:bg-gray-800/50">
-                    <th className="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] w-16">#</th>
-                    <th className="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Full Name</th>
-                    <th className="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-center">Jersey</th>
-                    <th className="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-center">Position</th>
-                    {userTier !== 'BASIC' && (
-                      <th className="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-center">Phonetic</th>
-                    )}
-                    {userTier !== 'BASIC' && (
-                      <th className="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-center">Colors</th>
-                    )}
-                    {userTier !== 'BASIC' && (
-                      <th className="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-right pr-12">Hardware Safe</th>
-                    )}
-                    {onDeletePlayer && <th className="w-16 h-full"></th>}
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
-                  {processedAthletes.map((a, idx) => (
-                    <motion.tr
-                      key={a.id || idx}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: idx * 0.03 }}
-                      className="hover:bg-indigo-50/30 dark:hover:bg-indigo-900/10 transition-colors group"
-                    >
-                      <td className="px-6 py-6 text-sm font-bold text-gray-300 dark:text-gray-600">{idx + 1}</td>
-                      <td className="px-6 py-6">
-                        <span className="text-base font-bold text-gray-900 dark:text-white tracking-tight">{a.fullName}</span>
-                      </td>
-                      <td className="px-6 py-6 text-center">
-                        <span className="inline-flex items-center justify-center min-w-[32px] h-8 bg-gray-100 dark:bg-gray-800 rounded-lg text-sm font-black text-gray-900 dark:text-white">
-                          {a.jerseyNumber.toString().replace(/#/g, '') || '--'}
-                        </span>
-                      </td>
-                      <td className="px-6 py-6 text-center">
-                        <span className="inline-block px-3 py-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 text-[10px] font-black uppercase tracking-wider">
-                          {a.position.toString().replace(/#/g, '')}
-                        </span>
-                      </td>
-                      {userTier !== 'BASIC' && (
-                        <td className="px-6 py-6 text-center">
-                          <span className="text-xs font-bold text-gray-500 italic">
-                            {a.phoneticSimplified || '-'}
-                          </span>
-                        </td>
-                      )}
-                      {userTier !== 'BASIC' && (
-                        <td className="px-6 py-6 text-center">
-                          <div className="flex items-center justify-center gap-1.5">
-                            <div className="w-3.5 h-3.5 rounded-full border border-gray-200 shadow-sm" style={{ backgroundColor: a.metadata?.primaryColor || primaryColor || '#000' }}></div>
-                            <div className="w-3.5 h-3.5 rounded-full border border-gray-200 shadow-sm" style={{ backgroundColor: a.metadata?.secondaryColor || secondaryColor || '#fff' }}></div>
-                          </div>
-                        </td>
-                      )}
-                      {userTier !== 'BASIC' && (
-                        <td className="px-6 py-6 text-right pr-12">
-                          <span className="inline-flex items-center gap-2 px-3 py-1.5 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 rounded-lg text-xs font-bold font-mono">
-                            <Check size={12} />
-                            {a.displayNameSafe}
-                          </span>
-                        </td>
-                      )}
-                      {onDeletePlayer && (
-                        <td className="px-6 py-6 text-center">
-                          <button
-                            onClick={() => handleDeletePlayer(a.fullName)}
-                            className="p-2 text-gray-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all opacity-0 group-hover:opacity-100"
-                          >
-                            <UserMinus size={16} />
-                          </button>
-                        </td>
-                      )}
-                    </motion.tr>
-                  ))}
-                </tbody>
-              </table>
-
-              {processedAthletes.length === 0 && (
-                <div className="py-20 text-center">
-                  <div className="w-16 h-16 bg-gray-50 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <UserMinus size={24} className="text-gray-300" />
-                  </div>
-                  <h3 className="text-lg font-bold text-gray-900 dark:text-white">No Athletes Found</h3>
-                  <p className="text-gray-500 text-sm">Review your source input and try scouting again.</p>
-                </div>
-              )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
-          </div>
-        </motion.div>
-      )}
+
+            {/* Roster Table */}
+            <div className="bg-white dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-gray-50/50 dark:bg-gray-800/50">
+                      <th className="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] w-16">#</th>
+                      <th className="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Full Name</th>
+                      <th className="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-center">Jersey</th>
+                      <th className="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-center">Position</th>
+                      {userTier !== 'BASIC' && (
+                        <th className="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-center">Phonetic</th>
+                      )}
+                      {userTier !== 'BASIC' && (
+                        <th className="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-center">Colors</th>
+                      )}
+                      {userTier !== 'BASIC' && (
+                        <th className="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-right pr-12">Hardware Safe</th>
+                      )}
+                      {onDeletePlayer && <th className="w-16 h-full"></th>}
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
+                    {processedAthletes.map((a, idx) => (
+                      <motion.tr
+                        key={a.id || idx}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: idx * 0.03 }}
+                        className="hover:bg-indigo-50/30 dark:hover:bg-indigo-900/10 transition-colors group"
+                      >
+                        <td className="px-6 py-6 text-sm font-bold text-gray-300 dark:text-gray-600">{idx + 1}</td>
+                        <td className="px-6 py-6">
+                          <span className="text-base font-bold text-gray-900 dark:text-white tracking-tight">{a.fullName}</span>
+                        </td>
+                        <td className="px-6 py-6 text-center">
+                          <span className="inline-flex items-center justify-center min-w-[32px] h-8 bg-gray-100 dark:bg-gray-800 rounded-lg text-sm font-black text-gray-900 dark:text-white">
+                            {a.jerseyNumber.toString().replace(/#/g, '') || '--'}
+                          </span>
+                        </td>
+                        <td className="px-6 py-6 text-center">
+                          <span className="inline-block px-3 py-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 text-[10px] font-black uppercase tracking-wider">
+                            {a.position.toString().replace(/#/g, '')}
+                          </span>
+                        </td>
+                        {userTier !== 'BASIC' && (
+                          <td className="px-6 py-6 text-center">
+                            <span className="text-xs font-bold text-gray-500 italic">
+                              {a.phoneticSimplified || '-'}
+                            </span>
+                          </td>
+                        )}
+                        {userTier !== 'BASIC' && (
+                          <td className="px-6 py-6 text-center">
+                            <div className="flex items-center justify-center gap-1.5">
+                              <div className="w-3.5 h-3.5 rounded-full border border-gray-200 shadow-sm" style={{ backgroundColor: a.metadata?.primaryColor || primaryColor || '#000' }}></div>
+                              <div className="w-3.5 h-3.5 rounded-full border border-gray-200 shadow-sm" style={{ backgroundColor: a.metadata?.secondaryColor || secondaryColor || '#fff' }}></div>
+                            </div>
+                          </td>
+                        )}
+                        {userTier !== 'BASIC' && (
+                          <td className="px-6 py-6 text-right pr-12">
+                            <span className="inline-flex items-center gap-2 px-3 py-1.5 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 rounded-lg text-xs font-bold font-mono">
+                              <Check size={12} />
+                              {a.displayNameSafe}
+                            </span>
+                          </td>
+                        )}
+                        {onDeletePlayer && (
+                          <td className="px-6 py-6 text-center">
+                            <button
+                              onClick={() => handleDeletePlayer(a.fullName)}
+                              className="p-2 text-gray-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                            >
+                              <UserMinus size={16} />
+                            </button>
+                          </td>
+                        )}
+                      </motion.tr>
+                    ))}
+                  </tbody>
+                </table>
+
+                {processedAthletes.length === 0 && (
+                  <div className="py-20 text-center">
+                    <div className="w-16 h-16 bg-gray-50 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <UserMinus size={24} className="text-gray-300" />
+                    </div>
+                    <h3 className="text-lg font-bold text-gray-900 dark:text-white">No Athletes Found</h3>
+                    <p className="text-gray-500 text-sm">Review your source input and try scouting again.</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </motion.div>
+        )
+      }
 
     </div >
   );

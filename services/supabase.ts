@@ -382,3 +382,46 @@ export async function saveBrandingCache(branding: BrandingCache): Promise<void> 
   }
 }
 
+
+/**
+ * Fetch all supported leagues
+ */
+export async function getLeagues() {
+  if (!isSupabaseConfigured) return [];
+
+  const { data, error } = await supabase
+    .from('leagues')
+    .select('*')
+    .order('name');
+
+  if (error) {
+    console.error('Error fetching leagues:', error);
+    return [];
+  }
+  return data || [];
+}
+
+/**
+ * Fetch conferences for a league
+ */
+export async function getConferences(leagueId: string, division?: string) {
+  if (!isSupabaseConfigured) return [];
+
+  let query = supabase
+    .from('conferences')
+    .select('*')
+    .eq('league_id', leagueId)
+    .order('name');
+
+  if (division) {
+    query = query.eq('division', division);
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    console.error('Error fetching conferences:', error);
+    return [];
+  }
+  return data || [];
+}
