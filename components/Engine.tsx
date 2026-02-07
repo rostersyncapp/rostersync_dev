@@ -601,9 +601,9 @@ export const Engine: React.FC<Props> = ({
           </div>
 
           {/* Intelligence Sidebar */}
-          <div className="space-y-6">
+          <div className="space-y-6 flex flex-col h-full">
             {/* Input Quality Card */}
-            <div className="bg-white dark:bg-gray-900 p-6 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm">
+            <div className="bg-white dark:bg-gray-900 p-6 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm flex-1 flex flex-col">
               <div className="flex items-center gap-2 mb-6 text-gray-400 dark:text-gray-500">
                 <Activity size={16} />
                 <span className="text-[10px] font-black uppercase tracking-widest">Live Intelligence</span>
@@ -644,14 +644,14 @@ export const Engine: React.FC<Props> = ({
             </div>
 
             {/* Recent Scouts Card */}
-            <div className="bg-white dark:bg-gray-900 p-6 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm">
+            <div className="bg-white dark:bg-gray-900 p-6 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm flex-1 flex flex-col">
               <div className="flex items-center gap-2 mb-6 text-gray-400 dark:text-gray-500">
                 <History size={16} />
                 <span className="text-[10px] font-black uppercase tracking-widest">Recent Scouts</span>
               </div>
 
               {scoutHistory.length > 0 ? (
-                <div className="space-y-4">
+                <div className="space-y-4 flex-1 overflow-y-auto">
                   {scoutHistory.map((h, i) => (
                     <div key={i} className="group cursor-default">
                       <h4 className="text-xs font-bold text-gray-900 dark:text-white group-hover:text-indigo-500 transition-colors truncate">{h.name}</h4>
@@ -673,7 +673,7 @@ export const Engine: React.FC<Props> = ({
             </div>
 
             {/* Tip Card */}
-            <div className="p-6 rounded-3xl bg-indigo-600 text-white shadow-xl shadow-indigo-500/10">
+            <div className="p-6 rounded-3xl bg-indigo-600 text-white shadow-xl shadow-indigo-500/10 flex-1 flex flex-col justify-center">
               <Info size={20} className="mb-4 opacity-50" />
               <h4 className="text-sm font-bold mb-2">Scout Tip</h4>
               <p className="text-[11px] leading-relaxed font-medium opacity-90">
