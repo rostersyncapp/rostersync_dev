@@ -162,3 +162,38 @@ VALUES (
     {"icon": "shield", "label": "Broadcast Safe", "text": "Automatic sanitization for Vizrt and Ross hardware."}
   ]'::jsonb
 ) ON CONFLICT DO NOTHING;
+
+-- ============================================
+-- LEAGUES TABLE
+-- ============================================
+
+CREATE TABLE IF NOT EXISTS public.leagues (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  display_name TEXT NOT NULL,
+  sport TEXT NOT NULL,
+  region TEXT DEFAULT 'north-america',
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- Seed North American Leagues
+INSERT INTO public.leagues (id, name, display_name, sport, region, is_active) VALUES
+  ('nba', 'nba', 'NBA', 'basketball', 'north-america', true),
+  ('wnba', 'wnba', 'WNBA', 'basketball', 'north-america', true),
+  ('nfl', 'nfl', 'NFL', 'football', 'north-america', true),
+  ('mlb', 'mlb', 'MLB', 'baseball', 'north-america', true),
+  ('milb', 'milb', 'MiLB', 'baseball', 'north-america', true),
+  ('nhl', 'nhl', 'NHL', 'hockey', 'north-america', true),
+  ('mls', 'mls', 'MLS', 'soccer', 'north-america', true),
+  ('nwsl', 'nwsl', 'NWSL', 'soccer', 'north-america', true),
+  ('usl', 'usl', 'USL', 'soccer', 'north-america', true),
+  ('ncaa', 'ncaa', 'NCAA', 'football', 'north-america', true),
+  ('premier-league', 'premier-league', 'Premier League', 'soccer', 'europe', true)
+ON CONFLICT (id) DO NOTHING;
+
+-- Enable RLS
+ALTER TABLE public.leagues ENABLE ROW LEVEL SECURITY;
+
+-- Policy
+CREATE POLICY "Allow public read of leagues" ON public.leagues FOR SELECT TO public USING (true);
