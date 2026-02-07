@@ -1593,7 +1593,7 @@ export const LEAGUE_TO_SPORT: Record<string, string> = {
   'nba': 'Basketball', 'wnba': 'Basketball', 'euroleague': 'Basketball',
   'nfl': 'Football',
   'premier-league': 'Soccer', 'la-liga': 'Soccer', 'serie-a': 'Soccer',
-  'bundesliga': 'Soccer', 'ligue-1': 'Soccer', 'mls': 'Soccer', 'usa.nwsl': 'Soccer', 'liga-mx': 'Soccer',
+  'bundesliga': 'Soccer', 'ligue-1': 'Soccer', 'mls': 'Soccer', 'usa.nwsl': 'Soccer', 'nwsl': 'Soccer', 'liga-mx': 'Soccer',
   'eredivisie': 'Soccer', 'usl': 'Soccer',
   'ipl': 'Cricket',
   'nhl': 'Hockey',
