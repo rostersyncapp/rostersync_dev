@@ -41,6 +41,7 @@ const DEFAULT_LOGOS: Logo[] = [
     { id: "milb", description: "MiLB", image: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/league_logos/milb.svg", className: "h-12 w-auto grayscale opacity-50 hover:opacity-100 hover:grayscale-0 transition-all duration-300" },
     { id: "nfl", description: "NFL", image: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/league_logos/nfl.svg", className: "h-12 w-auto grayscale opacity-50 hover:opacity-100 hover:grayscale-0 transition-all duration-300" },
     { id: "nhl", description: "NHL", image: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/league_logos/nhl.svg", className: "h-12 w-auto grayscale opacity-50 hover:opacity-100 hover:grayscale-0 transition-all duration-300" },
+    { id: "ncaa", description: "NCAA", image: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/team_logos/ncaa.png", className: "h-12 w-auto grayscale opacity-50 hover:opacity-100 hover:grayscale-0 transition-all duration-300" },
 ];
 
 const Logos3 = ({
