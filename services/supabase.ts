@@ -425,3 +425,22 @@ export async function getConferences(leagueId: string, division?: string) {
   }
   return data || [];
 }
+
+/**
+ * Fetch teams for a conference
+ */
+export async function getTeams(conferenceId: string) {
+  if (!isSupabaseConfigured) return [];
+
+  const { data, error } = await supabase
+    .from('teams')
+    .select('*')
+    .eq('conference_id', conferenceId)
+    .order('name');
+
+  if (error) {
+    console.error('Error fetching teams:', error);
+    return [];
+  }
+  return data || [];
+}

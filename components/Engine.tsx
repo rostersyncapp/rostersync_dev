@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Athlete, SubscriptionTier, Roster, ExportFormat, Project } from '../types.ts';
 import { ProcessedRoster } from '../services/gemini.ts';
-import { getLeagues, getConferences } from '../services/supabase.ts';
+import { getLeagues, getConferences, getTeams } from '../services/supabase.ts';
 import { TeamSelectionModal } from './TeamSelectionModal';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -150,11 +150,13 @@ export const Engine: React.FC<Props> = ({
   // Dynamic League Data State
   const [availableLeagues, setAvailableLeagues] = useState<any[]>([]);
   const [availableConferences, setAvailableConferences] = useState<any[]>([]);
+  const [availableTeams, setAvailableTeams] = useState<any[]>([]);
 
   // NCAA Specific State
   const [ncaaSport, setNcaaSport] = useState<string>('Football');
   const [ncaaDivision, setNcaaDivision] = useState<string>('Division I');
   const [ncaaConference, setNcaaConference] = useState<string>('');
+  const [ncaaTeamId, setNcaaTeamId] = useState<string>('');
 
   useEffect(() => {
     // Fetch supported leagues on mount
@@ -170,6 +172,25 @@ export const Engine: React.FC<Props> = ({
       getConferences('ncaa', ncaaDivision).then(data => setAvailableConferences(data));
     }
   }, [league, ncaaDivision]);
+
+  // Fetch NCAA Teams when Conference Changes
+  useEffect(() => {
+    async function fetchTeams() {
+      if (league === 'ncaa' && ncaaConference) {
+        // Find conference ID
+        const conf = availableConferences.find(c => c.name === ncaaConference);
+        if (conf) {
+          const teams = await getTeams(conf.id);
+          setAvailableTeams(teams);
+        } else {
+          setAvailableTeams([]);
+        }
+      } else {
+        setAvailableTeams([]);
+      }
+    }
+    fetchTeams();
+  }, [league, ncaaConference, availableConferences]);
 
   const [isEditingMetadata, setIsEditingMetadata] = useState(false);
   const [processedAthletes, setProcessedAthletes] = useState<Athlete[]>([]);
@@ -357,7 +378,6 @@ export const Engine: React.FC<Props> = ({
     });
     return Object.entries(groups).map(([category, options]) => ({ category, options }));
   }, [availableLeagues]);
-
   const handleLeagueSelect = (selectedLeague: string) => {
     setLeague(selectedLeague);
     setIsLeagueDropdownOpen(false);
@@ -392,7 +412,6 @@ export const Engine: React.FC<Props> = ({
     const finalSeason = isOlympicFastMode ? "2026" : seasonYear;
     const finalLeague = isOlympicFastMode ? "milano-cortina-2026" : league;
 
-    // Prepend team name to raw input if provided (helps AI identification)
     // Prepend team name and conference to raw input
     let promptPrefix = "";
     if (manualTeamName.trim()) promptPrefix += `Team: ${manualTeamName.trim()}\n`;
@@ -805,6 +824,48 @@ export const Engine: React.FC<Props> = ({
                       </div>
                     </div>
                   </div>
+
+                  {/* Team Selector (Optional) */}
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-gray-400 uppercase tracking-widest font-mono flex items-center gap-2">
+                      <Trophy size={12} /> Select Team <span className="text-gray-300 dark:text-gray-600">(Optional)</span>
+                    </label>
+                    <div className="relative">
+                      <select
+                        value={ncaaTeamId}
+                        onChange={(e) => {
+                          const teamId = e.target.value;
+                          setNcaaTeamId(teamId);
+
+                          if (teamId) {
+                            const team = availableTeams.find(t => t.id === teamId);
+                            if (team) {
+                              setManualTeamName(team.name);
+                              setPrimaryColor(team.primary_color || '#5B5FFF');
+                              setSecondaryColor(team.secondary_color || '#1A1A1A');
+                              setLogoUrl(team.logo_url);
+                            }
+                          } else {
+                            setManualTeamName('');
+                            setPrimaryColor('#5B5FFF');
+                            setSecondaryColor('#1A1A1A');
+                            setLogoUrl('');
+                          }
+                        }}
+                        className="w-full h-14 px-5 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl text-base font-medium outline-none focus:ring-2 focus:ring-[#5B5FFF]/20 pl-4 appearance-none"
+                        disabled={!ncaaConference}
+                      >
+                        <option value="">Select Team...</option>
+                        {availableTeams.map(t => (
+                          <option key={t.id} value={t.id}>{t.name}</option>
+                        ))}
+                      </select>
+                      <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                        <ChevronDown size={16} className="text-gray-400" />
+                      </div>
+                    </div>
+                  </div>
+
                 </div>
               )}
 
