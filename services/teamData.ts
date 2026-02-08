@@ -1609,6 +1609,25 @@ export const LEAGUE_TO_SPORT: Record<string, string> = {
   'ncaa': 'Football',
 };
 
+export const DB_LEAGUE_TO_ESPN_LEAGUE: Record<string, string> = {
+  'mls': 'usa.1',
+  'nwsl': 'usa.nwsl',
+  'nfl': 'nfl',
+  'nba': 'nba',
+  'mlb': 'mlb',
+  'nhl': 'nhl',
+  'wnba': 'wnba',
+  'usl': 'usl',
+  'milb': 'milb-aaa',
+  'premier-league': 'eng.1',
+  'la-liga': 'esp.1',
+  'bundesliga': 'ger.1',
+  'serie-a': 'ita.1',
+  'ligue-1': 'fra.1',
+  'eredivisie': 'ned.1',
+  'liga-mx': 'mex.1',
+};
+
 export const MILB_SPORT_IDS: Record<string, number> = {
   "milb": 11, // Default to AAA if generic
   "milb-aaa": 11,

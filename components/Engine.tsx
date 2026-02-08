@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Athlete, SubscriptionTier, Roster, ExportFormat, Project } from '../types.ts';
 import { ProcessedRoster } from '../services/gemini.ts';
 import { getLeagues, getConferences, getTeams } from '../services/supabase.ts';
-import { ESPN_TEAM_IDS } from '../services/teamData.ts';
+import { ESPN_TEAM_IDS, DB_LEAGUE_TO_ESPN_LEAGUE } from '../services/teamData.ts';
 import { TeamSelectionModal } from './TeamSelectionModal';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -195,11 +195,19 @@ export const Engine: React.FC<Props> = ({
   // Fetch Teams for Non-NCAA Leagues from ESPN_TEAM_IDS
   useEffect(() => {
     if (league && league !== 'ncaa') {
-      const normalizedInputLeague = league.replace(/^usa\./, '');
+      const espnLeagueCode = DB_LEAGUE_TO_ESPN_LEAGUE[league] || league;
+      // Normalize by removing 'usa.' prefix if present, to match how ESPN_TEAM_IDS might be stored inconsistently
+      // checking 'usa.1' against 'usa.1' is best.
+
       const leagueTeams = Object.entries(ESPN_TEAM_IDS)
         .filter(([_, info]) => {
-          const normalizedTeamLeague = (info.league || '').replace(/^usa\./, '');
-          return normalizedTeamLeague === normalizedInputLeague;
+          // Direct match first
+          if (info.league === espnLeagueCode) return true;
+
+          // Fallback: normalized match (handle usa. prefix)
+          const normInfo = (info.league || '').replace(/^usa\./, '');
+          const normInput = espnLeagueCode.replace(/^usa\./, '');
+          return normInfo === normInput;
         })
         .map(([name, info]) => ({
           id: info.id,
@@ -208,7 +216,7 @@ export const Engine: React.FC<Props> = ({
           primary_color: info.primaryColor,
           secondary_color: info.secondaryColor
         }));
-      console.log(`[Engine] Populated ${leagueTeams.length} teams for league: ${league}`);
+      console.log(`[Engine] Populated ${leagueTeams.length} teams for league: ${league} (ESPN: ${espnLeagueCode})`);
       setAvailableTeams(leagueTeams);
     }
   }, [league]);
@@ -423,16 +431,18 @@ export const Engine: React.FC<Props> = ({
 
     // Populate teams for non-NCAA leagues from ESPN_TEAM_IDS
     if (selectedLeague && selectedLeague !== 'ncaa') {
-      const normalizedInputLeague = selectedLeague.replace(/^usa\./, '');
-      console.log(`[Engine] Selected league: ${selectedLeague}, Normalized: ${normalizedInputLeague}`);
-
-      const allTeams = Object.entries(ESPN_TEAM_IDS).filter(([_, info]) => info.league?.includes('nwsl'));
-      console.log(`[Engine] NWSL teams found in ESPN_TEAM_IDS: ${allTeams.length}`);
+      const espnLeagueCode = DB_LEAGUE_TO_ESPN_LEAGUE[selectedLeague] || selectedLeague;
+      console.log(`[Engine] Populating teams for league: ${selectedLeague} (ESPN: ${espnLeagueCode})`);
 
       const leagueTeams = Object.entries(ESPN_TEAM_IDS)
         .filter(([_, info]) => {
-          const normalizedTeamLeague = (info.league || '').replace(/^usa\./, '');
-          return normalizedTeamLeague === normalizedInputLeague;
+          // Direct match first
+          if (info.league === espnLeagueCode) return true;
+
+          // Fallback: normalized match (handle usa. prefix)
+          const normInfo = (info.league || '').replace(/^usa\./, '');
+          const normInput = espnLeagueCode.replace(/^usa\./, '');
+          return normInfo === normInput;
         })
         .map(([name, info]) => ({
           id: info.id,
@@ -441,7 +451,7 @@ export const Engine: React.FC<Props> = ({
           primary_color: info.primaryColor,
           secondary_color: info.secondaryColor
         }));
-      console.log(`[Engine] Teams to populate: ${leagueTeams.length}`, leagueTeams.slice(0, 3));
+      console.log(`[Engine] Teams populated: ${leagueTeams.length}`, leagueTeams.slice(0, 3));
       setAvailableTeams(leagueTeams);
     } else {
       console.log(`[Engine] Clearing availableTeams (NCAA or no league selected)`);
