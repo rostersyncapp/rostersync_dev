@@ -192,6 +192,27 @@ export const Engine: React.FC<Props> = ({
     fetchTeams();
   }, [league, ncaaConference, availableConferences]);
 
+  // Fetch Teams for Non-NCAA Leagues from ESPN_TEAM_IDS
+  useEffect(() => {
+    if (league && league !== 'ncaa') {
+      const normalizedInputLeague = league.replace(/^usa\./, '');
+      const leagueTeams = Object.entries(ESPN_TEAM_IDS)
+        .filter(([_, info]) => {
+          const normalizedTeamLeague = (info.league || '').replace(/^usa\./, '');
+          return normalizedTeamLeague === normalizedInputLeague;
+        })
+        .map(([name, info]) => ({
+          id: info.id,
+          name: name,
+          logo_url: info.logoUrl,
+          primary_color: info.primaryColor,
+          secondary_color: info.secondaryColor
+        }));
+      console.log(`[Engine] Populated ${leagueTeams.length} teams for league: ${league}`);
+      setAvailableTeams(leagueTeams);
+    }
+  }, [league]);
+
   const [isEditingMetadata, setIsEditingMetadata] = useState(false);
   const [processedAthletes, setProcessedAthletes] = useState<Athlete[]>([]);
 
