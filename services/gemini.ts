@@ -221,35 +221,49 @@ async function fetchESPNRoster(teamName: string, league?: string): Promise<Map<s
   const teamUpper = teamName.toUpperCase().trim();
   let teamInfo = ESPN_TEAM_IDS[teamUpper];
 
-  // Fuzzy matching fallback if exact match fails
-  if (!teamInfo) {
+  // If no match OR match is missing critical metadata (id, sport, league), perform a smarter lookup
+  if (!teamInfo || !teamInfo.id || !teamInfo.sport || !teamInfo.league) {
     const allKeys = Object.keys(ESPN_TEAM_IDS);
     const fuzzyMatches = allKeys.filter(key =>
       teamUpper.includes(key) || key.includes(teamUpper)
     );
 
     if (fuzzyMatches.length > 0) {
+      // Prioritize matches that HAVE critical metadata
+      const validMatches = fuzzyMatches.filter(key => {
+        const info = ESPN_TEAM_IDS[key];
+        return info.id && info.sport && info.league;
+      });
+
       // If a league is provided, prioritize matches in that league
-      if (league) {
+      if (league && (validMatches.length > 0 || fuzzyMatches.length > 0)) {
         const leagueLower = league.toLowerCase();
-        const leagueMatch = fuzzyMatches.find(key =>
+        const pool = validMatches.length > 0 ? validMatches : fuzzyMatches;
+        const leagueMatch = pool.find(key =>
           ESPN_TEAM_IDS[key].league.toLowerCase() === leagueLower ||
           ESPN_TEAM_IDS[key].league.toLowerCase().includes(leagueLower)
         );
         if (leagueMatch) teamInfo = ESPN_TEAM_IDS[leagueMatch];
       }
 
-      // Fallback to first fuzzy match if no league match found
-      if (!teamInfo) teamInfo = ESPN_TEAM_IDS[fuzzyMatches[0]];
+      // Fallback: Use the first valid metadata-rich match
+      if (!teamInfo && validMatches.length > 0) {
+        teamInfo = ESPN_TEAM_IDS[validMatches[0]];
+      }
 
-      if (teamInfo) {
-        console.log(`[ESPN] Found fuzzy match for "${teamName}":`, teamInfo);
+      // Final fallback: Use the first fuzzy match regardless of metadata
+      if (!teamInfo) {
+        teamInfo = ESPN_TEAM_IDS[fuzzyMatches[0]];
+      }
+
+      if (teamInfo && teamInfo.id) {
+        console.log(`[ESPN] Resolved metadata-rich match for "${teamName}":`, teamInfo);
       }
     }
   }
 
-  if (!teamInfo) {
-    console.log(`[ESPN] No team ID found for: ${teamName}`);
+  if (!teamInfo || !teamInfo.id) {
+    console.log(`[ESPN] No valid team ID found for: ${teamName}`);
     return null;
   }
 
