@@ -907,23 +907,9 @@ export const Engine: React.FC<Props> = ({
                 />
               </div>
 
-              {/* Team Name */}
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-gray-400 uppercase tracking-widest font-mono flex items-center gap-2">
-                  <Trophy size={12} /> Team Name
-                </label>
-                <input
-                  type="text"
-                  value={manualTeamName}
-                  onChange={(e) => setManualTeamName(e.target.value)}
-                  className="w-full h-14 px-5 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl text-base font-medium outline-none focus:ring-2 focus:ring-[#5B5FFF]/20 flex items-center"
-                />
-              </div>
-            </div>
-
-            <button
-              onClick={handleProcess}
-              disabled={!league}
+              <button
+                onClick={handleProcess}
+                disabled={!league}
               className={`w-full mt-8 h-14 rounded-xl font-bold text-base shadow-lg transition-all uppercase tracking-widest flex items-center justify-center gap-2 ${league ? 'primary-gradient text-white shadow-[#5B5FFF]/20 hover:scale-[1.02] active:scale-[0.98]' : 'bg-gray-100 dark:bg-gray-800 text-gray-400 cursor-not-allowed'}`}
             >
               <Cpu size={20} /> Confirm & Process
@@ -1156,7 +1142,7 @@ export const Engine: React.FC<Props> = ({
         )
       }
 
-    </div >
+    </div>
   );
 };
 

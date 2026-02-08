@@ -535,7 +535,8 @@ export async function processRosterRawText(
   overrideSeason: string = '',
   findBranding: boolean = false,
   userId?: string,
-  league?: string
+  league?: string,
+  manualTeamName: string = ''
 ): Promise<ProcessedRoster> {
   const apiKey = getApiKey();
   if (!apiKey) {
@@ -920,7 +921,8 @@ export async function processRosterRawText(
   // PRIORITY: Check hardcoded known teams first (most reliable)
   // Normalize team name: uppercase, trim, and REMOVE YEARS (e.g. "San Diego FC 2025" -> "SAN DIEGO FC")
   // This prevents year inputs from breaking exact matches
-  const teamNameUpper = (parsedResult.teamName || "")
+  // Priority: manualTeamName (user selected) > AI extracted teamName
+  const teamNameUpper = (manualTeamName || parsedResult.teamName || "")
     .toUpperCase()
     .replace(/\b20\d{2}(-20\d{2})?\b/g, '') // Remove 2024, 2025, 2024-25
     .trim()
