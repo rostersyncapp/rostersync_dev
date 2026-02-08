@@ -64,6 +64,7 @@ export interface Profile {
   organizationName: string;
   orgLogoUrl?: string; // Workspace custom logo URL
   creditsUsed: number;
+  is_admin?: boolean;
 }
 
 export type ExportFormat = 'CSV_FLAT' | 'ICONIK_JSON' | 'CATDV_JSON' | 'ROSS_XML' | 'VIZRT_JSON' | 'VIZRT_DATACENTER_CSV' | 'VIZRT_XML' | 'CHYRON_CSV' | 'NEWBLUE_CSV' | 'TAGBOARD_CSV';

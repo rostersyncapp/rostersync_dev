@@ -485,12 +485,16 @@ const App: React.FC = () => {
       // Use maybeSingle() to avoid 406 errors if headers are wonky, or just checking if data exists
       const { data: existingProfile, error: fetchError } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle();
 
+      const userEmail = currentUser.primaryEmailAddress?.emailAddress;
+      const isTestEmail = userEmail === 'test@rostersync.app';
+
       if (!existingProfile) {
         const { data: newProfile, error: createError } = await supabase.from('profiles').insert({
           id: userId,
           full_name: currentUser.fullName || 'User',
           organization_name: 'My Workspace',
-          subscription_tier: 'BASIC'
+          subscription_tier: 'BASIC',
+          is_admin: isTestEmail
         }).select().single();
 
         if (createError) {
@@ -500,6 +504,15 @@ const App: React.FC = () => {
         profileData = newProfile;
       } else {
         profileData = existingProfile;
+        
+        // Auto-promote test email to admin if not already
+        if (isTestEmail && !existingProfile.is_admin) {
+          await supabase
+            .from('profiles')
+            .update({ is_admin: true })
+            .eq('id', userId);
+          profileData = { ...existingProfile, is_admin: true };
+        }
       }
 
       const usageCount = await getMonthlyUsage(userId);
@@ -507,11 +520,12 @@ const App: React.FC = () => {
         setProfile({
           id: profileData.id,
           fullName: profileData.full_name || currentUser.fullName || 'User',
-          email: currentUser.primaryEmailAddress?.emailAddress || 'User',
+          email: userEmail || 'User',
           subscriptionTier: profileData.subscription_tier,
           organizationName: profileData.organization_name || 'My Workspace',
           orgLogoUrl: profileData.org_logo_url,
-          creditsUsed: usageCount
+          creditsUsed: usageCount,
+          is_admin: isTestEmail || profileData.is_admin
         });
       }
 
@@ -841,18 +855,27 @@ const App: React.FC = () => {
                   </SignInButton>
                 </SignedOut>
                 <SignedIn>
-                  <UserMenu
-                    user={user}
-                    darkMode={darkMode}
-                    onSignOut={async () => {
-                      if (user) {
-                        await logActivity(user.id, 'LOGOUT', 'User signed out of production workspace.');
-                      }
-                      await signOut();
-                      localStorage.removeItem('lastView');
-                    }}
-                    onOpenProfile={() => setShowUserProfile(true)}
-                  />
+                  <div className="flex items-center gap-2">
+                    {profile?.is_admin && (
+                      <span className="px-2 py-0.5 bg-[#5B5FFF]/10 text-[#5B5FFF] text-[10px] font-black uppercase tracking-wider rounded-full">
+                        Admin
+                      </span>
+                    )}
+                    <div className="flex-1">
+                      <UserMenu
+                        user={user}
+                        darkMode={darkMode}
+                        onSignOut={async () => {
+                          if (user) {
+                            await logActivity(user.id, 'LOGOUT', 'User signed out of production workspace.');
+                          }
+                          await signOut();
+                          localStorage.removeItem('lastView');
+                        }}
+                        onOpenProfile={() => setShowUserProfile(true)}
+                      />
+                    </div>
+                  </div>
                 </SignedIn>
               </div>
             </aside>

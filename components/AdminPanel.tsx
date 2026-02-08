@@ -75,9 +75,14 @@ const AdminPanel: React.FC<Props> = ({ profile }) => {
             <Settings className="w-6 h-6 text-[#5B5FFF]" />
           </div>
           <div>
-            <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white">
-              Admin Dashboard
-            </h1>
+            <div className="flex items-center gap-3">
+              <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white">
+                Admin Dashboard
+              </h1>
+              <span className="px-3 py-1 bg-[#5B5FFF] text-white text-xs font-black uppercase tracking-wider rounded-full">
+                Admin Mode
+              </span>
+            </div>
             <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
               System analytics and management
             </p>
