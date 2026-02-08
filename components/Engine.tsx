@@ -464,7 +464,7 @@ export const Engine: React.FC<Props> = ({
 
     const inputWithTeam = promptPrefix ? `${promptPrefix}\n${rawInput}` : rawInput;
 
-    onStartProcessing(inputWithTeam, finalSeason, true, finalLeague);
+    onStartProcessing(inputWithTeam, finalSeason, true, finalLeague, manualTeamName);
   };
 
   const handleStartScout = () => {

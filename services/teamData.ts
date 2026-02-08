@@ -11,6 +11,7 @@ export const KNOWN_TEAM_LOGOS: Record<string, TeamLogoInfo> = {
   "ANGEL CITY FC": { logoUrl: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/nwsl/angel-city-fc.png", primaryColor: "#010101", secondaryColor: "#F2D4D7" },
   "ANGEL CITY": { logoUrl: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/nwsl/angel-city-fc.png", primaryColor: "#010101", secondaryColor: "#F2D4D7" },
   "ACFC": { logoUrl: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/nwsl/angel-city-fc.png", primaryColor: "#010101", secondaryColor: "#F2D4D7" },
+
   // ==================== ENGLISH PREMIER LEAGUE (ESPN) ====================
   "AFC BOURNEMOUTH": { logoUrl: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/premier-league/afc-bournemouth.png", primaryColor: "#f42727", secondaryColor: "#ffffff" },
   "BOURNEMOUTH": { logoUrl: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/premier-league/afc-bournemouth.png", primaryColor: "#f42727", secondaryColor: "#ffffff" },
@@ -765,10 +766,10 @@ export const KNOWN_TEAM_LOGOS: Record<string, TeamLogoInfo> = {
   "WASHINGTON CAPITALS": { logoUrl: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/nhl/washington-capitals.png", primaryColor: "#041e42", secondaryColor: "#c8102e" },
   "CAPITALS": { logoUrl: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/nhl/washington-capitals.png", primaryColor: "#041e42", secondaryColor: "#c8102e" },
   "CAPS": { logoUrl: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/nhl/washington-capitals.png", primaryColor: "#041e42", secondaryColor: "#c8102e" },
-  
+
   "WINNIPEG JETS": { logoUrl: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/nhl/winnipeg-jets.png", primaryColor: "#041e42", secondaryColor: "#004c97" },
 
-// ==================== NCAA (ESPN) ====================
+  // ==================== NCAA (ESPN) ====================
   "AIR FORCE FALCONS": { logoUrl: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/ncaa/air-force-falcons.png", primaryColor: "#003594", secondaryColor: "#ffffff" },
   "AKRON ZIPS": { logoUrl: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/ncaa/akron-zips.png", primaryColor: "#041e42", secondaryColor: "#c5b783" },
   "ALABAMA CRIMSON TIDE": { logoUrl: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/ncaa/alabama-crimson-tide.png", primaryColor: "#9e1b32", secondaryColor: "#ffffff" },
@@ -1081,6 +1082,7 @@ export const ESPN_TEAM_IDS: Record<string, TeamLogoInfo> = {
   // NWSL (National Women's Soccer League)
   "ANGEL CITY FC": { id: 21422, sport: "soccer", league: "usa.nwsl", logoUrl: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/nwsl/angel-city-fc.png", primaryColor: "#F2D4D7", secondaryColor: "#010101" },
   "ANGEL CITY": { id: 21422, sport: "soccer", league: "usa.nwsl", logoUrl: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/nwsl/angel-city-fc.png", primaryColor: "#F2D4D7", secondaryColor: "#010101" },
+
   "ACFC": { id: 21422, sport: "soccer", league: "usa.nwsl", logoUrl: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/nwsl/angel-city-fc.png", primaryColor: "#F2D4D7", secondaryColor: "#010101" },
   "BAY FC": { id: 22187, sport: "soccer", league: "usa.nwsl", logoUrl: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/nwsl/bay-fc.png", primaryColor: "#051C2C", secondaryColor: "#F9423A" },
   "BOSTON LEGACY FC": { id: 131562, sport: "soccer", league: "usa.nwsl", logoUrl: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/nwsl/boston-legacy-fc.png", primaryColor: "#1d3c34", secondaryColor: "#b2aa8d" },
@@ -1406,10 +1408,10 @@ export const ESPN_TEAM_IDS: Record<string, TeamLogoInfo> = {
   "ROCHESTER RED WINGS": { id: 459, sport: "baseball", league: "milb-aaa", logoUrl: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/milb/rochester-red-wings.png", primaryColor: "#EE2D24", secondaryColor: "#231F20" },
   "TOLEDO MUD HENS": { id: 464, sport: "baseball", league: "milb-aaa", logoUrl: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/milb/toledo-mud-hens.png", primaryColor: "#002A5C", secondaryColor: "#ED174F" },
   "EL PASO CHIHUAHUAS": { id: 410, sport: "baseball", league: "milb-aaa", logoUrl: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/milb/el-paso-chihuahuas.png", primaryColor: "#BE0F34", secondaryColor: "#1D1D1D" },
-  
+
   "ROUND ROCK EXPRESS": { id: 468, sport: "baseball", league: "milb-aaa", logoUrl: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/milb/round-rock-express.png", primaryColor: "#091F40", secondaryColor: "#A31F37" },
 
-// NCAA
+  // NCAA
   "AIR FORCE FALCONS": { id: 2005, sport: "football", league: "ncaa", logoUrl: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/ncaa/air-force-falcons.png", primaryColor: "#003594", secondaryColor: "#ffffff" },
   "AKRON ZIPS": { id: 2006, sport: "football", league: "ncaa", logoUrl: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/ncaa/akron-zips.png", primaryColor: "#041e42", secondaryColor: "#c5b783" },
   "ALABAMA CRIMSON TIDE": { id: 333, sport: "football", league: "ncaa", logoUrl: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/ncaa/alabama-crimson-tide.png", primaryColor: "#9e1b32", secondaryColor: "#ffffff" },
@@ -1564,7 +1566,7 @@ export const LEAGUE_DISPLAY_NAMES: Record<string, string> = {
   "nba": "NBA",
   "nfl": "NFL",
   "nhl": "NHL",
-  
+
   "wnba": "WNBA",
   "ncaa": "NCAA (Football)",
 
@@ -1599,7 +1601,7 @@ export const LEAGUE_TO_SPORT: Record<string, string> = {
   'nhl': 'Hockey',
 
   'mlb': 'Baseball',
-  
+
   'milb': 'Baseball',
   'milb-aaa': 'Baseball',
   'ncaa': 'Football',
