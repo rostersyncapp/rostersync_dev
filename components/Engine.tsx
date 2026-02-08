@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Athlete, SubscriptionTier, Roster, ExportFormat, Project } from '../types.ts';
-import { ProcessedRoster } from '../services/gemini.ts';
+import { ProcessedRoster, fillMissingJerseyNumbers } from '../services/gemini.ts';
 import { getLeagues, getConferences, getTeams } from '../services/supabase.ts';
 import { ESPN_TEAM_IDS, DB_LEAGUE_TO_ESPN_LEAGUE } from '../services/teamData.ts';
 import { TeamSelectionModal } from './TeamSelectionModal';
@@ -223,8 +223,8 @@ export const Engine: React.FC<Props> = ({
 
   const [isEditingMetadata, setIsEditingMetadata] = useState(false);
   const [processedAthletes, setProcessedAthletes] = useState<Athlete[]>([]);
-
-  // Team Selection Modal State
+  const [initialAthletes, setInitialAthletes] = useState<Athlete[]>([]); // Store original AI extraction for re-backfilling
+  const [isSaving, setIsSaving] = useState(false);
   const [showTeamSelection, setShowTeamSelection] = useState(false);
   const [candidateTeams, setCandidateTeams] = useState<any[]>([]);
 
@@ -235,8 +235,6 @@ export const Engine: React.FC<Props> = ({
     official: number;
     missing: Athlete[];
   } | null>(null);
-
-  const [isSaving, setIsSaving] = useState(false);
 
   // Intelligence & History States
   const [scoutHistory, setScoutHistory] = useState<{ name: string, date: string, count: number }[]>([]);
@@ -315,6 +313,8 @@ export const Engine: React.FC<Props> = ({
 
   useEffect(() => {
     if (pendingRoster) {
+      setProcessedAthletes(pendingRoster.athletes);
+      setInitialAthletes(pendingRoster.athletes); // Save original state
       setStep(2);
       setTeamName(pendingRoster.teamName);
       setSport(pendingRoster.sport);
@@ -545,14 +545,19 @@ export const Engine: React.FC<Props> = ({
     onDeletePlayer?.(athleteName);
   };
 
-  const handleTeamSelected = (team: any) => {
+  const handleTeamSelected = async (team: any) => {
     console.log('[Engine] Team selected from modal:', team);
     console.log('[Engine] Sport metadata:', team.sport, 'League:', team.league);
-    setTeamName(team.name);
+
+    const newTeamName = team.name;
+    const currentLeague = team.league || league;
+
+    setTeamName(newTeamName);
     setLogoUrl(team.logoUrl);
     setPrimaryColor(team.primaryColor);
     setSecondaryColor(team.secondaryColor);
-    // Preserve sport metadata (league is shown in UI but not stored separately)
+
+    // Preserve sport metadata
     if (team.sport) {
       console.log('[Engine] Setting sport to:', team.sport);
       setSport(team.sport);
@@ -560,6 +565,36 @@ export const Engine: React.FC<Props> = ({
     if (team.league) {
       setLeague(team.league);
     }
+
+    // RE-TRIGGER BACKFILL
+    // Since the team has changed, we should re-check for jerseys, positions and missing players
+    if (newTeamName && newTeamName !== 'Unknown Team') {
+      try {
+        console.log(`[Engine] Re-triggering backfill for newly selected team: ${newTeamName} (${currentLeague})`);
+        const { updatedAthletes, officialCount, missingAthletes } = await fillMissingJerseyNumbers(
+          initialAthletes.length > 0 ? initialAthletes : processedAthletes,
+          newTeamName,
+          currentLeague
+        );
+
+        if (updatedAthletes) {
+          setProcessedAthletes(updatedAthletes);
+        }
+
+        // Update missing players modal data
+        if (missingAthletes && missingAthletes.length > 0) {
+          setMissingAthletesData({
+            pasted: initialAthletes.length || processedAthletes.length,
+            official: officialCount,
+            missing: missingAthletes
+          });
+          setShowMissingPlayersModal(true);
+        }
+      } catch (err) {
+        console.error('[Engine] Failed to re-backfill after team selection:', err);
+      }
+    }
+
     setShowTeamSelection(false);
   };
 

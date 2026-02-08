@@ -411,7 +411,7 @@ async function fetchNHLRoster(teamName: string): Promise<Map<string, ExternalAth
 /**
  * Fill in missing jersey numbers by matching against external roster data (ESPN or MiLB)
  */
-async function fillMissingJerseyNumbers(
+export async function fillMissingJerseyNumbers(
   athletes: any[],
   teamName: string,
   league?: string
@@ -443,6 +443,7 @@ async function fillMissingJerseyNumbers(
 
   // 1. Fill missing jerseys AND positions
   let filledCount = 0;
+  const matchedOfficialNames = new Set<string>();
 
   // Pre-calculate a map of normalized "Last Name" -> External Data for fuzzy matching
   const lastNameMap = new Map<string, ExternalAthleteData[]>();
@@ -461,6 +462,9 @@ async function fillMissingJerseyNumbers(
 
     // 1. Try Exact Match
     let externalData = externalRoster?.get(normalizedName);
+    if (externalData) {
+      matchedOfficialNames.add(normalizedName);
+    }
 
     // 2. Try Fuzzy Match (Last Name + First Initial) if no exact match
     if (!externalData) {
@@ -482,7 +486,10 @@ async function fillMissingJerseyNumbers(
             for (const [extFullName, extData] of externalRoster.entries()) {
               if (extData === c) {
                 const extParts = extFullName.split(' ');
-                if (extParts[0].charAt(0) === initial) return true;
+                if (extParts[0].charAt(0) === initial) {
+                  matchedOfficialNames.add(extFullName);
+                  return true;
+                }
               }
             }
             return false;
@@ -526,32 +533,23 @@ async function fillMissingJerseyNumbers(
   console.log(`[Roster Sync] Filled ${filledCount} missing jersey numbers/positions`);
 
   // 2. Identify missing athletes
-  const pastedNames = new Set(athletes.map(a => normalizePlayerName(a.fullName || '')));
   const missingAthletes: Athlete[] = [];
 
   externalRoster.forEach((data, nameKey) => {
-    // Check if this normalized name exists in the pasted list
-    // Also skip if it seems like a duplicate/alias (simple check)
-    if (!pastedNames.has(nameKey)) {
-      // Reconstruct the name from key (since map key is normalized) 
-      // Actually we don't have the original name easily unless we stored it.
-      // Let's assume title case of the key is "good enough" or improved later.
-      // BETTER: We should probably store the original display name in ExternalAthleteData.
-      // For now, convert simple Title Case.
+    // Check if this official name was NOT matched to any pasted name
+    if (!matchedOfficialNames.has(nameKey)) {
       const displayName = toTitleCase(nameKey);
-
       missingAthletes.push({
-        id: data.id,
+        id: `missing-${nameKey}-${Date.now()}`,
         fullName: displayName,
-        jerseyNumber: formatJerseyNumber(data.jersey),
-        position: data.position || "Athlete",
-        nilStatus: 'Incoming',
-        originalName: displayName,
-        displayNameSafe: displayName.toUpperCase(),
-        phoneticSimplified: "",
+        displayNameSafe: toSafeName(displayName),
+        jerseyNumber: formatJerseyNumber(data.jersey).replace(/#/g, ''),
+        position: (data.position || "Athlete").replace(/#/g, ''),
         phoneticIPA: "",
-        seasonYear: "2024" // Default or pass in
-      });
+        phoneticSimplified: "",
+        nilStatus: 'Active',
+        seasonYear: athletes[0]?.seasonYear || new Date().getFullYear().toString()
+      } as Athlete);
     }
   });
 
