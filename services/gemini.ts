@@ -373,26 +373,36 @@ async function fetchNHLRoster(teamName: string): Promise<Map<string, ExternalAth
   // Use proxy path to avoid CORS issues
   // Local: Vite proxy forwards to https://api-web.nhle.com/v1
   // Prod: Vercel rewrite forwards to https://api-web.nhle.com/v1
+  console.log(`[NHL] Fetching roster for: "${teamName}" (Upper: "${teamUpper}")`);
+
+  if (!teamCode) {
+    console.warn(`[NHL] No team code found in NHL_API_CODES for: "${teamName}"`);
+    return null;
+  }
+
   const url = `/api/nhl/roster/${teamCode}/current`;
+  console.log(`[NHL] Using URL: ${url}`);
 
   try {
-    console.log(`[NHL] Fetching roster from: ${url}`);
     const response = await fetch(url);
+    console.log(`[NHL] Fetch status: ${response.status} ${response.statusText}`);
     if (!response.ok) {
       console.warn(`[NHL] API returned status: ${response.status}`);
       return null;
     }
 
-    const data = await response.json();
+    const data: any = await response.json();
+    console.log(`[NHL] API response keys:`, Object.keys(data));
     const rosterMap = new Map<string, ExternalAthleteData>();
 
     const processPlayer = (player: any) => {
       const fullName = `${player.firstName.default} ${player.lastName.default}`;
-      rosterMap.set(normalizePlayerName(fullName), {
+      const normalized = normalizePlayerName(fullName);
+      rosterMap.set(normalized, {
         jersey: player.sweaterNumber?.toString() || "00",
         position: player.positionCode || "Athlete",
         headshot: player.headshot || "",
-        id: player.id.toString()
+        id: player.id?.toString()
       });
     };
 
@@ -400,7 +410,7 @@ async function fetchNHLRoster(teamName: string): Promise<Map<string, ExternalAth
     data.defensemen?.forEach(processPlayer);
     data.goalies?.forEach(processPlayer);
 
-    console.log(`[NHL] Loaded ${rosterMap.size} players for ${teamCode}`);
+    console.log(`[NHL] Successfully loaded ${rosterMap.size} players for ${teamCode}`);
     return rosterMap;
   } catch (error) {
     console.error('[NHL] Failed to fetch roster:', error);
@@ -540,7 +550,7 @@ export async function fillMissingJerseyNumbers(
     if (!matchedOfficialNames.has(nameKey)) {
       const displayName = toTitleCase(nameKey);
       missingAthletes.push({
-        id: `missing-${nameKey}-${Date.now()}`,
+        id: `missing-${nameKey}-${Math.random().toString(36).substr(2, 9)}`,
         fullName: displayName,
         displayNameSafe: toSafeName(displayName),
         jerseyNumber: formatJerseyNumber(data.jersey).replace(/#/g, ''),
@@ -553,7 +563,7 @@ export async function fillMissingJerseyNumbers(
     }
   });
 
-  console.log(`[Roster Sync] Identified ${missingAthletes.length} athletes missing from input (Official Total: ${externalRoster.size})`);
+  console.log(`[Roster Sync] fillMissingJerseyNumbers complete. Official Count: ${externalRoster.size}, Found Missing: ${missingAthletes.length}`);
 
   return {
     updatedAthletes,

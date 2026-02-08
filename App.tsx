@@ -625,14 +625,20 @@ const App: React.FC = () => {
   // State for team selection modal
   const [teamSelectionCandidates, setTeamSelectionCandidates] = useState<{ name: string; logoUrl: string; primaryColor: string; secondaryColor: string }[]>([]);
   const [pendingRosterWithCandidates, setPendingRosterWithCandidates] = useState<ProcessedRoster | null>(null);
-
   const handleStartProcessing = async (text: string, seasonYear: string = '', findBranding: boolean = false, league?: string, manualTeamName: string = '') => {
     const limit = getTierLimit(profile.subscriptionTier);
     if (profile.creditsUsed >= limit) { alert(`Limit Reached! ${profile.creditsUsed}/${limit}`); return; }
     setIsProcessing(true);
-    handleSetView('engine');
+    console.log(`[App] Starting Roster Processing. League: ${league}, Manual Team: ${manualTeamName}`);
     try {
       const result = await processRosterRawText(text, profile.subscriptionTier, seasonYear, findBranding, profile.id, league, manualTeamName);
+
+      console.log('[App] Processing complete. Result:', {
+        teamName: result.teamName,
+        athleteCount: result.athletes?.length,
+        officialCount: result.officialRosterCount,
+        missingCount: result.missingAthletes?.length
+      });
 
       // Check if there are multiple team candidates
       if (result.candidateTeams && result.candidateTeams.length > 1) {

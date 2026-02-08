@@ -236,6 +236,17 @@ export const Engine: React.FC<Props> = ({
     missing: Athlete[];
   } | null>(null);
 
+  useEffect(() => {
+    if (missingAthletesData) {
+      console.log('[Engine] missingAthletesData updated:', {
+        pasted: missingAthletesData.pasted,
+        official: missingAthletesData.official,
+        missingCount: missingAthletesData.missing.length,
+        showModal: showMissingPlayersModal
+      });
+    }
+  }, [missingAthletesData]);
+
   // Intelligence & History States
   const [scoutHistory, setScoutHistory] = useState<{ name: string, date: string, count: number }[]>([]);
   const [inputQuality, setInputQuality] = useState(0); // 0 to 100
@@ -340,18 +351,21 @@ export const Engine: React.FC<Props> = ({
 
   // Effect to Check for Missing Players when Pending Roster loads
   useEffect(() => {
+    console.log('[Engine] pendingRoster changed:', {
+      hasRoster: !!pendingRoster,
+      officialCount: pendingRoster?.officialRosterCount,
+      missingCount: pendingRoster?.missingAthletes?.length
+    });
     if (pendingRoster && pendingRoster.officialRosterCount && pendingRoster.missingAthletes && pendingRoster.missingAthletes.length > 0) {
       const pasted = pendingRoster.pastedRosterCount || pendingRoster.athletes.length;
       const official = pendingRoster.officialRosterCount;
-      // Show if ANY players are missing (even if counts match)
-      if (pendingRoster.missingAthletes.length > 0) {
-        setMissingAthletesData({
-          pasted,
-          official,
-          missing: pendingRoster.missingAthletes
-        });
-        setShowMissingPlayersModal(true);
-      }
+      console.log('[Engine] Triggering MissingPlayersModal via useEffect');
+      setMissingAthletesData({
+        pasted,
+        official,
+        missing: pendingRoster.missingAthletes
+      });
+      setShowMissingPlayersModal(true);
     }
   }, [pendingRoster]);
 
@@ -570,23 +584,29 @@ export const Engine: React.FC<Props> = ({
     // Since the team has changed, we should re-check for jerseys, positions and missing players
     if (newTeamName && newTeamName !== 'Unknown Team') {
       try {
-        console.log(`[Engine] Re-triggering backfill for newly selected team: ${newTeamName} (${currentLeague})`);
-        const { updatedAthletes, officialCount, missingAthletes } = await fillMissingJerseyNumbers(
+        console.log(`[Engine] Re-triggering backfill for newly selected team: "${newTeamName}", League: "${currentLeague}"`);
+        const result = await fillMissingJerseyNumbers(
           initialAthletes.length > 0 ? initialAthletes : processedAthletes,
           newTeamName,
           currentLeague
         );
+        console.log('[Engine] Backfill result:', {
+          updatedCount: result.updatedAthletes?.length,
+          officialCount: result.officialCount,
+          missingCount: result.missingAthletes?.length
+        });
 
-        if (updatedAthletes) {
-          setProcessedAthletes(updatedAthletes);
+        if (result.updatedAthletes) {
+          setProcessedAthletes(result.updatedAthletes);
         }
 
         // Update missing players modal data
-        if (missingAthletes && missingAthletes.length > 0) {
+        if (result.missingAthletes && result.missingAthletes.length > 0) {
+          console.log('[Engine] Triggering MissingPlayersModal via handleTeamSelected');
           setMissingAthletesData({
             pasted: initialAthletes.length || processedAthletes.length,
-            official: officialCount,
-            missing: missingAthletes
+            official: result.officialCount,
+            missing: result.missingAthletes
           });
           setShowMissingPlayersModal(true);
         }
