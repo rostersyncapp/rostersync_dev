@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Athlete, SubscriptionTier, Roster, ExportFormat, Project } from '../types.ts';
-import { ProcessedRoster, fillMissingJerseyNumbers } from '../services/gemini.ts';
+import { ProcessedRoster, fillMissingJerseyNumbers, generateBatchPhonetics } from '../services/gemini.ts';
 import { getLeagues, getConferences, getTeams } from '../services/supabase.ts';
 import { ESPN_TEAM_IDS, DB_LEAGUE_TO_ESPN_LEAGUE } from '../services/teamData.ts';
 import { TeamSelectionModal } from './TeamSelectionModal';
@@ -49,7 +49,8 @@ const MissingPlayersModal = ({
   officialCount,
   missingCount,
   onKeep,
-  onAdd
+  onAdd,
+  isGenerating
 }: {
   isOpen: boolean;
   pastedCount: number;
@@ -57,6 +58,7 @@ const MissingPlayersModal = ({
   missingCount: number;
   onKeep: () => void;
   onAdd: () => void;
+  isGenerating: boolean;
 }) => {
   if (!isOpen) return null;
 
@@ -86,16 +88,22 @@ const MissingPlayersModal = ({
         <div className="flex gap-3">
           <button
             onClick={onKeep}
-            className="flex-1 h-12 rounded-xl font-bold text-sm text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+            disabled={isGenerating}
+            className="flex-1 h-12 rounded-xl font-bold text-sm text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:pointer-events-none"
           >
             Keep My {pastedCount}
           </button>
           <button
             onClick={onAdd}
-            className="flex-1 h-12 rounded-xl font-bold text-sm bg-indigo-600 text-white hover:bg-indigo-700 hover:shadow-lg hover:shadow-indigo-500/20 transition-all flex items-center justify-center gap-2"
+            disabled={isGenerating}
+            className="flex-1 h-12 rounded-xl font-bold text-sm bg-indigo-600 text-white hover:bg-indigo-700 hover:shadow-lg hover:shadow-indigo-500/20 transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:pointer-events-none"
           >
-            <UserPlus size={16} />
-            Add {missingCount} Players
+            {isGenerating ? (
+              <Loader2 className="animate-spin" size={16} />
+            ) : (
+              <UserPlus size={16} />
+            )}
+            {isGenerating ? "Processing..." : `Add ${missingCount} Players`}
           </button>
         </div>
       </div>
@@ -166,6 +174,8 @@ export const Engine: React.FC<Props> = ({
   const [ncaaDivision, setNcaaDivision] = useState<string>('Division I');
   const [ncaaConference, setNcaaConference] = useState<string>('');
   const [ncaaTeamId, setNcaaTeamId] = useState<string>('');
+  const [isGeneratingPhonetics, setIsGeneratingPhonetics] = useState(false);
+
 
   useEffect(() => {
     // Fetch supported leagues on mount
@@ -391,10 +401,36 @@ export const Engine: React.FC<Props> = ({
     }
   }, [pendingRoster]);
 
-  const handleAddMissingPlayers = () => {
+  const handleAddMissingPlayers = async () => {
     if (missingAthletesData && missingAthletesData.missing.length > 0) {
-      setProcessedAthletes(prev => [...prev, ...missingAthletesData.missing]);
-      setShowMissingPlayersModal(false);
+      setIsGeneratingPhonetics(true);
+      try {
+        const names = missingAthletesData.missing.map(a => a.fullName);
+        console.log(`[Engine] Generating batch phonetics for ${names.length} missing players...`);
+        const phoneticsMapping = await generateBatchPhonetics(names, sport, userTier);
+
+        const athletesWithPhonetics = missingAthletesData.missing.map(athlete => {
+          const phonetics = phoneticsMapping[athlete.fullName];
+          if (phonetics) {
+            return {
+              ...athlete,
+              phoneticSimplified: phonetics.phoneticSimplified,
+              phoneticIPA: phonetics.phoneticIPA
+            };
+          }
+          return athlete;
+        });
+
+        setProcessedAthletes(prev => [...prev, ...athletesWithPhonetics]);
+        setShowMissingPlayersModal(false);
+      } catch (err) {
+        console.error('[Engine] Failed to generate phonetics for missing players:', err);
+        // Fallback: add anyway
+        setProcessedAthletes(prev => [...prev, ...missingAthletesData.missing]);
+        setShowMissingPlayersModal(false);
+      } finally {
+        setIsGeneratingPhonetics(false);
+      }
     }
   };
 
@@ -1051,6 +1087,7 @@ export const Engine: React.FC<Props> = ({
         pastedCount={missingAthletesData?.pasted || 0}
         officialCount={missingAthletesData?.official || 0}
         missingCount={missingAthletesData?.missing.length || 0}
+        isGenerating={isGeneratingPhonetics}
         onKeep={() => setShowMissingPlayersModal(false)}
         onAdd={handleAddMissingPlayers}
       />

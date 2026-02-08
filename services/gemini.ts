@@ -1334,3 +1334,68 @@ export async function processRosterRawText(
     missingAthletes: missingAthletes
   };
 }
+
+/**
+ * Generates phonetics for a list of names in batch
+ */
+export async function generateBatchPhonetics(
+  names: string[],
+  sport: string,
+  tier: SubscriptionTier = 'BASIC'
+): Promise<Record<string, { phoneticSimplified: string; phoneticIPA: string }>> {
+  const apiKey = getApiKey();
+  if (!apiKey || names.length === 0) return {};
+
+  const genAI = new GoogleGenerativeAI(apiKey);
+  const model = genAI.getGenerativeModel({
+    model: "gemini-2.0-flash",
+    generationConfig: {
+      responseMimeType: "application/json",
+      responseSchema: {
+        type: SchemaType.OBJECT,
+        properties: {
+          results: {
+            type: SchemaType.ARRAY,
+            items: {
+              type: SchemaType.OBJECT,
+              properties: {
+                name: { type: SchemaType.STRING },
+                phoneticSimplified: { type: SchemaType.STRING },
+                phoneticIPA: { type: SchemaType.STRING }
+              },
+              required: ["name", "phoneticSimplified"]
+            }
+          }
+        },
+        required: ["results"]
+      }
+    }
+  });
+
+  const prompt = `Generate phonetic pronunciation guides for the following ${sport} players:
+  [${names.join(', ')}]
+  
+  Guidelines:
+  1. Use 'phoneticSimplified' for a readable, capitalized-stress guide (e.g. 'fuh-NET-ik').
+  2. Use 'phoneticIPA' for standard International Phonetic Alphabet symbols.
+  3. Return a JSON object with a 'results' array.`;
+
+  try {
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const parsed = extractJSON(response.text());
+
+    const mapping: Record<string, { phoneticSimplified: string; phoneticIPA: string }> = {};
+    parsed.results?.forEach((r: any) => {
+      // Use original name as key for easy mapping
+      mapping[r.name] = {
+        phoneticSimplified: r.phoneticSimplified || '',
+        phoneticIPA: r.phoneticIPA || ''
+      };
+    });
+    return mapping;
+  } catch (error) {
+    console.error('[Gemini] Batch phonetic generation failed:', error);
+    return {};
+  }
+}
