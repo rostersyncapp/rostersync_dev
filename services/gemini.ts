@@ -1078,7 +1078,8 @@ export async function processRosterRawText(
   }
 
   // Fill missing jersey numbers from ESPN or MiLB roster data
-  const teamNameForLookup = parsedResult.teamName || "";
+  const teamNameForLookup = manualTeamName || parsedResult.teamName || "";
+  console.log(`[Gemini] Looking up roster for: "${teamNameForLookup}"`);
   const { updatedAthletes: athletesWithJerseys, officialCount, missingAthletes } = await fillMissingJerseyNumbers(athletes, teamNameForLookup, league);
 
   // Standardize Sport/League from MiLB or ESPN ID Mapping
