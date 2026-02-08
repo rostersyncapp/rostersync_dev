@@ -189,8 +189,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
 
       <section className="relative pt-32 pb-64 md:pb-80 px-4 overflow-hidden z-10">
         <div className="max-w-7xl mx-auto text-center relative z-20">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#5B5FFF]/5 border border-[#5B5FFF]/10 text-[#5B5FFF] text-[10px] font-black uppercase tracking-widest mb-2">
-            <Sparkles size={12} /> New: Gemini 3 Integration
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#5B5FFF]/5 border border-[#5B5FFF]/10 text-[#5B5FFF] text-[10px] font-black uppercase tracking-widest mb-6">
+            <Sparkles size={12} /> New: Gemini 2.0 Integration
           </div>
           <h1 className="text-4xl md:text-6xl font-extrabold tracking-tighter leading-[1.2] text-gray-900 dark:text-white mb-8">
             Athlete Rosters. <br />
