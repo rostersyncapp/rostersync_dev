@@ -196,10 +196,8 @@ export const Engine: React.FC<Props> = ({
   useEffect(() => {
     if (league && league !== 'ncaa') {
       const espnLeagueCode = DB_LEAGUE_TO_ESPN_LEAGUE[league] || league;
-      // Normalize by removing 'usa.' prefix if present, to match how ESPN_TEAM_IDS might be stored inconsistently
-      // checking 'usa.1' against 'usa.1' is best.
 
-      const leagueTeams = Object.entries(ESPN_TEAM_IDS)
+      const filteredTeamsRaw = Object.entries(ESPN_TEAM_IDS)
         .filter(([_, info]) => {
           // Direct match first
           if (info.league === espnLeagueCode) return true;
@@ -208,15 +206,32 @@ export const Engine: React.FC<Props> = ({
           const normInfo = (info.league || '').replace(/^usa\./, '');
           const normInput = espnLeagueCode.replace(/^usa\./, '');
           return normInfo === normInput;
-        })
-        .map(([name, info]) => ({
-          id: info.id,
-          name: name,
-          logo_url: info.logoUrl,
-          primary_color: info.primaryColor,
-          secondary_color: info.secondaryColor
-        }));
-      console.log(`[Engine] Populated ${leagueTeams.length} teams for league: ${league} (ESPN: ${espnLeagueCode})`);
+        });
+
+      // Dedup by ID to remove short names/aliases (pick longest name as actual name)
+      const teamMap = new Map<string | number, any>();
+      filteredTeamsRaw.forEach(([name, info]) => {
+        const existing = teamMap.get(info.id);
+        if (!existing || name.length > existing.name.length) {
+          // Capitalize Name properly (e.g. "IOWA CUBS" -> "Iowa Cubs")
+          const formattedName = name.split(' ').map(word =>
+            word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+          ).join(' ');
+
+          teamMap.set(info.id, {
+            id: info.id,
+            name: formattedName,
+            logo_url: info.logoUrl,
+            primary_color: info.primaryColor,
+            secondary_color: info.secondaryColor
+          });
+        }
+      });
+
+      const leagueTeams = Array.from(teamMap.values())
+        .sort((a, b) => a.name.localeCompare(b.name));
+
+      console.log(`[Engine] Populated ${leagueTeams.length} unique teams for league: ${league} (ESPN: ${espnLeagueCode})`);
       setAvailableTeams(leagueTeams);
     }
   }, [league]);
