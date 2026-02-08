@@ -174,11 +174,14 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
             <BrandLogo siteConfig={siteConfig} size="md" />
             <span className="text-lg font-black tracking-tight text-gray-900 dark:text-white">{siteConfig?.site_name || 'rosterSync'}</span>
           </div>
-          <div className="flex items-center gap-4 relative z-50">
+          <div className="flex items-center gap-3 relative z-50">
             <button onClick={toggleDarkMode} className="p-2 text-gray-400 hover:text-[#5B5FFF] transition-colors rounded-full hover:bg-gray-100 dark:hover:bg-gray-800">
               {darkMode ? <Sun size={20} /> : <Moon size={20} />}
             </button>
             <a href={signInUrl} className="hidden md:block text-xs font-bold text-gray-500 hover:text-[#5B5FFF] transition-colors cursor-pointer relative z-50">Sign In</a>
+            <button onClick={() => setShowDemoModal(true)} className="hidden md:block relative z-50 px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80 text-gray-600 dark:text-gray-300 font-bold text-xs shadow-sm hover:scale-105 active:scale-95 transition-all">
+              Book Demo
+            </button>
             <a href={signUpUrl} className="relative z-50 px-4 py-2 rounded-lg bg-[#1A1A1A] dark:bg-white text-white dark:text-[#1A1A1A] font-bold text-xs shadow-md hover:scale-105 active:scale-95 transition-all cursor-pointer">Get Started</a>
           </div>
         </div>
@@ -196,10 +199,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
           <p className="text-lg md:text-xl text-gray-500 dark:text-gray-400 max-w-2xl mx-auto font-medium leading-relaxed">
             The high-performance middleware transforming messy rosters into production-ready metadata for Broadcast, MAM, and DAM systems.
           </p>
-          <div className="pt-6 flex justify-center relative z-50">
-            <button onClick={() => setShowDemoModal(true)} className="px-6 py-3.5 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-300 font-bold text-base hover:bg-gray-50 dark:hover:bg-gray-800 transition-all">
-              Book Demo
-            </button>
+          <div className="pt-6 flex justify-center items-center gap-4 relative z-50">
+            <a href={signUpUrl} className="px-8 py-4 rounded-xl primary-gradient text-white font-black text-lg shadow-xl shadow-[#5B5FFF]/20 hover:scale-105 active:scale-95 transition-all">
+              Start Building Free
+            </a>
           </div>
         </div>
       </section>
