@@ -418,6 +418,23 @@ const App: React.FC = () => {
     syncToken();
   }, [user, clerkLoaded]);
 
+  // Proactive token refresh to prevent JWT expiry (every 40s)
+  useEffect(() => {
+    if (!user) return;
+
+    const interval = setInterval(async () => {
+      try {
+        const token = await getSupabaseTokenWithRetry();
+        await setSupabaseToken(token);
+        console.log('[Auth] Proactive token refresh successful');
+      } catch (err) {
+        console.warn('[Auth] Proactive token refresh failed:', err);
+      }
+    }, 40000); // 40 seconds (well within 60s limit)
+
+    return () => clearInterval(interval);
+  }, [user]);
+
   useEffect(() => {
     const handleTokenExpired = async () => {
       console.log('Token expired event received, refreshing...');
