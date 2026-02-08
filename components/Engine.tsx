@@ -191,12 +191,13 @@ export const Engine: React.FC<Props> = ({
         if (conf) {
           const rawTeams = await getTeams(conf.id);
 
-          // Dedup by Name and Title Case
-          const teamMap = new Map<string, any>();
+          // Dedup by ID and pick longest Name + Title Case
+          const teamMap = new Map<string | number, any>();
           rawTeams.forEach(t => {
             const formattedName = toTitleCase(t.name);
-            if (!teamMap.has(formattedName)) {
-              teamMap.set(formattedName, { ...t, name: formattedName });
+            const existing = teamMap.get(t.id);
+            if (!existing || formattedName.length > existing.name.length) {
+              teamMap.set(t.id, { ...t, name: formattedName });
             }
           });
 
@@ -230,31 +231,28 @@ export const Engine: React.FC<Props> = ({
           return normInfo === normInput;
         });
 
-      // Dedup by Name to remove variations and Title Case
-      const teamMap = new Map<string, any>();
+      // Dedup by ID to remove variations/nicknames (pick longest name as official name)
+      const teamMap = new Map<string | number, any>();
       filteredTeamsRaw.forEach(([name, info]) => {
         const formattedName = toTitleCase(name);
-        const existing = teamMap.get(formattedName);
+        const existing = teamMap.get(info.id);
 
-        // Keep the version with more complete data (id check) or longest source name 
-        // to ensure we capture the most "official" one if names are identical
-        if (!existing || name.length > (existing._sourceName?.length || 0)) {
-          teamMap.set(formattedName, {
+        // Use ID for deduplication and pick the longest name among duplicates
+        if (!existing || formattedName.length > existing.name.length) {
+          teamMap.set(info.id, {
             id: info.id,
             name: formattedName,
             logo_url: info.logoUrl,
             primary_color: info.primaryColor,
-            secondary_color: info.secondaryColor,
-            _sourceName: name // tracking original for heuristic
+            secondary_color: info.secondaryColor
           });
         }
       });
 
       const leagueTeams = Array.from(teamMap.values())
-        .map(({ _sourceName, ...rest }) => rest) // remove heuristic property
         .sort((a, b) => a.name.localeCompare(b.name));
 
-      console.log(`[Engine] Populated ${leagueTeams.length} unique Title Cased teams for league: ${league}`);
+      console.log(`[Engine] Populated ${leagueTeams.length} unique official teams for league: ${league}`);
       setAvailableTeams(leagueTeams);
     } else if (league !== 'ncaa') {
       // Clear if no league selected (and not handled by NCAA effect)
