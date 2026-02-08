@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Dashboard } from './components/Dashboard.tsx';
 import Engine from './components/Engine.tsx';
 import Settings from './components/Settings.tsx';
+import AdminPanel from './components/AdminPanel.tsx';
 import LandingPage from './components/LandingPage.tsx';
 import SupportCard from './components/SupportCard.tsx';
 import SupportPage from './components/SupportPage.tsx';
@@ -242,16 +243,16 @@ const App: React.FC = () => {
   const { openSignIn, openSignUp } = useClerk();
 
   // All hooks must be called unconditionally - no early returns before hooks
-  const [view, setView] = useState<'dashboard' | 'engine' | 'settings'>('dashboard');
+  const [view, setView] = useState<'dashboard' | 'engine' | 'settings' | 'admin'>('dashboard');
 
   useEffect(() => {
     const saved = localStorage.getItem('lastView');
-    if (saved === 'engine' || saved === 'settings') {
+    if (saved === 'engine' || saved === 'settings' || saved === 'admin') {
       setView(saved);
     }
   }, []);
 
-  const handleSetView = (newView: 'dashboard' | 'engine' | 'settings') => {
+  const handleSetView = (newView: 'dashboard' | 'engine' | 'settings' | 'admin') => {
     setView(newView);
     localStorage.setItem('lastView', newView);
   };
@@ -806,6 +807,12 @@ const App: React.FC = () => {
                     <span className="hidden lg:block text-[14px]">AI Scout</span>
                   </button>
                   <button onClick={() => handleSetView('settings')} className={`w-full flex items-center gap-3 p-2 rounded-lg transition-all ${view === 'settings' ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF] font-bold' : 'text-gray-500 hover:bg-gray-100 font-medium'}`}><SettingsIcon size={20} /><span className="hidden lg:block text-[14px]">Settings</span></button>
+                  {profile?.is_admin && (
+                    <button onClick={() => handleSetView('admin')} className={`w-full flex items-center gap-3 p-2 rounded-lg transition-all ${view === 'admin' ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF] font-bold' : 'text-gray-500 hover:bg-gray-100 font-medium'}`}>
+                      <SettingsIcon size={20} />
+                      <span className="hidden lg:block text-[14px]">Admin</span>
+                    </button>
+                  )}
                 </nav>
                 <div className="space-y-2">
                   <div className="flex items-center justify-between pl-1 pr-3">
@@ -951,6 +958,7 @@ const App: React.FC = () => {
                 {view === 'support' && (
                   <SupportPage darkMode={darkMode} />
                 )}
+                {view === 'admin' && <AdminPanel profile={profile} />}
               </div>
             </main>
 
