@@ -855,27 +855,18 @@ const App: React.FC = () => {
                   </SignInButton>
                 </SignedOut>
                 <SignedIn>
-                  <div className="flex items-center gap-2">
-                    {profile?.is_admin && (
-                      <span className="px-2 py-0.5 bg-[#5B5FFF]/10 text-[#5B5FFF] text-[10px] font-black uppercase tracking-wider rounded-full">
-                        Admin
-                      </span>
-                    )}
-                    <div className="flex-1">
-                      <UserMenu
-                        user={user}
-                        darkMode={darkMode}
-                        onSignOut={async () => {
-                          if (user) {
-                            await logActivity(user.id, 'LOGOUT', 'User signed out of production workspace.');
-                          }
-                          await signOut();
-                          localStorage.removeItem('lastView');
-                        }}
-                        onOpenProfile={() => setShowUserProfile(true)}
-                      />
-                    </div>
-                  </div>
+                  <UserMenu
+                    user={user}
+                    darkMode={darkMode}
+                    onSignOut={async () => {
+                      if (user) {
+                        await logActivity(user.id, 'LOGOUT', 'User signed out of production workspace.');
+                      }
+                      await signOut();
+                      localStorage.removeItem('lastView');
+                    }}
+                    onOpenProfile={() => setShowUserProfile(true)}
+                  />
                 </SignedIn>
               </div>
             </aside>
