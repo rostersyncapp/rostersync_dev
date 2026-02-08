@@ -176,7 +176,7 @@ export const Engine: React.FC<Props> = ({
   // Fetch NCAA Teams when Conference Changes
   useEffect(() => {
     async function fetchTeams() {
-      if (league === 'ncaa' && ncaaConference) {
+      if (league === 'ncaa' && ncaaConference && availableConferences.length > 0) {
         // Find conference ID
         const conf = availableConferences.find(c => c.name === ncaaConference);
         if (conf) {
@@ -185,7 +185,7 @@ export const Engine: React.FC<Props> = ({
         } else {
           setAvailableTeams([]);
         }
-      } else {
+      } else if (league !== 'ncaa') {
         setAvailableTeams([]);
       }
     }
@@ -791,45 +791,45 @@ export const Engine: React.FC<Props> = ({
                 </div>
               </div>
 
-              {/* Team Selector (All Leagues) */}
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-gray-400 uppercase tracking-widest font-mono flex items-center gap-2">
-                  <Trophy size={12} /> Team
-                </label>
-                <div className="relative">
-                  <select
-                    value={ncaaTeamId}
-                    onChange={(e) => {
-                      const teamId = e.target.value;
-                      setNcaaTeamId(teamId);
+              {/* Team Selector - Non-NCAA Leagues Only */}
+              {league && league !== 'ncaa' && (
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-gray-400 uppercase tracking-widest font-mono flex items-center gap-2">
+                    <Trophy size={12} /> Team
+                  </label>
+                  <div className="relative">
+                    <select
+                      value={manualTeamName}
+                      onChange={(e) => {
+                        const teamName = e.target.value;
+                        setManualTeamName(teamName);
 
-                      if (teamId) {
-                        const team = availableTeams.find(t => t.id === teamId);
-                        if (team) {
-                          setManualTeamName(team.name);
-                          setPrimaryColor(team.primary_color || '#5B5FFF');
-                          setSecondaryColor(team.secondary_color || '#1A1A1A');
-                          setLogoUrl(team.logo_url);
+                        if (teamName) {
+                          const team = availableTeams.find(t => t.name === teamName);
+                          if (team) {
+                            setPrimaryColor(team.primary_color || '#5B5FFF');
+                            setSecondaryColor(team.secondary_color || '#1A1A1A');
+                            setLogoUrl(team.logo_url);
+                          }
+                        } else {
+                          setPrimaryColor('#5B5FFF');
+                          setSecondaryColor('#1A1A1A');
+                          setLogoUrl('');
                         }
-                      } else {
-                        setManualTeamName('');
-                        setPrimaryColor('#5B5FFF');
-                        setSecondaryColor('#1A1A1A');
-                        setLogoUrl('');
-                      }
-                    }}
-                    className="w-full h-14 px-5 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl text-base font-medium outline-none focus:ring-2 focus:ring-[#5B5FFF]/20 pl-4 appearance-none"
-                  >
-                    <option value="">Select Team...</option>
-                    {availableTeams.map(t => (
-                      <option key={t.id} value={t.id}>{t.name}</option>
-                    ))}
-                  </select>
-                  <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
-                    <ChevronDown size={16} className="text-gray-400" />
+                      }}
+                      className="w-full h-14 px-5 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl text-base font-medium outline-none focus:ring-2 focus:ring-[#5B5FFF]/20 pl-4 appearance-none"
+                    >
+                      <option value="">Select Team...</option>
+                      {availableTeams.map(t => (
+                        <option key={t.id} value={t.name}>{t.name}</option>
+                      ))}
+                    </select>
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                      <ChevronDown size={16} className="text-gray-400" />
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
 
               {/* NCAA Cascading Selectors */}
               {league === 'ncaa' && (
@@ -843,7 +843,12 @@ export const Engine: React.FC<Props> = ({
                       value={ncaaSport}
                       onChange={(e) => {
                         setNcaaSport(e.target.value);
-                        setSport(e.target.value); // Update metadata sport too
+                        setSport(e.target.value);
+                        setNcaaDivision('Division I');
+                        setNcaaConference('');
+                        setManualTeamName('');
+                        setAvailableConferences([]);
+                        setAvailableTeams([]);
                       }}
                       className="w-full h-14 px-5 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl text-base font-medium outline-none focus:ring-2 focus:ring-[#5B5FFF]/20 pl-4 appearance-none"
                     >
@@ -860,7 +865,13 @@ export const Engine: React.FC<Props> = ({
                     </label>
                     <select
                       value={ncaaDivision}
-                      onChange={(e) => setNcaaDivision(e.target.value)}
+                      onChange={(e) => {
+                        setNcaaDivision(e.target.value);
+                        setNcaaConference('');
+                        setManualTeamName('');
+                        setAvailableConferences([]);
+                        setAvailableTeams([]);
+                      }}
                       className="w-full h-14 px-5 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl text-base font-medium outline-none focus:ring-2 focus:ring-[#5B5FFF]/20 pl-4 appearance-none"
                     >
                       {['Division I', 'Division II', 'Division III'].map(d => (
@@ -877,7 +888,10 @@ export const Engine: React.FC<Props> = ({
                     <div className="relative">
                       <select
                         value={ncaaConference}
-                        onChange={(e) => setNcaaConference(e.target.value)}
+                        onChange={(e) => {
+                          setNcaaConference(e.target.value);
+                          setManualTeamName('');
+                        }}
                         className="w-full h-14 px-5 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl text-base font-medium outline-none focus:ring-2 focus:ring-[#5B5FFF]/20 pl-4 appearance-none"
                       >
                         <option value="">Select Conference...</option>
@@ -890,6 +904,42 @@ export const Engine: React.FC<Props> = ({
                       </div>
                     </div>
                   </div>
+
+                  {/* NCAA Team Selector - Shows after Conference Selected */}
+                  {ncaaConference && availableTeams.length > 0 && (
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold text-gray-400 uppercase tracking-widest font-mono flex items-center gap-2">
+                        <Trophy size={12} /> Team
+                      </label>
+                      <div className="relative">
+                        <select
+                          value={manualTeamName}
+                          onChange={(e) => {
+                            const teamName = e.target.value;
+                            setManualTeamName(teamName);
+
+                            if (teamName) {
+                              const team = availableTeams.find(t => t.name === teamName);
+                              if (team) {
+                                setPrimaryColor(team.primary_color || '#5B5FFF');
+                                setSecondaryColor(team.secondary_color || '#1A1A1A');
+                                setLogoUrl(team.logo_url);
+                              }
+                            }
+                          }}
+                          className="w-full h-14 px-5 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl text-base font-medium outline-none focus:ring-2 focus:ring-[#5B5FFF]/20 pl-4 appearance-none"
+                        >
+                          <option value="">Select Team...</option>
+                          {availableTeams.map(t => (
+                            <option key={t.id} value={t.name}>{t.name}</option>
+                          ))}
+                        </select>
+                        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                          <ChevronDown size={16} className="text-gray-400" />
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
