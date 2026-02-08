@@ -538,6 +538,7 @@ export async function processRosterRawText(
   league?: string,
   manualTeamName: string = ''
 ): Promise<ProcessedRoster> {
+  console.log(`[Gemini] processRosterRawText called. ManualTeamName: "${manualTeamName}"`);
   const apiKey = getApiKey();
   if (!apiKey) {
     throw new Error("Gemini API Key is not configured.");
@@ -1173,8 +1174,10 @@ export async function processRosterRawText(
     console.log(`[Gemini] Populated ${candidateTeams.length} teams for selection`);
   }
 
+  console.log(`[Gemini] Finalizing return. Manual: "${manualTeamName}", Parsed: "${parsedResult.teamName}"`);
+
   return {
-    teamName: parsedResult.teamName || "Unknown Team",
+    teamName: manualTeamName || parsedResult.teamName || "Unknown Team",
     sport: standardizedSport,
     league: finalLeague || undefined,
     seasonYear: extractedSeason,
