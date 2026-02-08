@@ -155,7 +155,7 @@ function extractJSON(text: string): any {
 }
 
 // Helper: Fetch authoritative branding from Supabase 'teams' table
-async function fetchBrandingFromDB(name: string, league: string): Promise<{ logoUrl?: string; primaryColor?: string; secondaryColor?: string } | null> {
+async function fetchBrandingFromDB(name: string, league: string): Promise<{ name?: string; logoUrl?: string; primaryColor?: string; secondaryColor?: string } | null> {
   if (!name || !supabase || name === 'Unknown Team') return null;
 
   const searchLeague = league.toLowerCase();
@@ -163,7 +163,7 @@ async function fetchBrandingFromDB(name: string, league: string): Promise<{ logo
   // 1. Try exact match first
   const { data } = await supabase
     .from('teams')
-    .select('logo_url, primary_color, secondary_color')
+    .select('name, logo_url, primary_color, secondary_color')
     .eq('league', searchLeague)
     .ilike('name', name)
     .limit(1)
@@ -172,6 +172,7 @@ async function fetchBrandingFromDB(name: string, league: string): Promise<{ logo
   if (data) {
     console.log(`[Supabase] Found authoritative branding for ${name}`);
     return {
+      name: data.name,
       logoUrl: data.logo_url,
       primaryColor: data.primary_color || undefined,
       secondaryColor: data.secondary_color || undefined
@@ -181,7 +182,7 @@ async function fetchBrandingFromDB(name: string, league: string): Promise<{ logo
   // 2. Try looking in alt_names array if exact match fails
   const { data: altData } = await supabase
     .from('teams')
-    .select('logo_url, primary_color, secondary_color')
+    .select('name, logo_url, primary_color, secondary_color')
     .eq('league', searchLeague)
     .contains('alt_names', [name])
     .limit(1)
@@ -190,6 +191,7 @@ async function fetchBrandingFromDB(name: string, league: string): Promise<{ logo
   if (altData) {
     console.log(`[Supabase] Found authoritative branding via alt_name for ${name}`);
     return {
+      name: altData.name,
       logoUrl: altData.logo_url,
       primaryColor: altData.primary_color || undefined,
       secondaryColor: altData.secondary_color || undefined
@@ -975,12 +977,13 @@ export async function processRosterRawText(
   if (parsedResult.teamName) {
     const branding = await fetchBrandingFromDB(parsedResult.teamName, league || 'milb');
     if (branding) {
+      if (branding.name) {
+        console.log(`[Gemini] Updating teamName from "${parsedResult.teamName}" to official: "${branding.name}"`);
+        parsedResult.teamName = branding.name;
+      }
       if (branding.logoUrl) {
         console.log(`[Gemini] Overriding AI logo with DB logo: ${branding.logoUrl} `);
         parsedResult.logoUrl = branding.logoUrl;
-        // Also ensure team name matches DB exactly if possible
-        // parsedResult.teamName = branding.name; // Actually, keeping user perception might be better
-
       }
       if (branding.primaryColor) parsedResult.primaryColor = branding.primaryColor;
       if (branding.secondaryColor) parsedResult.secondaryColor = branding.secondaryColor;
