@@ -192,18 +192,13 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#5B5FFF]/5 border border-[#5B5FFF]/10 text-[#5B5FFF] text-[10px] font-black uppercase tracking-widest mb-2">
             <Sparkles size={12} /> New: Gemini 3 Integration
           </div>
-          <h1 className="text-4xl md:text-6xl font-extrabold tracking-tighter leading-[1.2] text-gray-900 dark:text-white">
+          <h1 className="text-4xl md:text-6xl font-extrabold tracking-tighter leading-[1.2] text-gray-900 dark:text-white mb-8">
             Athlete Rosters. <br />
             <span className="bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-purple-600 text-transparent bg-clip-text inline-block py-1">Simplified for Production.</span>
           </h1>
-          <p className="text-lg md:text-xl text-gray-500 dark:text-gray-400 max-w-2xl mx-auto font-medium leading-relaxed">
+          <p className="text-lg md:text-xl text-gray-500 dark:text-gray-400 max-w-2xl mx-auto font-medium leading-relaxed mb-12">
             The high-performance middleware transforming messy rosters into production-ready metadata for Broadcast, MAM, and DAM systems.
           </p>
-          <div className="pt-6 flex justify-center items-center gap-4 relative z-50">
-            <a href={signUpUrl} className="px-8 py-4 rounded-xl primary-gradient text-white font-black text-lg shadow-xl shadow-[#5B5FFF]/20 hover:scale-105 active:scale-95 transition-all">
-              Start Building Free
-            </a>
-          </div>
         </div>
       </section>
 
