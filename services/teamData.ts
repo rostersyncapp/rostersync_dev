@@ -1086,6 +1086,7 @@ export const ESPN_TEAM_IDS: Record<string, TeamLogoInfo> = {
   "ACFC": { id: 21422, sport: "soccer", league: "usa.nwsl", logoUrl: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/nwsl/angel-city-fc.png", primaryColor: "#F2D4D7", secondaryColor: "#010101" },
   "BAY FC": { id: 22187, sport: "soccer", league: "usa.nwsl", logoUrl: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/nwsl/bay-fc.png", primaryColor: "#051C2C", secondaryColor: "#F9423A" },
   "BOSTON LEGACY FC": { id: 131562, sport: "soccer", league: "usa.nwsl", logoUrl: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/nwsl/boston-legacy-fc.png", primaryColor: "#1d3c34", secondaryColor: "#b2aa8d" },
+  "CHICAGO RED STARS": { id: 10420, sport: "soccer", league: "usa.nwsl", logoUrl: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/nwsl/chicago-stars-fc.png", primaryColor: "#41B6E6", secondaryColor: "#000000" },
   "CHICAGO STARS FC": { id: 15360, sport: "soccer", league: "usa.nwsl", logoUrl: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/nwsl/chicago-stars-fc.png", primaryColor: "#051C2C", secondaryColor: "#41B6E6" },
   "CHICAGO STARS": { id: 15360, sport: "soccer", league: "usa.nwsl", logoUrl: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/nwsl/chicago-stars-fc.png", primaryColor: "#051C2C", secondaryColor: "#41B6E6" },
   "DENVER SUMMIT FC": { id: 131563, sport: "soccer", league: "usa.nwsl", logoUrl: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/nwsl/denver-summit-fc.png", primaryColor: "#2c5234", secondaryColor: "#ffc72c" },
@@ -1104,6 +1105,7 @@ export const ESPN_TEAM_IDS: Record<string, TeamLogoInfo> = {
   "SAN DIEGO WAVE": { id: 21423, sport: "soccer", league: "usa.nwsl", logoUrl: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/nwsl/san-diego-wave-fc.png", primaryColor: "#1d428a", secondaryColor: "#e61b72" },
   "SEATTLE REIGN FC": { id: 15363, sport: "soccer", league: "usa.nwsl", logoUrl: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/nwsl/seattle-reign-fc.png", primaryColor: "#002a5c", secondaryColor: "#005696" },
   "SEATTLE REIGN": { id: 15363, sport: "soccer", league: "usa.nwsl", logoUrl: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/nwsl/seattle-reign-fc.png", primaryColor: "#002a5c", secondaryColor: "#005696" },
+  "UTAH ROYALS FC": { id: 19141, sport: "soccer", league: "usa.nwsl", logoUrl: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/nwsl/utah-royals.png", primaryColor: "#e31837", secondaryColor: "#fdb927" },
   "UTAH ROYALS": { id: 19141, sport: "soccer", league: "usa.nwsl", logoUrl: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/nwsl/utah-royals.png", primaryColor: "#e31837", secondaryColor: "#fdb927" },
   "WASHINGTON SPIRIT": { id: 15365, sport: "soccer", league: "usa.nwsl", logoUrl: "https://rddqcxfalrlmlvirjlca.supabase.co/storage/v1/object/public/logos/nwsl/washington-spirit.png", primaryColor: "#000000", secondaryColor: "#ffffff" },
 
