@@ -443,9 +443,57 @@ async function fillMissingJerseyNumbers(
 
   // 1. Fill missing jerseys AND positions
   let filledCount = 0;
+
+  // Pre-calculate a map of normalized "Last Name" -> External Data for fuzzy matching
+  const lastNameMap = new Map<string, ExternalAthleteData[]>();
+  externalRoster.forEach((data, name) => {
+    const parts = name.split(' ');
+    const lastName = parts[parts.length - 1];
+    if (lastName) {
+      const list = lastNameMap.get(lastName) || [];
+      list.push(data);
+      lastNameMap.set(lastName, list);
+    }
+  });
+
   const updatedAthletes = athletes.map(athlete => {
     const normalizedName = normalizePlayerName(athlete.fullName || '');
-    const externalData = externalRoster?.get(normalizedName);
+
+    // 1. Try Exact Match
+    let externalData = externalRoster?.get(normalizedName);
+
+    // 2. Try Fuzzy Match (Last Name + First Initial) if no exact match
+    if (!externalData) {
+      const parts = normalizedName.split(' ');
+      if (parts.length >= 2) {
+        const firstName = parts[0];
+        const lastName = parts[parts.length - 1];
+        const initial = firstName.charAt(0);
+
+        const candidates = lastNameMap.get(lastName);
+        if (candidates && candidates.length === 1) {
+          // Only match if it's the only player with that last name (safer)
+          // or if we can confirm the first initial matches.
+          // In the externalRoster keys, we need to find the full name that matches.
+          // Let's check candidates.
+          const match = candidates.find(c => {
+            // We don't have the full name in ExternalAthleteData, but we can search externalRoster
+            // This is a bit inefficient but for 30 players it's fine.
+            for (const [extFullName, extData] of externalRoster.entries()) {
+              if (extData === c) {
+                const extParts = extFullName.split(' ');
+                if (extParts[0].charAt(0) === initial) return true;
+              }
+            }
+            return false;
+          });
+          if (match) {
+            console.log(`[Roster Sync] Fuzzy matched "${athlete.fullName}" to official roster via last name/initial`);
+            externalData = match;
+          }
+        }
+      }
+    }
 
     if (!externalData) return athlete;
 
@@ -475,7 +523,7 @@ async function fillMissingJerseyNumbers(
     return updated;
   });
 
-  console.log(`[Roster Sync] Filled ${filledCount} missing jersey numbers`);
+  console.log(`[Roster Sync] Filled ${filledCount} missing jersey numbers/positions`);
 
   // 2. Identify missing athletes
   const pastedNames = new Set(athletes.map(a => normalizePlayerName(a.fullName || '')));
@@ -671,9 +719,11 @@ export async function processRosterRawText(
   const systemInstruction = `You are an expert broadcast metadata extractor. Your PRIMARY GOAL is to extract the roster data.
     
     1. TEAM IDENTIFICATION:
-    - DO NOT attempt to identify the team from player names or context.
-    - ALWAYS set teamName to "Unknown Team".
-    - The user will select the correct team manually after extraction.
+    ${league ? `- The user has selected the ${league.toUpperCase()} league. IDENTIFY THE TEAM from the provided list or context.
+    - VALID LIST: ${knownTeams.join(', ')}
+    - If you are UNSURE, set teamName to "Unknown Team".` : `- DO NOT attempt to identify the team from player names or context.
+    - ALWAYS set teamName to "Unknown Team".`}
+    - The user will select the correct team manually after extraction if you are unsure.
     
     2. ROSTER EXTRACTION (MANDATORY):
 
@@ -737,12 +787,14 @@ export async function processRosterRawText(
   try {
     const model = genAI.getGenerativeModel(modelParams);
     // Note: Team identification is now manual - AI always returns "Unknown Team"
-    const extractionInstruction = `Extract roster data from the provided text. Set teamName to "Unknown Team".`;
+    const extractionInstruction = league
+      ? `Identify the team from the DATA and set teamName to the correct name from the valid list. If unclear, use "Unknown Team".`
+      : `Extract roster data from the provided text. Set teamName to "Unknown Team".`;
 
     const userPrompt = `DATA:\n${text}\n\n${context}\nTier: ${tier}.\n\n` +
       `FINAL INSTRUCTIONS:\n` +
       `${extractionInstruction}\n` +
-      `Extraction (MANDATORY): CRITICAL - You MUST extract EVERY SINGLE athlete from the 'DATA' block into the athletes array. Always set teamName to "Unknown Team".
+      `Extraction (MANDATORY): CRITICAL - You MUST extract EVERY SINGLE athlete from the 'DATA' block into the athletes array. ${league ? 'Identify the team if possible.' : 'Always set teamName to "Unknown Team".'}
          - NO SKIPPING: If a name is in DATA, it MUST be in the JSON results.
          - Use "00" for jersey/bib and "Athlete" as defaults for missing metadata.
          - Only provide birthDate, height, and weight if found in text or via search. Do NOT use fake placeholders.

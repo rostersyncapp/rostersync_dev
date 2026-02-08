@@ -343,8 +343,8 @@ export const Engine: React.FC<Props> = ({
     if (pendingRoster && pendingRoster.officialRosterCount && pendingRoster.missingAthletes && pendingRoster.missingAthletes.length > 0) {
       const pasted = pendingRoster.pastedRosterCount || pendingRoster.athletes.length;
       const official = pendingRoster.officialRosterCount;
-      // Show if ANY players are missing (threshold > 0)
-      if (official > pasted && pendingRoster.missingAthletes.length > 0) {
+      // Show if ANY players are missing (even if counts match)
+      if (pendingRoster.missingAthletes.length > 0) {
         setMissingAthletesData({
           pasted,
           official,
