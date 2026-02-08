@@ -117,6 +117,15 @@ interface Props {
   initialText?: string;
 }
 
+const toTitleCase = (str: string) => {
+  if (!str) return '';
+  return str.toLowerCase().split(' ').map(word => {
+    // Keep certain words uppercase if they are short (like acronyms)
+    // but for now, the user wants strict Title Case
+    return word.charAt(0).toUpperCase() + word.slice(1);
+  }).join(' ');
+};
+
 export const Engine: React.FC<Props> = ({
   userTier,
   projects,
@@ -180,8 +189,21 @@ export const Engine: React.FC<Props> = ({
         // Find conference ID
         const conf = availableConferences.find(c => c.name === ncaaConference);
         if (conf) {
-          const teams = await getTeams(conf.id);
-          setAvailableTeams(teams);
+          const rawTeams = await getTeams(conf.id);
+
+          // Dedup by Name and Title Case
+          const teamMap = new Map<string, any>();
+          rawTeams.forEach(t => {
+            const formattedName = toTitleCase(t.name);
+            if (!teamMap.has(formattedName)) {
+              teamMap.set(formattedName, { ...t, name: formattedName });
+            }
+          });
+
+          const sortedTeams = Array.from(teamMap.values())
+            .sort((a, b) => a.name.localeCompare(b.name));
+
+          setAvailableTeams(sortedTeams);
         } else {
           setAvailableTeams([]);
         }
@@ -208,30 +230,31 @@ export const Engine: React.FC<Props> = ({
           return normInfo === normInput;
         });
 
-      // Dedup by ID to remove short names/aliases (pick longest name as actual name)
-      const teamMap = new Map<string | number, any>();
+      // Dedup by Name to remove variations and Title Case
+      const teamMap = new Map<string, any>();
       filteredTeamsRaw.forEach(([name, info]) => {
-        const existing = teamMap.get(info.id);
-        if (!existing || name.length > existing.name.length) {
-          // Capitalize Name properly (e.g. "IOWA CUBS" -> "Iowa Cubs")
-          const formattedName = name.split(' ').map(word =>
-            word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-          ).join(' ');
+        const formattedName = toTitleCase(name);
+        const existing = teamMap.get(formattedName);
 
-          teamMap.set(info.id, {
+        // Keep the version with more complete data (id check) or longest source name 
+        // to ensure we capture the most "official" one if names are identical
+        if (!existing || name.length > (existing._sourceName?.length || 0)) {
+          teamMap.set(formattedName, {
             id: info.id,
             name: formattedName,
             logo_url: info.logoUrl,
             primary_color: info.primaryColor,
-            secondary_color: info.secondaryColor
+            secondary_color: info.secondaryColor,
+            _sourceName: name // tracking original for heuristic
           });
         }
       });
 
       const leagueTeams = Array.from(teamMap.values())
+        .map(({ _sourceName, ...rest }) => rest) // remove heuristic property
         .sort((a, b) => a.name.localeCompare(b.name));
 
-      console.log(`[Engine] Populated ${leagueTeams.length} unique teams for league: ${league} (ESPN: ${espnLeagueCode})`);
+      console.log(`[Engine] Populated ${leagueTeams.length} unique Title Cased teams for league: ${league}`);
       setAvailableTeams(leagueTeams);
     } else if (league !== 'ncaa') {
       // Clear if no league selected (and not handled by NCAA effect)
