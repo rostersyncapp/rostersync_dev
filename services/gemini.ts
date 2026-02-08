@@ -391,7 +391,6 @@ async function fetchNHLRoster(teamName: string): Promise<Map<string, ExternalAth
   // Use proxy path to avoid CORS issues
   // Local: Vite proxy forwards to https://api-web.nhle.com/v1
   // Prod: Vercel rewrite forwards to https://api-web.nhle.com/v1
-  console.log(`[NHL] Fetching roster for: "${teamName}" (Upper: "${teamUpper}")`);
 
   if (!teamCode) {
     console.warn(`[NHL] No team code found in NHL_API_CODES for: "${teamName}"`);
@@ -400,18 +399,15 @@ async function fetchNHLRoster(teamName: string): Promise<Map<string, ExternalAth
 
   const season = getNHLSeasonString();
   const url = `/api/nhl/roster/${teamCode}/${season}`;
-  console.log(`[NHL] Using explicit season URL: ${url}`);
 
   try {
     const response = await fetch(url);
-    console.log(`[NHL] Fetch status: ${response.status} ${response.statusText}`);
     if (!response.ok) {
       console.warn(`[NHL] API returned status: ${response.status}`);
       return null;
     }
 
     const data: any = await response.json();
-    console.log(`[NHL] API response keys:`, Object.keys(data));
     const rosterMap = new Map<string, ExternalAthleteData>();
 
     const processPlayer = (player: any) => {
@@ -581,8 +577,6 @@ export async function fillMissingJerseyNumbers(
       } as Athlete);
     }
   });
-
-  console.log(`[Roster Sync] fillMissingJerseyNumbers complete. Official Count: ${externalRoster.size}, Found Missing: ${missingAthletes.length}`);
 
   return {
     updatedAthletes,
