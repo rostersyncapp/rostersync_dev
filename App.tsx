@@ -407,7 +407,6 @@ const App: React.FC = () => {
           await logActivity(user.id, 'LOGIN', 'Signed in to production workspace.');
           fetchData(user);
         } catch (err: any) {
-          console.error("Error syncing token with Supabase:", err);
           setInitializationError(err.message || "Failed to synchronize authentication.");
         }
       } else if (clerkLoaded) {
@@ -629,16 +628,8 @@ const App: React.FC = () => {
     const limit = getTierLimit(profile.subscriptionTier);
     if (profile.creditsUsed >= limit) { alert(`Limit Reached! ${profile.creditsUsed}/${limit}`); return; }
     setIsProcessing(true);
-    console.log(`[App] Starting Roster Processing. League: ${league}, Manual Team: ${manualTeamName}`);
     try {
       const result = await processRosterRawText(text, profile.subscriptionTier, seasonYear, findBranding, profile.id, league, manualTeamName);
-
-      console.log('[App] Processing complete. Result:', {
-        teamName: result.teamName,
-        athleteCount: result.athletes?.length,
-        officialCount: result.officialRosterCount,
-        missingCount: result.missingAthletes?.length
-      });
 
       // Check if there are multiple team candidates
       if (result.candidateTeams && result.candidateTeams.length > 1) {
