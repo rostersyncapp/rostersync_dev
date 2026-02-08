@@ -2,7 +2,7 @@
 import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
 import { Athlete, NILStatus, SubscriptionTier } from "../types.ts";
 import { getBrandingCache, saveBrandingCache, recordUsage, supabase } from "./supabase.ts";
-import { KNOWN_TEAM_LOGOS, ESPN_TEAM_IDS, LEAGUE_DISPLAY_NAMES, LEAGUE_TO_SPORT, MILB_SPORT_IDS } from './teamData.ts';
+import { KNOWN_TEAM_LOGOS, ESPN_TEAM_IDS, LEAGUE_DISPLAY_NAMES, LEAGUE_TO_SPORT, MILB_SPORT_IDS, NHL_API_CODES } from './teamData.ts';
 
 // Helper to get the key even if the build tool is doing static analysis on process.env.API_KEY
 const getApiKey = () => {
@@ -359,6 +359,53 @@ async function fetchMilbRoster(teamName: string, league: string): Promise<Map<st
 }
 
 /**
+ * Fetch team roster from unofficial NHL API
+ */
+async function fetchNHLRoster(teamName: string): Promise<Map<string, ExternalAthleteData> | null> {
+  const teamUpper = teamName.toUpperCase().trim();
+  const teamCode = NHL_API_CODES[teamUpper];
+
+  if (!teamCode) {
+    console.log(`[NHL] No team code found for: ${teamName}`);
+    return null;
+  }
+
+  const url = `https://api-web.nhle.com/v1/roster/${teamCode}/current`;
+
+  try {
+    console.log(`[NHL] Fetching roster from: ${url}`);
+    const response = await fetch(url);
+    if (!response.ok) {
+      console.warn(`[NHL] API returned status: ${response.status}`);
+      return null;
+    }
+
+    const data = await response.json();
+    const rosterMap = new Map<string, ExternalAthleteData>();
+
+    const processPlayer = (player: any) => {
+      const fullName = `${player.firstName.default} ${player.lastName.default}`;
+      rosterMap.set(normalizePlayerName(fullName), {
+        jersey: player.sweaterNumber?.toString() || "00",
+        position: player.positionCode || "Athlete",
+        headshot: player.headshot || "",
+        id: player.id.toString()
+      });
+    };
+
+    data.forwards?.forEach(processPlayer);
+    data.defensemen?.forEach(processPlayer);
+    data.goalies?.forEach(processPlayer);
+
+    console.log(`[NHL] Loaded ${rosterMap.size} players for ${teamCode}`);
+    return rosterMap;
+  } catch (error) {
+    console.error('[NHL] Failed to fetch roster:', error);
+    return null;
+  }
+}
+
+/**
  * Fill in missing jersey numbers by matching against external roster data (ESPN or MiLB)
  */
 async function fillMissingJerseyNumbers(
@@ -376,6 +423,8 @@ async function fillMissingJerseyNumbers(
 
   if (league && MILB_SPORT_IDS[league]) {
     externalRoster = await fetchMilbRoster(teamName, league);
+  } else if (league === 'nhl') {
+    externalRoster = await fetchNHLRoster(teamName);
   } else {
     externalRoster = await fetchESPNRoster(teamName);
   }
