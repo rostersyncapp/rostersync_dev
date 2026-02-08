@@ -221,6 +221,9 @@ async function fetchESPNRoster(teamName: string, league?: string): Promise<Map<s
   const teamUpper = teamName.toUpperCase().trim();
   let teamInfo = ESPN_TEAM_IDS[teamUpper];
 
+  console.log(`[ESPN] Looking up team: "${teamName}" (normalized: "${teamUpper}")`);
+  console.log(`[ESPN] Direct lookup result:`, teamInfo ? `Found - ${teamInfo.id} (${teamInfo.sport}/${teamInfo.league})` : 'Not found');
+
   // If no match OR match is missing critical metadata (id, sport, league), perform a smarter lookup
   if (!teamInfo || !teamInfo.id || !teamInfo.sport || !teamInfo.league) {
     const allKeys = Object.keys(ESPN_TEAM_IDS);
@@ -228,12 +231,16 @@ async function fetchESPNRoster(teamName: string, league?: string): Promise<Map<s
       teamUpper.includes(key) || key.includes(teamUpper)
     );
 
+    console.log(`[ESPN] Fuzzy matches found: ${fuzzyMatches.length}`, fuzzyMatches.slice(0, 5));
+
     if (fuzzyMatches.length > 0) {
       // Prioritize matches that HAVE critical metadata
       const validMatches = fuzzyMatches.filter(key => {
         const info = ESPN_TEAM_IDS[key];
         return info.id && info.sport && info.league;
       });
+
+      console.log(`[ESPN] Valid matches with metadata: ${validMatches.length}`, validMatches.slice(0, 5));
 
       // If a league is provided, prioritize matches in that league
       if (league && (validMatches.length > 0 || fuzzyMatches.length > 0)) {
@@ -243,17 +250,22 @@ async function fetchESPNRoster(teamName: string, league?: string): Promise<Map<s
           ESPN_TEAM_IDS[key].league.toLowerCase() === leagueLower ||
           ESPN_TEAM_IDS[key].league.toLowerCase().includes(leagueLower)
         );
-        if (leagueMatch) teamInfo = ESPN_TEAM_IDS[leagueMatch];
+        if (leagueMatch) {
+          teamInfo = ESPN_TEAM_IDS[leagueMatch];
+          console.log(`[ESPN] League-filtered match: ${leagueMatch}`, teamInfo);
+        }
       }
 
       // Fallback: Use the first valid metadata-rich match
       if (!teamInfo && validMatches.length > 0) {
         teamInfo = ESPN_TEAM_IDS[validMatches[0]];
+        console.log(`[ESPN] Using first valid match: ${validMatches[0]}`, teamInfo);
       }
 
       // Final fallback: Use the first fuzzy match regardless of metadata
       if (!teamInfo) {
         teamInfo = ESPN_TEAM_IDS[fuzzyMatches[0]];
+        console.log(`[ESPN] Using first fuzzy match: ${fuzzyMatches[0]}`, teamInfo);
       }
 
       if (teamInfo && teamInfo.id) {
@@ -263,19 +275,27 @@ async function fetchESPNRoster(teamName: string, league?: string): Promise<Map<s
   }
 
   if (!teamInfo || !teamInfo.id) {
-    console.log(`[ESPN] No valid team ID found for: ${teamName}`);
+    console.log(`[ESPN] ❌ No valid team ID found for: ${teamName}`);
     return null;
   }
 
   const url = `https://site.api.espn.com/apis/site/v2/sports/${teamInfo.sport}/${teamInfo.league}/teams/${teamInfo.id}/roster`;
 
   try {
-    console.log(`[ESPN] Fetching roster from: ${url}`);
+    console.log(`[ESPN] 🔄 Fetching roster from: ${url}`);
     const response = await fetch(url);
-    if (!response.ok) return null;
+    console.log(`[ESPN] Response status: ${response.status} ${response.statusText}`);
+    
+    if (!response.ok) {
+      console.error(`[ESPN] ❌ HTTP Error: ${response.status} ${response.statusText}`);
+      return null;
+    }
 
     const data = await response.json();
     const rosterMap = new Map<string, ExternalAthleteData>();
+
+    console.log(`[ESPN] API response keys:`, Object.keys(data || {}));
+    console.log(`[ESPN] data.athletes:`, data.athletes ? `Array with ${data.athletes.length} items` : 'null/undefined');
 
     if (data.athletes && Array.isArray(data.athletes)) {
       for (const athlete of data.athletes) {
@@ -290,10 +310,10 @@ async function fetchESPNRoster(teamName: string, league?: string): Promise<Map<s
       }
     }
 
-    console.log(`[ESPN] Loaded ${rosterMap.size} players with jersey numbers`);
+    console.log(`[ESPN] ✅ Loaded ${rosterMap.size} players with jersey numbers`);
     return rosterMap;
   } catch (error) {
-    console.error('[ESPN] Failed to fetch roster:', error);
+    console.error('[ESPN] ❌ Failed to fetch roster:', error);
     return null;
   }
 }
@@ -486,26 +506,36 @@ export async function fillMissingJerseyNumbers(
   officialCount: number,
   missingAthletes: Athlete[]
 }> {
-  console.log(`[Roster Sync] fillMissingJerseyNumbers called with team: "${teamName}", league: ${league || 'unknown'}, athletes: ${athletes.length}`);
+  console.log(`[Roster Sync] 🔍 fillMissingJerseyNumbers called with team: "${teamName}", league: ${league || 'unknown'}, athletes: ${athletes.length}`);
+  console.log(`[Roster Sync] 📋 Sample athletes:`, athletes.slice(0, 3).map(a => ({ name: a.fullName, jersey: a.jerseyNumber, pos: a.position })));
 
   let externalRoster: Map<string, ExternalAthleteData> | null = null;
 
+  console.log(`[Roster Sync] 🔎 Fetching external roster...`);
+
   if (league && MILB_SPORT_IDS[league]) {
+    console.log(`[Roster Sync] 📡 Using MiLB API for: ${teamName}`);
     externalRoster = await fetchMilbRoster(teamName, league);
   } else if (league === 'nhl') {
+    console.log(`[Roster Sync] 📡 Using NHL API for: ${teamName}`);
     externalRoster = await fetchNHLRoster(teamName);
   } else {
+    console.log(`[Roster Sync] 📡 Using ESPN API for: ${teamName} (league: ${league || 'not specified'})`);
     externalRoster = await fetchESPNRoster(teamName, league);
   }
 
+  console.log(`[Roster Sync] 📊 External roster size: ${externalRoster?.size || 0} players`);
+
   if (!externalRoster || externalRoster.size === 0) {
-    console.log('[Roster Sync] No external roster data available - returning original athletes');
+    console.log('[Roster Sync] ⚠️ No external roster data available - returning original athletes');
     return {
       updatedAthletes: athletes,
       officialCount: 0,
       missingAthletes: []
     };
   }
+
+  console.log(`[Roster Sync] ✅ External roster loaded with ${externalRoster.size} players`);
 
   // 1. Fill missing jerseys AND positions
   let filledCount = 0;
@@ -596,10 +626,15 @@ export async function fillMissingJerseyNumbers(
     return updated;
   });
 
-  console.log(`[Roster Sync] Filled ${filledCount} missing jersey numbers/positions`);
+  console.log(`[Roster Sync] ✅ Filled ${filledCount} missing jersey numbers/positions`);
+  console.log(`[Roster Sync] 📊 Matched ${matchedOfficialNames.size} official players to pasted roster`);
 
   // 2. Identify missing athletes
   const missingAthletes: Athlete[] = [];
+
+  console.log(`[Roster Sync] 🔍 Checking for missing athletes...`);
+  console.log(`[Roster Sync] 📋 External roster has ${externalRoster.size} players`);
+  console.log(`[Roster Sync] 📋 Matched ${matchedOfficialNames.size} players`);
 
   externalRoster.forEach((data, nameKey) => {
     // Check if this official name was NOT matched to any pasted name
@@ -618,6 +653,14 @@ export async function fillMissingJerseyNumbers(
       } as Athlete);
     }
   });
+
+  console.log(`[Roster Sync] 🎯 RESULTS:`);
+  console.log(`[Roster Sync]   - Official roster size: ${externalRoster.size}`);
+  console.log(`[Roster Sync]   - Missing athletes detected: ${missingAthletes.length}`);
+  console.log(`[Roster Sync]   - Missing athletes:`, missingAthletes.slice(0, 5).map(a => a.fullName));
+  if (missingAthletes.length > 5) {
+    console.log(`[Roster Sync]   - ... and ${missingAthletes.length - 5} more`);
+  }
 
   return {
     updatedAthletes,

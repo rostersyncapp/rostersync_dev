@@ -613,27 +613,47 @@ export const Engine: React.FC<Props> = ({
     // Since the team has changed, we should re-check for jerseys, positions and missing players
     if (newTeamName && newTeamName !== 'Unknown Team') {
       try {
+        console.log('[Engine] 🔄 Triggering completeness check for:', newTeamName, currentLeague);
+        
         const result = await fillMissingJerseyNumbers(
           initialAthletes.length > 0 ? initialAthletes : processedAthletes,
           newTeamName,
           currentLeague
         );
 
+        console.log('[Engine] 📊 Completeness check results:');
+        console.log('[Engine]   - Official roster size:', result.officialCount);
+        console.log('[Engine]   - Missing athletes:', result.missingAthletes?.length || 0);
+        console.log('[Engine]   - Athletes updated:', result.updatedAthletes?.length || 0);
+
         if (result.updatedAthletes) {
           setProcessedAthletes(result.updatedAthletes);
+          
+          // Check phonetics status after update
+          const withPhonetics = result.updatedAthletes.filter(a => a.phoneticSimplified || a.phoneticIPA);
+          const withoutPhonetics = result.updatedAthletes.filter(a => !a.phoneticSimplified && !a.phoneticIPA);
+          console.log('[Engine] 🎤 Phonetics status:');
+          console.log('[Engine]   - With phonetics:', withPhonetics.length);
+          console.log('[Engine]   - Without phonetics:', withoutPhonetics.length);
+          if (withoutPhonetics.length > 0) {
+            console.log('[Engine]   - Missing phonetics for:', withoutPhonetics.slice(0, 3).map(a => a.fullName));
+          }
         }
 
         // Update missing players modal data
         if (result.missingAthletes && result.missingAthletes.length > 0) {
+          console.log('[Engine] ⚠️ Missing players detected, showing modal');
           setMissingAthletesData({
             pasted: initialAthletes.length || processedAthletes.length,
             official: result.officialCount,
             missing: result.missingAthletes
           });
           setShowMissingPlayersModal(true);
+        } else {
+          console.log('[Engine] ✅ No missing players - roster is complete!');
         }
       } catch (err) {
-        console.error('[Engine] Failed to re-backfill after team selection:', err);
+        console.error('[Engine] ❌ Failed to re-backfill after team selection:', err);
       }
     }
 

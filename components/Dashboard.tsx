@@ -738,6 +738,7 @@ export const Dashboard: React.FC<Props> = ({
 
                       {userTier !== 'BASIC' && (
                         <td className="px-8 py-4 text-center">
+                          {console.log(`[Dashboard] Rendering phonetics for ${a.fullName}: IPA=${a.phoneticIPA}, Simplified=${a.phoneticSimplified}, Tier=${userTier}`)}
                           <span className={`px-3 py-1 rounded-lg text-[10px] font-bold tracking-tight shadow-sm ${userTier === 'NETWORK' ? 'bg-indigo-600 dark:bg-indigo-700 text-white font-mono' : 'bg-amber-500 dark:bg-amber-600 text-white'}`}>
                             {userTier === 'NETWORK' ? (a.phoneticIPA || a.phoneticSimplified || '-') : (a.phoneticSimplified || '-')}
                           </span>
