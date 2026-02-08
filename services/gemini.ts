@@ -953,7 +953,8 @@ export async function processRosterRawText(
 
   // Always check for ambiguity when the search term is reasonable length (< 60 chars)
   // Expanded from 20 to 60 to handle long team names + metadata
-  if (teamNameUpper.length > 3 && teamNameUpper.length < 60) {
+  // CRITICAL FIX: Skip ambiguity check if user MANUALLY selected the team
+  if (!manualTeamName && teamNameUpper.length > 3 && teamNameUpper.length < 60) {
     const allKeys = Array.from(new Set([
       ...Object.keys(KNOWN_TEAM_LOGOS),
       ...Object.keys(ESPN_TEAM_IDS)
