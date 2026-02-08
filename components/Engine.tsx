@@ -426,10 +426,10 @@ export const Engine: React.FC<Props> = ({
     if (selectedLeague && selectedLeague !== 'ncaa') {
       const normalizedInputLeague = selectedLeague.replace(/^usa\./, '');
       console.log(`[Engine] Selected league: ${selectedLeague}, Normalized: ${normalizedInputLeague}`);
-      
+
       const allTeams = Object.entries(ESPN_TEAM_IDS).filter(([_, info]) => info.league?.includes('nwsl'));
       console.log(`[Engine] NWSL teams found in ESPN_TEAM_IDS: ${allTeams.length}`);
-      
+
       const leagueTeams = Object.entries(ESPN_TEAM_IDS)
         .filter(([_, info]) => {
           const normalizedTeamLeague = (info.league || '').replace(/^usa\./, '');
@@ -960,14 +960,15 @@ export const Engine: React.FC<Props> = ({
               <button
                 onClick={handleProcess}
                 disabled={!league}
-              className={`w-full mt-8 h-14 rounded-xl font-bold text-base shadow-lg transition-all uppercase tracking-widest flex items-center justify-center gap-2 ${league ? 'primary-gradient text-white shadow-[#5B5FFF]/20 hover:scale-[1.02] active:scale-[0.98]' : 'bg-gray-100 dark:bg-gray-800 text-gray-400 cursor-not-allowed'}`}
-            >
-              <Cpu size={20} /> Confirm & Process
-            </button>
+                className={`w-full mt-8 h-14 rounded-xl font-bold text-base shadow-lg transition-all uppercase tracking-widest flex items-center justify-center gap-2 ${league ? 'primary-gradient text-white shadow-[#5B5FFF]/20 hover:scale-[1.02] active:scale-[0.98]' : 'bg-gray-100 dark:bg-gray-800 text-gray-400 cursor-not-allowed'}`}
+              >
+                <Cpu size={20} /> Confirm & Process
+              </button>
+            </div>
           </div>
         </div>
-      )
-      }
+      )}
+
 
       {/* Ambiguous Team Selection Modal */}
       <TeamSelectionModal
