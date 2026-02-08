@@ -1,5 +1,5 @@
 
-export type SubscriptionTier = 'BASIC' | 'PRO' | 'NETWORK';
+export type SubscriptionTier = 'BASIC' | 'PRO' | 'STUDIO' | 'NETWORK';
 
 export type NILStatus = 'Active' | 'Transfer' | 'Alumni' | 'Incoming';
 
@@ -24,12 +24,10 @@ export interface Athlete {
   phoneticSimplified: string;
   nilStatus: NILStatus;
   seasonYear: string;
-  nameSpanish?: string; 
-  nameMandarin?: string; 
-  bioStats?: string; 
-  socialHandle?: string; 
-  countryCode?: string; // IOC Country Code (e.g., USA, FRA)
-  event?: string; // Specific Olympic Event
+  nameSpanish?: string;
+  nameMandarin?: string;
+  bioStats?: string;
+  socialHandle?: string;
   metadata?: Record<string, any>;
 }
 
@@ -39,23 +37,23 @@ export interface TeamMetadata {
   conference: string;
   abbreviation: string;
   logoUrl?: string;
-  countryCode?: string; // IOC Country Code for NOC mode
 }
 
 export interface Roster {
   id: string;
   userId: string;
-  projectId?: string; 
+  projectId?: string;
   teamName: string;
   sport: string;
+  league?: string; // League identifier (nba, ipl, nfl, etc.)
   seasonYear: string;
   athleteCount: number;
   rosterData: Athlete[];
   versionDescription: string;
   createdAt: string;
   teamMetadata?: TeamMetadata;
-  isSynced?: boolean; 
-  isNocMode?: boolean;
+  isSynced?: boolean;
+  preferredAccentColor?: string; // User selected accent color
 }
 
 export interface Profile {
@@ -65,7 +63,7 @@ export interface Profile {
   subscriptionTier: SubscriptionTier;
   organizationName: string;
   orgLogoUrl?: string; // Workspace custom logo URL
-  creditsUsed: number; 
+  creditsUsed: number;
 }
 
-export type ExportFormat = 'CSV_FLAT' | 'ICONIK_JSON' | 'PREMIERE_CSV' | 'CATDV_CSV' | 'ROSS_XML' | 'ROSS_XP_CSV' | 'VIZRT_JSON' | 'VIZRT_DATACENTER_CSV' | 'VIZRT_XML' | 'CHYRON_CSV' | 'NEWBLUE_CSV' | 'ODF_XML';
+export type ExportFormat = 'CSV_FLAT' | 'ICONIK_JSON' | 'CATDV_JSON' | 'ROSS_XML' | 'VIZRT_JSON' | 'VIZRT_DATACENTER_CSV' | 'VIZRT_XML' | 'CHYRON_CSV' | 'NEWBLUE_CSV' | 'TAGBOARD_CSV';

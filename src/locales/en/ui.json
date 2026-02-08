@@ -1,0 +1,83 @@
+{
+    "nav": {
+        "dashboard": "Dashboard",
+        "engine": "Engine",
+        "settings": "Settings",
+        "about": "About",
+        "signIn": "Sign In",
+        "signUp": "Sign Up",
+        "signOut": "Sign Out"
+    },
+    "actions": {
+        "save": "Save",
+        "cancel": "Cancel",
+        "delete": "Delete",
+        "edit": "Edit",
+        "export": "Export",
+        "upload": "Upload",
+        "process": "Process",
+        "close": "Close",
+        "confirm": "Confirm",
+        "newRoster": "New Roster",
+        "addPlayer": "Add Player",
+        "deleteRoster": "Delete Roster"
+    },
+    "status": {
+        "loading": "Loading...",
+        "processing": "Processing...",
+        "success": "Success",
+        "error": "Error",
+        "saved": "Saved"
+    },
+    "dashboard": {
+        "title": "Roster Library",
+        "empty": "No rosters yet",
+        "athletes": "{{count}} athlete",
+        "athletes_plural": "{{count}} athletes",
+        "search": "Search...",
+        "filter": "Filter",
+        "sort": "Sort by",
+        "lastModified": "Last modified",
+        "created": "Created"
+    },
+    "engine": {
+        "title": "Process Roster",
+        "teamName": "Team Name",
+        "season": "Season",
+        "uploadPrompt": "Upload or paste roster data",
+        "preview": "Preview",
+        "selectTeam": "Select Team"
+    },
+    "settings": {
+        "title": "Settings",
+        "tabs": {
+            "subscription": "Subscription",
+            "activity": "Activity Log",
+            "roi": "Performance ROI"
+        },
+        "currentUsage": "Current Usage",
+        "creditsUsed": "{{used}} / {{limit}} Credits Used",
+        "upgrade": "Upgrade Plan",
+        "roi": {
+            "totalSavings": "Total Cost Savings",
+            "timeSaved": "Time Saved",
+            "rostersProcessed": "Rosters Processed",
+            "costPerAthlete": "Cost Per Athlete",
+            "efficiency": "Efficiency",
+            "volume": "Volume",
+            "unitCost": "Unit Cost",
+            "timeSavedDesc": "Time saved vs manual entry",
+            "rostersDesc": "Rosters ({{count}} athletes)",
+            "costDesc": "Per athlete vs $3.00 manual",
+            "costBreakdown": "Cost Breakdown",
+            "manualEntry": "Manual Entry",
+            "manualDesc": "4 min/athlete @ $45/hr",
+            "rosterSync": "RosterSync",
+            "rosterSyncDesc": "$0.04/athlete automated",
+            "instantProcessing": "Instant processing",
+            "netSavings": "Net Savings",
+            "reduction": "reduction",
+            "insights": "Optimization Insights"
+        }
+    }
+}

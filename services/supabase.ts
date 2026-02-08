@@ -167,12 +167,15 @@ export async function getMonthlyUsage(userId: string): Promise<number> {
 /**
  * Activity Types
  */
-export type ActivityType = 
-  | 'LOGIN' 
-  | 'LOGOUT' 
-  | 'ROSTER_DELETE' 
-  | 'PLAYER_DELETE' 
-  | 'PROJECT_FOLDER_DELETE' 
+export type ActivityType =
+  | 'LOGIN'
+  | 'LOGOUT'
+  | 'ROSTER_SAVE'
+  | 'ROSTER_DELETE'
+  | 'ROSTER_EXPORT'
+  | 'PLAYER_ADD'
+  | 'PLAYER_DELETE'
+  | 'PROJECT_FOLDER_DELETE'
   | 'ROSTER_UPDATE';
 
 export interface ActivityLog {
@@ -187,15 +190,15 @@ export interface ActivityLog {
  * Log specific user activities
  */
 export async function logActivity(
-  userId: string, 
-  actionType: ActivityType, 
+  userId: string,
+  actionType: ActivityType,
   description: string
 ): Promise<void> {
   if (!isSupabaseConfigured) {
     console.log('[Activity] (Supabase not configured):', actionType, description);
     return;
   }
-  
+
   try {
     const { error } = await supabase
       .from('activity_logs')
@@ -204,7 +207,7 @@ export async function logActivity(
         action_type: actionType,
         description: description
       });
-    
+
     if (error) {
       console.error('[Activity] Error logging:', actionType, error);
     } else {
@@ -220,18 +223,224 @@ export async function logActivity(
  */
 export async function getActivityLogs(userId: string): Promise<ActivityLog[]> {
   if (!isSupabaseConfigured) return [];
-  
+
   const { data, error } = await supabase
     .from('activity_logs')
     .select('id, user_id, action_type, description, created_at')
     .eq('user_id', userId)
     .order('created_at', { ascending: false })
     .limit(20);
-  
+
   if (error) {
     console.error('[Activity] Fetch error:', error);
     return [];
   }
-  
+
+  return data || [];
+}
+
+/**
+ * Branding Cache Interface
+ */
+export interface BrandingCache {
+  id?: string;
+  team_name: string;
+  sport: string;
+  logo_url: string | null;
+  primary_color: string | null;
+  secondary_color: string | null;
+  abbreviation: string | null;
+  // Additional color formats
+  primary_rgb: string | null;
+  secondary_rgb: string | null;
+  primary_pantone: string | null;
+  secondary_pantone: string | null;
+  primary_cmyk: string | null;
+  secondary_cmyk: string | null;
+}
+
+/**
+ * Get cached branding for a team
+ */
+export async function getBrandingCache(teamName: string, sport: string): Promise<BrandingCache | null> {
+  if (!isSupabaseConfigured || !teamName || !sport) return null;
+
+  try {
+    const { data, error } = await supabase
+      .from('team_branding_cache')
+      .select('*')
+      .ilike('team_name', teamName)
+      .ilike('sport', sport)
+      .single();
+
+    if (error || !data) {
+      console.log('[BrandingCache] Cache miss for:', teamName, sport);
+      return null;
+    }
+
+    console.log('[BrandingCache] Cache hit for:', teamName, sport);
+    return data as BrandingCache;
+  } catch (err) {
+    console.error('[BrandingCache] Lookup error:', err);
+    return null;
+  }
+}
+
+/**
+ * Save branding to cache
+ */
+export async function saveBrandingCache(branding: BrandingCache): Promise<void> {
+  if (!isSupabaseConfigured || !branding.team_name || !branding.sport) {
+    console.log('[BrandingCache] Skipping save - not configured or missing data:', {
+      configured: isSupabaseConfigured,
+      team: branding.team_name,
+      sport: branding.sport
+    });
+    return;
+  }
+
+  // Do not cache Unknown or poisoned entries
+  const nameLower = branding.team_name.toLowerCase();
+  const logoLower = branding.logo_url?.toLowerCase() || '';
+  const primaryLower = branding.primary_color?.toLowerCase() || '';
+
+  const isPoisoned = nameLower === 'unknown team' || nameLower === 'unknown' || nameLower === 'unknown noc' ||
+    logoLower === 'unknown' || logoLower === 'logourl' ||
+    primaryLower === 'unknown';
+
+  if (isPoisoned) {
+    console.log('[BrandingCache] Skipping save - data is placeholder/poisoned:', {
+      team: branding.team_name,
+      logo: branding.logo_url,
+      primary: branding.primary_color
+    });
+    return;
+  }
+
+  console.log('[BrandingCache] Attempting to save:', branding);
+
+  try {
+    // First try to check if entry exists
+    const { data: existing } = await supabase
+      .from('team_branding_cache')
+      .select('id')
+      .ilike('team_name', branding.team_name)
+      .ilike('sport', branding.sport)
+      .single();
+
+    if (existing) {
+      // Update existing
+      const { error } = await supabase
+        .from('team_branding_cache')
+        .update({
+          logo_url: branding.logo_url,
+          primary_color: branding.primary_color,
+          secondary_color: branding.secondary_color,
+          abbreviation: branding.abbreviation,
+          primary_rgb: branding.primary_rgb,
+          secondary_rgb: branding.secondary_rgb,
+          primary_pantone: branding.primary_pantone,
+          secondary_pantone: branding.secondary_pantone,
+          primary_cmyk: branding.primary_cmyk,
+          secondary_cmyk: branding.secondary_cmyk,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', existing.id);
+
+      if (error) {
+        console.error('[BrandingCache] Update error:', error);
+      } else {
+        console.log('[BrandingCache] Updated existing entry for:', branding.team_name);
+      }
+    } else {
+      // Insert new
+      const { error } = await supabase
+        .from('team_branding_cache')
+        .insert({
+          team_name: branding.team_name.toUpperCase(),
+          sport: branding.sport.toUpperCase(),
+          logo_url: branding.logo_url,
+          primary_color: branding.primary_color,
+          secondary_color: branding.secondary_color,
+          abbreviation: branding.abbreviation,
+          primary_rgb: branding.primary_rgb,
+          secondary_rgb: branding.secondary_rgb,
+          primary_pantone: branding.primary_pantone,
+          secondary_pantone: branding.secondary_pantone,
+          primary_cmyk: branding.primary_cmyk,
+          secondary_cmyk: branding.secondary_cmyk
+        });
+
+      if (error) {
+        console.error('[BrandingCache] Insert error:', error);
+      } else {
+        console.log('[BrandingCache] Saved new entry for:', branding.team_name, branding.sport);
+      }
+    }
+  } catch (err) {
+    console.error('[BrandingCache] Save exception:', err);
+  }
+}
+
+
+/**
+ * Fetch all supported leagues
+ */
+export async function getLeagues() {
+  if (!isSupabaseConfigured) return [];
+
+  const { data, error } = await supabase
+    .from('leagues')
+    .select('*')
+    .order('name');
+
+  if (error) {
+    console.error('Error fetching leagues:', error);
+    return [];
+  }
+  return data || [];
+}
+
+/**
+ * Fetch conferences for a league
+ */
+export async function getConferences(leagueId: string, division?: string) {
+  if (!isSupabaseConfigured) return [];
+
+  let query = supabase
+    .from('conferences')
+    .select('*')
+    .eq('league_id', leagueId)
+    .order('name');
+
+  if (division) {
+    query = query.eq('division', division);
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    console.error('Error fetching conferences:', error);
+    return [];
+  }
+  return data || [];
+}
+
+/**
+ * Fetch teams for a conference
+ */
+export async function getTeams(conferenceId: string) {
+  if (!isSupabaseConfigured) return [];
+
+  const { data, error } = await supabase
+    .from('teams')
+    .select('*')
+    .eq('conference_id', conferenceId)
+    .order('name');
+
+  if (error) {
+    console.error('Error fetching teams:', error);
+    return [];
+  }
   return data || [];
 }

@@ -1,0 +1,205 @@
+{
+    "common": {
+        "save": "Guardar",
+        "cancel": "Cancelar",
+        "delete": "Eliminar",
+        "edit": "Editar",
+        "close": "Cerrar",
+        "loading": "Cargando...",
+        "error": "Error",
+        "success": "Éxito",
+        "confirm": "Confirmar",
+        "back": "Atrás",
+        "next": "Siguiente",
+        "finish": "Finalizar"
+    },
+    "nav": {
+        "dashboard": "Panel",
+        "engine": "Motor",
+        "settings": "Configuración",
+        "about": "Acerca de",
+        "signIn": "Iniciar Sesión",
+        "signUp": "Registrarse",
+        "signOut": "Cerrar Sesión",
+        "home": "Inicio"
+    },
+    "landing": {
+        "hero": {
+            "title": "Metadatos Listos para Transmisión en Segundos",
+            "subtitle": "Transforma listas desordenadas en datos de atletas listos para producción con normalización impulsada por IA",
+            "cta": "Comenzar Prueba Gratuita",
+            "demo": "Ver Demo"
+        },
+        "features": {
+            "title": "Diseñado para Transmisiones de Alto Nivel",
+            "aiNormalization": {
+                "title": "Normalización IA",
+                "desc": "Analiza instantáneamente texto desordenado de PDFs, sitios web y correos con 99.9% de precisión."
+            },
+            "multiFormat": {
+                "title": "Exportación Multi-Formato",
+                "desc": "Exporta a CSV, JSON, XML, o integraciones directas con Ross, Vizrt y Daktronics."
+            },
+            "teamBranding": {
+                "title": "Marca de Equipo Automática",
+                "desc": "Obtiene automáticamente logos y colores para más de 500 equipos profesionales y universitarios."
+            },
+            "cloudSync": {
+                "title": "Sincronización en la Nube",
+                "desc": "Envía actualizaciones a Dropbox, Google Drive o buckets S3 en tiempo real."
+            },
+            "versionControl": {
+                "title": "Control de Versiones",
+                "desc": "Rastrea cada cambio con registros de auditoría completos y capacidades de reversión."
+            },
+            "realtime": {
+                "title": "Sincronización en Tiempo Real",
+                "desc": "Envía actualizaciones directamente a tus carpetas de producción o buckets en la nube en segundos."
+            }
+        },
+        "pricing": {
+            "title": "Precios Simples y Transparentes",
+            "subtitle": "Elige el plan que se adapte a tu flujo de trabajo",
+            "free": {
+                "name": "Gratis",
+                "price": "$0",
+                "period": "para siempre",
+                "features": [
+                    "5 listas por mes",
+                    "Exportación CSV básica",
+                    "Soporte comunitario"
+                ],
+                "cta": "Comenzar"
+            },
+            "pro": {
+                "name": "Pro",
+                "price": "$29",
+                "period": "por mes",
+                "features": [
+                    "Listas ilimitadas",
+                    "Todos los formatos de exportación",
+                    "Soporte prioritario",
+                    "Sincronización en la nube"
+                ],
+                "cta": "Iniciar Prueba"
+            },
+            "network": {
+                "name": "Network",
+                "price": "$99",
+                "period": "por mes",
+                "features": [
+                    "Todo en Pro",
+                    "Integraciones Ross/Vizrt",
+                    "Soporte dedicado",
+                    "Marca personalizada"
+                ],
+                "cta": "Contactar Ventas"
+            }
+        },
+        "faq": {
+            "title": "Preguntas Frecuentes",
+            "q1": {
+                "question": "¿Qué tan precisa es la extracción de IA?",
+                "answer": "Nuestra IA logra una precisión del 99.9% en formatos de lista estándar. Para casos especiales, puedes corregir manualmente cualquier campo antes de exportar."
+            },
+            "q2": {
+                "question": "¿Qué formatos de archivo puedo importar?",
+                "answer": "Soportamos PDF, documentos Word, Excel, texto plano e incluso capturas de pantalla. Solo pega o sube, y nosotros nos encargamos del resto."
+            },
+            "q3": {
+                "question": "¿Puedo exportar para Ross Xpression o Vizrt?",
+                "answer": "Sí. Nuestro nivel Network incluye exportaciones directas para Ross DataLinq (XML/CSV) y Vizrt DataCenter, incluyendo eliminación automática de acentos y normalización de mayúsculas."
+            },
+            "q4": {
+                "question": "¿Almacenan mis datos?",
+                "answer": "Todas las listas están encriptadas y almacenadas de forma segura. Puedes eliminar tus datos en cualquier momento desde Configuración."
+            }
+        }
+    },
+    "dashboard": {
+        "title": "Biblioteca de Listas",
+        "empty": "Aún no hay listas",
+        "createFirst": "Crea tu primera lista para comenzar",
+        "newRoster": "Nueva Lista",
+        "athletes": "{{count}} atleta",
+        "athletes_plural": "{{count}} atletas",
+        "export": "Exportar",
+        "delete": "Eliminar Lista",
+        "confirmDelete": "¿Estás seguro de que quieres eliminar esta lista?",
+        "search": "Buscar listas...",
+        "filter": "Filtrar",
+        "sort": "Ordenar por",
+        "lastModified": "Última modificación",
+        "created": "Creado",
+        "name": "Nombre"
+    },
+    "engine": {
+        "title": "Procesar Lista",
+        "uploadPrompt": "Sube o pega datos de lista",
+        "teamName": "Nombre del Equipo",
+        "season": "Temporada",
+        "process": "Procesar",
+        "processing": "Procesando...",
+        "success": "Lista procesada exitosamente",
+        "error": "Error al procesar lista",
+        "cancel": "Cancelar",
+        "retry": "Reintentar",
+        "preview": "Vista Previa"
+    },
+    "settings": {
+        "title": "Configuración",
+        "subscription": "Suscripción",
+        "activity": "Registro de Actividad",
+        "roi": "ROI de Rendimiento",
+        "currentUsage": "Uso Actual",
+        "creditsUsed": "{{used}} / {{limit}} Créditos Usados",
+        "upgrade": "Mejorar Plan",
+        "manageSubscription": "Administrar Suscripción",
+        "roi": {
+            "totalSavings": "Ahorro Total de Costos",
+            "timeSaved": "Tiempo Ahorrado",
+            "rostersProcessed": "Listas Procesadas",
+            "costPerAthlete": "Costo por Atleta",
+            "efficiency": "Eficiencia",
+            "volume": "Volumen",
+            "unitCost": "Costo Unitario",
+            "timeSavedDesc": "Tiempo ahorrado vs entrada manual",
+            "rostersDesc": "Listas ({{count}} atletas)",
+            "costDesc": "Por atleta vs $3.00 manual",
+            "costBreakdown": "Desglose de Costos",
+            "manualEntry": "Entrada Manual",
+            "manualDesc": "4 min/atleta @ $45/hr",
+            "rosterSync": "RosterSync",
+            "rosterSyncDesc": "$0.04/atleta automatizado",
+            "instantProcessing": "Procesamiento instantáneo",
+            "netSavings": "Ahorro Neto",
+            "reduction": "reducción",
+            "insights": {
+                "title": "Perspectivas de Optimización",
+                "creditWarning": "Estás usando {{percent}}% de tus créditos. Considera mejorar para evitar alcanzar los límites.",
+                "rosterSizeTip": "Promedio {{avg}} atletas/lista. Listas más grandes maximizan tu ROI.",
+                "perRosterSavings": "Estás ahorrando ${{amount}} por lista en promedio.",
+                "firstTime": "Procesa tu primera lista para ver perspectivas de ROI personalizadas y cálculos de ahorro."
+            }
+        }
+    },
+    "auth": {
+        "signIn": "Iniciar Sesión",
+        "signUp": "Registrarse",
+        "signOut": "Cerrar Sesión",
+        "welcome": "Bienvenido de nuevo",
+        "createAccount": "Crea tu cuenta",
+        "email": "Correo Electrónico",
+        "password": "Contraseña",
+        "forgotPassword": "¿Olvidaste tu contraseña?",
+        "noAccount": "¿No tienes una cuenta?",
+        "hasAccount": "¿Ya tienes una cuenta?"
+    },
+    "errors": {
+        "generic": "Algo salió mal. Por favor, inténtalo de nuevo.",
+        "network": "Error de red. Por favor, verifica tu conexión.",
+        "unauthorized": "Debes iniciar sesión para hacer eso.",
+        "notFound": "Recurso no encontrado.",
+        "validation": "Por favor, verifica tu entrada e inténtalo de nuevo."
+    }
+}
