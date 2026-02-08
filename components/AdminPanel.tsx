@@ -16,6 +16,7 @@ const AdminPanel: React.FC<Props> = ({ profile }) => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const { getToken } = useAuth();
+  const { user } = useUser();
   
   useEffect(() => {
     checkAdminStatus();
@@ -23,18 +24,26 @@ const AdminPanel: React.FC<Props> = ({ profile }) => {
   
   const checkAdminStatus = async () => {
     try {
+      if (!user) {
+        setIsAdmin(false);
+        setLoading(false);
+        return;
+      }
+      
       const token = await getToken({ template: 'supabase' });
       await setSupabaseToken(token);
       
       const { data, error } = await supabase
         .from('profiles')
         .select('is_admin')
+        .eq('id', user.id)
         .single();
         
       if (error) throw error;
       setIsAdmin(data?.is_admin || false);
     } catch (err) {
       console.error('Error checking admin status:', err);
+      setIsAdmin(false);
     } finally {
       setLoading(false);
     }
