@@ -361,6 +361,22 @@ async function fetchMilbRoster(teamName: string, league: string): Promise<Map<st
 }
 
 /**
+ * Helper: Compute current NHL season string (e.g. "20242025")
+ */
+function getNHLSeasonString(): string {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth() + 1; // 1-indexed (Jan=1)
+
+  // NHL seasons generally start in September/October
+  if (month >= 9) {
+    return `${year}${year + 1}`;
+  } else {
+    return `${year - 1}${year}`;
+  }
+}
+
+/**
  * Fetch team roster from unofficial NHL API
  */
 async function fetchNHLRoster(teamName: string): Promise<Map<string, ExternalAthleteData> | null> {
@@ -382,8 +398,9 @@ async function fetchNHLRoster(teamName: string): Promise<Map<string, ExternalAth
     return null;
   }
 
-  const url = `/api/nhl/roster/${teamCode}/current`;
-  console.log(`[NHL] Using URL: ${url}`);
+  const season = getNHLSeasonString();
+  const url = `/api/nhl/roster/${teamCode}/${season}`;
+  console.log(`[NHL] Using explicit season URL: ${url}`);
 
   try {
     const response = await fetch(url);
