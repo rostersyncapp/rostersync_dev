@@ -18,6 +18,7 @@ import {
   LayoutDashboard,
   Cpu,
   Settings as SettingsIcon,
+  BarChart3,
   LogOut,
   Disc,
   Sun,
@@ -823,8 +824,8 @@ const App: React.FC = () => {
                   <button onClick={() => handleSetView('settings')} className={`w-full flex items-center gap-3 p-2 rounded-lg transition-all ${view === 'settings' ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF] font-bold' : 'text-gray-500 hover:bg-gray-100 font-medium'}`}><SettingsIcon size={20} /><span className="hidden lg:block text-[14px]">Settings</span></button>
                   {profile?.is_admin && (
                     <button onClick={() => handleSetView('admin')} className={`w-full flex items-center gap-3 p-2 rounded-lg transition-all ${view === 'admin' ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF] font-bold' : 'text-gray-500 hover:bg-gray-100 font-medium'}`}>
-                      <SettingsIcon size={20} />
-                      <span className="hidden lg:block text-[14px]">Admin</span>
+                      <BarChart3 size={20} />
+                      <span className="hidden lg:block text-[14px]">Stats</span>
                     </button>
                   )}
                 </nav>
