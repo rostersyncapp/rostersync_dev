@@ -233,6 +233,9 @@ export const Engine: React.FC<Props> = ({
 
       console.log(`[Engine] Populated ${leagueTeams.length} unique teams for league: ${league} (ESPN: ${espnLeagueCode})`);
       setAvailableTeams(leagueTeams);
+    } else if (league !== 'ncaa') {
+      // Clear if no league selected (and not handled by NCAA effect)
+      setAvailableTeams([]);
     }
   }, [league]);
 
@@ -455,35 +458,6 @@ export const Engine: React.FC<Props> = ({
       setSport(leagueToSport[selectedLeague]);
     } else if (!selectedLeague) {
       setSport('');
-    }
-
-    // Populate teams for non-NCAA leagues from ESPN_TEAM_IDS
-    if (selectedLeague && selectedLeague !== 'ncaa') {
-      const espnLeagueCode = DB_LEAGUE_TO_ESPN_LEAGUE[selectedLeague] || selectedLeague;
-      console.log(`[Engine] Populating teams for league: ${selectedLeague} (ESPN: ${espnLeagueCode})`);
-
-      const leagueTeams = Object.entries(ESPN_TEAM_IDS)
-        .filter(([_, info]) => {
-          // Direct match first
-          if (info.league === espnLeagueCode) return true;
-
-          // Fallback: normalized match (handle usa. prefix)
-          const normInfo = (info.league || '').replace(/^usa\./, '');
-          const normInput = espnLeagueCode.replace(/^usa\./, '');
-          return normInfo === normInput;
-        })
-        .map(([name, info]) => ({
-          id: info.id,
-          name: name,
-          logo_url: info.logoUrl,
-          primary_color: info.primaryColor,
-          secondary_color: info.secondaryColor
-        }));
-      console.log(`[Engine] Teams populated: ${leagueTeams.length}`, leagueTeams.slice(0, 3));
-      setAvailableTeams(leagueTeams);
-    } else {
-      console.log(`[Engine] Clearing availableTeams (NCAA or no league selected)`);
-      setAvailableTeams([]);
     }
   };
 
