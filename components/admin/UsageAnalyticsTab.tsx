@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { FileText, Cpu, Download, TrendingUp } from 'lucide-react';
+import { FileText, Cpu, Download, TrendingUp, RefreshCw } from 'lucide-react';
 import MetricCard from './MetricCard';
 import SignupChart from '../charts/SignupChart';
 import { supabase, setSupabaseToken } from '../../services/supabase';
@@ -66,9 +66,26 @@ const UsageAnalyticsTab: React.FC = () => {
     if (!stats?.exportBreakdown?.length) return 'N/A';
     return stats.exportBreakdown[0].name;
   };
+
+  const handleRefresh = async () => {
+    await fetchUsageData();
+  };
   
   return (
     <div className="space-y-6">
+      {/* Header with Refresh Button */}
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-bold text-gray-900 dark:text-white">Usage Analytics</h2>
+        <button
+          onClick={handleRefresh}
+          disabled={loading}
+          className="flex items-center gap-2 px-4 py-2 text-sm font-bold text-[#5B5FFF] bg-[#5B5FFF]/10 hover:bg-[#5B5FFF]/20 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+          <span>Refresh</span>
+        </button>
+      </div>
+
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <MetricCard
