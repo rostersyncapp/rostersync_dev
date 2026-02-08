@@ -370,7 +370,10 @@ async function fetchNHLRoster(teamName: string): Promise<Map<string, ExternalAth
     return null;
   }
 
-  const url = `https://api-web.nhle.com/v1/roster/${teamCode}/current`;
+  // Use proxy path to avoid CORS issues
+  // Local: Vite proxy forwards to https://api-web.nhle.com/v1
+  // Prod: Vercel rewrite forwards to https://api-web.nhle.com/v1
+  const url = `/api/nhl/roster/${teamCode}/current`;
 
   try {
     console.log(`[NHL] Fetching roster from: ${url}`);
@@ -438,20 +441,38 @@ async function fillMissingJerseyNumbers(
     };
   }
 
-  // 1. Fill missing jerseys
+  // 1. Fill missing jerseys AND positions
   let filledCount = 0;
   const updatedAthletes = athletes.map(athlete => {
-    if (!athlete.jerseyNumber || athlete.jerseyNumber === '00' || athlete.jerseyNumber === '') {
-      const normalizedName = normalizePlayerName(athlete.fullName || '');
-      const externalData = externalRoster?.get(normalizedName);
+    const normalizedName = normalizePlayerName(athlete.fullName || '');
+    const externalData = externalRoster?.get(normalizedName);
 
-      if (externalData?.jersey) {
-        console.log(`[Roster Sync] ✓ Found jersey for ${athlete.fullName}: #${externalData.jersey}`);
-        filledCount++;
-        return { ...athlete, jerseyNumber: formatJerseyNumber(externalData.jersey) };
+    if (!externalData) return athlete;
+
+    let updated = { ...athlete };
+    let changed = false;
+
+    // Backfill Jersey if missing
+    if (!updated.jerseyNumber || updated.jerseyNumber === '00' || updated.jerseyNumber === '') {
+      if (externalData.jersey) {
+        updated.jerseyNumber = formatJerseyNumber(externalData.jersey);
+        changed = true;
       }
     }
-    return athlete;
+
+    // Backfill Position if missing or generic
+    if (!updated.position || updated.position === 'Athlete' || updated.position === 'UNK') {
+      if (externalData.position) {
+        updated.position = externalData.position;
+        changed = true;
+      }
+    }
+
+    if (changed) {
+      filledCount++;
+    }
+
+    return updated;
   });
 
   console.log(`[Roster Sync] Filled ${filledCount} missing jersey numbers`);
