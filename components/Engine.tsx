@@ -381,29 +381,45 @@ export const Engine: React.FC<Props> = ({
   }, [isLeagueDropdownOpen]);
 
   // Hardcoded map for grouping (since DB doesn't have sport column yet)
-  const LEAGUE_SPORT_MAP: Record<string, string> = {
-    nba: 'Basketball', wnba: 'Basketball',
-    nfl: 'Football',
-    mlb: 'Baseball', milb: 'Baseball',
-    nhl: 'Hockey',
-    mls: 'Soccer', nwsl: 'Soccer', usl: 'Soccer',
-    ncaa: 'College Sports'
+  const LEAGUE_SPORT_MAP: Record<string, { name: string, emoji: string }> = {
+    nba: { name: 'Basketball', emoji: '🏀' },
+    wnba: { name: 'Basketball', emoji: '🏀' },
+    nfl: { name: 'Football', emoji: '🏈' },
+    mlb: { name: 'Baseball', emoji: '⚾️' },
+    milb: { name: 'Baseball', emoji: '⚾️' },
+    nhl: { name: 'Hockey', emoji: '🏒' },
+    mls: { name: 'Soccer', emoji: '⚽️' },
+    nwsl: { name: 'Soccer', emoji: '⚽️' },
+    usl: { name: 'Soccer', emoji: '⚽️' },
+    'premier-league': { name: 'Soccer', emoji: '⚽️' },
+    'la-liga': { name: 'Soccer', emoji: '⚽️' },
+    'bundesliga': { name: 'Soccer', emoji: '⚽️' },
+    'serie-a': { name: 'Soccer', emoji: '⚽️' },
+    'ligue-1': { name: 'Soccer', emoji: '⚽️' },
+    'eredivisie': { name: 'Soccer', emoji: '⚽️' },
+    'liga-mx': { name: 'Soccer', emoji: '⚽️' },
+    ncaa: { name: 'College Sports', emoji: '🎓' }
   };
 
   const getLeagueLabel = (value: string) => {
     const found = availableLeagues.find(l => l.id === value);
-    return found ? (found.abbreviation || found.name) : (value || 'Select League');
+    if (found) {
+      return (found.abbreviation || found.name).toUpperCase();
+    }
+    return (value || 'Select League').toUpperCase();
   };
 
   // Group available leagues by sport
   const groupedLeagues = useMemo(() => {
-    const groups: Record<string, any[]> = {};
+    const groups: Record<string, { label: string, emoji: string, options: any[] }> = {};
     availableLeagues.forEach(l => {
-      const sport = LEAGUE_SPORT_MAP[l.id] || 'Other';
-      if (!groups[sport]) groups[sport] = [];
-      groups[sport].push({ value: l.id, label: l.abbreviation || l.name });
+      const sportData = LEAGUE_SPORT_MAP[l.id] || { name: 'Other', emoji: '🏆' };
+      if (!groups[sportData.name]) {
+        groups[sportData.name] = { label: sportData.name, emoji: sportData.emoji, options: [] };
+      }
+      groups[sportData.name].options.push({ value: l.id, label: (l.abbreviation || l.name).toUpperCase() });
     });
-    return Object.entries(groups).map(([category, options]) => ({ category, options }));
+    return Object.values(groups);
   }, [availableLeagues]);
   const handleLeagueSelect = (selectedLeague: string) => {
     setLeague(selectedLeague);
@@ -780,8 +796,9 @@ export const Engine: React.FC<Props> = ({
                         </button>
                         {groupedLeagues.map((group, groupIdx) => (
                           <div key={groupIdx}>
-                            <div className="px-5 py-2 text-xs font-extrabold uppercase tracking-widest text-[#5B5FFF] bg-gray-50/50 dark:bg-gray-900/50 mt-1 first:mt-0">
-                              {group.category}
+                            <div className="px-5 py-2 text-xs font-extrabold uppercase tracking-widest text-[#5B5FFF] bg-gray-50/50 dark:bg-gray-900/50 mt-1 first:mt-0 flex items-center gap-2">
+                              <span>{group.emoji}</span>
+                              <span>{group.label}</span>
                             </div>
                             {group.options.map((option) => (
                               <button
