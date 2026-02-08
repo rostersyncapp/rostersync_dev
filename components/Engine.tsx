@@ -332,11 +332,10 @@ export const Engine: React.FC<Props> = ({
 
   // Effect to Check for Missing Players when Pending Roster loads
   useEffect(() => {
-    if (pendingRoster && pendingRoster.officialRosterCount && pendingRoster.missingAthletes && pendingRoster.missingAthletes.length > 2) {
+    if (pendingRoster && pendingRoster.officialRosterCount && pendingRoster.missingAthletes && pendingRoster.missingAthletes.length > 0) {
       const pasted = pendingRoster.pastedRosterCount || pendingRoster.athletes.length;
       const official = pendingRoster.officialRosterCount;
-      // Only show if the discrepancy is significant (e.g. at least 3 missing players)
-      // and official count is greater than pasted count
+      // Show if ANY players are missing (threshold > 0)
       if (official > pasted && pendingRoster.missingAthletes.length > 0) {
         setMissingAthletesData({
           pasted,
