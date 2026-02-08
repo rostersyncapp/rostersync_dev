@@ -632,7 +632,6 @@ const App: React.FC = () => {
     setIsProcessing(true);
     handleSetView('engine');
     try {
-      console.log(`[App] handleStartProcessing called. ManualTeamName: "${manualTeamName}"`);
       const result = await processRosterRawText(text, profile.subscriptionTier, seasonYear, findBranding, profile.id, league, manualTeamName);
 
       // Check if there are multiple team candidates

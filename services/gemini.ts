@@ -538,7 +538,6 @@ export async function processRosterRawText(
   league?: string,
   manualTeamName: string = ''
 ): Promise<ProcessedRoster> {
-  console.log(`[Gemini] processRosterRawText called. ManualTeamName: "${manualTeamName}"`);
   const apiKey = getApiKey();
   if (!apiKey) {
     throw new Error("Gemini API Key is not configured.");
@@ -1079,7 +1078,6 @@ export async function processRosterRawText(
 
   // Fill missing jersey numbers from ESPN or MiLB roster data
   const teamNameForLookup = manualTeamName || parsedResult.teamName || "";
-  console.log(`[Gemini] Looking up roster for: "${teamNameForLookup}"`);
   const { updatedAthletes: athletesWithJerseys, officialCount, missingAthletes } = await fillMissingJerseyNumbers(athletes, teamNameForLookup, league);
 
   // Standardize Sport/League from MiLB or ESPN ID Mapping
