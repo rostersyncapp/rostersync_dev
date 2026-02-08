@@ -217,9 +217,36 @@ function normalizePlayerName(name: string): string {
 /**
  * Fetch team roster from ESPN API
  */
-async function fetchESPNRoster(teamName: string): Promise<Map<string, ExternalAthleteData> | null> {
+async function fetchESPNRoster(teamName: string, league?: string): Promise<Map<string, ExternalAthleteData> | null> {
   const teamUpper = teamName.toUpperCase().trim();
-  const teamInfo = ESPN_TEAM_IDS[teamUpper];
+  let teamInfo = ESPN_TEAM_IDS[teamUpper];
+
+  // Fuzzy matching fallback if exact match fails
+  if (!teamInfo) {
+    const allKeys = Object.keys(ESPN_TEAM_IDS);
+    const fuzzyMatches = allKeys.filter(key =>
+      teamUpper.includes(key) || key.includes(teamUpper)
+    );
+
+    if (fuzzyMatches.length > 0) {
+      // If a league is provided, prioritize matches in that league
+      if (league) {
+        const leagueLower = league.toLowerCase();
+        const leagueMatch = fuzzyMatches.find(key =>
+          ESPN_TEAM_IDS[key].league.toLowerCase() === leagueLower ||
+          ESPN_TEAM_IDS[key].league.toLowerCase().includes(leagueLower)
+        );
+        if (leagueMatch) teamInfo = ESPN_TEAM_IDS[leagueMatch];
+      }
+
+      // Fallback to first fuzzy match if no league match found
+      if (!teamInfo) teamInfo = ESPN_TEAM_IDS[fuzzyMatches[0]];
+
+      if (teamInfo) {
+        console.log(`[ESPN] Found fuzzy match for "${teamName}":`, teamInfo);
+      }
+    }
+  }
 
   if (!teamInfo) {
     console.log(`[ESPN] No team ID found for: ${teamName}`);
@@ -454,7 +481,7 @@ export async function fillMissingJerseyNumbers(
   } else if (league === 'nhl') {
     externalRoster = await fetchNHLRoster(teamName);
   } else {
-    externalRoster = await fetchESPNRoster(teamName);
+    externalRoster = await fetchESPNRoster(teamName, league);
   }
 
   if (!externalRoster || externalRoster.size === 0) {
