@@ -109,7 +109,7 @@ const ChatSupport: React.FC = () => {
 
                         <div className={`max-w-[80%] space-y-1 ${msg.role === 'user' ? 'items-end flex flex-col' : ''}`}>
                             <div className={`p-4 rounded-2xl text-sm leading-relaxed ${msg.role === 'user'
-                                ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-tr-none'
+                                ? 'bg-[#5B5FFF] text-white rounded-tr-none shadow-md shadow-[#5B5FFF]/10'
                                 : 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded-tl-none'
                                 }`}>
                                 {msg.content}

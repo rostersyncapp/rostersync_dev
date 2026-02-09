@@ -614,7 +614,7 @@ export const Engine: React.FC<Props> = ({
     if (newTeamName && newTeamName !== 'Unknown Team') {
       try {
         console.log('[Engine] 🔄 Triggering completeness check for:', newTeamName, currentLeague);
-        
+
         const result = await fillMissingJerseyNumbers(
           initialAthletes.length > 0 ? initialAthletes : processedAthletes,
           newTeamName,
@@ -628,7 +628,7 @@ export const Engine: React.FC<Props> = ({
 
         if (result.updatedAthletes) {
           setProcessedAthletes(result.updatedAthletes);
-          
+
           // Check phonetics status after update
           const withPhonetics = result.updatedAthletes.filter(a => a.phoneticSimplified || a.phoneticIPA);
           const withoutPhonetics = result.updatedAthletes.filter(a => !a.phoneticSimplified && !a.phoneticIPA);
@@ -762,7 +762,7 @@ export const Engine: React.FC<Props> = ({
                 <button
                   onClick={handleStartScout}
                   disabled={isProcessing || !rawInput || !hasCredits}
-                  className={`px-10 py-4 rounded-2xl font-bold flex items-center gap-3 shadow-xl transition-all text-sm uppercase tracking-widest ${hasCredits && rawInput ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:scale-[1.02] active:scale-[0.98]' : 'bg-gray-200 dark:bg-gray-800 text-gray-400 cursor-not-allowed shadow-none'}`}
+                  className={`px-10 py-4 rounded-2xl font-bold flex items-center gap-3 shadow-xl transition-all text-sm uppercase tracking-widest ${hasCredits && rawInput ? 'bg-[#5B5FFF] text-white hover:scale-[1.02] active:scale-[0.98] shadow-[#5B5FFF]/20' : 'bg-gray-200 dark:bg-gray-800 text-gray-400 cursor-not-allowed shadow-none'}`}
                 >
                   {isProcessing ? <Loader2 className="animate-spin" size={18} /> : <Search size={18} />}
                   {isProcessing ? 'Scouting...' : 'Scout Roster'}
@@ -1177,7 +1177,7 @@ export const Engine: React.FC<Props> = ({
                 </div>
 
                 <div className="flex flex-col justify-center min-w-[240px] pt-6 md:pt-0 border-t md:border-t-0 md:border-l border-gray-100 dark:border-gray-800 md:pl-10">
-                  <button onClick={handleSaveToLibrary} disabled={isSaving} className="w-full h-14 rounded-2xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-bold text-sm hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-gray-900/10 dark:shadow-white/5 transition-all flex items-center justify-center gap-3 uppercase tracking-[0.2em]">
+                  <button onClick={handleSaveToLibrary} disabled={isSaving} className="w-full h-14 rounded-2xl bg-[#5B5FFF] text-white font-bold text-sm hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-[#5B5FFF]/20 transition-all flex items-center justify-center gap-3 uppercase tracking-[0.2em]">
                     {isSaving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />} Save To Library
                   </button>
                   <p className="text-[10px] text-gray-400 text-center mt-4 font-medium uppercase tracking-widest">Ready for export and sync</p>

@@ -182,7 +182,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
             <button onClick={() => setShowDemoModal(true)} className="hidden md:block relative z-50 px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80 text-gray-600 dark:text-gray-300 font-bold text-xs shadow-sm hover:scale-105 active:scale-95 transition-all">
               Book Demo
             </button>
-            <a href={signUpUrl} className="relative z-50 px-4 py-2 rounded-lg bg-[#1A1A1A] dark:bg-white text-white dark:text-[#1A1A1A] font-bold text-xs shadow-md hover:scale-105 active:scale-95 transition-all cursor-pointer">Get Started</a>
+            <a href={signUpUrl} className="relative z-50 px-4 py-2 rounded-lg bg-[#5B5FFF] text-white font-bold text-xs shadow-md shadow-[#5B5FFF]/20 hover:scale-105 active:scale-95 transition-all cursor-pointer">Get Started</a>
           </div>
         </div>
       </nav>
@@ -373,7 +373,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
               <span className="bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-purple-600 text-transparent bg-clip-text inline-block py-1">Frequently Asked <br /> Questions</span>
             </h3>
             <p className="text-base text-gray-500 dark:text-gray-400 font-medium mb-8 max-w-md leading-relaxed">Everything you need to know about the product and billing.</p>
-            <a href="mailto:support@rostersync.io" className="inline-flex items-center justify-center px-6 py-3 rounded-lg bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-bold text-sm hover:opacity-90 transition-opacity">Contact Support</a>
+            <a href="mailto:support@rostersync.io" className="inline-flex items-center justify-center px-6 py-3 rounded-lg bg-[#5B5FFF] text-white font-bold text-sm hover:opacity-90 shadow-lg shadow-[#5B5FFF]/10 transition-all">Contact Support</a>
           </div>
           <div className="space-y-4">
             {FAQS.map((faq, i) => (
