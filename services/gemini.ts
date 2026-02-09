@@ -38,6 +38,7 @@ interface ExternalAthleteData {
   position: string;
   headshot?: string;
   id: string;
+  fullName: string;
 }
 
 export type { ProcessedRoster };
@@ -59,6 +60,11 @@ function toTitleCase(str: string): string {
   const acronyms = ['FC', 'CF', 'II', 'III', 'IV', 'VI', 'AFC', 'SC', 'AC', 'US', 'USA', 'U18', 'U20', 'U23', 'LA', 'NY', 'NJ', 'DC', 'KC', 'STL', 'RSL', 'NYC', 'S.C.', 'F.C.'];
 
   return str.split(' ').map((word, index) => {
+    // Handle hyphenated names (e.g., Jean-Pierre)
+    if (word.includes('-')) {
+      return word.split('-').map(part => toTitleCase(part)).join('-');
+    }
+
     const upper = word.toUpperCase();
     // Check if the word (stripped of punctuation for matching) is a known acronym
     const cleanWord = upper.replace(/[^A-Z0-9]/g, '');
@@ -74,8 +80,22 @@ function toTitleCase(str: string): string {
     }
 
     // Capitalize first letter, lowercase rest
-    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+    return upper.charAt(0) + lower.slice(1);
   }).join(' ');
+}
+
+/**
+ * Smartly fix casing only if it looks broken (all caps or all lowercase)
+ */
+function fixNameCase(name: string): string {
+  if (!name) return "";
+  // If it has at least one lowercase letter AND at least one uppercase, 
+  // assume it was intentionally cased (e.g. LeBron, de Jong, MacKinnon)
+  const hasLower = /[a-z]/.test(name);
+  const hasUpper = /[A-Z]/.test(name);
+
+  if (hasLower && hasUpper) return name;
+  return toTitleCase(name);
 }
 
 /**
@@ -307,7 +327,8 @@ async function fetchESPNRoster(teamName: string, league?: string): Promise<Map<s
                 jersey: athlete.jersey || "00",
                 position: athlete.position?.abbreviation || athlete.position?.name || "Athlete",
                 headshot: athlete.headshot?.href || "",
-                id: athlete.id
+                id: athlete.id,
+                fullName: athlete.fullName
               });
             }
           }
@@ -318,7 +339,8 @@ async function fetchESPNRoster(teamName: string, league?: string): Promise<Map<s
             jersey: group.jersey || "00",
             position: group.position?.abbreviation || group.position?.name || "Athlete",
             headshot: group.headshot?.href || "",
-            id: group.id
+            id: group.id,
+            fullName: group.fullName
           });
         }
       }
@@ -421,7 +443,8 @@ async function fetchMilbRoster(teamName: string, league: string): Promise<Map<st
             jersey: entry.jerseyNumber || "00",
             position: entry.position?.abbreviation || "Athlete",
             id: entry.person.id.toString(),
-            headshot: `https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:67:current.png/w_213,q_auto:best/v1/people/${entry.person.id}/headshot/67/current`
+            headshot: `https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:67:current.png/w_213,q_auto:best/v1/people/${entry.person.id}/headshot/67/current`,
+            fullName: entry.person.fullName
           });
         }
       }
@@ -492,7 +515,8 @@ async function fetchNHLRoster(teamName: string): Promise<Map<string, ExternalAth
         jersey: player.sweaterNumber?.toString() || "00",
         position: player.positionCode || "Athlete",
         headshot: player.headshot || "",
-        id: player.id?.toString()
+        id: player.id?.toString(),
+        fullName: fullName
       });
     };
 
@@ -541,9 +565,9 @@ export async function fillMissingJerseyNumbers(
   console.log(`[Roster Sync] 📊 External roster size: ${externalRoster?.size || 0} players`);
 
   if (!externalRoster || externalRoster.size === 0) {
-    console.log('[Roster Sync] ⚠️ No external roster data available - returning original athletes');
+    console.log('[Roster Sync] ⚠️ No external roster data available - returning original athletes with casing fix');
     return {
-      updatedAthletes: athletes,
+      updatedAthletes: athletes.map(a => ({ ...a, fullName: fixNameCase(a.fullName) })),
       officialCount: 0,
       missingAthletes: []
     };
@@ -615,7 +639,9 @@ export async function fillMissingJerseyNumbers(
     if (!externalData) return athlete;
 
     let updated = { ...athlete };
-    let changed = false;
+    // Always ensure name casing is clean, preferring official name if matched
+    updated.fullName = fixNameCase(externalData.fullName || updated.fullName);
+    let changed = updated.fullName !== athlete.fullName;
 
     // Backfill Jersey if missing
     if (!updated.jerseyNumber || updated.jerseyNumber === '00' || updated.jerseyNumber === '') {
@@ -653,7 +679,7 @@ export async function fillMissingJerseyNumbers(
   externalRoster.forEach((data, nameKey) => {
     // Check if this official name was NOT matched to any pasted name
     if (!matchedOfficialNames.has(nameKey)) {
-      const displayName = toTitleCase(nameKey);
+      const displayName = fixNameCase(data.fullName || nameKey);
       missingAthletes.push({
         id: `missing-${nameKey}-${Math.random().toString(36).substr(2, 9)}`,
         fullName: displayName,
