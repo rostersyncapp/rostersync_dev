@@ -47,6 +47,7 @@ const MissingPlayersModal = ({
   isOpen,
   pastedCount,
   officialCount,
+  matchedCount,
   missingCount,
   onKeep,
   onAdd,
@@ -55,6 +56,7 @@ const MissingPlayersModal = ({
   isOpen: boolean;
   pastedCount: number;
   officialCount: number;
+  matchedCount: number;
   missingCount: number;
   onKeep: () => void;
   onAdd: () => void;
@@ -70,8 +72,8 @@ const MissingPlayersModal = ({
             <UserPlus size={32} />
           </div>
           <h3 className="text-xl font-bold text-gray-900 dark:text-white">Incomplete Roster Detected</h3>
-          <p className="text-sm text-gray-500 mt-2">
-            You pasted <strong className="text-gray-900 dark:text-gray-200">{pastedCount} players</strong>, but the official roster has <strong className="text-gray-900 dark:text-gray-200">{officialCount}</strong>.
+          <p className="text-sm text-gray-500 mt-2 px-4">
+            We matched <strong className="text-gray-900 dark:text-gray-200">{matchedCount} players</strong> from your list to the official <strong className="text-gray-900 dark:text-gray-200">{officialCount}-player</strong> roster.
           </p>
         </div>
 
@@ -103,7 +105,7 @@ const MissingPlayersModal = ({
             ) : (
               <UserPlus size={16} />
             )}
-            {isGenerating ? "Processing..." : `Add ${missingCount} Players`}
+            {isGenerating ? "Processing..." : `Import ${missingCount} Missing`}
           </button>
         </div>
       </div>
@@ -282,6 +284,7 @@ export const Engine: React.FC<Props> = ({
   const [missingAthletesData, setMissingAthletesData] = useState<{
     pasted: number;
     official: number;
+    matched: number;
     missing: Athlete[];
   } | null>(null);
 
@@ -395,6 +398,7 @@ export const Engine: React.FC<Props> = ({
       setMissingAthletesData({
         pasted,
         official,
+        matched: pendingRoster.matchedRosterCount || (official - pendingRoster.missingAthletes.length),
         missing: pendingRoster.missingAthletes
       });
       setShowMissingPlayersModal(true);
@@ -646,6 +650,7 @@ export const Engine: React.FC<Props> = ({
           setMissingAthletesData({
             pasted: initialAthletes.length || processedAthletes.length,
             official: result.officialCount,
+            matched: result.matchedCount,
             missing: result.missingAthletes
           });
           setShowMissingPlayersModal(true);
@@ -1106,6 +1111,7 @@ export const Engine: React.FC<Props> = ({
         isOpen={showMissingPlayersModal}
         pastedCount={missingAthletesData?.pasted || 0}
         officialCount={missingAthletesData?.official || 0}
+        matchedCount={missingAthletesData?.matched || 0}
         missingCount={missingAthletesData?.missing.length || 0}
         isGenerating={isGeneratingPhonetics}
         onKeep={() => setShowMissingPlayersModal(false)}

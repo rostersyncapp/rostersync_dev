@@ -30,6 +30,7 @@ interface ProcessedRoster {
   };
   officialRosterCount?: number;
   pastedRosterCount?: number;
+  matchedRosterCount?: number;
   missingAthletes?: Athlete[];
 }
 
@@ -542,6 +543,7 @@ export async function fillMissingJerseyNumbers(
 ): Promise<{
   updatedAthletes: any[],
   officialCount: number,
+  matchedCount: number,
   missingAthletes: Athlete[]
 }> {
   console.log(`[Roster Sync] 🔍 fillMissingJerseyNumbers called with team: "${teamName}", league: ${league || 'unknown'}, athletes: ${athletes.length}`);
@@ -569,6 +571,7 @@ export async function fillMissingJerseyNumbers(
     return {
       updatedAthletes: athletes.map(a => ({ ...a, fullName: fixNameCase(a.fullName) })),
       officialCount: 0,
+      matchedCount: 0,
       missingAthletes: []
     };
   }
@@ -705,6 +708,7 @@ export async function fillMissingJerseyNumbers(
   return {
     updatedAthletes,
     officialCount: externalRoster.size,
+    matchedCount: matchedOfficialNames.size,
     missingAthletes
   };
 }
@@ -1346,7 +1350,12 @@ export async function processRosterRawText(
 
   // Fill missing jersey numbers from ESPN or MiLB roster data
   const teamNameForLookup = manualTeamName || parsedResult.teamName || "";
-  const { updatedAthletes: athletesWithJerseys, officialCount, missingAthletes } = await fillMissingJerseyNumbers(athletes, teamNameForLookup, league);
+  const {
+    updatedAthletes: athletesWithJerseys,
+    officialCount,
+    matchedCount,
+    missingAthletes
+  } = await fillMissingJerseyNumbers(athletes, teamNameForLookup, league);
 
   // Standardize Sport/League from MiLB or ESPN ID Mapping
   // IMPORTANT: Only do this if there are NO candidate teams (no ambiguity)
@@ -1455,6 +1464,7 @@ export async function processRosterRawText(
     abbreviation: finalBranding.abbreviation, // Also include at root for easy UI access
     officialRosterCount: officialCount,
     pastedRosterCount: athletes.length,
+    matchedRosterCount: matchedCount,
     missingAthletes: missingAthletes
   };
 }
