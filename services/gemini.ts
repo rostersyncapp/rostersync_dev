@@ -285,7 +285,7 @@ async function fetchESPNRoster(teamName: string, league?: string): Promise<Map<s
     console.log(`[ESPN] 🔄 Fetching roster from: ${url}`);
     const response = await fetch(url);
     console.log(`[ESPN] Response status: ${response.status} ${response.statusText}`);
-    
+
     if (!response.ok) {
       console.error(`[ESPN] ❌ HTTP Error: ${response.status} ${response.statusText}`);
       return null;
@@ -298,13 +298,27 @@ async function fetchESPNRoster(teamName: string, league?: string): Promise<Map<s
     console.log(`[ESPN] data.athletes:`, data.athletes ? `Array with ${data.athletes.length} items` : 'null/undefined');
 
     if (data.athletes && Array.isArray(data.athletes)) {
-      for (const athlete of data.athletes) {
-        if (athlete.fullName) {
-          rosterMap.set(normalizePlayerName(athlete.fullName), {
-            jersey: athlete.jersey || "00",
-            position: athlete.position?.abbreviation || "Athlete",
-            headshot: athlete.headshot?.href || "",
-            id: athlete.id
+      for (const group of data.athletes) {
+        // Handle grouped athletes (e.g., NFL has groups with 'items' array)
+        if (group.items && Array.isArray(group.items)) {
+          for (const athlete of group.items) {
+            if (athlete.fullName) {
+              rosterMap.set(normalizePlayerName(athlete.fullName), {
+                jersey: athlete.jersey || "00",
+                position: athlete.position?.abbreviation || athlete.position?.name || "Athlete",
+                headshot: athlete.headshot?.href || "",
+                id: athlete.id
+              });
+            }
+          }
+        }
+        // Handle flat athletes (standard for many other leagues)
+        else if (group.fullName) {
+          rosterMap.set(normalizePlayerName(group.fullName), {
+            jersey: group.jersey || "00",
+            position: group.position?.abbreviation || group.position?.name || "Athlete",
+            headshot: group.headshot?.href || "",
+            id: group.id
           });
         }
       }
