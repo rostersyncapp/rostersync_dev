@@ -409,9 +409,20 @@ export const Engine: React.FC<Props> = ({
     if (missingAthletesData && missingAthletesData.missing.length > 0) {
       setIsGeneratingPhonetics(true);
       try {
-        const names = missingAthletesData.missing.map(a => a.fullName);
-        console.log(`[Engine] Generating batch phonetics for ${names.length} missing players...`);
-        const phoneticsMapping = await generateBatchPhonetics(names, sport, userTier);
+        const missingCount = missingAthletesData.missing.filter(a => {
+          const p = (a.phoneticSimplified || "").trim();
+          return !p || p === "?" || p.toUpperCase() === "N/A";
+        }).length;
+
+        let phoneticsMapping: Record<string, { phoneticSimplified: string; phoneticIPA: string }> = {};
+
+        if (missingCount > 0) {
+          const names = missingAthletesData.missing.map(a => a.fullName);
+          console.log(`[Engine] Generating batch phonetics for ${names.length} missing players...`);
+          phoneticsMapping = await generateBatchPhonetics(names, sport, userTier);
+        } else {
+          console.log(`[Engine] Skipping batch phonetics - all missing players are pre-filled.`);
+        }
 
         const athletesWithPhonetics = missingAthletesData.missing.map(athlete => {
           const phonetics = phoneticsMapping[athlete.fullName];

@@ -1450,16 +1450,25 @@ export async function processRosterRawText(
     console.log(`[Gemini] Populated ${candidateTeams.length} teams for selection`);
   }
 
-  // SECOND PASS: Backfill phonetics if they are mostly missing and the user is on a premium tier
-  const missingPhonetics = athletesWithJerseys.filter(a => !a.phoneticSimplified).length;
-  // Thresholds: For PRO, NETWORK, and STUDIO, ALWAYS backfill if any are missing.
+  // SECOND PASS: Backfill phonetics for BOTH matched and missing athletes if user is on a premium tier
+  // Stronger missing detection: handle empty, whitespace, "?", or "N/A"
+  const isPhoneticMissing = (a: Athlete) => {
+    const val = (a.phoneticSimplified || "").trim();
+    return !val || val === "?" || val.toUpperCase() === "N/A";
+  };
+
+  const allPossibleAthletes = [...athletesWithJerseys, ...(missingAthletes || [])];
+  const missingCount = allPossibleAthletes.filter(isPhoneticMissing).length;
+
   const isPremium = tier === 'PRO' || tier === 'NETWORK' || tier === 'STUDIO';
-  const shouldBackfill = isPremium && missingPhonetics > 0;
+  const shouldBackfill = isPremium && missingCount > 0;
 
   if (shouldBackfill) {
-    console.log(`[Gemini] Phonetic gap detected (${missingPhonetics}/${athletesWithJerseys.length}). Triggering backfill pass...`);
+    console.log(`[Gemini] Phonetic gap detected (${missingCount}/${allPossibleAthletes.length}). Triggering backfill pass...`);
     try {
-      const namesForPhonetics = athletesWithJerseys.map(a => a.fullName);
+      // Use all fullNames for context, but we only really need results for those missing them.
+      // However, generateBatchPhonetics returns a map, so supplying all names is safer for context.
+      const namesForPhonetics = allPossibleAthletes.map(a => a.fullName);
       const phoneticsMap = await generateBatchPhonetics(namesForPhonetics, standardizedSport, tier);
 
       // Build a normalized mapping for robust lookup
@@ -1468,15 +1477,21 @@ export async function processRosterRawText(
         normalizedPhoneticsMap[normalizePlayerName(name)] = data;
       });
 
-      // Merge phonetics back into athletes using normalized matching
-      athletesWithJerseys.forEach(a => {
-        const normName = normalizePlayerName(a.fullName);
-        if (!a.phoneticSimplified && normalizedPhoneticsMap[normName]) {
-          a.phoneticSimplified = normalizedPhoneticsMap[normName].phoneticSimplified;
-          a.phoneticIPA = normalizedPhoneticsMap[normName].phoneticIPA;
-        }
-      });
-      console.log(`[Gemini] Backfill complete. Added guides for ${Object.keys(phoneticsMap).length} players.`);
+      // Merge phonetics back into BOTH athletesWithJerseys and missingAthletes
+      const mergePhonetics = (list: Athlete[]) => {
+        list.forEach(a => {
+          const normName = normalizePlayerName(a.fullName);
+          if (isPhoneticMissing(a) && normalizedPhoneticsMap[normName]) {
+            a.phoneticSimplified = normalizedPhoneticsMap[normName].phoneticSimplified;
+            a.phoneticIPA = normalizedPhoneticsMap[normName].phoneticIPA;
+          }
+        });
+      };
+
+      mergePhonetics(athletesWithJerseys);
+      if (missingAthletes) mergePhonetics(missingAthletes);
+
+      console.log(`[Gemini] Backfill complete. Augmented guides for ${Object.keys(phoneticsMap).length} players.`);
     } catch (err) {
       console.error("[Gemini] Phonetic backfill failed:", err);
     }
