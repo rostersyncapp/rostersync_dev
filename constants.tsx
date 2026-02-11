@@ -86,6 +86,5 @@ export const getTierLimit = (tierId: string) => {
 export const NAV_ITEMS = [
   { name: 'Dashboard', icon: <LayoutDashboard size={20} />, id: 'dashboard' },
   { name: 'AI Scout', icon: <Bot size={20} />, id: 'engine' },
-  { name: 'WNBA Archive', icon: <Archive size={20} />, id: 'wnba-archive' },
   { name: 'Settings', icon: <Settings size={20} />, id: 'settings' },
 ];

@@ -50,7 +50,8 @@ import {
   History,
   ChevronDown,
   AlertCircle,
-  Bot
+  Bot,
+  Archive
 } from 'lucide-react';
 
 const ICON_MAP: Record<string, any> = {
@@ -191,7 +192,7 @@ const FolderItem: React.FC<{
   rosters: Roster[];
   expandedFolderIds: string[];
   toggleExpand: (id: string) => void;
-  setView: (view: 'dashboard' | 'engine' | 'settings') => void;
+  setView: (view: 'dashboard' | 'engine' | 'settings' | 'wnba-archive') => void;
   setActiveProjectId: (id: string | null) => void;
   setSelectedRosterId: (id: string | null) => void;
   setCreatingFolderInId: (id: string | 'root' | null) => void;
@@ -245,16 +246,16 @@ const App: React.FC = () => {
   const { openSignIn, openSignUp } = useClerk();
 
   // All hooks must be called unconditionally - no early returns before hooks
-  const [view, setView] = useState<'dashboard' | 'engine' | 'settings' | 'admin'>('dashboard');
+  const [view, setView] = useState<'dashboard' | 'engine' | 'settings' | 'admin' | 'wnba-archive' | 'support'>('dashboard');
 
   useEffect(() => {
     const saved = localStorage.getItem('lastView');
-    if (saved === 'engine' || saved === 'settings' || saved === 'admin') {
+    if (saved === 'engine' || saved === 'settings' || saved === 'admin' || saved === 'wnba-archive') {
       setView(saved);
     }
   }, []);
 
-  const handleSetView = (newView: 'dashboard' | 'engine' | 'settings' | 'admin') => {
+  const handleSetView = (newView: 'dashboard' | 'engine' | 'settings' | 'admin' | 'wnba-archive' | 'support') => {
     setView(newView);
     localStorage.setItem('lastView', newView);
   };
@@ -821,6 +822,10 @@ const App: React.FC = () => {
                   <button onClick={() => handleSetView('engine')} className={`w-full flex items-center gap-3 p-2 rounded-lg transition-all ${view === 'engine' ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF] font-bold' : 'text-gray-500 hover:bg-gray-50 font-medium'}`}>
                     <Bot size={20} />
                     <span className="hidden lg:block text-[14px]">AI Scout</span>
+                  </button>
+                  <button onClick={() => handleSetView('wnba-archive')} className={`w-full flex items-center gap-3 p-2 rounded-lg transition-all ${view === 'wnba-archive' ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF] font-bold' : 'text-gray-500 hover:bg-gray-50 font-medium'}`}>
+                    <Archive size={20} />
+                    <span className="hidden lg:block text-[14px]">WNBA Archive</span>
                   </button>
                   <button onClick={() => handleSetView('settings')} className={`w-full flex items-center gap-3 p-2 rounded-lg transition-all ${view === 'settings' ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF] font-bold' : 'text-gray-500 hover:bg-gray-100 font-medium'}`}><SettingsIcon size={20} /><span className="hidden lg:block text-[14px]">Settings</span></button>
                   {profile?.is_admin && (
