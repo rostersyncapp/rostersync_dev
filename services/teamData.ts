@@ -1606,6 +1606,9 @@ export const LEAGUE_TO_SPORT: Record<string, string> = {
 
   'milb': 'Baseball',
   'milb-aaa': 'Baseball',
+  'milb-aa': 'Baseball',
+  'milb-higha': 'Baseball',
+  'milb-a': 'Baseball',
   'ncaa': 'Football',
 };
 

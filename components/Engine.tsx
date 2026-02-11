@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Athlete, SubscriptionTier, Roster, ExportFormat, Project } from '../types.ts';
 import { ProcessedRoster, fillMissingJerseyNumbers, generateBatchPhonetics } from '../services/gemini.ts';
 import { getLeagues, getConferences, getTeams } from '../services/supabase.ts';
-import { ESPN_TEAM_IDS, DB_LEAGUE_TO_ESPN_LEAGUE } from '../services/teamData.ts';
+import { ESPN_TEAM_IDS, DB_LEAGUE_TO_ESPN_LEAGUE, LEAGUE_TO_SPORT } from '../services/teamData.ts';
 import { TeamSelectionModal } from './TeamSelectionModal';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -501,22 +501,10 @@ export const Engine: React.FC<Props> = ({
     setLeague(selectedLeague);
     setIsLeagueDropdownOpen(false);
 
-    // Auto-set sport based on league
-    const leagueToSport: Record<string, string> = {
-      'nba': 'Basketball', 'wnba': 'Basketball', 'euroleague': 'Basketball',
-      'nfl': 'Football',
-      'premier-league': 'Soccer', 'la-liga': 'Soccer', 'serie-a': 'Soccer',
-      'bundesliga': 'Soccer', 'ligue-1': 'Soccer', 'mls': 'Soccer', 'nwsl': 'Soccer', 'liga-mx': 'Soccer',
-      'eredivisie': 'Soccer', 'usl': 'Soccer',
-      'ipl': 'Cricket',
-      'nhl': 'Hockey',
-      'mlb': 'Baseball',
-      'milb': 'Baseball',
-      'ncaa': ncaaSport // Default for NCAA
-    };
-
-    if (selectedLeague && leagueToSport[selectedLeague]) {
-      setSport(leagueToSport[selectedLeague]);
+    if (selectedLeague === 'ncaa') {
+      setSport(ncaaSport);
+    } else if (selectedLeague && LEAGUE_TO_SPORT[selectedLeague]) {
+      setSport(LEAGUE_TO_SPORT[selectedLeague]);
     } else if (!selectedLeague) {
       setSport('');
     }
@@ -532,7 +520,15 @@ export const Engine: React.FC<Props> = ({
     // Prepend team name and conference to raw input
     let promptPrefix = "";
     if (manualTeamName.trim()) promptPrefix += `Team: ${manualTeamName.trim()}\n`;
-    if (league === 'ncaa' && ncaaConference) promptPrefix += `Conference: ${ncaaConference}\n`;
+    if (league) {
+      if (league === 'ncaa') {
+        promptPrefix += `League: NCAA\nSport: ${ncaaSport}\n`;
+        if (ncaaConference) promptPrefix += `Conference: ${ncaaConference}\n`;
+      } else {
+        const leagueLabel = LEAGUE_TO_SPORT[league] || league.toUpperCase();
+        promptPrefix += `League: ${league.toUpperCase()}\nSport: ${LEAGUE_TO_SPORT[league] || ''}\n`;
+      }
+    }
 
     const inputWithTeam = promptPrefix ? `${promptPrefix}\n${rawInput}` : rawInput;
 

@@ -1172,7 +1172,7 @@ export async function processRosterRawText(
     displayNameSafe: toSafeName(a.fullName || ""),
     jerseyNumber: formatJerseyNumber(a.jerseyNumber).replace(/#/g, ''),
     position: (a.position || "?").replace(/#/g, ''),
-    phoneticIPA: "",
+    phoneticIPA: a.phoneticIPA || "",
     phoneticSimplified: a.phoneticSimplified || "",
     nilStatus: (a.nilStatus as NILStatus) || 'Active',
     seasonYear: extractedSeason,
@@ -1365,8 +1365,8 @@ export async function processRosterRawText(
 
   // Guard: For Olympics (NOC Mode), do not overwrite the AI's sport/gender string
   if (candidateTeams.length <= 1) {
-    // PRIORITY 1: Check if a MiLB league was explicitly selected
-    if (league && LEAGUE_TO_SPORT[league]) {
+    // PRIORITY 1: Check if a MiLB or Pro league was explicitly selected
+    if (league && league !== 'ncaa' && LEAGUE_TO_SPORT[league]) {
       standardizedSport = LEAGUE_TO_SPORT[league];
       console.log(`[Gemini] Standardized sport from user - selected league: ${standardizedSport} `);
     } else {
@@ -1450,6 +1450,32 @@ export async function processRosterRawText(
     console.log(`[Gemini] Populated ${candidateTeams.length} teams for selection`);
   }
 
+  // SECOND PASS: Backfill phonetics if they are mostly missing and the user is on a premium tier
+  const missingPhonetics = athletesWithJerseys.filter(a => !a.phoneticSimplified).length;
+  // If more than 30% are missing and it's a large roster (>= 15 players), or if it's almost entirely missing
+  const shouldBackfill = (tier === 'PRO' || tier === 'NETWORK') &&
+    (missingPhonetics > (athletesWithJerseys.length * 0.3)) &&
+    (athletesWithJerseys.length >= 10);
+
+  if (shouldBackfill) {
+    console.log(`[Gemini] Phonetic gap detected (${missingPhonetics}/${athletesWithJerseys.length}). Triggering backfill pass...`);
+    try {
+      const namesForPhonetics = athletesWithJerseys.map(a => a.fullName);
+      const phoneticsMap = await generateBatchPhonetics(namesForPhonetics, standardizedSport, tier);
+
+      // Merge phonetics back into athletes
+      athletesWithJerseys.forEach(a => {
+        if (!a.phoneticSimplified && phoneticsMap[a.fullName]) {
+          a.phoneticSimplified = phoneticsMap[a.fullName].phoneticSimplified;
+          a.phoneticIPA = phoneticsMap[a.fullName].phoneticIPA;
+        }
+      });
+      console.log(`[Gemini] Backfill complete. Added guides for ${Object.keys(phoneticsMap).length} players.`);
+    } catch (err) {
+      console.error("[Gemini] Phonetic backfill failed:", err);
+    }
+  }
+
   console.log(`[Gemini] Finalizing return. Manual: "${manualTeamName}", Parsed: "${parsedResult.teamName}"`);
 
   return {
@@ -1510,9 +1536,11 @@ export async function generateBatchPhonetics(
   [${names.join(', ')}]
   
   Guidelines:
-  1. Use 'phoneticSimplified' for a readable, capitalized-stress guide (e.g. 'fuh-NET-ik').
-  2. Use 'phoneticIPA' for standard International Phonetic Alphabet symbols.
-  3. Return a JSON object with a 'results' array.`;
+  1. Return one entry for EVERY name provided in the list. Do not skip any players.
+  2. Use 'phoneticSimplified' for a readable, capitalized-stress guide (e.g. 'fuh-NET-ik').
+  3. Use 'phoneticIPA' for standard International Phonetic Alphabet symbols.
+  4. Accuracy is critical for ${sport} broadcast usage.
+  5. Return a JSON object with a 'results' array.`;
 
   try {
     const result = await model.generateContent(prompt);
