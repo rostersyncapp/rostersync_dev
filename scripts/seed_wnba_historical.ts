@@ -1,12 +1,13 @@
 #!/usr/bin/env ts-node
 /**
- * WNBA Historical Roster Seeding Script
+ * WNBA Historical Roster Seeding Script - StatsCrew Scraper
  * 
- * Populates the wnba_historical_rosters table with data from ESPN API
+ * Populates the wnba_historical_rosters table with data from StatsCrew.com
  * Covers all WNBA teams from 1997 (inaugural season) to present
  */
 
 import { createClient } from '@supabase/supabase-js';
+import * as cheerio from 'cheerio';
 
 // Supabase configuration
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || '';
@@ -19,55 +20,22 @@ if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
-// WNBA team configuration with ESPN IDs and active date ranges
+// WNBA team configuration with StatsCrew abbreviations
 const WNBA_TEAMS = [
     // Active teams
-    { id: 'atlanta-dream', espnId: 16, startYear: 2008, endYear: null },
-    { id: 'chicago-sky', espnId: 17, startYear: 2006, endYear: null },
-    { id: 'connecticut-sun', espnId: 18, startYear: 1999, endYear: null },
-    { id: 'indiana-fever', espnId: 19, startYear: 2000, endYear: null },
-    { id: 'new-york-liberty', espnId: 20, startYear: 1997, endYear: null },
-    { id: 'washington-mystics', espnId: 21, startYear: 1998, endYear: null },
-    { id: 'dallas-wings', espnId: 22, startYear: 1998, endYear: null },
-    { id: 'las-vegas-aces', espnId: 23, startYear: 1997, endYear: null },
-    { id: 'los-angeles-sparks', espnId: 24, startYear: 1997, endYear: null },
-    { id: 'minnesota-lynx', espnId: 25, startYear: 1999, endYear: null },
-    { id: 'phoenix-mercury', espnId: 26, startYear: 1997, endYear: null },
-    { id: 'seattle-storm', espnId: 27, startYear: 2000, endYear: null },
-
-    // Historical teams (no longer active)
-    { id: 'charlotte-sting', espnId: 28, startYear: 1997, endYear: 2006 },
-    { id: 'cleveland-rockers', espnId: 29, startYear: 1997, endYear: 2003 },
-    { id: 'detroit-shock', espnId: 30, startYear: 1998, endYear: 2009 },
-    { id: 'houston-comets', espnId: 31, startYear: 1997, endYear: 2008 },
-    { id: 'miami-sol', espnId: 32, startYear: 2000, endYear: 2002 },
-    { id: 'orlando-miracle', espnId: 33, startYear: 1999, endYear: 2002 },
-    { id: 'portland-fire', espnId: 34, startYear: 2000, endYear: 2002 },
-    { id: 'sacramento-monarchs', espnId: 35, startYear: 1997, endYear: 2009 },
-    { id: 'san-antonio-stars', espnId: 36, startYear: 2003, endYear: 2017 },
-    { id: 'tulsa-shock', espnId: 37, startYear: 2010, endYear: 2015 },
-    { id: 'utah-starzz', espnId: 38, startYear: 1997, endYear: 2002 },
+    { id: 'atlanta-dream', abbr: 'ATL', startYear: 2008, endYear: null },
+    { id: 'chicago-sky', abbr: 'CHI', startYear: 2006, endYear: null },
+    { id: 'connecticut-sun', abbr: 'CON', startYear: 1999, endYear: null },
+    { id: 'indiana-fever', abbr: 'IND', startYear: 2000, endYear: null },
+    { id: 'new-york-liberty', abbr: 'NYL', startYear: 1997, endYear: null },
+    { id: 'washington-mystics', abbr: 'WAS', startYear: 1998, endYear: null },
+    { id: 'dallas-wings', abbr: 'DAL', startYear: 1998, endYear: null },
+    { id: 'las-vegas-aces', abbr: 'LVA', startYear: 1997, endYear: null },
+    { id: 'los-angeles-sparks', abbr: ' LAS', startYear: 1997, endYear: null },
+    { id: 'minnesota-lynx', abbr: 'MIN', startYear: 1999, endYear: null },
+    { id: 'phoenix-mercury', abbr: 'PHO', startYear: 1997, endYear: null },
+    { id: 'seattle-storm', abbr: 'SEA', startYear: 2000, endYear: null },
 ];
-
-interface ESPNPlayer {
-    id?: string;
-    displayName?: string;
-    fullName?: string;
-    jersey?: string;
-    position?: {
-        abbreviation?: string;
-        name?: string;
-    };
-    height?: string;
-    weight?: string;
-    college?: {
-        name?: string;
-    };
-    experience?: {
-        years?: number;
-    };
-    dateOfBirth?: string;
-}
 
 interface WNBARosterEntry {
     team_id: string;
@@ -83,33 +51,52 @@ interface WNBARosterEntry {
     years_pro: number | null;
 }
 
-async function fetchESPNWNBARoster(espnId: number, seasonYear: number): Promise<ESPNPlayer[]> {
-    const url = `https://site.api.espn.com/apis/site/v2/sports/basketball/wnba/teams/${espnId}/roster?season=${seasonYear}`;
+async function fetchStatsCrewRoster(teamAbbr: string, seasonYear: number): Promise<WNBARosterEntry[]> {
+    const url = `https://www.statscrew.com/womensbasketball/roster/t-${teamAbbr}/y-${seasonYear}`;
 
     try {
         console.log(`  🔄 Fetching: ${url}`);
         const response = await fetch(url);
 
         if (!response.ok) {
-            console.warn(`  ⚠️  HTTP ${response.status} for ESPN ID ${espnId}, season ${seasonYear}`);
+            console.warn(`  ⚠️  HTTP ${response.status} for ${teamAbbr}, season ${seasonYear}`);
             return [];
         }
 
-        const data = await response.json();
-        const players: ESPNPlayer[] = [];
+        const html = await response.text();
+        const $ = cheerio.load(html);
+        const players: WNBARosterEntry[] = [];
 
-        // ESPN WNBA roster structure: data.athletes is array of groups
-        if (data.athletes && Array.isArray(data.athletes)) {
-            for (const group of data.athletes) {
-                if (group.items && Array.isArray(group.items)) {
-                    players.push(...group.items);
-                }
-                // Sometimes athletes are directly in the group
-                else if (group.displayName || group.fullName) {
-                    players.push(group);
+        // Find the roster table and extract rows
+        $('table.sortable tbody tr').each((index, element) => {
+            const $row = $(element);
+            const $cells = $row.find('td');
+
+            if ($cells.length >= 7) {
+                const playerName = $cells.eq(0).text().trim();
+                const position = $cells.eq(1).text().trim() || null;
+                const birthDate = $cells.eq(2).attr('sorttable_customkey') || null; // YYYY-MM-DD format
+                const height = $cells.eq(3).text().trim() || null;
+                const weight = $cells.eq(4).text().trim() || null;
+                const college = $cells.eq(5).text().trim() || null;
+
+                if (playerName) {
+                    players.push({
+                        team_id: '', // Will be filled in by caller
+                        season_year: seasonYear,
+                        player_name: playerName,
+                        player_id: null,
+                        jersey_number: null, // StatsCrew doesn't provide jersey numbers
+                        position,
+                        height,
+                        weight,
+                        birth_date: birthDate,
+                        college: college || null,
+                        years_pro: null,
+                    });
                 }
             }
-        }
+        });
 
         console.log(`  ✅ Found ${players.length} players`);
         return players;
@@ -119,49 +106,18 @@ async function fetchESPNWNBARoster(espnId: number, seasonYear: number): Promise<
     }
 }
 
-function convertESPNPlayerToRosterEntry(
-    player: ESPNPlayer,
-    teamId: string,
-    seasonYear: number
-): WNBARosterEntry | null {
-    const name = player.fullName || player.displayName;
-    if (!name) {
-        console.warn('  ⚠️  Skipping player with no name');
-        return null;
-    }
-
-    return {
-        team_id: teamId,
-        season_year: seasonYear,
-        player_name: name,
-        player_id: player.id?.toString() || null,
-        jersey_number: player.jersey || null,
-        position: player.position?.abbreviation || player.position?.name || null,
-        height: player.height || null,
-        weight: player.weight ? `${player.weight}` : null,
-        birth_date: player.dateOfBirth || null,
-        college: player.college?.name || null,
-        years_pro: player.experience?.years ?? null,
-    };
-}
-
-async function seedTeamSeason(teamId: string, espnId: number, seasonYear: number): Promise<number> {
-    const players = await fetchESPNWNBARoster(espnId, seasonYear);
+async function seedTeamSeason(teamId: string, teamAbbr: string, seasonYear: number): Promise<number> {
+    const players = await fetchStatsCrewRoster(teamAbbr, seasonYear);
 
     if (players.length === 0) {
         console.log(`  ⏭️  No players found, skipping`);
         return 0;
     }
 
-    const rosterEntries = players
-        .map(p => convertESPNPlayerToRosterEntry(p, teamId, seasonYear))
-        .filter((entry): entry is WNBARosterEntry => entry !== null);
+    // Add team_id to each player entry
+    const rosterEntries = players.map(p => ({ ...p, team_id: teamId }));
 
-    if (rosterEntries.length === 0) {
-        return 0;
-    }
-
-    // Batch insert with conflict handling (ON CONFLICT DO NOTHING handled by UNIQUE constraint)
+    // Batch insert with conflict handling
     const { data, error } = await supabase
         .from('wnba_historical_rosters')
         .upsert(rosterEntries, {
@@ -183,7 +139,7 @@ async function seedAllTeams(startYear?: number, endYear?: number) {
     const seedStartYear = startYear || 1997;
     const seedEndYear = endYear || currentYear;
 
-    console.log(`\n🏀 WNBA Historical Roster Seeding`);
+    console.log(`\n🏀 WNBA Historical Roster Seeding (StatsCrew)`);
     console.log(`📅 Years: ${seedStartYear} - ${seedEndYear}`);
     console.log(`📊 Teams: ${WNBA_TEAMS.length}\n`);
 
@@ -200,12 +156,12 @@ async function seedAllTeams(startYear?: number, endYear?: number) {
 
         for (let year = teamStartYear; year <= teamEndYear; year++) {
             console.log(`\n  📆 Season ${year}`);
-            const playersAdded = await seedTeamSeason(team.id, team.espnId, year);
+            const playersAdded = await seedTeamSeason(team.id, team.abbr, year);
             totalPlayers += playersAdded;
             totalSeasons++;
 
-            // Rate limiting: small delay to avoid hammering ESPN
-            await new Promise(resolve => setTimeout(resolve, 500));
+            // Rate limiting: delay between requests to be respectful
+            await new Promise(resolve => setTimeout(resolve, 1000));
         }
     }
 
