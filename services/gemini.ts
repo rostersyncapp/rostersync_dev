@@ -1452,10 +1452,12 @@ export async function processRosterRawText(
 
   // SECOND PASS: Backfill phonetics if they are mostly missing and the user is on a premium tier
   const missingPhonetics = athletesWithJerseys.filter(a => !a.phoneticSimplified).length;
-  // If more than 30% are missing and it's a large roster (>= 15 players), or if it's almost entirely missing
-  const shouldBackfill = (tier === 'PRO' || tier === 'NETWORK') &&
-    (missingPhonetics > (athletesWithJerseys.length * 0.3)) &&
-    (athletesWithJerseys.length >= 10);
+  // Thresholds: Lowered for better coverage. If any are missing and we are in a high tier, or >15% missing for PRO
+  const isPremium = tier === 'PRO' || tier === 'NETWORK' || tier === 'STUDIO';
+  const shouldBackfill = isPremium && (
+    (missingPhonetics > 0 && athletesWithJerseys.length < 10) || // Small test snippets: always backfill if any missing
+    (missingPhonetics > (athletesWithJerseys.length * 0.15)) // Large rosters: backfill if >15% missing
+  );
 
   if (shouldBackfill) {
     console.log(`[Gemini] Phonetic gap detected (${missingPhonetics}/${athletesWithJerseys.length}). Triggering backfill pass...`);
@@ -1463,11 +1465,18 @@ export async function processRosterRawText(
       const namesForPhonetics = athletesWithJerseys.map(a => a.fullName);
       const phoneticsMap = await generateBatchPhonetics(namesForPhonetics, standardizedSport, tier);
 
-      // Merge phonetics back into athletes
+      // Build a normalized mapping for robust lookup
+      const normalizedPhoneticsMap: Record<string, { phoneticSimplified: string; phoneticIPA: string }> = {};
+      Object.entries(phoneticsMap).forEach(([name, data]) => {
+        normalizedPhoneticsMap[normalizePlayerName(name)] = data;
+      });
+
+      // Merge phonetics back into athletes using normalized matching
       athletesWithJerseys.forEach(a => {
-        if (!a.phoneticSimplified && phoneticsMap[a.fullName]) {
-          a.phoneticSimplified = phoneticsMap[a.fullName].phoneticSimplified;
-          a.phoneticIPA = phoneticsMap[a.fullName].phoneticIPA;
+        const normName = normalizePlayerName(a.fullName);
+        if (!a.phoneticSimplified && normalizedPhoneticsMap[normName]) {
+          a.phoneticSimplified = normalizedPhoneticsMap[normName].phoneticSimplified;
+          a.phoneticIPA = normalizedPhoneticsMap[normName].phoneticIPA;
         }
       });
       console.log(`[Gemini] Backfill complete. Added guides for ${Object.keys(phoneticsMap).length} players.`);
