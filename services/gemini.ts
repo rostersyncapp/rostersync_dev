@@ -1452,12 +1452,9 @@ export async function processRosterRawText(
 
   // SECOND PASS: Backfill phonetics if they are mostly missing and the user is on a premium tier
   const missingPhonetics = athletesWithJerseys.filter(a => !a.phoneticSimplified).length;
-  // Thresholds: Lowered for better coverage. If any are missing and we are in a high tier, or >15% missing for PRO
+  // Thresholds: For PRO, NETWORK, and STUDIO, ALWAYS backfill if any are missing.
   const isPremium = tier === 'PRO' || tier === 'NETWORK' || tier === 'STUDIO';
-  const shouldBackfill = isPremium && (
-    (missingPhonetics > 0 && athletesWithJerseys.length < 10) || // Small test snippets: always backfill if any missing
-    (missingPhonetics > (athletesWithJerseys.length * 0.15)) // Large rosters: backfill if >15% missing
-  );
+  const shouldBackfill = isPremium && missingPhonetics > 0;
 
   if (shouldBackfill) {
     console.log(`[Gemini] Phonetic gap detected (${missingPhonetics}/${athletesWithJerseys.length}). Triggering backfill pass...`);
@@ -1547,7 +1544,7 @@ export async function generateBatchPhonetics(
   Guidelines:
   1. Return one entry for EVERY name provided in the list. Do not skip any players.
   2. Use 'phoneticSimplified' for a readable, capitalized-stress guide (e.g. 'fuh-NET-ik').
-  3. Use 'phoneticIPA' for standard International Phonetic Alphabet symbols.
+  ${tier === 'NETWORK' ? "3. Use 'phoneticIPA' for standard International Phonetic Alphabet symbols." : "3. Leave 'phoneticIPA' as an empty string (IPA is only for NETWORK tier)."}
   4. Accuracy is critical for ${sport} broadcast usage.
   5. Return a JSON object with a 'results' array.`;
 
