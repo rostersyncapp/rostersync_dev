@@ -7,6 +7,7 @@ import AdminPanel from './components/AdminPanel.tsx';
 import LandingPage from './components/LandingPage.tsx';
 import SupportCard from './components/SupportCard.tsx';
 import SupportPage from './components/SupportPage.tsx';
+import WNBAHistoricalBrowser from './components/WNBAHistoricalBrowser.tsx';
 import { Roster, Profile, Project } from './types.ts';
 import { processRosterRawText, ProcessedRoster } from './services/gemini.ts';
 import { TeamSelectionModal } from './components/TeamSelectionModal.tsx';
@@ -505,7 +506,7 @@ const App: React.FC = () => {
         profileData = newProfile;
       } else {
         profileData = existingProfile;
-        
+
         // Auto-promote test email to admin if not already
         if (isTestEmail && !existingProfile.is_admin) {
           await supabase
@@ -970,6 +971,7 @@ const App: React.FC = () => {
                 {view === 'settings' && <Settings profile={profile} rosters={rosters} onUpdate={async (updates) => {
                   setProfile(prev => ({ ...prev, ...updates }));
                 }} />}
+                {view === 'wnba-archive' && <WNBAHistoricalBrowser onSave={handleSaveRoster} userTier={profile.subscriptionTier} />}
                 {view === 'support' && (
                   <SupportPage darkMode={darkMode} />
                 )}
