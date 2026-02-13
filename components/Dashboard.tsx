@@ -606,8 +606,8 @@ export const Dashboard: React.FC<Props> = ({
                       </div>
                       <div className="flex items-end h-full pt-6">
                         <div className="flex gap-2">
-                          <button onClick={handleUpdateMetadata} className="p-3.5 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 shadow-lg shadow-emerald-500/20 active:scale-95 transition-all"><Check size={20} /></button>
-                          <button onClick={() => setIsEditingMetadata(false)} className="p-3.5 bg-gray-100 dark:bg-gray-800 text-gray-500 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700 active:scale-95 transition-all"><X size={20} /></button>
+                          <button onClick={handleUpdateMetadata} className="p-3.5 bg-emerald-500 text-white rounded-2xl hover:bg-emerald-600 shadow-lg shadow-emerald-500/20 active:scale-95 transition-all"><Check size={20} /></button>
+                          <button onClick={() => setIsEditingMetadata(false)} className="p-3.5 bg-gray-100 dark:bg-gray-800 text-gray-500 rounded-2xl hover:bg-gray-200 dark:hover:bg-gray-700 active:scale-95 transition-all"><X size={20} /></button>
                         </div>
                       </div>
                     </div>
@@ -1044,7 +1044,7 @@ export const Dashboard: React.FC<Props> = ({
         {rosterToDelete && (
           <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
             <div className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={() => setRosterToDelete(null)} />
-            <div className="bg-white dark:bg-gray-900 rounded-3xl p-8 max-w-sm w-full shadow-2xl relative z-10 border border-gray-100 dark:border-gray-800 animate-in zoom-in-95 fade-in duration-200">
+            <div className="bg-white dark:bg-gray-900 rounded-2xl p-8 max-w-sm w-full shadow-2xl relative z-10 border border-gray-100 dark:border-gray-800 animate-in zoom-in-95 fade-in duration-200">
               <div className="w-16 h-16 bg-red-50 dark:bg-red-950/30 rounded-2xl flex items-center justify-center mb-6 mx-auto">
                 <Trash2 size={32} className="text-red-500" />
               </div>
@@ -1109,7 +1109,7 @@ export const Dashboard: React.FC<Props> = ({
       {/* Stats Grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
         {/* Athletes Card */}
-        <div className="group relative bg-white/40 dark:bg-gray-900/40 backdrop-blur-xl p-6 rounded-3xl border border-white/20 dark:border-gray-800/50 shadow-xl transition-all hover:scale-[1.02] hover:shadow-blue-500/10 overflow-hidden">
+        <div className="group relative bg-white/40 dark:bg-gray-900/40 backdrop-blur-xl p-6 rounded-2xl border border-white/20 dark:border-gray-800/50 shadow-xl transition-all hover:scale-[1.02] hover:shadow-blue-500/10 overflow-hidden">
           <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 blur-3xl -mr-16 -mt-16 group-hover:bg-blue-500/20 transition-colors"></div>
           <div className="flex items-center justify-between mb-4">
             <div className="w-10 h-10 rounded-2xl bg-blue-500/10 text-blue-500 flex items-center justify-center shadow-inner"><Users size={20} /></div>
@@ -1124,7 +1124,7 @@ export const Dashboard: React.FC<Props> = ({
         {/* Health Card */}
         <div
           onClick={() => setIsHealthModalOpen(true)}
-          className="group relative bg-white/40 dark:bg-gray-900/40 backdrop-blur-xl p-6 rounded-3xl border border-white/20 dark:border-gray-800/50 shadow-xl transition-all hover:scale-[1.02] hover:shadow-emerald-500/10 overflow-hidden cursor-pointer"
+          className="group relative bg-white/40 dark:bg-gray-900/40 backdrop-blur-xl p-6 rounded-2xl border border-white/20 dark:border-gray-800/50 shadow-xl transition-all hover:scale-[1.02] hover:shadow-emerald-500/10 overflow-hidden cursor-pointer"
         >
           <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 blur-3xl -mr-16 -mt-16 group-hover:bg-emerald-500/20 transition-colors"></div>
           <div className="flex items-center justify-between mb-4">
@@ -1165,7 +1165,7 @@ export const Dashboard: React.FC<Props> = ({
                   </div>
 
                   <div className="grid grid-cols-1 gap-6">
-                    <div className="bg-emerald-500/5 dark:bg-emerald-500/10 rounded-3xl p-8 border border-emerald-500/10">
+                    <div className="bg-emerald-500/5 dark:bg-emerald-500/10 rounded-2xl p-8 border border-emerald-500/10">
                       <div className="flex items-end justify-between mb-2">
                         <div className="text-[11px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-[0.2em] font-mono">Overall Score</div>
                         <div className="text-5xl font-black text-emerald-500 tracking-tighter">{healthScore}%</div>
@@ -1176,11 +1176,11 @@ export const Dashboard: React.FC<Props> = ({
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
-                      <div className="p-6 bg-gray-50/50 dark:bg-gray-800/50 rounded-3xl border border-gray-100 dark:border-gray-700/50">
+                      <div className="p-6 bg-gray-50/50 dark:bg-gray-800/50 rounded-2xl border border-gray-100 dark:border-gray-700/50">
                         <div className="text-gray-400 font-bold text-[10px] uppercase tracking-widest mb-1 font-mono">Total Athletes</div>
                         <div className="text-2xl font-black text-gray-900 dark:text-white">{totalAthletes}</div>
                       </div>
-                      <div className="p-6 bg-emerald-50/50 dark:bg-emerald-500/5 rounded-3xl border border-emerald-100/50 dark:border-emerald-500/10">
+                      <div className="p-6 bg-emerald-50/50 dark:bg-emerald-500/5 rounded-2xl border border-emerald-100/50 dark:border-emerald-500/10">
                         <div className="text-emerald-600 dark:text-emerald-400 font-bold text-[10px] uppercase tracking-widest mb-1 font-mono">Complete</div>
                         <div className="text-2xl font-black text-emerald-500">{totalAthletes - totalMissingData}</div>
                       </div>
@@ -1276,7 +1276,7 @@ export const Dashboard: React.FC<Props> = ({
         )}
 
         {/* Time Saved Card */}
-        <div className="group relative bg-white/40 dark:bg-gray-900/40 backdrop-blur-xl p-6 rounded-3xl border border-white/20 dark:border-gray-800/50 shadow-xl transition-all hover:scale-[1.02] hover:shadow-purple-500/10 overflow-hidden">
+        <div className="group relative bg-white/40 dark:bg-gray-900/40 backdrop-blur-xl p-6 rounded-2xl border border-white/20 dark:border-gray-800/50 shadow-xl transition-all hover:scale-[1.02] hover:shadow-purple-500/10 overflow-hidden">
           <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 blur-3xl -mr-16 -mt-16 group-hover:bg-purple-500/20 transition-colors"></div>
           <div className="flex items-center justify-between mb-4">
             <div className="w-10 h-10 rounded-2xl bg-purple-500/10 text-purple-500 flex items-center justify-center shadow-inner"><Clock size={20} /></div>
@@ -1287,7 +1287,7 @@ export const Dashboard: React.FC<Props> = ({
         </div>
 
         {/* Usage Card */}
-        <div className="group relative bg-white/40 dark:bg-gray-900/40 backdrop-blur-xl p-6 rounded-3xl border border-white/20 dark:border-gray-800/50 shadow-xl transition-all hover:scale-[1.02] hover:shadow-indigo-500/10 overflow-hidden">
+        <div className="group relative bg-white/40 dark:bg-gray-900/40 backdrop-blur-xl p-6 rounded-2xl border border-white/20 dark:border-gray-800/50 shadow-xl transition-all hover:scale-[1.02] hover:shadow-indigo-500/10 overflow-hidden">
           <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 blur-3xl -mr-16 -mt-16 group-hover:bg-indigo-500/20 transition-colors"></div>
           <div className="flex items-center justify-between mb-4">
             <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center shadow-inner"><Zap size={20} /></div>
@@ -1480,7 +1480,7 @@ export const Dashboard: React.FC<Props> = ({
         {rosterToDelete && (
           <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
             <div className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={() => setRosterToDelete(null)} />
-            <div className="bg-white dark:bg-gray-900 rounded-3xl p-8 max-w-sm w-full shadow-2xl relative z-10 border border-gray-100 dark:border-gray-800 animate-in zoom-in-95 fade-in duration-200">
+            <div className="bg-white dark:bg-gray-900 rounded-2xl p-8 max-w-sm w-full shadow-2xl relative z-10 border border-gray-100 dark:border-gray-800 animate-in zoom-in-95 fade-in duration-200">
               <div className="w-16 h-16 bg-red-50 dark:bg-red-950/30 rounded-2xl flex items-center justify-center mb-6 mx-auto">
                 <Trash2 size={32} className="text-red-500" />
               </div>

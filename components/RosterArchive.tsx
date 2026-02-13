@@ -365,10 +365,10 @@ export default function RosterArchive({ onSave, userTier = 'BASIC' }: RosterArch
     return (
         <div className="max-w-7xl mx-auto p-4 sm:p-8 space-y-8 animate-in fade-in duration-500">
             {/* Header Section */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white dark:bg-gray-900 p-8 rounded-[32px] border border-gray-100 dark:border-gray-800 shadow-sm">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white dark:bg-gray-900 p-8 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
                 <div className="flex items-center gap-6">
-                    <div className="p-4 bg-primary/10 rounded-2xl">
-                        <Library className="text-primary" size={32} />
+                    <div className="p-4 bg-[#5B5FFF]/10 rounded-xl text-[#5B5FFF]">
+                        <Library size={32} />
                     </div>
                     <div>
                         <h1 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight uppercase">Roster Archive</h1>
@@ -380,7 +380,7 @@ export default function RosterArchive({ onSave, userTier = 'BASIC' }: RosterArch
             {/* Selectors Section */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* League Selector */}
-                <div className="bg-white dark:bg-gray-900 p-6 rounded-[32px] border border-gray-100 dark:border-gray-800 shadow-sm space-y-4">
+                <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm space-y-4">
                     <div className="flex items-center gap-3 px-2">
                         <Globe size={18} className="text-gray-400" />
                         <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Select League</span>
@@ -388,7 +388,7 @@ export default function RosterArchive({ onSave, userTier = 'BASIC' }: RosterArch
                     <select
                         value={selectedLeagueId}
                         onChange={(e) => setSelectedLeagueId(e.target.value)}
-                        className="w-full px-5 py-4 bg-gray-50 dark:bg-gray-800/50 border-none rounded-2xl focus:ring-2 focus:ring-primary font-bold dark:text-white appearance-none"
+                        className="w-full px-5 py-4 bg-gray-50 dark:bg-gray-800/50 border-none rounded-2xl focus:ring-2 focus:ring-[#5B5FFF] font-bold dark:text-white appearance-none"
                     >
                         {LEAGUES.map((league) => (
                             <option key={league.id} value={league.id}>
@@ -399,7 +399,7 @@ export default function RosterArchive({ onSave, userTier = 'BASIC' }: RosterArch
                 </div>
 
                 {/* Team Selector */}
-                <div className="bg-white dark:bg-gray-900 p-6 rounded-[32px] border border-gray-100 dark:border-gray-800 shadow-sm space-y-4">
+                <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm space-y-4">
                     <div className="flex items-center gap-3 px-2">
                         <Search size={18} className="text-gray-400" />
                         <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Select Team</span>
@@ -407,7 +407,7 @@ export default function RosterArchive({ onSave, userTier = 'BASIC' }: RosterArch
                     <select
                         value={selectedTeamId}
                         onChange={(e) => setSelectedTeamId(e.target.value)}
-                        className="w-full px-5 py-4 bg-gray-50 dark:bg-gray-800/50 border-none rounded-2xl focus:ring-2 focus:ring-primary font-bold dark:text-white appearance-none"
+                        className="w-full px-5 py-4 bg-gray-50 dark:bg-gray-800/50 border-none rounded-2xl focus:ring-2 focus:ring-[#5B5FFF] font-bold dark:text-white appearance-none"
                     >
                         <option value="">{loading ? 'Loading teams...' : `Choose ${currentLeague.name} Team...`}</option>
                         {teams.map(team => (
@@ -419,7 +419,7 @@ export default function RosterArchive({ onSave, userTier = 'BASIC' }: RosterArch
                 </div>
 
                 {/* Season Selector */}
-                <div className="bg-white dark:bg-gray-900 p-6 rounded-[32px] border border-gray-100 dark:border-gray-800 shadow-sm space-y-4">
+                <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm space-y-4">
                     <div className="flex items-center gap-3 px-2">
                         <Archive size={18} className="text-gray-400" />
                         <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Select Season</span>
@@ -428,7 +428,7 @@ export default function RosterArchive({ onSave, userTier = 'BASIC' }: RosterArch
                         value={selectedSeason || ''}
                         onChange={(e) => setSelectedSeason(parseInt(e.target.value))}
                         disabled={!selectedTeamId || availableSeasons.length === 0}
-                        className="w-full px-5 py-4 bg-gray-50 dark:bg-gray-800/50 border-none rounded-2xl focus:ring-2 focus:ring-primary font-bold dark:text-white disabled:opacity-50 appearance-none"
+                        className="w-full px-5 py-4 bg-gray-50 dark:bg-gray-800/50 border-none rounded-2xl focus:ring-2 focus:ring-[#5B5FFF] font-bold dark:text-white disabled:opacity-50 appearance-none"
                     >
                         <option value="">{availableSeasons.length === 0 ? 'No seasons available' : 'Choose Season...'}</option>
                         {availableSeasons.map(year => (
@@ -445,14 +445,14 @@ export default function RosterArchive({ onSave, userTier = 'BASIC' }: RosterArch
                 <div className="space-y-6">
                     {/* Team Hero Card */}
                     <div
-                        className="p-8 rounded-[40px] flex flex-col md:flex-row items-center justify-between gap-8 border-l-8 animate-in slide-in-from-left duration-700"
+                        className="p-8 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-8 border-l-8 animate-in slide-in-from-left duration-700"
                         style={{
                             backgroundColor: (selectedTeam.primary_color || currentLeague.primaryColor) + '15',
                             borderColor: selectedTeam.primary_color || currentLeague.primaryColor
                         }}
                     >
                         <div className="flex items-center gap-8">
-                            <div className="w-24 h-24 bg-white dark:bg-gray-800 p-4 rounded-3xl shadow-xl shadow-black/5 flex items-center justify-center">
+                            <div className="w-24 h-24 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-xl shadow-black/5 flex items-center justify-center">
                                 {selectedTeam.logo_url ? (
                                     <img src={selectedTeam.logo_url} alt={selectedTeam.display_name} className="w-full h-full object-contain" />
                                 ) : (
@@ -461,7 +461,7 @@ export default function RosterArchive({ onSave, userTier = 'BASIC' }: RosterArch
                             </div>
                             <div className="space-y-1">
                                 <div className="flex items-center gap-3">
-                                    <span className="px-3 py-1 bg-white/50 dark:bg-black/20 rounded-full text-[10px] font-black text-primary uppercase tracking-widest">
+                                    <span className="px-3 py-1 bg-white/50 dark:bg-black/20 rounded-full text-[10px] font-black text-[#5B5FFF] uppercase tracking-widest">
                                         {currentLeague.name}
                                     </span>
                                 </div>
@@ -478,14 +478,14 @@ export default function RosterArchive({ onSave, userTier = 'BASIC' }: RosterArch
                         <div className="flex gap-4">
                             <button
                                 onClick={handleSaveToLibrary}
-                                className="flex items-center gap-3 px-8 py-5 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-[20px] font-black text-sm uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl"
+                                className="flex items-center gap-3 px-8 py-5 primary-gradient text-white rounded-[20px] font-black text-sm uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl shadow-[#5B5FFF]/20"
                             >
                                 <Save size={18} />
                                 Import to Library
                             </button>
                             <button
                                 onClick={handleExportCSV}
-                                className="flex items-center gap-3 px-8 py-5 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 text-gray-900 dark:text-white rounded-[20px] font-black text-sm uppercase tracking-widest hover:bg-gray-50 transition-all shadow-lg"
+                                className="flex items-center gap-3 px-8 py-5 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 text-gray-900 dark:text-white rounded-[20px] font-black text-sm uppercase tracking-widest hover:bg-gray-50 dark:hover:bg-gray-700 transition-all shadow-lg"
                             >
                                 <Download size={18} />
                                 Export CSV
@@ -494,7 +494,7 @@ export default function RosterArchive({ onSave, userTier = 'BASIC' }: RosterArch
                     </div>
 
                     {/* Roster Table */}
-                    <div className="bg-white dark:bg-gray-900 rounded-[40px] border border-gray-100 dark:border-gray-800 overflow-hidden shadow-sm">
+                    <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 overflow-hidden shadow-sm">
                         <div className="overflow-x-auto">
                             <table className="w-full">
                                 <thead className="bg-gray-50 dark:bg-gray-800/30 border-b border-gray-50 dark:border-gray-800">
@@ -519,13 +519,13 @@ export default function RosterArchive({ onSave, userTier = 'BASIC' }: RosterArch
                                                             onError={(e) => e.currentTarget.style.display = 'none'}
                                                         />
                                                     )}
-                                                    <span className="font-bold text-gray-700 dark:text-gray-200 border-b-2 border-transparent group-hover:border-primary/30 transition-all">
+                                                    <span className="font-bold text-gray-700 dark:text-gray-200 border-b-2 border-transparent group-hover:border-[#5B5FFF]/30 transition-all">
                                                         {player.player_name}
                                                     </span>
                                                 </div>
                                             </td>
                                             <td className="px-8 py-5">
-                                                <span className="px-3 py-1 bg-gray-100 dark:bg-gray-800 rounded-lg text-[10px] font-black uppercase text-gray-500 tracking-wider">
+                                                <span className="px-3 py-1 bg-[#5B5FFF]/10 dark:bg-[#5B5FFF]/20 rounded-lg text-[10px] font-black uppercase text-[#5B5FFF] tracking-wider">
                                                     {player.position || 'UNK'}
                                                 </span>
                                             </td>
@@ -543,9 +543,9 @@ export default function RosterArchive({ onSave, userTier = 'BASIC' }: RosterArch
                     </div>
                 </div>
             ) : (
-                <div className="flex flex-col items-center justify-center py-32 bg-white dark:bg-gray-900 rounded-[40px] border-2 border-dashed border-gray-100 dark:border-gray-800 animate-in fade-in duration-1000">
-                    <div className="p-6 bg-gray-50 dark:bg-gray-800 rounded-full mb-6">
-                        <Library className="text-gray-300 dark:text-gray-600" size={64} />
+                <div className="flex flex-col items-center justify-center py-32 bg-white dark:bg-gray-900 rounded-2xl border-2 border-dashed border-gray-100 dark:border-gray-800 animate-in fade-in duration-1000">
+                    <div className="p-6 bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/10 rounded-full mb-6 text-[#5B5FFF]">
+                        <Library className="opacity-40" size={64} />
                     </div>
                     <h3 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tight">Select your Target Roster</h3>
                     <p className="text-gray-400 font-medium max-w-xs text-center mt-2">
@@ -564,7 +564,7 @@ export default function RosterArchive({ onSave, userTier = 'BASIC' }: RosterArch
             {/* Loading Overlay */}
             {loading && !roster.length && (
                 <div className="flex flex-col items-center justify-center py-32 space-y-6">
-                    <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin shadow-lg"></div>
+                    <div className="w-16 h-16 border-4 border-[#5B5FFF] border-t-transparent rounded-full animate-spin shadow-lg"></div>
                     <p className="font-black text-gray-400 uppercase tracking-widest text-xs animate-pulse">Syncing Archive Database...</p>
                 </div>
             )}
