@@ -19,7 +19,7 @@ This feature allows users to browse and export WNBA team rosters from the league
    - Colors and logos
    - Foundation year and active status
 
-2. **`wnba_historical_rosters`** - Stores player roster data
+2. **`wnba_rosters`** - Stores player roster data
    - Player name, jersey number, position
    - Height, weight, birth date
    - College and years pro
@@ -71,22 +71,34 @@ Core service functions:
 
 ## Data Population
 
-### Seeding Script
+### StatMuse Scraper (Recommended)
 
-Run the seeding script to populate historical data:
+The most accurate source for 2025 and historical data is StatMuse:
+
+```bash
+# Seed 2025 rosters for all teams (default)
+npx tsx scripts/seed_wnba_statmuse.ts
+
+# Seed specific range (e.g., 2020 to 2024)
+npx tsx scripts/seed_wnba_statmuse.ts 2020 2024
+```
+
+### ESPN Seeding Script
+
+Run the legacy seeding script to populate data from ESPN:
 
 ```bash
 # Seed all teams and all seasons
 npx ts-node scripts/seed-wnba-rosters.ts
+```
 
-# Seed specific team
-npx ts-node scripts/seed-wnba-rosters.ts --team=atlanta-dream
+### Wikipedia Historical Scraper
 
-# Seed specific season for all teams
-npx ts-node scripts/seed-wnba-rosters.ts --season=2024
+For deep historical data (1997-present), you can also use:
 
-# Seed specific team and season
-npx ts-node scripts/seed-wnba-rosters.ts --team=las-vegas-aces --season=2024
+```bash
+# Seed specific range from Wikipedia
+npx ts-node scripts/seed_wnba_historical.ts 2000 2024
 ```
 
 **Note**: The seeding script fetches data from ESPN's API. Early historical data (1997-2000s) may be incomplete.

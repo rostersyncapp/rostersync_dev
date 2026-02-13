@@ -7,12 +7,7 @@ import AdminPanel from './components/AdminPanel.tsx';
 import LandingPage from './components/LandingPage.tsx';
 import SupportCard from './components/SupportCard.tsx';
 import SupportPage from './components/SupportPage.tsx';
-import WNBAHistoricalBrowser from './components/WNBAHistoricalBrowser.tsx';
-import NFLHistoricalBrowser from './components/NFLHistoricalBrowser.tsx';
-import MLSHistoricalBrowser from './components/MLSHistoricalBrowser.tsx';
-import NWSLHistoricalBrowser from './components/NWSLHistoricalBrowser.tsx';
-import USLHistoricalBrowser from './components/USLHistoricalBrowser.tsx';
-import NCAAHistoricalBrowser from './components/NCAAHistoricalBrowser.tsx';
+import RosterArchive from './components/RosterArchive.tsx';
 import { Roster, Profile, Project } from './types.ts';
 import { processRosterRawText, ProcessedRoster } from './services/gemini.ts';
 import { TeamSelectionModal } from './components/TeamSelectionModal.tsx';
@@ -57,7 +52,8 @@ import {
   AlertCircle,
   Bot,
   Archive,
-  Trophy
+  Trophy,
+  Library
 } from 'lucide-react';
 
 const ICON_MAP: Record<string, any> = {
@@ -252,16 +248,16 @@ const App: React.FC = () => {
   const { openSignIn, openSignUp } = useClerk();
 
   // All hooks must be called unconditionally - no early returns before hooks
-  const [view, setView] = useState<'dashboard' | 'engine' | 'settings' | 'admin' | 'wnba-archive' | 'nfl-archive' | 'mls-archive' | 'nwsl-archive' | 'usl-archive' | 'ncaa-archive' | 'support'>('dashboard');
+  const [view, setView] = useState<'dashboard' | 'engine' | 'settings' | 'admin' | 'roster-archive' | 'support'>('dashboard');
 
   useEffect(() => {
     const saved = localStorage.getItem('lastView');
-    if (saved === 'engine' || saved === 'settings' || saved === 'admin' || saved === 'wnba-archive' || saved === 'nfl-archive' || saved === 'mls-archive' || saved === 'nwsl-archive' || saved === 'usl-archive') {
+    if (saved === 'engine' || saved === 'settings' || saved === 'admin' || saved === 'roster-archive') {
       setView(saved as any);
     }
   }, []);
 
-  const handleSetView = (newView: 'dashboard' | 'engine' | 'settings' | 'admin' | 'wnba-archive' | 'nfl-archive' | 'mls-archive' | 'nwsl-archive' | 'usl-archive' | 'ncaa-archive' | 'support') => {
+  const handleSetView = (newView: 'dashboard' | 'engine' | 'settings' | 'admin' | 'roster-archive' | 'support') => {
     setView(newView);
     localStorage.setItem('lastView', newView);
   };
@@ -829,29 +825,9 @@ const App: React.FC = () => {
                     <Bot size={20} />
                     <span className="hidden lg:block text-[14px]">AI Scout</span>
                   </button>
-                  <button onClick={() => handleSetView('wnba-archive')} className={`w-full flex items-center gap-3 p-2 rounded-lg transition-all ${view === 'wnba-archive' ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF] font-bold' : 'text-gray-500 hover:bg-gray-50 font-medium'}`}>
-                    <Archive size={20} />
-                    <span className="hidden lg:block text-[14px]">WNBA Archive</span>
-                  </button>
-                  <button onClick={() => handleSetView('nfl-archive')} className={`w-full flex items-center gap-3 p-2 rounded-lg transition-all ${view === 'nfl-archive' ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF] font-bold' : 'text-gray-500 hover:bg-gray-50 font-medium'}`}>
-                    <Trophy size={20} />
-                    <span className="hidden lg:block text-[14px]">NFL Archive</span>
-                  </button>
-                  <button onClick={() => handleSetView('mls-archive')} className={`w-full flex items-center gap-3 p-2 rounded-lg transition-all ${view === 'mls-archive' ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF] font-bold' : 'text-gray-500 hover:bg-gray-50 font-medium'}`}>
-                    <Globe size={20} />
-                    <span className="hidden lg:block text-[14px]">MLS Archive</span>
-                  </button>
-                  <button onClick={() => handleSetView('nwsl-archive')} className={`w-full flex items-center gap-3 p-2 rounded-lg transition-all ${view === 'nwsl-archive' ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF] font-bold' : 'text-gray-500 hover:bg-gray-50 font-medium'}`}>
-                    <Globe size={20} className="text-fuchsia-500" />
-                    <span className="hidden lg:block text-[14px]">NWSL Archive</span>
-                  </button>
-                  <button onClick={() => handleSetView('usl-archive')} className={`w-full flex items-center gap-3 p-2 rounded-lg transition-all ${view === 'usl-archive' ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF] font-bold' : 'text-gray-500 hover:bg-gray-50 font-medium'}`}>
-                    <Globe size={20} className="text-amber-500" />
-                    <span className="hidden lg:block text-[14px]">USL Archive</span>
-                  </button>
-                  <button onClick={() => handleSetView('ncaa-archive')} className={`w-full flex items-center gap-3 p-2 rounded-lg transition-all ${view === 'ncaa-archive' ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF] font-bold' : 'text-gray-500 hover:bg-gray-50 font-medium'}`}>
-                    <Trophy size={20} className="text-red-600" />
-                    <span className="hidden lg:block text-[14px]">NCAA Football</span>
+                  <button onClick={() => handleSetView('roster-archive')} className={`w-full flex items-center gap-3 p-2 rounded-lg transition-all ${view === 'roster-archive' ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF] font-bold' : 'text-gray-500 hover:bg-gray-50 font-medium'}`}>
+                    <Library size={20} />
+                    <span className="hidden lg:block text-[14px]">Roster Archive</span>
                   </button>
                   <button onClick={() => handleSetView('settings')} className={`w-full flex items-center gap-3 p-2 rounded-lg transition-all ${view === 'settings' ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF] font-bold' : 'text-gray-500 hover:bg-gray-100 font-medium'}`}><SettingsIcon size={20} /><span className="hidden lg:block text-[14px]">Settings</span></button>
                   {profile?.is_admin && (
@@ -1002,12 +978,7 @@ const App: React.FC = () => {
                 {view === 'settings' && <Settings profile={profile} rosters={rosters} onUpdate={async (updates) => {
                   setProfile(prev => ({ ...prev, ...updates }));
                 }} />}
-                {view === 'wnba-archive' && <WNBAHistoricalBrowser onSave={handleSaveRoster} userTier={profile.subscriptionTier} />}
-                {view === 'nfl-archive' && <NFLHistoricalBrowser onSave={handleSaveRoster} userTier={profile.subscriptionTier} />}
-                {view === 'mls-archive' && <MLSHistoricalBrowser onSave={handleSaveRoster} userTier={profile.subscriptionTier} />}
-                {view === 'nwsl-archive' && <NWSLHistoricalBrowser onSave={handleSaveRoster} userTier={profile.subscriptionTier} />}
-                {view === 'usl-archive' && <USLHistoricalBrowser onSave={handleSaveRoster} userTier={profile.subscriptionTier} />}
-                {view === 'ncaa-archive' && <NCAAHistoricalBrowser onSave={handleSaveRoster} userTier={profile.subscriptionTier} />}
+                {view === 'roster-archive' && <RosterArchive onSave={handleSaveRoster} userTier={profile.subscriptionTier} />}
                 {view === 'support' && (
                   <SupportPage darkMode={darkMode} />
                 )}

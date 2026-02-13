@@ -70,7 +70,7 @@ export async function getWNBATeamSeasons(teamId: string): Promise<number[]> {
  */
 export async function getWNBARoster(teamId: string, seasonYear: number): Promise<WNBAPlayer[]> {
   const { data, error } = await supabase
-    .from('wnba_historical_rosters')
+    .from('wnba_rosters')
     .select('*')
     .eq('team_id', teamId)
     .eq('season_year', seasonYear)
@@ -166,11 +166,11 @@ export function getWNBATeamMetadata(team: WNBATeam): TeamMetadata {
 export function getAvailableSeasons(): number[] {
   const currentYear = new Date().getFullYear();
   const seasons: number[] = [];
-  
+
   for (let year = currentYear; year >= 1997; year--) {
     seasons.push(year);
   }
-  
+
   return seasons;
 }
 
@@ -181,7 +181,7 @@ export async function fetchRosterFromESPN(teamId: string, seasonYear: number): P
   // WNBA ESPN API endpoint
   // Note: ESPN API structure for WNBA: /wnba/teams/{team_id}/roster
   const url = `https://site.api.espn.com/apis/site/v2/sports/basketball/wnba/teams/${teamId}/roster?season=${seasonYear}`;
-  
+
   try {
     const response = await fetch(url);
     if (!response.ok) {
@@ -189,7 +189,7 @@ export async function fetchRosterFromESPN(teamId: string, seasonYear: number): P
     }
 
     const data = await response.json();
-    
+
     if (!data.athletes || !Array.isArray(data.athletes)) {
       return [];
     }
@@ -214,8 +214,8 @@ export async function fetchRosterFromESPN(teamId: string, seasonYear: number): P
  * Save roster data to database (for data population)
  */
 export async function saveRosterToDatabase(
-  teamId: string, 
-  seasonYear: number, 
+  teamId: string,
+  seasonYear: number,
   players: WNBAPlayer[]
 ): Promise<void> {
   const records = players.map(player => ({
@@ -232,7 +232,7 @@ export async function saveRosterToDatabase(
   }));
 
   const { error } = await supabase
-    .from('wnba_historical_rosters')
+    .from('wnba_rosters')
     .upsert(records, {
       onConflict: 'team_id,season_year,player_name',
       ignoreDuplicates: false

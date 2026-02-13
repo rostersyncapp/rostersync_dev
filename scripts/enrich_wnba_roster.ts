@@ -99,7 +99,7 @@ async function enrichPlayer(playerId: string, playerName: string): Promise<boole
 
     // Update database
     const { error } = await supabase
-        .from('wnba_historical_rosters')
+        .from('wnba_rosters')
         .update({
             player_id: espnData.espn_id,
         })
@@ -128,7 +128,7 @@ async function enrichTeamSeason(teamId: string, seasonYear: number) {
 
     // Fetch current roster
     const { data: roster, error } = await supabase
-        .from('wnba_historical_rosters')
+        .from('wnba_rosters')
         .select('*')
         .eq('team_id', teamId)
         .eq('season_year', seasonYear)
@@ -188,7 +188,7 @@ async function enrichTeamSeason(teamId: string, seasonYear: number) {
 
     // Final summary
     const { data: updatedRoster } = await supabase
-        .from('wnba_historical_rosters')
+        .from('wnba_rosters')
         .select('*')
         .eq('team_id', teamId)
         .eq('season_year', seasonYear);

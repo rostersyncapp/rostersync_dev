@@ -18,28 +18,30 @@ if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
-const WNBA_TEAMS = [
-    { id: 'atlanta-dream', name: 'Atlanta Dream', startYear: 2008 },
-    { id: 'chicago-sky', name: 'Chicago Sky', startYear: 2006 },
-    { id: 'connecticut-sun', name: 'Connecticut Sun', startYear: 1999 },
-    { id: 'indiana-fever', name: 'Indiana Fever', startYear: 2000 },
-    { id: 'new-york-liberty', name: 'New York Liberty', startYear: 1997 },
-    { id: 'washington-mystics', name: 'Washington Mystics', startYear: 1998 },
-    { id: 'dallas-wings', name: 'Dallas Wings', startYear: 2018 },
-    { id: 'las-vegas-aces', name: 'Las Vegas Aces', startYear: 2018 },
-    { id: 'los-angeles-sparks', name: 'Los Angeles Sparks', startYear: 1997 },
-    { id: 'minnesota-lynx', name: 'Minnesota Lynx', startYear: 1999 },
-    { id: 'phoenix-mercury', name: 'Phoenix Mercury', startYear: 1997 },
-    { id: 'seattle-storm', name: 'Seattle Storm', startYear: 2000 },
-];
-
 async function generateCoverageReport() {
     console.log('\n📊 WNBA Historical Roster Coverage Report\n');
     console.log('='.repeat(80));
 
+    // Get all teams
+    const { data: teams, error: teamsError } = await supabase
+        .from('wnba_teams')
+        .select('id, name, display_name, founded_year')
+        .order('display_name');
+
+    if (teamsError) {
+        console.error('❌ Error fetching teams:', teamsError);
+        process.exit(1);
+    }
+
+    const WNBA_TEAMS = (teams || []).map(t => ({
+        id: t.id,
+        name: t.display_name,
+        startYear: t.founded_year || 1997
+    }));
+
     // Get all seeded data
     const { data: allRosters, error } = await supabase
-        .from('wnba_historical_rosters')
+        .from('wnba_rosters')
         .select('team_id, season_year, player_name, jersey_number')
         .order('team_id, season_year, player_name');
 
@@ -174,7 +176,7 @@ async function generateCoverageReport() {
 
     // Check for jersey number coverage
     const { data: jerseyStats } = await supabase
-        .from('wnba_historical_rosters')
+        .from('wnba_rosters')
         .select('jersey_number')
         .not('jersey_number', 'is', null);
 

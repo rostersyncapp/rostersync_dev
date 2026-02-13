@@ -106,11 +106,11 @@ async function fetchRosterFromESPN(teamId: string, season: number): Promise<ESPN
 
   // ESPN API endpoint for WNBA rosters
   const url = `https://site.api.espn.com/apis/site/v2/sports/basketball/wnba/teams/${espnId}/roster?season=${season}`;
-  
+
   try {
     console.log(`  Fetching: ${url}`);
     const response = await fetch(url);
-    
+
     if (!response.ok) {
       if (response.status === 404) {
         console.log(`  No data available for ${teamId} in ${season}`);
@@ -120,7 +120,7 @@ async function fetchRosterFromESPN(teamId: string, season: number): Promise<ESPN
     }
 
     const data: ESPNRosterResponse = await response.json();
-    
+
     if (!data.athletes || !Array.isArray(data.athletes)) {
       console.log(`  No athletes data for ${teamId} in ${season}`);
       return [];
@@ -134,8 +134,8 @@ async function fetchRosterFromESPN(teamId: string, season: number): Promise<ESPN
 }
 
 async function saveRosterToDatabase(
-  teamId: string, 
-  season: number, 
+  teamId: string,
+  season: number,
   players: ESPNPlayer[]
 ): Promise<number> {
   if (players.length === 0) {
@@ -158,7 +158,7 @@ async function saveRosterToDatabase(
   }));
 
   const { error } = await supabase
-    .from('wnba_historical_rosters')
+    .from('wnba_rosters')
     .upsert(records, {
       onConflict: 'team_id,season_year,player_name',
       ignoreDuplicates: false
@@ -185,8 +185,8 @@ async function getTeamsFromDatabase(): Promise<string[]> {
 }
 
 async function seedTeamRosters(
-  teamId: string, 
-  startYear: number = 1997, 
+  teamId: string,
+  startYear: number = 1997,
   endYear: number = new Date().getFullYear()
 ): Promise<{ team: string; seasonsProcessed: number; totalPlayers: number }> {
   console.log(`\nProcessing team: ${teamId}`);
@@ -195,9 +195,9 @@ async function seedTeamRosters(
 
   for (let year = endYear; year >= startYear; year--) {
     // Skip years before team was founded (you could add this logic)
-    
+
     const players = await fetchRosterFromESPN(teamId, year);
-    
+
     if (players.length > 0) {
       const saved = await saveRosterToDatabase(teamId, year, players);
       totalPlayers += saved;
@@ -264,7 +264,7 @@ async function main() {
     // Summary
     console.log('\n\n📊 Seeding Summary');
     console.log('==================');
-    
+
     const totalSeasons = results.reduce((sum, r) => sum + r.seasonsProcessed, 0);
     const totalPlayersAll = results.reduce((sum, r) => sum + r.totalPlayers, 0);
 
