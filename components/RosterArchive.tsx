@@ -155,8 +155,8 @@ const LEAGUES: LeagueConfig[] = [
         sport: 'Basketball',
         primaryColor: '#FF6B00',
         params: {
-            seasons: (id) => ({ team_id: id }),
-            roster: (id, yr) => ({ team_id: id, season_year: yr })
+            seasons: (id) => ({ p_team_id: id }),
+            roster: (id, yr) => ({ p_team_id: id, p_season_year: yr })
         }
     }
 ];
