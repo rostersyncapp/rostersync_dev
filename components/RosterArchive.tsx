@@ -543,7 +543,7 @@ export default function RosterArchive({ onSave, userTier = 'BASIC' }: RosterArch
                     </div>
                 </div>
             ) : (
-                <div className="flex flex-col items-center justify-center py-32 bg-white dark:bg-gray-900 rounded-2xl border-2 border-dashed border-gray-100 dark:border-gray-800 animate-in fade-in duration-1000">
+                <div className="flex flex-col items-center justify-center py-32 bg-white dark:bg-gray-900 rounded-2xl border-2 border-dashed border-gray-100 dark:border-gray-800">
                     <div className="p-6 bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/10 rounded-full mb-6 text-[#5B5FFF]">
                         <Library className="opacity-40" size={64} />
                     </div>
