@@ -8,6 +8,9 @@
 
 import { createClient } from '@supabase/supabase-js';
 import * as cheerio from 'cheerio';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || '';
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
@@ -53,6 +56,18 @@ const WNBA_TEAMS: TeamConfig[] = [
     { id: 'minnesota-lynx', startYear: 1999, endYear: null, wikiMappings: [{ name: 'Minnesota_Lynx' }] },
     { id: 'phoenix-mercury', startYear: 1997, endYear: null, wikiMappings: [{ name: 'Phoenix_Mercury' }] },
     { id: 'seattle-storm', startYear: 2000, endYear: null, wikiMappings: [{ name: 'Seattle_Storm' }] },
+    // Defunct / Historical Teams
+    { id: 'charlotte-sting', startYear: 1997, endYear: 2006, wikiMappings: [{ name: 'Charlotte_Sting' }] },
+    { id: 'cleveland-rockers', startYear: 1997, endYear: 2003, wikiMappings: [{ name: 'Cleveland_Rockers' }] },
+    { id: 'houston-comets', startYear: 1997, endYear: 2008, wikiMappings: [{ name: 'Houston_Comets' }] },
+    { id: 'miami-sol', startYear: 2000, endYear: 2002, wikiMappings: [{ name: 'Miami_Sol' }] },
+    { id: 'portland-fire', startYear: 2000, endYear: 2002, wikiMappings: [{ name: 'Portland_Fire' }] },
+    { id: 'sacramento-monarchs', startYear: 1997, endYear: 2009, wikiMappings: [{ name: 'Sacramento_Monarchs' }] },
+    { id: 'orlando-miracle', startYear: 1999, endYear: 2002, wikiMappings: [{ name: 'Orlando_Miracle' }] },
+    { id: 'detroit-shock', startYear: 1998, endYear: 2009, wikiMappings: [{ name: 'Detroit_Shock' }] },
+    { id: 'tulsa-shock', startYear: 2010, endYear: 2015, wikiMappings: [{ name: 'Tulsa_Shock' }] },
+    { id: 'utah-starzz', startYear: 1997, endYear: 2002, wikiMappings: [{ name: 'Utah_Starzz' }] },
+    { id: 'san-antonio-stars', startYear: 2003, endYear: 2017, wikiMappings: [{ name: 'San_Antonio_Stars' }] }
 ];
 
 interface WNBARosterEntry {
@@ -178,12 +193,28 @@ async function fetchWikipediaRoster(teamId: string, teamWikiName: string, season
     } catch (error) { return []; }
 }
 
-async function seedAllTeams(startYear?: number, endYear?: number) {
-    const seedStartYear = startYear || 1997;
-    const seedEndYear = endYear || 2024;
+async function seedAllTeams() {
+    // Parse command line arguments
+    const args = process.argv.slice(2);
+    const teamArg = args.find(arg => arg.startsWith('--team='))?.split('=')[1];
+    const startYearArg = args.find(arg => arg.startsWith('--start='))?.split('=')[1];
+    const endYearArg = args.find(arg => arg.startsWith('--end='))?.split('=')[1];
+
+    const seedStartYear = startYearArg ? parseInt(startYearArg) : 1997;
+    const seedEndYear = endYearArg ? parseInt(endYearArg) : 2025;
+
     console.log(`\n🏀 WNBA Historical Roster Seeding (Supreme)\n📅 ${seedStartYear} - ${seedEndYear}\n`);
 
-    for (const team of WNBA_TEAMS) {
+    const teamsToProcess = teamArg
+        ? WNBA_TEAMS.filter(t => t.id === teamArg)
+        : WNBA_TEAMS;
+
+    if (teamsToProcess.length === 0) {
+        console.log(`❌ No teams found matching: ${teamArg}`);
+        return;
+    }
+
+    for (const team of teamsToProcess) {
         const teamStartYear = Math.max(team.startYear, seedStartYear);
         const teamEndYear = team.endYear ? Math.min(team.endYear, seedEndYear) : seedEndYear;
         console.log(`\n🏆 ${team.id.toUpperCase()}`);
@@ -203,7 +234,6 @@ async function seedAllTeams(startYear?: number, endYear?: number) {
     console.log(`\n✅ Seeding Complete!`);
 }
 
-const args = process.argv.slice(2);
-seedAllTeams(args[0] ? parseInt(args[0]) : undefined, args[1] ? parseInt(args[1]) : undefined)
+seedAllTeams()
     .then(() => process.exit(0))
     .catch(error => { console.error('\n❌ Fatal error:', error); process.exit(1); });
