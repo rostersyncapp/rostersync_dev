@@ -363,7 +363,7 @@ export default function RosterArchive({ onSave, userTier = 'BASIC' }: RosterArch
     const selectedTeam = teams.find(t => t.id === selectedTeamId);
 
     return (
-        <div className="max-w-7xl mx-auto p-4 sm:p-8 space-y-8 animate-in fade-in duration-500">
+        <div className="max-w-7xl mx-auto p-4 sm:p-8 space-y-8">
             {/* Header Section */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white dark:bg-gray-900 p-8 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm">
                 <div className="flex items-center gap-6">
@@ -445,7 +445,7 @@ export default function RosterArchive({ onSave, userTier = 'BASIC' }: RosterArch
                 <div className="space-y-6">
                     {/* Team Hero Card */}
                     <div
-                        className="p-8 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-8 border-l-8 animate-in slide-in-from-left duration-700"
+                        className="p-8 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-8 border-l-8"
                         style={{
                             backgroundColor: (selectedTeam.primary_color || currentLeague.primaryColor) + '15',
                             borderColor: selectedTeam.primary_color || currentLeague.primaryColor
@@ -556,7 +556,7 @@ export default function RosterArchive({ onSave, userTier = 'BASIC' }: RosterArch
 
             {/* Error Message */}
             {error && (
-                <div className="fixed bottom-8 right-8 bg-red-600 text-white px-8 py-4 rounded-2xl shadow-2xl animate-in slide-in-from-bottom-8">
+                <div className="fixed bottom-8 right-8 bg-red-600 text-white px-8 py-4 rounded-2xl shadow-2xl">
                     <p className="font-black text-sm uppercase tracking-widest">{error}</p>
                 </div>
             )}
@@ -565,7 +565,7 @@ export default function RosterArchive({ onSave, userTier = 'BASIC' }: RosterArch
             {loading && !roster.length && (
                 <div className="flex flex-col items-center justify-center py-32 space-y-6">
                     <div className="w-16 h-16 border-4 border-[#5B5FFF] border-t-transparent rounded-full animate-spin shadow-lg"></div>
-                    <p className="font-black text-gray-400 uppercase tracking-widest text-xs animate-pulse">Syncing Archive Database...</p>
+                    <p className="font-black text-gray-400 uppercase tracking-widest text-xs">Syncing Archive Database...</p>
                 </div>
             )}
         </div>
