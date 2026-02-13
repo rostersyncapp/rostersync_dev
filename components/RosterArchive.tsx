@@ -361,215 +361,310 @@ export default function RosterArchive({ onSave, userTier = 'BASIC' }: RosterArch
     }
 
     const selectedTeam = teams.find(t => t.id === selectedTeamId);
+    const teamPrimaryColor = selectedTeam?.primary_color || currentLeague.primaryColor;
+
+    const getPositionColor = (pos: string | null) => {
+        if (!pos) return 'bg-gray-100 text-gray-500';
+        const p = pos.toUpperCase();
+        if (['QB', 'PG', 'P'].includes(p)) return 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400';
+        if (['WR', 'SG', 'F', 'LW', 'RW'].includes(p)) return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400';
+        if (['RB', 'SF', 'C', 'ST', 'CF'].includes(p)) return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400';
+        if (['DL', 'PF', 'D', 'LB', 'CB'].includes(p)) return 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400';
+        return 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400';
+    };
 
     return (
-        <div className="max-w-7xl mx-auto p-4 sm:p-8 space-y-8 animate-in fade-in duration-500">
-            {/* Header Section */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white dark:bg-gray-900 p-8 rounded-[32px] border border-gray-100 dark:border-gray-800 shadow-sm">
-                <div className="flex items-center gap-6">
-                    <div className="p-4 bg-primary/10 rounded-2xl">
-                        <Library className="text-primary" size={32} />
-                    </div>
-                    <div>
-                        <h1 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight uppercase">Roster Archive</h1>
-                        <p className="text-gray-500 font-medium">Browse thousands of historical professional and collegiate rosters.</p>
-                    </div>
-                </div>
+        <div className="relative min-h-screen overflow-hidden">
+            {/* Dynamic Background Blobs */}
+            <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+                <div
+                    className="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] rounded-full blur-[120px] opacity-20 dark:opacity-30 transition-colors duration-1000"
+                    style={{ backgroundColor: teamPrimaryColor }}
+                />
+                <div
+                    className="absolute top-[40%] -right-[5%] w-[30%] h-[30%] rounded-full blur-[100px] opacity-10 dark:opacity-20 transition-colors duration-1000"
+                    style={{ backgroundColor: currentLeague.primaryColor }}
+                />
             </div>
 
-            {/* Selectors Section */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* League Selector */}
-                <div className="bg-white dark:bg-gray-900 p-6 rounded-[32px] border border-gray-100 dark:border-gray-800 shadow-sm space-y-4">
-                    <div className="flex items-center gap-3 px-2">
-                        <Globe size={18} className="text-gray-400" />
-                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Select League</span>
+            <div className="relative z-10 max-w-7xl mx-auto p-4 sm:p-8 space-y-8 animate-in fade-in duration-500">
+                {/* Header Section */}
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl p-8 rounded-[40px] border border-white/20 dark:border-gray-800/50 shadow-2xl shadow-black/5">
+                    <div className="flex items-center gap-6">
+                        <div
+                            className="p-5 rounded-3xl shadow-inner transition-colors duration-500"
+                            style={{ backgroundColor: teamPrimaryColor + '20' }}
+                        >
+                            <Library className="animate-pulse" style={{ color: teamPrimaryColor }} size={32} />
+                        </div>
+                        <div>
+                            <h1 className="text-4xl font-black text-gray-900 dark:text-white tracking-tighter uppercase italic">
+                                Roster <span style={{ color: teamPrimaryColor }}>Archive</span>
+                            </h1>
+                            <p className="text-gray-500 font-bold text-sm tracking-wide">Premium Historical Database • {LEAGUES.length} Professional Leagues</p>
+                        </div>
                     </div>
-                    <div className="grid grid-cols-2 gap-2">
-                        {LEAGUES.map((league) => (
-                            <button
-                                key={league.id}
-                                onClick={() => setSelectedLeagueId(league.id)}
-                                className={`flex items-center gap-3 p-3 rounded-2xl text-left transition-all ${selectedLeagueId === league.id
-                                    ? 'bg-primary text-white shadow-lg shadow-primary/25'
-                                    : 'bg-gray-50 dark:bg-gray-800/50 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
-                                    }`}
+                </div>
+
+                {/* Selectors Section */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    {/* League Selector */}
+                    <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md p-6 rounded-[40px] border border-white/20 dark:border-gray-800 shadow-xl space-y-4">
+                        <div className="flex items-center gap-3 px-2">
+                            <Globe size={18} className="text-gray-400" />
+                            <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Global Leagues</span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2 max-h-[220px] overflow-y-auto custom-scrollbar pr-1">
+                            {LEAGUES.map((league) => (
+                                <button
+                                    key={league.id}
+                                    onClick={() => setSelectedLeagueId(league.id)}
+                                    className={`flex items-center gap-3 p-3 rounded-[20px] text-left transition-all duration-300 group ${selectedLeagueId === league.id
+                                        ? 'text-white shadow-xl scale-[1.02]'
+                                        : 'bg-gray-50 dark:bg-gray-800/50 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
+                                        }`}
+                                    style={selectedLeagueId === league.id ? {
+                                        background: `linear-gradient(135deg, ${league.primaryColor}, ${league.primaryColor}dd)`,
+                                        boxShadow: `0 10px 30px -10px ${league.primaryColor}80`
+                                    } : {}}
+                                >
+                                    <div className={`p-2 rounded-xl ${selectedLeagueId === league.id ? 'bg-white/20' : 'bg-white dark:bg-gray-800 shadow-sm'}`}>
+                                        <league.icon size={16} />
+                                    </div>
+                                    <span className="text-xs font-black truncate uppercase tracking-tighter">{league.name}</span>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Team Selector */}
+                    <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md p-6 rounded-[40px] border border-white/20 dark:border-gray-800 shadow-xl space-y-4">
+                        <div className="flex items-center gap-3 px-2">
+                            <Search size={18} className="text-gray-400" />
+                            <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Organization</span>
+                        </div>
+                        <div className="relative group">
+                            <select
+                                value={selectedTeamId}
+                                onChange={(e) => setSelectedTeamId(e.target.value)}
+                                className="w-full px-6 py-5 bg-gray-50 dark:bg-gray-800/50 border-2 border-transparent focus:border-primary/20 rounded-[24px] font-black text-gray-900 dark:text-white appearance-none transition-all outline-none"
                             >
-                                <league.icon size={18} />
-                                <span className="text-sm font-bold truncate">{league.name}</span>
-                            </button>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Team Selector */}
-                <div className="bg-white dark:bg-gray-900 p-6 rounded-[32px] border border-gray-100 dark:border-gray-800 shadow-sm space-y-4">
-                    <div className="flex items-center gap-3 px-2">
-                        <Search size={18} className="text-gray-400" />
-                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Select Team</span>
-                    </div>
-                    <select
-                        value={selectedTeamId}
-                        onChange={(e) => setSelectedTeamId(e.target.value)}
-                        className="w-full px-5 py-4 bg-gray-50 dark:bg-gray-800/50 border-none rounded-2xl focus:ring-2 focus:ring-primary font-bold dark:text-white appearance-none"
-                    >
-                        <option value="">{loading ? 'Loading teams...' : `Choose ${currentLeague.name} Team...`}</option>
-                        {teams.map(team => (
-                            <option key={team.id} value={team.id}>
-                                {team.display_name}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-
-                {/* Season Selector */}
-                <div className="bg-white dark:bg-gray-900 p-6 rounded-[32px] border border-gray-100 dark:border-gray-800 shadow-sm space-y-4">
-                    <div className="flex items-center gap-3 px-2">
-                        <Archive size={18} className="text-gray-400" />
-                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Select Season</span>
-                    </div>
-                    <select
-                        value={selectedSeason || ''}
-                        onChange={(e) => setSelectedSeason(parseInt(e.target.value))}
-                        disabled={!selectedTeamId || availableSeasons.length === 0}
-                        className="w-full px-5 py-4 bg-gray-50 dark:bg-gray-800/50 border-none rounded-2xl focus:ring-2 focus:ring-primary font-bold dark:text-white disabled:opacity-50 appearance-none"
-                    >
-                        <option value="">{availableSeasons.length === 0 ? 'No seasons available' : 'Choose Season...'}</option>
-                        {availableSeasons.map(year => (
-                            <option key={year} value={year}>
-                                {year} Season
-                            </option>
-                        ))}
-                    </select>
-                </div>
-            </div>
-
-            {/* Main Content Area */}
-            {selectedTeam && selectedSeason ? (
-                <div className="space-y-6">
-                    {/* Team Hero Card */}
-                    <div
-                        className="p-8 rounded-[40px] flex flex-col md:flex-row items-center justify-between gap-8 border-l-8 animate-in slide-in-from-left duration-700"
-                        style={{
-                            backgroundColor: (selectedTeam.primary_color || currentLeague.primaryColor) + '15',
-                            borderColor: selectedTeam.primary_color || currentLeague.primaryColor
-                        }}
-                    >
-                        <div className="flex items-center gap-8">
-                            <div className="w-24 h-24 bg-white dark:bg-gray-800 p-4 rounded-3xl shadow-xl shadow-black/5 flex items-center justify-center">
-                                {selectedTeam.logo_url ? (
-                                    <img src={selectedTeam.logo_url} alt={selectedTeam.display_name} className="w-full h-full object-contain" />
-                                ) : (
-                                    <Trophy size={48} className="text-gray-200" />
-                                )}
+                                <option value="">{loading ? 'SYNCING TEAMS...' : `CHOOSE ${currentLeague.name} TEAM...`}</option>
+                                {teams.map(team => (
+                                    <option key={team.id} value={team.id}>
+                                        {team.display_name}
+                                    </option>
+                                ))}
+                            </select>
+                            <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none">
+                                <ChevronRight size={20} className="text-gray-400 group-hover:translate-x-1 transition-transform" />
                             </div>
-                            <div className="space-y-1">
-                                <div className="flex items-center gap-3">
-                                    <span className="px-3 py-1 bg-white/50 dark:bg-black/20 rounded-full text-[10px] font-black text-primary uppercase tracking-widest">
-                                        {currentLeague.name}
-                                    </span>
+                        </div>
+                    </div>
+
+                    {/* Season Selector */}
+                    <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md p-6 rounded-[40px] border border-white/20 dark:border-gray-800 shadow-xl space-y-4">
+                        <div className="flex items-center gap-3 px-2">
+                            <Archive size={18} className="text-gray-400" />
+                            <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Timeline</span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                            <select
+                                value={selectedSeason || ''}
+                                onChange={(e) => setSelectedSeason(parseInt(e.target.value))}
+                                disabled={!selectedTeamId || availableSeasons.length === 0}
+                                className="col-span-2 w-full px-6 py-5 bg-gray-50 dark:bg-gray-800/50 border-2 border-transparent focus:border-primary/20 rounded-[24px] font-black text-gray-900 dark:text-white disabled:opacity-50 appearance-none transition-all outline-none"
+                            >
+                                <option value="">{availableSeasons.length === 0 ? 'NO DATA' : 'SELECT YEAR...'}</option>
+                                {availableSeasons.map(year => (
+                                    <option key={year} value={year}>
+                                        {year} SEASON
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Main Content Area */}
+                {selectedTeam && selectedSeason ? (
+                    <div className="space-y-8 animate-in slide-in-from-bottom-8 duration-500">
+                        {/* Team Hero Card - HIGH COLOR VERSION */}
+                        <div
+                            className="relative overflow-hidden p-10 rounded-[48px] border border-white/20 shadow-2xl transition-all duration-1000"
+                            style={{
+                                background: `linear-gradient(135deg, ${teamPrimaryColor}ee, ${teamPrimaryColor}88)`,
+                                boxShadow: `0 30px 60px -15px ${teamPrimaryColor}40`
+                            }}
+                        >
+                            {/* Watermark Abbreviation */}
+                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[24rem] font-black text-white/5 pointer-events-none select-none tracking-tighter italic">
+                                {selectedTeam.name.substring(0, 3).toUpperCase()}
+                            </div>
+
+                            <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-10">
+                                <div className="flex items-center gap-10">
+                                    <div className="w-32 h-32 bg-white p-6 rounded-[32px] shadow-2xl shadow-black/10 flex items-center justify-center transform hover:scale-110 transition-transform duration-500 group">
+                                        {selectedTeam.logo_url ? (
+                                            <img src={selectedTeam.logo_url} alt={selectedTeam.display_name} className="w-full h-full object-contain" />
+                                        ) : (
+                                            <Trophy size={64} className="text-gray-200" />
+                                        )}
+                                    </div>
+                                    <div className="space-y-2">
+                                        <div className="flex items-center gap-3">
+                                            <span className="px-4 py-1 bg-black/20 backdrop-blur-md rounded-full text-[11px] font-black text-white uppercase tracking-widest border border-white/10">
+                                                {currentLeague.name} • {currentLeague.sport}
+                                            </span>
+                                        </div>
+                                        <h2 className="text-6xl font-black text-white tracking-tighter uppercase italic leading-none">
+                                            {selectedTeam.display_name}
+                                        </h2>
+                                        <div className="flex items-center gap-4">
+                                            <p className="text-white/80 font-black uppercase tracking-widest text-sm flex items-center gap-2">
+                                                <Activity size={16} />
+                                                {selectedSeason} Official Roster
+                                            </p>
+                                            <div className="h-1 w-1 bg-white/40 rounded-full" />
+                                            <p className="text-white/80 font-black uppercase tracking-widest text-sm">
+                                                {roster.length} Athletes Loaded
+                                            </p>
+                                        </div>
+                                    </div>
                                 </div>
-                                <h2 className="text-4xl font-black text-gray-900 dark:text-white tracking-tight uppercase">
-                                    {selectedTeam.display_name}
-                                </h2>
-                                <p className="text-gray-500 font-bold uppercase tracking-widest text-sm flex items-center gap-2">
-                                    <Activity size={14} />
-                                    {selectedSeason} Roster • {roster.length} Athletes
-                                </p>
+
+                                <div className="flex flex-col sm:flex-row gap-4">
+                                    <button
+                                        onClick={handleSaveToLibrary}
+                                        className="group relative flex items-center gap-3 px-10 py-6 bg-white text-gray-900 rounded-[24px] font-black text-sm uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl hover:shadow-white/20 overflow-hidden"
+                                    >
+                                        <div className="absolute inset-0 bg-primary/5 group-hover:bg-primary/10 transition-colors" />
+                                        <Save size={20} className="relative z-10" />
+                                        <span className="relative z-10">Secure Library Sync</span>
+                                    </button>
+                                    <button
+                                        onClick={handleExportCSV}
+                                        className="flex items-center gap-3 px-10 py-6 bg-black/20 backdrop-blur-md border border-white/20 text-white rounded-[24px] font-black text-sm uppercase tracking-widest hover:bg-black/30 transition-all shadow-xl"
+                                    >
+                                        <Download size={20} />
+                                        Export Data
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
-                        <div className="flex gap-4">
-                            <button
-                                onClick={handleSaveToLibrary}
-                                className="flex items-center gap-3 px-8 py-5 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-[20px] font-black text-sm uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl"
-                            >
-                                <Save size={18} />
-                                Import to Library
-                            </button>
-                            <button
-                                onClick={handleExportCSV}
-                                className="flex items-center gap-3 px-8 py-5 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 text-gray-900 dark:text-white rounded-[20px] font-black text-sm uppercase tracking-widest hover:bg-gray-50 transition-all shadow-lg"
-                            >
-                                <Download size={18} />
-                                Export CSV
-                            </button>
-                        </div>
-                    </div>
-
-                    {/* Roster Table */}
-                    <div className="bg-white dark:bg-gray-900 rounded-[40px] border border-gray-100 dark:border-gray-800 overflow-hidden shadow-sm">
-                        <div className="overflow-x-auto">
-                            <table className="w-full">
-                                <thead className="bg-gray-50 dark:bg-gray-800/30 border-b border-gray-50 dark:border-gray-800">
-                                    <tr>
-                                        <th className="px-8 py-6 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">#</th>
-                                        <th className="px-8 py-6 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Athlete</th>
-                                        <th className="px-8 py-6 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Pos</th>
-                                        <th className="px-8 py-6 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Size</th>
-                                        <th className="px-8 py-6 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Details</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
-                                    {roster.map((player, idx) => (
-                                        <tr key={idx} className="group hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all">
-                                            <td className="px-8 py-5 text-sm font-black text-gray-900 dark:text-white">{player.jersey_number || '--'}</td>
-                                            <td className="px-8 py-5">
-                                                <div className="flex items-center gap-4">
-                                                    {player.player_id && currentLeague.id.includes('ncaa') && (
-                                                        <img
-                                                            src={`https://a.espncdn.com/i/headshots/ncaa/players/full/${player.player_id}.png`}
-                                                            className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 object-cover border-2 border-transparent group-hover:border-primary/20 transition-all"
-                                                            onError={(e) => e.currentTarget.style.display = 'none'}
-                                                        />
-                                                    )}
-                                                    <span className="font-bold text-gray-700 dark:text-gray-200 border-b-2 border-transparent group-hover:border-primary/30 transition-all">
-                                                        {player.player_name}
-                                                    </span>
-                                                </div>
-                                            </td>
-                                            <td className="px-8 py-5">
-                                                <span className="px-3 py-1 bg-gray-100 dark:bg-gray-800 rounded-lg text-[10px] font-black uppercase text-gray-500 tracking-wider">
-                                                    {player.position || 'UNK'}
-                                                </span>
-                                            </td>
-                                            <td className="px-8 py-5 text-sm font-medium text-gray-500 dark:text-gray-400">
-                                                {player.height ? `${player.height}` : ''} {player.weight ? ` / ${player.weight}` : '--'}
-                                            </td>
-                                            <td className="px-8 py-5 text-sm font-medium text-gray-400 italic">
-                                                {player.class || player.college || '--'}
-                                            </td>
+                        {/* Roster Table Section */}
+                        <div className="bg-white/90 dark:bg-gray-950/90 backdrop-blur-xl rounded-[48px] border border-white/20 dark:border-gray-800/50 overflow-hidden shadow-2xl">
+                            <div className="overflow-x-auto">
+                                <table className="w-full">
+                                    <thead>
+                                        <tr
+                                            className="text-white"
+                                            style={{ backgroundColor: teamPrimaryColor }}
+                                        >
+                                            <th className="px-10 py-8 text-left text-[11px] font-black uppercase tracking-widest opacity-80">Jersey</th>
+                                            <th className="px-10 py-8 text-left text-[11px] font-black uppercase tracking-widest opacity-80">Athlete Profile</th>
+                                            <th className="px-10 py-8 text-left text-[11px] font-black uppercase tracking-widest opacity-80">Position</th>
+                                            <th className="px-10 py-8 text-left text-[11px] font-black uppercase tracking-widest opacity-80">Physicals</th>
+                                            <th className="px-10 py-8 text-left text-[11px] font-black uppercase tracking-widest opacity-80">Background</th>
                                         </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody className="divide-y divide-gray-50 dark:divide-gray-800/30">
+                                        {roster.map((player, idx) => (
+                                            <tr key={idx} className="group hover:bg-gray-50/50 dark:hover:bg-white/5 transition-all relative">
+                                                {/* Left highlights color bar on hover */}
+                                                <div
+                                                    className="absolute left-0 top-0 bottom-0 w-1.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                    style={{ backgroundColor: teamPrimaryColor }}
+                                                />
+                                                <td className="px-10 py-6">
+                                                    <span className="text-xl font-black text-gray-900 dark:text-white tracking-tighter opacity-70 group-hover:opacity-100 transition-opacity">
+                                                        {player.jersey_number ? formatJersey(player.jersey_number) : '--'}
+                                                    </span>
+                                                </td>
+                                                <td className="px-10 py-6">
+                                                    <div className="flex items-center gap-5">
+                                                        <div className="relative">
+                                                            <div
+                                                                className="absolute -inset-1 rounded-full opacity-0 group-hover:opacity-30 blur-sm transition-opacity"
+                                                                style={{ backgroundColor: teamPrimaryColor }}
+                                                            />
+                                                            {player.player_id && currentLeague.id.includes('ncaa') ? (
+                                                                <img
+                                                                    src={`https://a.espncdn.com/i/headshots/ncaa/players/full/${player.player_id}.png`}
+                                                                    className="relative w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-800 object-cover border-2 border-transparent group-hover:border-white/50 transition-all shadow-sm"
+                                                                    onError={(e) => e.currentTarget.style.display = 'none'}
+                                                                />
+                                                            ) : (
+                                                                <div className="relative w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center border-2 border-transparent group-hover:border-white/20 transition-all">
+                                                                    <span className="text-xs font-black text-gray-400">{player.player_name.split(' ').map(n => n[0]).join('')}</span>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                        <span className="text-lg font-bold text-gray-800 dark:text-gray-100 tracking-tight group-hover:translate-x-1 transition-transform">
+                                                            {player.player_name}
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                                <td className="px-10 py-6">
+                                                    <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm ${getPositionColor(player.position)}`}>
+                                                        {player.position || 'Player'}
+                                                    </span>
+                                                </td>
+                                                <td className="px-10 py-6">
+                                                    <div className="flex flex-col">
+                                                        <span className="text-sm font-black text-gray-700 dark:text-gray-300 tracking-tight">
+                                                            {player.height ? player.height : '--'}
+                                                        </span>
+                                                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                                                            {player.weight ? `${player.weight} lbs` : '--'}
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                                <td className="px-10 py-6">
+                                                    <span className="text-sm font-bold text-gray-400 italic bg-gray-100/50 dark:bg-white/5 px-3 py-1 rounded-lg">
+                                                        {player.class || player.college || '--'}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
-                </div>
-            ) : (
-                <div className="flex flex-col items-center justify-center py-32 bg-white dark:bg-gray-900 rounded-[40px] border-2 border-dashed border-gray-100 dark:border-gray-800 animate-in fade-in duration-1000">
-                    <div className="p-6 bg-gray-50 dark:bg-gray-800 rounded-full mb-6">
-                        <Library className="text-gray-300 dark:text-gray-600" size={64} />
+                ) : (
+                    <div className="flex flex-col items-center justify-center py-40 bg-white/60 dark:bg-gray-900/40 backdrop-blur-xl rounded-[48px] border-2 border-dashed border-gray-100 dark:border-gray-800 animate-in fade-in zoom-in duration-1000 group">
+                        <div className="relative">
+                            <div className="absolute -inset-10 bg-primary/10 rounded-full blur-[50px] group-hover:bg-primary/20 transition-all duration-700" />
+                            <div className="relative p-10 bg-white dark:bg-gray-800 rounded-full mb-8 shadow-2xl shadow-black/5 transform group-hover:scale-110 transition-transform duration-700">
+                                <Library className="text-gray-300 dark:text-gray-600 group-hover:text-primary transition-colors" size={80} />
+                            </div>
+                        </div>
+                        <h3 className="text-3xl font-black text-gray-900 dark:text-white uppercase tracking-tighter italic">Select your Target Roster</h3>
+                        <p className="text-gray-400 font-bold max-w-sm text-center mt-3 tracking-wide leading-relaxed">
+                            Pick a league, team, and season above to load premium athlete data from the global archives.
+                        </p>
                     </div>
-                    <h3 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tight">Select your Target Roster</h3>
-                    <p className="text-gray-400 font-medium max-w-xs text-center mt-2">
-                        Pick a league, team, and season above to load historical athlete data.
-                    </p>
-                </div>
-            )}
+                )}
+            </div>
 
             {/* Error Message */}
             {error && (
-                <div className="fixed bottom-8 right-8 bg-red-600 text-white px-8 py-4 rounded-2xl shadow-2xl animate-in slide-in-from-bottom-8">
+                <div className="fixed bottom-8 right-8 bg-rose-600 text-white px-8 py-5 rounded-[24px] shadow-2xl shadow-rose-600/20 animate-in slide-in-from-right-10 flex items-center gap-4 border border-white/10">
+                    <div className="w-1.5 h-1.5 bg-white rounded-full animate-ping" />
                     <p className="font-black text-sm uppercase tracking-widest">{error}</p>
                 </div>
             )}
 
             {/* Loading Overlay */}
             {loading && !roster.length && (
-                <div className="flex flex-col items-center justify-center py-32 space-y-6">
-                    <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin shadow-lg"></div>
-                    <p className="font-black text-gray-400 uppercase tracking-widest text-xs animate-pulse">Syncing Archive Database...</p>
+                <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white/10 backdrop-blur-sm pointer-events-none">
+                    <div className="relative">
+                        <div className="absolute -inset-10 bg-primary/20 rounded-full blur-[60px] animate-pulse" />
+                        <div className="relative w-24 h-24 border-8 border-primary border-t-transparent rounded-full animate-spin shadow-2xl" />
+                    </div>
+                    <p className="mt-10 font-black text-gray-900 dark:text-white uppercase tracking-[0.5em] text-sm animate-pulse">Syncing Engine...</p>
                 </div>
             )}
         </div>
