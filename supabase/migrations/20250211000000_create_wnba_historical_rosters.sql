@@ -49,9 +49,9 @@ INSERT INTO public.wnba_teams (id, name, abbreviation, display_name, location, e
 ON CONFLICT (id) DO NOTHING;
 
 -- ============================================
--- WNBA HISTORICAL ROSTERS TABLE
+-- WNBA ROSTERS TABLE
 -- ============================================
-CREATE TABLE IF NOT EXISTS public.wnba_historical_rosters (
+CREATE TABLE IF NOT EXISTS public.wnba_rosters (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   team_id TEXT NOT NULL REFERENCES public.wnba_teams(id) ON DELETE CASCADE,
   season_year INTEGER NOT NULL,
@@ -71,15 +71,15 @@ CREATE TABLE IF NOT EXISTS public.wnba_historical_rosters (
 );
 
 -- Create indexes for common queries
-CREATE INDEX IF NOT EXISTS idx_wnba_rosters_team_season ON public.wnba_historical_rosters(team_id, season_year);
-CREATE INDEX IF NOT EXISTS idx_wnba_rosters_season ON public.wnba_historical_rosters(season_year);
-CREATE INDEX IF NOT EXISTS idx_wnba_rosters_player ON public.wnba_historical_rosters(player_name);
+CREATE INDEX IF NOT EXISTS idx_wnba_rosters_team_season ON public.wnba_rosters(team_id, season_year);
+CREATE INDEX IF NOT EXISTS idx_wnba_rosters_season ON public.wnba_rosters(season_year);
+CREATE INDEX IF NOT EXISTS idx_wnba_rosters_player ON public.wnba_rosters(player_name);
 
 -- ============================================
 -- ENABLE ROW LEVEL SECURITY
 -- ============================================
 ALTER TABLE public.wnba_teams ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.wnba_historical_rosters ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.wnba_rosters ENABLE ROW LEVEL SECURITY;
 
 -- ============================================
 -- RLS POLICIES
@@ -89,16 +89,16 @@ ALTER TABLE public.wnba_historical_rosters ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow public read of WNBA teams" 
 ON public.wnba_teams FOR SELECT TO public USING (true);
 
--- Allow public read access to historical rosters
+-- Allow public read access to rosters
 CREATE POLICY "Allow public read of WNBA rosters" 
-ON public.wnba_historical_rosters FOR SELECT TO public USING (true);
+ON public.wnba_rosters FOR SELECT TO public USING (true);
 
 -- Allow authenticated users to insert/update rosters (for data population)
 CREATE POLICY "Allow authenticated inserts of WNBA rosters" 
-ON public.wnba_historical_rosters FOR INSERT TO authenticated WITH CHECK (true);
+ON public.wnba_rosters FOR INSERT TO authenticated WITH CHECK (true);
 
 CREATE POLICY "Allow authenticated updates of WNBA rosters" 
-ON public.wnba_historical_rosters FOR UPDATE TO authenticated USING (true);
+ON public.wnba_rosters FOR UPDATE TO authenticated USING (true);
 
 -- ============================================
 -- FUNCTION TO GET WNBA ROSTER BY TEAM AND YEAR
@@ -121,7 +121,7 @@ BEGIN
     r.height,
     r.college,
     r.years_pro
-  FROM public.wnba_historical_rosters r
+  FROM public.wnba_rosters r
   WHERE r.team_id = $1 AND r.season_year = $2
   ORDER BY 
     CASE 
@@ -140,7 +140,7 @@ RETURNS TABLE (season_year INTEGER) AS $$
 BEGIN
   RETURN QUERY
   SELECT DISTINCT r.season_year
-  FROM public.wnba_historical_rosters r
+  FROM public.wnba_rosters r
   WHERE r.team_id = $1
   ORDER BY r.season_year DESC;
 END;
