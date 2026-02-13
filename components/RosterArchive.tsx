@@ -25,15 +25,45 @@ interface LeagueConfig {
 
 const LEAGUES: LeagueConfig[] = [
     {
-        id: 'nfl',
-        name: 'NFL',
-        description: 'National Football League Historical Rosters',
+        id: 'mlb',
+        name: 'MLB',
+        description: 'Major League Baseball Historical Rosters',
+        icon: Globe,
+        table: 'mlb_teams',
+        seasonsRpc: 'get_mlb_team_seasons',
+        rosterRpc: 'get_mlb_roster',
+        sport: 'Baseball',
+        primaryColor: '#002D72',
+        params: {
+            seasons: (id) => ({ team_id: id }),
+            roster: (id, yr) => ({ p_team_id: id, p_season_year: yr })
+        }
+    },
+    {
+        id: 'mls',
+        name: 'MLS',
+        description: 'Major League Soccer Historical Rosters',
+        icon: Globe,
+        table: 'mls_teams',
+        seasonsRpc: 'get_mls_team_seasons',
+        rosterRpc: 'get_mls_roster',
+        sport: 'Soccer',
+        primaryColor: '#F5002D',
+        params: {
+            seasons: (id) => ({ p_team_id: id }),
+            roster: (id, yr) => ({ p_team_id: id, p_season_year: yr })
+        }
+    },
+    {
+        id: 'nba',
+        name: 'NBA',
+        description: 'National Basketball Association Historical Rosters',
         icon: Trophy,
-        table: 'nfl_teams',
-        seasonsRpc: 'get_nfl_team_seasons',
-        rosterRpc: 'get_nfl_roster',
-        sport: 'Football',
-        primaryColor: '#013369',
+        table: 'nba_teams',
+        seasonsRpc: 'get_nba_team_seasons',
+        rosterRpc: 'get_nba_roster',
+        sport: 'Basketball',
+        primaryColor: '#17408B',
         params: {
             seasons: (id) => ({ team_id: id }),
             roster: (id, yr) => ({ p_team_id: id, p_season_year: yr })
@@ -55,45 +85,15 @@ const LEAGUES: LeagueConfig[] = [
         }
     },
     {
-        id: 'wnba',
-        name: 'WNBA',
-        description: 'Women\'s National Basketball Association',
+        id: 'nfl',
+        name: 'NFL',
+        description: 'National Football League Historical Rosters',
         icon: Trophy,
-        table: 'wnba_teams',
-        seasonsRpc: 'get_wnba_team_seasons',
-        rosterRpc: 'get_wnba_roster',
-        sport: 'Basketball',
-        primaryColor: '#FF6B00',
-        params: {
-            seasons: (id) => ({ team_id: id }),
-            roster: (id, yr) => ({ team_id: id, season_year: yr })
-        }
-    },
-    {
-        id: 'nba',
-        name: 'NBA',
-        description: 'National Basketball Association Historical Rosters',
-        icon: Trophy,
-        table: 'nba_teams',
-        seasonsRpc: 'get_nba_team_seasons',
-        rosterRpc: 'get_nba_roster',
-        sport: 'Basketball',
-        primaryColor: '#17408B',
-        params: {
-            seasons: (id) => ({ team_id: id }),
-            roster: (id, yr) => ({ p_team_id: id, p_season_year: yr })
-        }
-    },
-    {
-        id: 'mlb',
-        name: 'MLB',
-        description: 'Major League Baseball Historical Rosters',
-        icon: Globe,
-        table: 'mlb_teams',
-        seasonsRpc: 'get_mlb_team_seasons',
-        rosterRpc: 'get_mlb_roster',
-        sport: 'Baseball',
-        primaryColor: '#002D72',
+        table: 'nfl_teams',
+        seasonsRpc: 'get_nfl_team_seasons',
+        rosterRpc: 'get_nfl_roster',
+        sport: 'Football',
+        primaryColor: '#013369',
         params: {
             seasons: (id) => ({ team_id: id }),
             roster: (id, yr) => ({ p_team_id: id, p_season_year: yr })
@@ -111,21 +111,6 @@ const LEAGUES: LeagueConfig[] = [
         primaryColor: '#000000',
         params: {
             seasons: (id) => ({ team_id: id }),
-            roster: (id, yr) => ({ p_team_id: id, p_season_year: yr })
-        }
-    },
-    {
-        id: 'mls',
-        name: 'MLS',
-        description: 'Major League Soccer Historical Rosters',
-        icon: Globe,
-        table: 'mls_teams',
-        seasonsRpc: 'get_mls_team_seasons',
-        rosterRpc: 'get_mls_roster',
-        sport: 'Soccer',
-        primaryColor: '#F5002D',
-        params: {
-            seasons: (id) => ({ p_team_id: id }),
             roster: (id, yr) => ({ p_team_id: id, p_season_year: yr })
         }
     },
@@ -157,6 +142,21 @@ const LEAGUES: LeagueConfig[] = [
         params: {
             seasons: (id) => ({ p_team_id: id }),
             roster: (id, yr) => ({ p_team_id: id, p_season_year: yr })
+        }
+    },
+    {
+        id: 'wnba',
+        name: 'WNBA',
+        description: 'Women\'s National Basketball Association',
+        icon: Trophy,
+        table: 'wnba_teams',
+        seasonsRpc: 'get_wnba_team_seasons',
+        rosterRpc: 'get_wnba_roster',
+        sport: 'Basketball',
+        primaryColor: '#FF6B00',
+        params: {
+            seasons: (id) => ({ team_id: id }),
+            roster: (id, yr) => ({ team_id: id, season_year: yr })
         }
     }
 ];
@@ -385,21 +385,17 @@ export default function RosterArchive({ onSave, userTier = 'BASIC' }: RosterArch
                         <Globe size={18} className="text-gray-400" />
                         <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Select League</span>
                     </div>
-                    <div className="grid grid-cols-2 gap-2">
+                    <select
+                        value={selectedLeagueId}
+                        onChange={(e) => setSelectedLeagueId(e.target.value)}
+                        className="w-full px-5 py-4 bg-gray-50 dark:bg-gray-800/50 border-none rounded-2xl focus:ring-2 focus:ring-primary font-bold dark:text-white appearance-none"
+                    >
                         {LEAGUES.map((league) => (
-                            <button
-                                key={league.id}
-                                onClick={() => setSelectedLeagueId(league.id)}
-                                className={`flex items-center gap-3 p-3 rounded-2xl text-left transition-all ${selectedLeagueId === league.id
-                                    ? 'bg-primary text-white shadow-lg shadow-primary/25'
-                                    : 'bg-gray-50 dark:bg-gray-800/50 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
-                                    }`}
-                            >
-                                <league.icon size={18} />
-                                <span className="text-sm font-bold truncate">{league.name}</span>
-                            </button>
+                            <option key={league.id} value={league.id}>
+                                {league.name}
+                            </option>
                         ))}
-                    </div>
+                    </select>
                 </div>
 
                 {/* Team Selector */}
