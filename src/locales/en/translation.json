@@ -63,35 +63,47 @@
             "free": {
                 "name": "Free",
                 "price": "$0",
-                "period": "forever",
+                "period": "Trial",
                 "features": [
-                    "5 rosters per month",
-                    "Basic CSV export",
-                    "Community support"
+                    "50 Credits (One-time trial)",
+                    "CSV_Flat exports only",
+                    "1 project max"
+                ],
+                "cta": "Start Trial"
+            },
+            "starter": {
+                "name": "Starter",
+                "price": "$49",
+                "period": "per month",
+                "features": [
+                    "150 Credits / month",
+                    "Simple phonetics",
+                    "English CSV/JSON exports",
+                    "1-year history"
                 ],
                 "cta": "Get Started"
             },
             "pro": {
                 "name": "Pro",
-                "price": "$29",
+                "price": "$149",
                 "period": "per month",
                 "features": [
-                    "Unlimited rosters",
-                    "All export formats",
-                    "Priority support",
-                    "Cloud sync"
+                    "500 Credits / month",
+                    "MAM sync (Iconik/CatDV)",
+                    "3 team seats",
+                    "5-year history"
                 ],
-                "cta": "Start Trial"
+                "cta": "Choose Pro"
             },
-            "network": {
-                "name": "Network",
-                "price": "$99",
+            "enterprise": {
+                "name": "Enterprise",
+                "price": "$199",
                 "period": "per month",
                 "features": [
-                    "Everything in Pro",
-                    "Ross/Vizrt integrations",
-                    "Dedicated support",
-                    "Custom branding"
+                    "1000 Credits / month",
+                    "IPA Phonetics + ES/ZH",
+                    "Full 25-year archive",
+                    "Custom formats"
                 ],
                 "cta": "Contact Sales"
             }
@@ -150,7 +162,7 @@
         "title": "Settings",
         "subscription": "Subscription",
         "activity": "Activity Log",
-        "roi": "Performance ROI",
+        "roiLabel": "Performance ROI",
         "currentUsage": "Current Usage",
         "creditsUsed": "{{used}} / {{limit}} Credits Used",
         "upgrade": "Upgrade Plan",

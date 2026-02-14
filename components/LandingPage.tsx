@@ -42,11 +42,11 @@ interface LandingPageProps {
 }
 
 const FAQS = [
-  { q: "Why upgrade from Free to Pro?", a: "Upgrade to Pro when you need more than 2 rosters per month, want to sync with Iconik or CatDV, or require automatic team logo and HEX color discovery with phonetic pronunciation guides." },
-  { q: "What does the Studio tier offer for agencies?", a: "The Studio tier ($149) is designed for teams and creative agencies. It includes 3 user seats, advanced branding, and direct support for cloud-ready graphics platforms like Tagboard and NewBlue." },
-  { q: "When should I choose the Network tier?", a: "Choose Network for national or international broadcasts. It adds support for enterprise XML formats (Ross/Vizrt/Chyron), Olympic ODF compliance, API access, and IPA-grade phonetic guides." },
-  { q: "Can I manage multiple projects?", a: "Yes. Starting with the Pro tier, you get unlimited folders and nested projects to help you organize rosters across different leagues, seasons, or production clients." },
-  { q: "What hardware systems do you support?", a: "We support nearly every major broadcast system. Studio tier provides direct data for cloud graphics (Tagboard/NewBlue), while Network adds native XML feeds for high-end Ross Xpression, Vizrt, and Chyron Prime hardware." }
+  { q: "Why upgrade from Free to Starter?", a: "Upgrade to Starter when you need more than the trial limit, want simple phonetic guides, or require historical data (1-year archive) for your creation workflow." },
+  { q: "What does the Pro tier offer for MAM workflows?", a: "The Pro tier ($149) is designed for professional broadcasters and media managers. It includes direct sync with Iconik and CatDV, 5-year historical archives, and support for all broadcast delivery formats." },
+  { q: "When should I choose the Enterprise tier?", a: "Choose Enterprise for national broadcasts or large organizations. It adds support for IPA-grade phonetics, Spanish/Chinese localized exports, a full 25-year historical archive, and custom export formats." },
+  { q: "Can I manage multiple projects?", a: "Yes. Starter includes up to 5 projects, while Pro and Enterprise offer unlimited project folders to help you organize rosters across different leagues and clients." },
+  { q: "What hardware systems do you support?", a: "We support nearly every major broadcast system. Pro and Enterprise tiers provide data for Ross Xpression, Vizrt, Chyron Prime, and specialized formats like Ross DataLinq XML." }
 ];
 
 const FEATURES = [
@@ -59,18 +59,17 @@ const FEATURES = [
 ];
 
 const PRICING_MATRIX = [
-  { feature: "Monthly Price", free: "$0", pro: "$79", studio: "$149", network: "$249" },
-  { feature: "AI Credits", free: "20", pro: "150", studio: "500", network: "800" },
-  { feature: "Rosters/month", free: "~1-2", pro: "~10", studio: "~33", network: "~53" },
-  { feature: "Export formats", free: "CSV (Flat)", pro: "CSV, Iconik, CatDV", studio: "Pro + Tagboard, NewBlue", network: "Studio + Ross, Vizrt, Chyron, ODF XML" },
-  { feature: "Team members", free: "1", pro: "1", studio: "3", network: "5" },
-  { feature: "Phonetic guides", free: false, pro: "✅ Simple", studio: "✅ Simple", network: "✅ Simple + IPA" },
-  { feature: "Multi-language", free: false, pro: false, studio: false, network: "✅ ES + ZH" },
-
-  { feature: "Colors", free: false, pro: "HEX", studio: "All formats", network: "All formats" },
-  { feature: "MAM live sync", free: false, pro: true, studio: true, network: true },
-
-  { feature: "Support", free: "Community", pro: "Email", studio: "Email", network: "Email + Quarterly" },
+  { feature: "Monthly Price", free: "$0", starter: "$49", pro: "$149", enterprise: "$199" },
+  { feature: "AI Credits", free: "50 (Trial)", starter: "150", pro: "500", enterprise: "1000" },
+  { feature: "Rosters/month", free: "~5", starter: "~15", pro: "~50", enterprise: "~100" },
+  { feature: "Export formats", free: "CSV (Flat)", starter: "CSV, JSON", pro: "All Broadcast Formats", enterprise: "Custom Formats" },
+  { feature: "Team members", free: "1", starter: "1", pro: "3", enterprise: "10+" },
+  { feature: "Phonetic guides", free: false, starter: "✅ Simple", pro: "✅ Simple", enterprise: "✅ Simple + IPA" },
+  { feature: "Multi-language", free: false, starter: false, pro: false, enterprise: "✅ ES + ZH" },
+  { feature: "Historical Data", free: "Current only", starter: "1 Year", pro: "5 Years", enterprise: "25+ Years" },
+  { feature: "Colors", free: false, starter: "HEX", pro: "RGB/CMYK", enterprise: "All Formats" },
+  { feature: "MAM live sync", free: false, starter: false, pro: true, enterprise: true },
+  { feature: "Support", free: "Community", starter: "Email", pro: "Email", enterprise: "Email + Quarterly" },
 ];
 
 
@@ -358,9 +357,9 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
                     <tr className="bg-gray-50/30 dark:bg-gray-800/20">
                       <th className="p-4 text-left text-[9px] font-black uppercase tracking-widest text-gray-400 border-b border-gray-100 dark:border-gray-800/50">Feature</th>
                       <th className="p-4 text-center text-[9px] font-black uppercase tracking-widest text-gray-400 border-b border-gray-100 dark:border-gray-800/50">Free</th>
+                      <th className="p-4 text-center text-[9px] font-black uppercase tracking-widest text-gray-400 border-b border-gray-100 dark:border-gray-800/50">Starter</th>
                       <th className="p-4 text-center text-[9px] font-black uppercase tracking-widest text-[#5B5FFF] border-b border-[#5B5FFF]/20 bg-[#5B5FFF]/5">Pro</th>
-                      <th className="p-4 text-center text-[9px] font-black uppercase tracking-widest text-gray-400 border-b border-gray-100 dark:border-gray-800/50">Studio</th>
-                      <th className="p-4 text-center text-[9px] font-black uppercase tracking-widest text-gray-400 border-b border-gray-100 dark:border-gray-800/50">Network</th>
+                      <th className="p-4 text-center text-[9px] font-black uppercase tracking-widest text-gray-400 border-b border-gray-100 dark:border-gray-800/50">Enterprise</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200 dark:divide-gray-800/10">
@@ -371,9 +370,9 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
                           {row.feature}
                         </td>
                         <td className="p-4 text-center"><MatrixCell value={row.free} /></td>
+                        <td className="p-4 text-center"><MatrixCell value={row.starter} /></td>
                         <td className="p-4 text-center bg-[#5B5FFF]/5 dark:bg-emerald-500/5 border-x border-gray-100/50 dark:border-gray-800/50"><MatrixCell value={row.pro} /></td>
-                        <td className="p-4 text-center"><MatrixCell value={row.studio} /></td>
-                        <td className="p-4 text-center"><MatrixCell value={row.network} /></td>
+                        <td className="p-4 text-center"><MatrixCell value={row.enterprise} /></td>
                       </tr>
                     ))}
                   </tbody>

@@ -42,38 +42,38 @@ export const BRAND_CONFIG = {
 export const PRICING_TIERS = [
   {
     name: 'Free',
-    id: 'BASIC',
+    id: 'TRIAL',
     price: '$0',
-    monthlyCredits: 20,
-    description: 'For students and freelancers.',
-    features: ['20 Credits / Month', 'CSV_FLAT Only', '1 Project Max', 'No Branding/Colors', 'Community Support'],
+    monthlyCredits: 50,
+    description: 'Trial/Trialists',
+    features: ['50 Credits (Limited Trial)', 'CSV_Flat Exports Only', 'Current Season Data Only', '1 Project Max'],
+    polarCheckoutUrl: '#'
+  },
+  {
+    name: 'Starter',
+    id: 'STARTER',
+    price: '$49',
+    monthlyCredits: 150,
+    description: 'Individual Creators',
+    features: ['150 Credits / Month', '1 Seat', 'Hardware Safe + Simple Phonetics', 'English CSV/JSON Exports', '1-Year History', '5 Projects Max', 'Basic Branding (HEX)'],
     polarCheckoutUrl: '#'
   },
   {
     name: 'Pro',
     id: 'PRO',
-    price: '$79',
-    monthlyCredits: 150,
-    description: 'For solo motion designers.',
-    features: ['150 Credits / Month', 'Logo & HEX Colors', 'Simplified Phonetics', 'MAM Sync (Iconik/CatDV)', 'Unlimited Storage'],
+    price: '$149',
+    monthlyCredits: 500,
+    description: 'MAM/DAM Workflows',
+    features: ['500 Credits / Month', '3 Seats', 'MAM Sync (Iconik/CatDV)', 'All Broadcast Formats', '5-Year History', 'RGB/CMYK Colors', 'Unlimited Projects', 'Team Collaboration'],
     polarCheckoutUrl: 'https://polar.sh/rostersync/products/pro-tier'
   },
   {
-    name: 'Studio',
-    id: 'STUDIO',
-    price: '$149',
-    monthlyCredits: 500,
-    description: 'For RSNs and creative agencies.',
-    features: ['500 Credits / Month', '3 Team Seats', 'Brand Colors (HEX/RGB)', 'Tagboard & NewBlue'],
-    polarCheckoutUrl: 'https://polar.sh/rostersync/products/studio-tier'
-  },
-  {
-    name: 'Network',
-    id: 'NETWORK',
-    price: '$249',
-    monthlyCredits: 800,
-    description: 'For national broadcasters.',
-    features: ['800 Credits / Month', '5 Team Seats', 'IPA Phonetics', 'Broadcast (Ross/Vizrt/Chyron)', 'Enterprise XML + API'],
+    name: 'Enterprise',
+    id: 'ENTERPRISE',
+    price: '$199',
+    monthlyCredits: 1000,
+    description: 'National Broadcasters',
+    features: ['1000 Credits / Month', '10+ Seats', 'IPA Phonetics', 'ES/ZH Support', 'Full 25-Year Archive', 'Custom Export Formats'],
     polarCheckoutUrl: 'https://polar.sh/rostersync/products/network-tier'
   }
 ];
