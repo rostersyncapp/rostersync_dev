@@ -85,7 +85,8 @@ async function enrichPlayer(player: Player) {
             .update({
                 phonetic_name: phonetic,
                 ipa_name: ipa,
-                chinese_name: chinese
+                chinese_name: chinese,
+                hardware_safe_name: player.player_name.toUpperCase()
             })
             .eq('id', player.id);
 

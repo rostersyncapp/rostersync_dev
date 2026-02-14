@@ -111,7 +111,8 @@ async function enrichPlayer(player: any, teamConfig: any): Promise<number> {
                 phonetic_name: data.phonetic,
                 ipa_name: data.ipa,
                 chinese_name: data.chinese,
-                jersey_number: updatedJersey
+                jersey_number: updatedJersey,
+                hardware_safe_name: player.player_name.toUpperCase()
             })
             .eq('id', player.id);
 

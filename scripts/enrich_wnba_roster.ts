@@ -102,6 +102,7 @@ async function enrichPlayer(playerId: string, playerName: string): Promise<boole
         .from('wnba_rosters')
         .update({
             player_id: espnData.espn_id,
+            hardware_safe_name: playerName.toUpperCase()
         })
         .eq('id', playerId);
 
