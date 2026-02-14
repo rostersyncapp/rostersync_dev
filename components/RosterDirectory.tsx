@@ -16,7 +16,7 @@ interface RosterDirectoryEntry {
     league: string;
     team_name: string;
     team_id: string;
-    season_year: number;
+    seasons_list: number[];
 }
 
 interface LeagueGroup {
@@ -44,7 +44,7 @@ const RosterDirectory: React.FC = () => {
             .select('*')
             .order('league', { ascending: true })
             .order('team_name', { ascending: true })
-            .order('season_year', { ascending: false });
+            .limit(10000);
 
         if (error) {
             console.error('Error fetching directory:', error);
@@ -52,27 +52,22 @@ const RosterDirectory: React.FC = () => {
             return;
         }
 
-        // Group by league and team
-        const groups: LeagueGroup[] = [];
-        const leagueMap = new Map<string, Map<string, number[]>>();
+        // Result is already aggregated per team from the view
+        const leagueMap = new Map<string, { name: string, seasons: number[] }[]>();
 
         (rawData as RosterDirectoryEntry[]).forEach(entry => {
             if (!leagueMap.has(entry.league)) {
-                leagueMap.set(entry.league, new Map());
+                leagueMap.set(entry.league, []);
             }
-            const teamsMap = leagueMap.get(entry.league)!;
-            if (!teamsMap.has(entry.team_name)) {
-                teamsMap.set(entry.team_name, []);
-            }
-            teamsMap.get(entry.team_name)!.push(entry.season_year);
+            leagueMap.get(entry.league)!.push({
+                name: entry.team_name,
+                seasons: entry.seasons_list
+            });
         });
 
-        leagueMap.forEach((teamsMap, league) => {
-            const teamsList: any[] = [];
-            teamsMap.forEach((seasons, name) => {
-                teamsList.push({ name, seasons });
-            });
-            groups.push({ league, teams: teamsList });
+        const groups: LeagueGroup[] = [];
+        leagueMap.forEach((teams, league) => {
+            groups.push({ league, teams });
         });
 
         setData(groups);
