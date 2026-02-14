@@ -56,7 +56,7 @@ CREATE OR REPLACE FUNCTION public.get_milb_roster(p_team_id TEXT, p_season_year 
 RETURNS TABLE (
   player_name TEXT,
   jersey_number TEXT,
-  player_pos TEXT
+  "position" TEXT -- Matches other league RPCs and UI types
 ) AS $$
 BEGIN
   RETURN QUERY

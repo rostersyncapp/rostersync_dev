@@ -116,12 +116,13 @@ async function fetchTeamRoster(team: MilbTeam, year: number): Promise<MilbRoster
                 const playerName = cells.eq(1).find('a').first().text().trim() || cells.eq(1).text().trim();
                 const position = cells.eq(3).text().trim();
 
-                if (playerName && playerName !== 'Player' && !rosterMap.has(playerName)) {
+                const isHeader = playerName.toLowerCase() === 'player' || jersey === '#';
+                if (playerName && !isHeader && !rosterMap.has(playerName)) {
                     rosterMap.set(playerName, {
                         team_id: team.id,
                         season_year: year,
                         player_name: playerName,
-                        jersey_number: jersey !== '-' ? jersey : null,
+                        jersey_number: (jersey !== '-' && jersey !== '#') ? jersey : null,
                         player_position: position || null
                     });
                 }
