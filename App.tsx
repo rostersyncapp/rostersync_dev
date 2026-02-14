@@ -8,6 +8,7 @@ import LandingPage from './components/LandingPage.tsx';
 import SupportCard from './components/SupportCard.tsx';
 import SupportPage from './components/SupportPage.tsx';
 import RosterArchive from './components/RosterArchive.tsx';
+import RosterDirectory from './components/RosterDirectory.tsx';
 import { Roster, Profile, Project } from './types.ts';
 import { processRosterRawText, ProcessedRoster } from './services/gemini.ts';
 import { TeamSelectionModal } from './components/TeamSelectionModal.tsx';
@@ -248,7 +249,7 @@ const App: React.FC = () => {
   const { openSignIn, openSignUp } = useClerk();
 
   // All hooks must be called unconditionally - no early returns before hooks
-  const [view, setView] = useState<'dashboard' | 'engine' | 'settings' | 'admin' | 'roster-archive' | 'support'>('dashboard');
+  const [view, setView] = useState<'dashboard' | 'engine' | 'settings' | 'admin' | 'roster-archive' | 'roster-directory' | 'support'>('dashboard');
 
   useEffect(() => {
     const saved = localStorage.getItem('lastView');
@@ -257,7 +258,7 @@ const App: React.FC = () => {
     }
   }, []);
 
-  const handleSetView = (newView: 'dashboard' | 'engine' | 'settings' | 'admin' | 'roster-archive' | 'support') => {
+  const handleSetView = (newView: 'dashboard' | 'engine' | 'settings' | 'admin' | 'roster-archive' | 'roster-directory' | 'support') => {
     setView(newView);
     localStorage.setItem('lastView', newView);
   };
@@ -829,6 +830,10 @@ const App: React.FC = () => {
                     <Library size={20} />
                     <span className="hidden lg:block text-[14px]">Roster Archive</span>
                   </button>
+                  <button onClick={() => handleSetView('roster-directory')} className={`w-full flex items-center gap-3 p-2 rounded-lg transition-all ${view === 'roster-directory' ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF] font-bold' : 'text-gray-500 hover:bg-gray-50 font-medium'}`}>
+                    <History size={20} />
+                    <span className="hidden lg:block text-[14px]">Coverage Directory</span>
+                  </button>
                   <button onClick={() => handleSetView('settings')} className={`w-full flex items-center gap-3 p-2 rounded-lg transition-all ${view === 'settings' ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF] font-bold' : 'text-gray-500 hover:bg-gray-100 font-medium'}`}><SettingsIcon size={20} /><span className="hidden lg:block text-[14px]">Settings</span></button>
                   {profile?.is_admin && (
                     <button onClick={() => handleSetView('admin')} className={`w-full flex items-center gap-3 p-2 rounded-lg transition-all ${view === 'admin' ? 'bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/20 text-[#5B5FFF] font-bold' : 'text-gray-500 hover:bg-gray-100 font-medium'}`}>
@@ -979,6 +984,7 @@ const App: React.FC = () => {
                   setProfile(prev => ({ ...prev, ...updates }));
                 }} />}
                 {view === 'roster-archive' && <RosterArchive onSave={handleSaveRoster} userTier={profile.subscriptionTier} />}
+                {view === 'roster-directory' && <RosterDirectory />}
                 {view === 'support' && (
                   <SupportPage darkMode={darkMode} />
                 )}

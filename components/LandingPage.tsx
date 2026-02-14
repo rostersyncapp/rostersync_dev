@@ -91,13 +91,14 @@ const BrandLogo: React.FC<{ siteConfig: SiteConfig; size?: 'sm' | 'md' }> = ({ s
 };
 
 import AboutPage from './AboutPage.tsx';
+import RosterDirectory from './RosterDirectory.tsx';
 
 const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode, toggleDarkMode, siteConfig }) => {
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
   const [showDemoModal, setShowDemoModal] = useState(false);
   const [demoForm, setDemoForm] = useState({ name: '', email: '', organization: '', useCase: '' });
   const [demoStatus, setDemoStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
-  const [currentPage, setCurrentPage] = useState<'home' | 'about'>('home');
+  const [currentPage, setCurrentPage] = useState<'home' | 'about' | 'directory'>('home');
 
   const handleDemoSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -152,6 +153,30 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
 
   if (currentPage === 'about') {
     return <AboutPage onBack={() => setCurrentPage('home')} siteConfig={siteConfig} darkMode={darkMode} />;
+  }
+
+  if (currentPage === 'directory') {
+    return (
+      <div className={`min-h-screen ${darkMode ? 'dark' : ''} bg-[#FAFAFA] dark:bg-[#111827]`}>
+        <nav className="fixed top-0 w-full px-4 md:px-8 py-6 z-50 bg-white/50 dark:bg-[#111827]/50 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-800/50">
+          <div className="max-w-7xl mx-auto flex items-center justify-between">
+            <button onClick={() => setCurrentPage('home')} className="flex items-center gap-2 relative z-50 transition-transform hover:scale-105 active:scale-95">
+              <BrandLogo siteConfig={siteConfig} size="md" />
+              <span className="text-lg font-black tracking-tight text-gray-900 dark:text-white underline decoration-[#5B5FFF]/30 decoration-2 underline-offset-4">{siteConfig?.site_name || 'rosterSync'}</span>
+            </button>
+            <div className="flex items-center gap-3 relative z-50">
+              <button onClick={toggleDarkMode} className="p-2 text-gray-400 hover:text-[#5B5FFF] transition-colors rounded-full">
+                {darkMode ? <Sun size={20} /> : <Moon size={20} />}
+              </button>
+              <a href={signInUrl} className="px-4 py-2 rounded-lg bg-[#5B5FFF] text-white font-bold text-xs shadow-md hover:scale-105 active:scale-95 transition-all">Sign In</a>
+            </div>
+          </div>
+        </nav>
+        <div className="pt-24">
+          <RosterDirectory />
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -263,7 +288,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
         </div>
       </section>
 
-      <Logos3 />
+      <Logos3 onSeeList={() => setCurrentPage('directory')} />
 
       <section className="py-16 px-6 relative overflow-hidden bg-white dark:bg-gray-900">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#5B5FFF]/5 rounded-full blur-[100px] -z-10"></div>

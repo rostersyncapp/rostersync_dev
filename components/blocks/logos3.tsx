@@ -19,6 +19,7 @@ interface Logos3Props {
     heading?: string;
     logos?: Logo[];
     className?: string;
+    onSeeList?: () => void;
 }
 
 const DEFAULT_LOGOS: Logo[] = [
@@ -48,6 +49,7 @@ const Logos3 = ({
     heading = "Supported Leagues",
     logos = DEFAULT_LOGOS,
     className,
+    onSeeList,
 }: Logos3Props) => {
     return (
         <section className="py-24 overflow-hidden">
@@ -60,6 +62,14 @@ const Logos3 = ({
                     <p className="text-gray-500 font-medium mt-4 max-w-2xl text-sm sm:text-base">
                         Access verified rosters from North America&apos;s top sports leagues. International expansion coming soon — Premier League currently in Beta.
                     </p>
+                    {onSeeList && (
+                        <button
+                            onClick={onSeeList}
+                            className="mt-4 text-xs font-bold text-[#5B5FFF] hover:underline flex items-center gap-1 cursor-pointer"
+                        >
+                            See List <span>&rarr;</span>
+                        </button>
+                    )}
                 </div>
             </div>
             <div className="relative">
