@@ -36,8 +36,10 @@ const LEAGUES = [
 ];
 
 async function fetchTeamsForLeague(leagueId: string, year: number): Promise<MilbTeam[]> {
-    const url = `https://thebaseballcube.com/content/minor_summary/${year}~${leagueId}/`;
-    console.log(`🔍 Fetching teams for ${leagueId} in ${year}...`);
+    // The Baseball Cube uses league IDs with a '2' suffix for 2021 and later
+    const effectiveLeagueId = year >= 2021 ? `${leagueId}2` : leagueId;
+    const url = `https://thebaseballcube.com/content/minor_summary/${year}~${effectiveLeagueId}/`;
+    console.log(`🔍 Fetching teams for ${leagueId} in ${year} (Code: ${effectiveLeagueId})...`);
 
     try {
         const response = await fetch(url, {
@@ -48,20 +50,23 @@ async function fetchTeamsForLeague(leagueId: string, year: number): Promise<Milb
         const $ = cheerio.load(html);
         const teamsMap = new Map<string, MilbTeam>();
 
-        // Standings table rows contain the team links
-        $('table.standings-table tr, table tr').each((i, row) => {
-            const link = $(row).find('a[href*="/content/stats_minor/"]').first();
-            if (link.length) {
-                const href = link.attr('href') || '';
-                const match = href.match(/stats_minor\/(\d+)~(\d+)\//);
-                if (match) {
-                    const yearInUrl = match[1];
-                    const cubeId = match[2];
-                    const displayName = link.text().trim();
+        // Find all links to team stats. The structure can vary, so we look for any link with '/stats_minor/'
+        $('a[href*="/content/stats_minor/"]').each((i, link) => {
+            const $link = $(link);
+            const href = $link.attr('href') || '';
+            const match = href.match(/stats_minor\/(\d+)~(\d+)\//);
+
+            if (match) {
+                const yearInUrl = match[1];
+                const cubeId = match[2];
+                const displayName = $link.text().trim();
+
+                // Ensure the link is for the current year and represents a team (not home/away links)
+                if (yearInUrl === year.toString() && displayName && !displayName.includes('Logos')) {
                     const slug = displayName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
                     const teamId = `${slug}-${cubeId}`;
 
-                    if (yearInUrl === year.toString() && !teamsMap.has(teamId)) {
+                    if (!teamsMap.has(teamId)) {
                         teamsMap.set(teamId, {
                             id: teamId,
                             name: displayName,
