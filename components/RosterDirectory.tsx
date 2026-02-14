@@ -87,6 +87,29 @@ const RosterDirectory: React.FC = () => {
         );
     };
 
+    const formatSeasonRanges = (years: (number | null)[]): string => {
+        const validYears = years.filter((y): y is number => y !== null && y !== undefined);
+        if (validYears.length === 0) return 'Coming Soon';
+
+        const sorted = [...new Set(validYears)].sort((a, b) => a - b);
+        const ranges: string[] = [];
+        let start = sorted[0];
+        let end = sorted[0];
+
+        for (let i = 1; i <= sorted.length; i++) {
+            if (i < sorted.length && sorted[i] === end + 1) {
+                end = sorted[i];
+            } else {
+                ranges.push(start === end ? `${start}` : `${start}-${end}`);
+                if (i < sorted.length) {
+                    start = sorted[i];
+                    end = sorted[i];
+                }
+            }
+        }
+        return ranges.join(', ');
+    };
+
     const filteredData = data.map(group => ({
         ...group,
         teams: group.teams.filter(team =>
@@ -168,14 +191,12 @@ const RosterDirectory: React.FC = () => {
                                                             <span className="font-bold text-gray-700 dark:text-gray-200 group-hover:text-[#5B5FFF] transition-colors">{team.name}</span>
                                                         </td>
                                                         <td className="px-8 py-4">
-                                                            <div className="flex flex-wrap gap-1.5">
-                                                                {team.seasons.slice(0, 5).map((year, yIdx) => (
-                                                                    <span key={yIdx} className="px-2 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-[10px] font-bold text-gray-500 dark:text-gray-400">{year}</span>
-                                                                ))}
-                                                                {team.seasons.length > 5 && (
-                                                                    <span className="px-2 py-0.5 bg-[#5B5FFF]/5 dark:bg-[#5B5FFF]/10 rounded text-[10px] font-bold text-[#5B5FFF]">+ {team.seasons.length - 5} more</span>
+                                                            <span className="font-bold text-gray-500 dark:text-gray-400 text-sm">
+                                                                {formatSeasonRanges(team.seasons)}
+                                                                {team.seasons.filter(y => y !== null).length === 1 && (
+                                                                    <span className="ml-2 px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-[10px] uppercase tracking-tighter opacity-50">Single Year</span>
                                                                 )}
-                                                            </div>
+                                                            </span>
                                                         </td>
                                                     </tr>
                                                 ))}
