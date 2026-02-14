@@ -158,6 +158,21 @@ const LEAGUES: LeagueConfig[] = [
             seasons: (id) => ({ p_team_id: id }),
             roster: (id, yr) => ({ p_team_id: id, p_season_year: yr })
         }
+    },
+    {
+        id: 'milb',
+        name: 'MiLB Triple-A',
+        description: 'Minor League Baseball Triple-A (IL & PCL)',
+        icon: Globe,
+        table: 'milb_teams',
+        seasonsRpc: 'get_milb_team_seasons',
+        rosterRpc: 'get_milb_roster',
+        sport: 'Baseball',
+        primaryColor: '#002D72',
+        params: {
+            seasons: (id) => ({ p_team_id: id }),
+            roster: (id, yr) => ({ p_team_id: id, p_season_year: yr })
+        }
     }
 ];
 
