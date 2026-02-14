@@ -62,17 +62,22 @@ async function migrateLogos() {
             const buffer = Buffer.from(await response.arrayBuffer());
             const contentType = response.headers.get('content-type') || 'image/svg+xml';
 
-            // 2. Prepare Storage Path
+            // 2. Find the best matching team entry (highest cube ID or most recently updated)
             const { data: existingTeams } = await supabase
                 .from('milb_teams')
-                .select('id')
-                .eq('name', team.name);
+                .select('id, cube_id')
+                .eq('name', team.name)
+                .order('cube_id', { ascending: false });
 
             let teamId = existingTeams && existingTeams.length > 0 ? existingTeams[0].id : null;
 
             if (!teamId) {
+                // Secondary check for Oklahoma City rebrand
                 if (team.name === 'Oklahoma City Comets') {
-                    const { data: okc } = await supabase.from('milb_teams').select('id').ilike('name', '%Oklahoma City Dodgers%');
+                    const { data: okc } = await supabase.from('milb_teams')
+                        .select('id')
+                        .ilike('name', '%Oklahoma City%')
+                        .order('cube_id', { ascending: false });
                     if (okc && okc.length > 0) teamId = okc[0].id;
                 }
             }
@@ -97,7 +102,14 @@ async function migrateLogos() {
 
             const publicUrl = `${supabaseUrl}/storage/v1/object/public/${BUCKET_NAME}/${storagePath}`;
 
-            // 4. Update/Insert in Database
+            // 4. Update the matched entry and deactivate others with the same name
+            // Reset all others with the same name to inactive
+            await supabase
+                .from('milb_teams')
+                .update({ is_active: false })
+                .eq('name', team.name)
+                .neq('id', teamId);
+
             const { error: dbError } = await supabase
                 .from('milb_teams')
                 .upsert({
@@ -106,6 +118,7 @@ async function migrateLogos() {
                     display_name: team.name,
                     logo_url: publicUrl,
                     league_id: team.league_id,
+                    is_active: true,
                     updated_at: new Date().toISOString()
                 }, { onConflict: 'id' });
 
