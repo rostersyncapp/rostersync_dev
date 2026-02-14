@@ -44,7 +44,7 @@ STATMUSE_NBA_TEAMS = [
   {"id": "golden-state-warriors", "slug": "golden-state-warriors", "statmuseId": 6},
   {"id": "houston-rockets", "slug": "houston-rockets", "statmuseId": 37},
   {"id": "indiana-pacers", "slug": "indiana-pacers", "statmuseId": 30},
-  {"id": "la-clippers", "slug": "la-clippers", "statmuseId": 41},
+  {"id": "los-angeles-clippers", "slug": "la-clippers", "statmuseId": 41},
   {"id": "los-angeles-lakers", "slug": "los-angeles-lakers", "statmuseId": 15},
   {"id": "memphis-grizzlies", "slug": "memphis-grizzlies", "statmuseId": 52},
   {"id": "miami-heat", "slug": "miami-heat", "statmuseId": 48},
