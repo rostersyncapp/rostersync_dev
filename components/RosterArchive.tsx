@@ -245,10 +245,17 @@ export default function RosterArchive({ onSave, userTier = 'BASIC' }: RosterArch
     async function loadTeams(leagueId: string) {
         setLoading(true);
         const league = LEAGUES.find(l => l.id === leagueId) || LEAGUES[0];
-        const { data, error } = await supabase
+
+        let query = supabase
             .from(league.table)
-            .select('*')
-            .order('display_name');
+            .select('*');
+
+        // For MiLB, we only want to show current Triple-A teams
+        if (leagueId === 'milb') {
+            query = query.eq('is_active', true);
+        }
+
+        const { data, error } = await query.order('display_name');
 
         if (error) {
             console.error('Error loading teams:', error);
