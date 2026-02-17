@@ -20,7 +20,6 @@ import {
   Twitter,
   Linkedin,
   Sparkles,
-  Database,
   Terminal as TerminalIcon,
   Check
 } from 'lucide-react';
@@ -45,15 +44,15 @@ interface LandingPageProps {
 const FAQS = [
   { q: "Why upgrade from Free to Starter?", a: "Upgrade to Starter when you need more than the trial limit, want simple phonetic guides, or require historical data (1-year archive) for your creation workflow." },
   { q: "What does the Pro tier offer for MAM workflows?", a: "The Pro tier ($149) is designed for professional broadcasters and media managers. It includes direct sync with Iconik and CatDV, 5-year historical archives, and support for all broadcast delivery formats." },
-  { q: "When should I choose the Enterprise tier?", a: "Choose Enterprise for national broadcasts, high-end production, or academic research. It adds support for IPA-grade phonetics, Spanish/Chinese localized exports, the complete 25-season historical archive, and custom export formats." },
+  { q: "When should I choose the Enterprise tier?", a: "Choose Enterprise for national broadcasts or large organizations. It adds support for IPA-grade phonetics, Spanish/Chinese localized exports, a full 25-year historical archive, and custom export formats." },
   { q: "Can I manage multiple projects?", a: "Yes. Starter includes up to 5 projects, while Pro and Enterprise offer unlimited project folders to help you organize rosters across different leagues and clients." },
   { q: "What hardware systems do you support?", a: "We support nearly every major broadcast system. Pro and Enterprise tiers provide data for Ross Xpression, Vizrt, Chyron Prime, and specialized formats like Ross DataLinq XML." }
 ];
 
 const FEATURES = [
-  { icon: <Database size={20} />, title: "Historical Authority", desc: "Access the definitive 25-year archive of MLB, NHL, NBA, NFL, and NCAA rosters instantly." },
+  { icon: <Wand2 size={20} />, title: "AI Normalization", desc: "Instantly parses messy text from PDF scrapes, websites, and emails with high accuracy." },
   { icon: <ShieldCheck size={20} />, title: "Broadcast Safe", desc: "Automatically strips accents and sanitizes special characters for character generator compatibility." },
-  { icon: <Wand2 size={20} />, title: "Smart Ingest", desc: "Instantly parses messy text from PDF scrapes or websites with high accuracy." },
+  { icon: <Palette size={20} />, title: "Smart Branding", desc: "Discovers official team hex codes, logos, and conference metadata automatically." },
   { icon: <Globe size={20} />, title: "Multi-Language", desc: "Generate phonetics and localized rosters in English, Spanish, and Mandarin (Network Tier)." },
   { icon: <Layers size={20} />, title: "Asset Management", desc: "Integrates with Iconik, CatDV, and other MAM systems via live sync (Pro Tier and above)." },
   { icon: <Zap size={20} />, title: "Real-time Sync", desc: "Push updates directly to your production folders or cloud buckets in seconds." }
@@ -218,11 +217,11 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
             <Sparkles size={12} /> New: Gemini 2.0 Integration
           </div>
           <h1 className="text-4xl md:text-6xl font-extrabold tracking-tighter leading-[1.2] text-gray-900 dark:text-white mb-8">
-            The Ultimate Sports Archive. <br />
-            <span className="bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-purple-600 text-transparent bg-clip-text inline-block py-1">25 Years of Rosters. Unified.</span>
+            Athlete Rosters. <br />
+            <span className="bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-purple-600 text-transparent bg-clip-text inline-block py-1">Simplified for Production.</span>
           </h1>
           <p className="text-lg md:text-xl text-gray-500 dark:text-gray-400 max-w-2xl mx-auto font-medium leading-relaxed mb-12">
-            The high-performance database and clearinghouse transforming historical rosters into production-ready metadata for Broadcast, MAM, and DAM systems.
+            The high-performance middleware transforming messy rosters into production-ready metadata for Broadcast, MAM, and DAM systems.
           </p>
         </div>
       </section>
@@ -241,21 +240,21 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
               <li className="flex gap-4">
                 <span className="flex-shrink-0 w-8 h-8 rounded-full bg-[#5B5FFF]/10 text-[#5B5FFF] flex items-center justify-center font-bold text-sm">1</span>
                 <div>
-                  <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-1">Explore</h4>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Search our 25-year archive of professional and collegiate athletes or paste your own.</p>
+                  <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-1">Paste</h4>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Copy raw roster data from any PDF, website, or spreadsheet.</p>
                 </div>
               </li>
               <li className="flex gap-4">
                 <span className="flex-shrink-0 w-8 h-8 rounded-full bg-[#5B5FFF]/10 text-[#5B5FFF] flex items-center justify-center font-bold text-sm">2</span>
                 <div>
-                  <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-1">Parse & Clean</h4>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Our engine instantly identifies athletes, position, jersey number, and sanitized team metadata.</p>
+                  <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-1">Parse</h4>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Our engine instantly identifies athletes, position, jersey number, and teams.</p>
                 </div>
               </li>
               <li className="flex gap-4">
                 <span className="flex-shrink-0 w-8 h-8 rounded-full bg-[#5B5FFF]/10 text-[#5B5FFF] flex items-center justify-center font-bold text-sm">3</span>
                 <div>
-                  <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-1">Export Anywhere</h4>
+                  <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-1">Export</h4>
                   <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Download cleaned JSON, CSV, or XML ready for broadcast, MAM and DAM.</p>
                 </div>
               </li>

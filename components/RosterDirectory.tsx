@@ -125,8 +125,8 @@ const RosterDirectory: React.FC = () => {
                         <Library size={32} />
                     </div>
                     <div>
-                        <h1 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight uppercase">Archive Explorer</h1>
-                        <p className="text-gray-500 font-medium">The definitive historical sports database. Search 25 years of rosters and coverage.</p>
+                        <h1 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight uppercase">Roster Directory</h1>
+                        <p className="text-gray-500 font-medium">Complete coverage of all supported leagues, teams, and historical seasons.</p>
                     </div>
                 </div>
 
