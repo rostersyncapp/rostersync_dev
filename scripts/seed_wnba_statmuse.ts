@@ -149,37 +149,42 @@ async function fetchStatMuseRoster(team: StatMuseTeam, year: number) {
 }
 
 async function seedStatMuse(startYear?: number, endYear?: number) {
-    const sYear = startYear || 2025;
-    const eYear = endYear || 2025;
+    const sYear = startYear || 1997;
+    const eYear = endYear || 2026;
 
-    console.log(`\n💎 StatMuse WNBA Seeding\n📅 ${sYear} - ${eYear}\n`);
+    console.log(`\n💎 StatMuse WNBA Seeding & Cleanup\n📅 ${sYear} - ${eYear}\n`);
 
     const summary: any[] = [];
 
     for (const team of STATMUSE_TEAMS) {
-        console.log(`🏆 ${team.id.toUpperCase()}`);
+        console.log(`\n🏆 ${team.id.toUpperCase()}`);
         let teamSaved = 0;
         let teamMissingYears: number[] = [];
 
         for (let year = sYear; year <= eYear; year++) {
-            console.log(`  📆 Season ${year}`);
+            process.stdout.write(`  📆 Season ${year}... `);
             const players = await fetchStatMuseRoster(team, year);
 
             if (players.length > 0) {
                 const { error } = await supabase
                     .from('wnba_rosters')
-                    .upsert(players, { onConflict: 'team_id,season_year,player_name' });
+                    .upsert(players, {
+                        onConflict: 'team_id,season_year,player_name',
+                        ignoreDuplicates: false // We WANT to overwrite with StatMuse data (high fidelity)
+                    });
 
                 if (error) {
-                    console.error(`    ❌ DB Error:`, error);
+                    process.stdout.write(`❌ DB Error\n`);
+                    console.error(`      ${error.message}`);
                 } else {
-                    console.log(`    ✅ Saved ${players.length} players`);
+                    process.stdout.write(`✅ Saved ${players.length} players\n`);
                     teamSaved += players.length;
                 }
             } else {
+                process.stdout.write(`⏭️  No data\n`);
                 teamMissingYears.push(year);
             }
-            await new Promise(res => setTimeout(res, 800));
+            await new Promise(res => setTimeout(res, 600)); // Slower to avoid rate limits
         }
 
         summary.push({
@@ -190,20 +195,27 @@ async function seedStatMuse(startYear?: number, endYear?: number) {
     }
 
     // Final Summary Report
-    console.log('\n' + '='.repeat(60));
+    console.log('\n' + '='.repeat(100));
     console.log(`📊 SEEDING SUMMARY REPORT (${sYear}-${eYear})`);
-    console.log('='.repeat(60));
+    console.log('='.repeat(100));
 
     summary.forEach(s => {
         const missingStr = s.missing.length > 0 ? `❌ Missing: ${s.missing.join(', ')}` : '✅ All seasons present';
         console.log(`${s.team.padEnd(25)} | 👥 ${s.totalSaved.toString().padStart(4)} players | ${missingStr}`);
     });
-    console.log('='.repeat(60));
+    console.log('='.repeat(100));
 }
 
 const args = process.argv.slice(2);
-seedStatMuse(args[0] ? parseInt(args[0]) : undefined, args[1] ? parseInt(args[1]) : undefined)
+const start = args[0] ? parseInt(args[0]) : undefined;
+const end = args[1] ? parseInt(args[1]) : undefined;
+
+seedStatMuse(start, end)
     .then(() => {
-        console.log('\n✅ StatMuse Seeding Complete!');
+        console.log('\n✅ StatMuse Seeding & Cleanup Complete!');
         process.exit(0);
+    })
+    .catch(error => {
+        console.error('\n❌ Fatal error:', error);
+        process.exit(1);
     });
