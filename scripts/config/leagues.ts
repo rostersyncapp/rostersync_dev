@@ -199,7 +199,16 @@ export const LEAGUE_CONFIGS: Record<string, LeagueConfig> = {
             { id: 'golden-state-valkyries', slug: 'golden-state-valkyries', statmuseId: 10, name: "Golden State Valkyries" },
             { id: 'dallas-wings', slug: 'dallas-wings', statmuseId: 11, name: "Dallas Wings" },
             { id: 'minnesota-lynx', slug: 'minnesota-lynx', statmuseId: 12, name: "Minnesota Lynx" },
-            { id: 'seattle-storm', slug: 'seattle-storm', statmuseId: 13, name: "Seattle Storm" }
+            { id: 'seattle-storm', slug: 'seattle-storm', statmuseId: 13, name: "Seattle Storm" },
+            { id: 'charlotte-sting', slug: 'charlotte-sting', statmuseId: 14, name: "Charlotte Sting" },
+            { id: 'cleveland-rockers', slug: 'cleveland-rockers', statmuseId: 15, name: "Cleveland Rockers" },
+            { id: 'houston-comets', slug: 'houston-comets', statmuseId: 16, name: "Houston Comets" },
+            { id: 'miami-sol', slug: 'miami-sol', statmuseId: 17, name: "Miami Sol" },
+            { id: 'portland-fire', slug: 'portland-fire', statmuseId: 18, name: "Portland Fire" },
+            { id: 'sacramento-monarchs', slug: 'sacramento-monarchs', statmuseId: 19, name: "Sacramento Monarchs" },
+            { id: 'utah-starzz', slug: 'utah-starzz', statmuseId: 9, name: "Utah Starzz" },
+            { id: 'orlando-miracle', slug: 'orlando-miracle', statmuseId: 5, name: "Orlando Miracle" },
+            { id: 'detroit-shock', slug: 'detroit-shock', statmuseId: 11, name: "Detroit Shock" }
         ]
     },
     mls: {

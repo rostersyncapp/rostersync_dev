@@ -28,31 +28,32 @@ if (!supabaseUrl || !supabaseKey) {
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-// WNBA Team ESPN IDs mapping
+// WNBA Team ESPN IDs mapping (Verified via subagent 2026-02-18)
 const TEAM_ESPN_IDS: Record<string, number> = {
-  'atlanta-dream': 16,
-  'chicago-sky': 17,
+  'atlanta-dream': 20,
+  'chicago-sky': 19,
   'connecticut-sun': 18,
-  'indiana-fever': 19,
-  'new-york-liberty': 20,
-  'washington-mystics': 21,
-  'dallas-wings': 22,
-  'las-vegas-aces': 23,
-  'los-angeles-sparks': 24,
-  'minnesota-lynx': 25,
-  'phoenix-mercury': 26,
-  'seattle-storm': 27,
-  'charlotte-sting': 28,
-  'cleveland-rockers': 29,
-  'detroit-shock': 30,
-  'houston-comets': 31,
-  'miami-sol': 32,
-  'orlando-miracle': 33,
-  'portland-fire': 34,
-  'sacramento-monarchs': 35,
-  'san-antonio-stars': 36,
-  'tulsa-shock': 37,
-  'utah-starzz': 38,
+  'indiana-fever': 5,
+  'new-york-liberty': 9,
+  'washington-mystics': 16,
+  'dallas-wings': 3,
+  'las-vegas-aces': 17,
+  'los-angeles-sparks': 6,
+  'minnesota-lynx': 8,
+  'phoenix-mercury': 11,
+  'seattle-storm': 14,
+  'charlotte-sting': 1,
+  'cleveland-rockers': 2,
+  'detroit-shock': 12, // Detroit Shock moved to Tulsa (12 -> 2793) -> Dallas (3)
+  'houston-comets': 4,
+  'miami-sol': 7,
+  'orlando-miracle': 10,
+  'portland-fire': 132052,
+  'sacramento-monarchs': 13,
+  'san-antonio-stars': 17, // Same franchise as Aces
+  'tulsa-shock': 2793,
+  'utah-starzz': 15,
+  'golden-state-valkyries': 129689
 };
 
 interface ESPNPlayer {
