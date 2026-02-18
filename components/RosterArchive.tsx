@@ -204,7 +204,11 @@ const LEAGUES: LeagueConfig[] = [
             roster: (id, yr) => ({ p_team_id: id, p_season_year: yr })
         }
     }
-];
+].sort((a, b) => {
+    const sportCompare = a.sport.localeCompare(b.sport);
+    if (sportCompare !== 0) return sportCompare;
+    return a.name.localeCompare(b.name);
+});
 
 interface Team {
     id: string;
