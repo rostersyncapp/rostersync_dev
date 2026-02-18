@@ -236,7 +236,7 @@ interface RosterArchiveProps {
 }
 
 export default function RosterArchive({ onSave, userTier = 'BASIC' }: RosterArchiveProps) {
-    const [selectedLeagueId, setSelectedLeagueId] = useState<string>(LEAGUES[0].id);
+    const [selectedLeagueId, setSelectedLeagueId] = useState<string>('');
     const [teams, setTeams] = useState<Team[]>([]);
     const [selectedTeamId, setSelectedTeamId] = useState<string>('');
     const [availableSeasons, setAvailableSeasons] = useState<number[]>([]);
@@ -249,7 +249,11 @@ export default function RosterArchive({ onSave, userTier = 'BASIC' }: RosterArch
 
     // Load teams when league changes
     useEffect(() => {
-        loadTeams(selectedLeagueId);
+        if (selectedLeagueId) {
+            loadTeams(selectedLeagueId);
+        } else {
+            setTeams([]);
+        }
         setSelectedTeamId('');
         setAvailableSeasons([]);
         setSelectedSeason(null);
@@ -446,6 +450,7 @@ export default function RosterArchive({ onSave, userTier = 'BASIC' }: RosterArch
                         onChange={(e) => setSelectedLeagueId(e.target.value)}
                         className="w-full px-5 py-4 bg-gray-50 dark:bg-gray-800/50 border-none rounded-2xl focus:ring-2 focus:ring-[#5B5FFF] font-bold dark:text-white appearance-none"
                     >
+                        <option value="">Choose League...</option>
                         {Array.from(new Set(LEAGUES.map(l => l.sport))).map(sport => (
                             <optgroup key={sport} label={sport.toUpperCase()} className="text-[10px] font-black text-gray-400 bg-white dark:bg-gray-900">
                                 {LEAGUES.filter(l => l.sport === sport).map(league => (
