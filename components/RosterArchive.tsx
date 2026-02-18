@@ -85,6 +85,36 @@ const LEAGUES: LeagueConfig[] = [
         }
     },
     {
+        id: 'ncaa-mens-basketball',
+        name: 'NCAA Men\'s Basketball',
+        description: 'College Basketball Historical Rosters (Men\'s)',
+        icon: Trophy,
+        table: 'ncaa_basketball_teams',
+        seasonsRpc: 'get_ncaa_basketball_team_seasons',
+        rosterRpc: 'get_ncaa_basketball_roster',
+        sport: 'Basketball',
+        primaryColor: '#003366',
+        params: {
+            seasons: (id) => ({ p_team_id: id }),
+            roster: (id, yr) => ({ p_team_id: id, p_season_year: yr })
+        }
+    },
+    {
+        id: 'ncaa-womens-basketball',
+        name: 'NCAA Women\'s Basketball',
+        description: 'College Basketball Historical Rosters (Women\'s)',
+        icon: Trophy,
+        table: 'ncaa_womens_basketball_teams',
+        seasonsRpc: 'get_ncaa_womens_basketball_team_seasons',
+        rosterRpc: 'get_ncaa_womens_basketball_roster',
+        sport: 'Basketball',
+        primaryColor: '#660099',
+        params: {
+            seasons: (id) => ({ p_team_id: id }),
+            roster: (id, yr) => ({ p_team_id: id, p_season_year: yr })
+        }
+    },
+    {
         id: 'nfl',
         name: 'NFL',
         description: 'National Football League Historical Rosters',

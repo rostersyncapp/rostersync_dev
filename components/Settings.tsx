@@ -348,7 +348,7 @@ const Settings: React.FC<Props> = ({ profile, rosters, onUpdate }) => {
                     <Zap size={20} className="text-[#5B5FFF]" /> Usage
                   </h3>
                   <div className="flex items-center gap-2 bg-[#5B5FFF]/10 px-3 py-1 rounded-full">
-                    <span className="text-[10px] font-black text-[#5B5FFF] uppercase tracking-widest">{profile.subscriptionTier}</span>
+                    <span className="text-[10px] font-black text-[#5B5FFF] uppercase tracking-widest">{currentTier.name}</span>
                   </div>
                 </div>
 

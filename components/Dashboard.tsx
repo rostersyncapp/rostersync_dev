@@ -138,38 +138,47 @@ const ExportItem: React.FC<{
   onClick: () => void;
   disabled?: boolean;
   requiredTier?: SubscriptionTier;
-}> = ({ icon, title, desc, onClick, disabled, requiredTier = 'PRO' }) => (
-  <button
-    onClick={disabled ? undefined : onClick}
-    disabled={disabled}
-    className={`w-full flex items-center justify-between p-4 rounded-lg transition-all group border ${disabled
-      ? 'bg-gray-50/50 dark:bg-gray-900/50 border-gray-100 dark:border-gray-800 opacity-60 cursor-not-allowed'
-      : 'bg-gray-50 dark:bg-gray-900 hover:bg-[#5B5FFF]/5 dark:hover:bg-[#5B5FFF]/10 border-gray-100 dark:border-gray-800 hover:border-[#5B5FFF]/20'
-      }`}
-  >
-    <div className="flex items-center gap-4">
-      <div className={`w-12 h-12 rounded-lg flex items-center justify-center shadow-sm transition-colors ${disabled
-        ? 'bg-gray-200 dark:bg-gray-800 text-gray-400'
-        : 'bg-white dark:bg-gray-800 text-gray-400 group-hover:text-[#5B5FFF] group-hover:scale-110'
-        }`}>
-        {icon}
-      </div>
-      <div className="text-left min-w-0">
-        <div className="flex items-center gap-2">
-          <div className="text-sm font-extrabold text-gray-900 dark:text-white truncate">{title}</div>
-          {disabled && (
-            <span className="px-1.5 py-0.5 bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 rounded text-[8px] font-black uppercase tracking-tighter shadow-sm border border-amber-200 dark:border-amber-900/50">
-              {requiredTier}
-            </span>
-          )}
+}> = ({ icon, title, desc, onClick, disabled, requiredTier = 'PRO' }) => {
+  const tierNameMap: Record<SubscriptionTier, string> = {
+    'BASIC': 'FREE',
+    'PRO': 'STARTER',
+    'STUDIO': 'PRO',
+    'NETWORK': 'ENTERPRISE'
+  };
+
+  return (
+    <button
+      onClick={disabled ? undefined : onClick}
+      disabled={disabled}
+      className={`w-full flex items-center justify-between p-4 rounded-lg transition-all group border ${disabled
+        ? 'bg-gray-50/50 dark:bg-gray-900/50 border-gray-100 dark:border-gray-800 opacity-60 cursor-not-allowed'
+        : 'bg-gray-50 dark:bg-gray-900 hover:bg-[#5B5FFF]/5 dark:hover:bg-[#5B5FFF]/10 border-gray-100 dark:border-gray-800 hover:border-[#5B5FFF]/20'
+        }`}
+    >
+      <div className="flex items-center gap-4">
+        <div className={`w-12 h-12 rounded-lg flex items-center justify-center shadow-sm transition-colors ${disabled
+          ? 'bg-gray-200 dark:bg-gray-800 text-gray-400'
+          : 'bg-white dark:bg-gray-800 text-gray-400 group-hover:text-[#5B5FFF] group-hover:scale-110'
+          }`}>
+          {icon}
         </div>
-        <div className="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-tight mt-0.5 truncate">{desc}</div>
+        <div className="text-left min-w-0">
+          <div className="flex items-center gap-2">
+            <div className="text-sm font-extrabold text-gray-900 dark:text-white truncate">{title}</div>
+            {disabled && (
+              <span className="px-1.5 py-0.5 bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 rounded text-[8px] font-black uppercase tracking-tighter shadow-sm border border-amber-200 dark:border-amber-900/50">
+                {tierNameMap[requiredTier]}
+              </span>
+            )}
+          </div>
+          <div className="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-tight mt-0.5 truncate">{desc}</div>
+        </div>
       </div>
-    </div>
-    {!disabled && <ArrowRight size={18} className="text-gray-300 group-hover:text-[#5B5FFF] group-hover:translate-x-1 transition-all shrink-0" />}
-    {disabled && <Lock size={14} className="text-gray-400 shrink-0" />}
-  </button>
-);
+      {!disabled && <ArrowRight size={18} className="text-gray-300 group-hover:text-[#5B5FFF] group-hover:translate-x-1 transition-all shrink-0" />}
+      {disabled && <Lock size={14} className="text-gray-400 shrink-0" />}
+    </button>
+  );
+};
 
 export const Dashboard: React.FC<Props> = ({
   userId,
@@ -784,10 +793,10 @@ export const Dashboard: React.FC<Props> = ({
                 </div>
 
                 <div className="space-y-12">
-                  {/* BASIC TIER */}
+                  {/* FREE TIER */}
                   <div className="space-y-4">
                     <h4 className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-gray-400 font-mono">
-                      <span className="flex items-center gap-2"><Table size={14} className="text-[#5B5FFF]" /> Basic Tier</span>
+                      <span className="flex items-center gap-2"><Table size={14} className="text-[#5B5FFF]" /> Free Tier</span>
                       <span className="px-2 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-[8px]">Interchange</span>
                     </h4>
                     <div className="grid grid-cols-1 gap-3">
@@ -795,10 +804,10 @@ export const Dashboard: React.FC<Props> = ({
                     </div>
                   </div>
 
-                  {/* PRO TIER */}
+                  {/* STARTER TIER */}
                   <div className="space-y-4">
                     <h4 className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-gray-400 font-mono">
-                      <span className="flex items-center gap-2"><Layers size={14} className="text-[#5B5FFF]" /> Pro Tier</span>
+                      <span className="flex items-center gap-2"><Layers size={14} className="text-[#5B5FFF]" /> Starter Tier</span>
                       <span className="px-2 py-0.5 bg-amber-500/10 text-amber-500 rounded text-[8px]">MAM & Cloud</span>
                     </h4>
                     <div className="grid grid-cols-1 gap-3">
@@ -821,7 +830,7 @@ export const Dashboard: React.FC<Props> = ({
                           <div className="text-left min-w-0">
                             <div className="flex items-center gap-2">
                               <div className="text-sm font-extrabold text-gray-900 dark:text-white truncate">Sync to Iconik</div>
-                              {isTierLocked(userTier, 'PRO') && <span className="px-1.5 py-0.5 bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 rounded text-[8px] font-black uppercase tracking-tighter shadow-sm border border-amber-200 dark:border-amber-900/50">PRO</span>}
+                              {isTierLocked(userTier, 'PRO') && <span className="px-1.5 py-0.5 bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 rounded text-[8px] font-black uppercase tracking-tighter shadow-sm border border-amber-200 dark:border-amber-900/50">STARTER</span>}
                             </div>
                             <div className="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-tight mt-0.5 truncate">
                               {isTierLocked(userTier, 'PRO') ? 'Premium Feature' : isSyncingIconik ? 'Syncing...' : isSyncIconikSuccess ? 'Synced Successfully!' : 'Push via API'}
@@ -849,7 +858,7 @@ export const Dashboard: React.FC<Props> = ({
                           <div className="text-left min-w-0">
                             <div className="flex items-center gap-2">
                               <div className="text-sm font-extrabold text-gray-900 dark:text-white truncate">Sync to CatDV</div>
-                              {isTierLocked(userTier, 'PRO') && <span className="px-1.5 py-0.5 bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 rounded text-[8px] font-black uppercase tracking-tighter shadow-sm border border-amber-200 dark:border-amber-900/50">PRO</span>}
+                              {isTierLocked(userTier, 'PRO') && <span className="px-1.5 py-0.5 bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 rounded text-[8px] font-black uppercase tracking-tighter shadow-sm border border-amber-200 dark:border-amber-900/50">STARTER</span>}
                             </div>
                             <div className="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-tight mt-0.5 truncate">
                               {isTierLocked(userTier, 'PRO') ? 'Premium Feature' : isSyncingCatdv ? 'Syncing...' : isSyncCatdvSuccess ? 'Synced Successfully!' : 'Update Picklist'}
@@ -863,10 +872,10 @@ export const Dashboard: React.FC<Props> = ({
                     </div>
                   </div>
 
-                  {/* STUDIO TIER */}
+                  {/* PRO TIER */}
                   <div className="space-y-4">
                     <h4 className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-gray-400 font-mono">
-                      <span className="flex items-center gap-2"><Palette size={14} className="text-[#5B5FFF]" /> Studio Tier</span>
+                      <span className="flex items-center gap-2"><Palette size={14} className="text-[#5B5FFF]" /> Pro Tier</span>
                       <span className="px-2 py-0.5 bg-purple-500/10 text-purple-500 rounded text-[8px]">Cloud Graphics</span>
                     </h4>
                     <div className="grid grid-cols-1 gap-3">
@@ -875,10 +884,10 @@ export const Dashboard: React.FC<Props> = ({
                     </div>
                   </div>
 
-                  {/* NETWORK TIER */}
+                  {/* ENTERPRISE TIER */}
                   <div className="space-y-4">
                     <h4 className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-gray-400 font-mono">
-                      <span className="flex items-center gap-2"><MonitorPlay size={14} className="text-[#5B5FFF]" /> Network Tier</span>
+                      <span className="flex items-center gap-2"><MonitorPlay size={14} className="text-[#5B5FFF]" /> Enterprise Tier</span>
                       <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-500 rounded text-[8px]">Broadcast Ready</span>
                     </h4>
                     <div className="grid grid-cols-1 gap-3">

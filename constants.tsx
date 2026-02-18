@@ -42,7 +42,7 @@ export const BRAND_CONFIG = {
 export const PRICING_TIERS = [
   {
     name: 'Free',
-    id: 'TRIAL',
+    id: 'BASIC',
     price: '$0',
     monthlyCredits: 50,
     description: 'Trial/Trialists',
@@ -51,7 +51,7 @@ export const PRICING_TIERS = [
   },
   {
     name: 'Starter',
-    id: 'STARTER',
+    id: 'PRO',
     price: '$49',
     monthlyCredits: 150,
     description: 'Individual Creators',
@@ -60,7 +60,7 @@ export const PRICING_TIERS = [
   },
   {
     name: 'Pro',
-    id: 'PRO',
+    id: 'STUDIO',
     price: '$149',
     monthlyCredits: 500,
     description: 'MAM/DAM Workflows',
@@ -69,7 +69,7 @@ export const PRICING_TIERS = [
   },
   {
     name: 'Enterprise',
-    id: 'ENTERPRISE',
+    id: 'NETWORK',
     price: '$199',
     monthlyCredits: 1000,
     description: 'National Broadcasters',
