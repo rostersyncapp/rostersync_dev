@@ -5,6 +5,7 @@
  * Scans a specific team/season roster and adds missing data required for PRO/STUDIO/NETWORK tiers:
  * - ESPN Player IDs
  * - Player headshot URLs
+ * - Hardware Safe Name (ALL CAPS)
  */
 
 import { createClient } from '@supabase/supabase-js';

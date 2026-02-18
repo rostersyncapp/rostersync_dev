@@ -153,7 +153,8 @@ async function fetchNBAStatMuseRoster(team: StatMuseTeam, year: number) {
                     height: height || null,
                     weight: weight || null,
                     birth_date: birth_date,
-                    college: college || null
+                    college: college || null,
+                    hardware_safe_name: name.toUpperCase()
                 });
             }
         });

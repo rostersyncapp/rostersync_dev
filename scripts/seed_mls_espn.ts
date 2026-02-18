@@ -157,7 +157,8 @@ async function scrapeRoster(teamId: string, season: number) {
                     age: isNaN(age) ? null : age,
                     height: height !== '--' ? height : null,
                     weight: weight !== '--' ? weight : null,
-                    nationality: nationality !== '--' ? nationality : null
+                    nationality: nationality !== '--' ? nationality : null,
+                    hardware_safe_name: playerName.toUpperCase()
                 });
             }
         });

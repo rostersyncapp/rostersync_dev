@@ -1,6 +1,6 @@
 /**
  * MLB Player Data Enrichment (Gemini AI)
- * Enriches MLB player data with phonetics, IPA, and Chinese characters.
+ * Enriches MLB player data with phonetics, IPA, Chinese characters, and Hardware Safe Name.
  * Usage: npx tsx scripts/enrich_mlb_gemini.ts [team_id] [--all] [--year=YYYY]
  */
 
@@ -64,7 +64,8 @@ async function enrichPlayer(player: Player) {
     {
         "phonetic": "The common phonetic spelling (e.g. SHO-hay oh-TAH-nee)",
         "ipa": "The International Phonetic Alphabet spelling (e.g. /ˌʃoʊheɪ oʊˈtɑːni/)",
-        "chinese": "The standard Chinese character translation (e.g. 大谷翔平)"
+        "chinese": "The standard Chinese character translation (e.g. 大谷翔平)",
+        "hardware_safe": "The player name in ALL CAPS (e.g. SHOHEI OHTANI)"
     }
     `;
 
@@ -86,7 +87,7 @@ async function enrichPlayer(player: Player) {
                 phonetic_name: phonetic,
                 ipa_name: ipa,
                 chinese_name: chinese,
-                hardware_safe_name: player.player_name.toUpperCase()
+                hardware_safe_name: data.hardware_safe?.toUpperCase() || player.player_name.toUpperCase()
             })
             .eq('id', player.id);
 

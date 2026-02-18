@@ -180,7 +180,8 @@ async function scrapeRoster(teamId: string, season: number) {
                     position: athlete.position?.abbreviation || athlete.position?.name || athlete.position || null,
                     height: athlete.displayHeight || athlete.height || null,
                     weight: athlete.displayWeight || athlete.weight || null,
-                    class: athlete.experience?.displayValue || athlete.experience?.abbreviation || athlete.class || null
+                    class: athlete.experience?.displayValue || athlete.experience?.abbreviation || athlete.class || null,
+                    hardware_safe_name: (athlete.fullName || athlete.name || athlete.displayName).toUpperCase()
                 });
             }
         }

@@ -188,7 +188,8 @@ async function fetchNHLStatMuseRoster(team: StatMuseTeam, year: number) {
                     height: height || null,
                     weight: weight || null,
                     birth_date: birth_date,
-                    birthplace: birthplace || null
+                    birthplace: birthplace || null,
+                    hardware_safe_name: name.toUpperCase()
                 });
             }
         });

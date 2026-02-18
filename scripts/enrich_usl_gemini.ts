@@ -1,6 +1,6 @@
 #!/usr/bin/env ts-node
 /**
- * WNBA Roster Enrichment - Gemini AI
+ * USL Roster Enrichment - Gemini AI
  * 
  * Enriches player data with:
  * - Simple Phonetic Spelling
@@ -10,9 +10,9 @@
  * 
  * Also verifies/utilizes team colors (Hex/RGB).
  * 
- * Usage: npx tsx scripts/enrich_wnba_gemini.ts [team-id] [limit]
- * Example: npx tsx scripts/enrich_wnba_gemini.ts atlanta-dream 5
- * Example: npx tsx scripts/enrich_wnba_gemini.ts all 1000
+ * Usage: npx tsx scripts/enrich_usl_gemini.ts [team-id] [limit]
+ * Example: npx tsx scripts/enrich_usl_gemini.ts birmingham-legion-fc 5
+ * Example: npx tsx scripts/enrich_usl_gemini.ts all 1000
  */
 
 import { createClient } from '@supabase/supabase-js';
@@ -26,13 +26,12 @@ try {
     if (fs.existsSync(envPath)) {
         const envConfig = fs.readFileSync(envPath, 'utf-8');
         envConfig.split('\n').forEach(line => {
-            const match = line.match(/^([^=]+)=(.*)$/);
-            if (match && !line.trim().startsWith('#')) {
-                const key = match[1].trim();
-                const value = match[2].trim().replace(/^["']|["']$/g, ''); // Remove quotes
-                if (!process.env[key]) {
-                    process.env[key] = value;
-                }
+            const match = line.match(/^([^#\s=]+)\s*=\s*(.*)$/);
+            if (match) {
+                const key = match[1];
+                let value = match[2].trim();
+                if (value.startsWith('"') && value.endsWith('"')) value = value.slice(1, -1);
+                process.env[key] = value;
             }
         });
         console.log('✅ Loaded .env file');
@@ -73,11 +72,11 @@ async function enrichPlayer(player: any, teamConfig: any): Promise<number> {
 
     // Prompt for Gemini
     const prompt = `
-    You are a sports data expert. Provide the following for WNBA player "${player.player_name}" (Team: ${teamConfig.name}):
-    1. Simple Phonetic Pronunciation (e.g. "Aja Wilson" -> "AH-zhuh Wilson")
-    2. International Phonetic Alphabet (IPA) (e.g. "Aja Wilson" -> "/ˈɑːʒə ˈwɪlsən/")
-    3. Chinese Character Spelling (e.g. "Aja Wilson" -> "阿贾·威尔逊")
-    4. Hardware Safe Name (the player name in ALL CAPS)
+    You are a sports data expert. Provide the following for USL player "${player.player_name}" (Team: ${teamConfig.name}):
+    1. Simple Phonetic Pronunciation (e.g. "Enzo Martinez" -> "EN-zo mar-TEE-nez")
+    2. International Phonetic Alphabet (IPA) (e.g. "Enzo Martinez" -> "/ˈɛnzoʊ mɑːrˈtiːnɛz/")
+    3. Chinese Character Spelling (e.g. "Enzo Martinez" -> "恩佐·马丁内斯")
+    4. Hardware Safe Name (the player name in ALL CAPS, e.g. "ENZO MARTINEZ")
     
     Return ONLY a JSON object with keys: "phonetic", "ipa", "chinese", "hardware_safe".
   `;
@@ -98,6 +97,7 @@ async function enrichPlayer(player: any, teamConfig: any): Promise<number> {
         console.log(`   ✅ Phonetic: ${data.phonetic}`);
         console.log(`   ✅ IPA: ${data.ipa}`);
         console.log(`   ✅ Chinese: ${data.chinese}`);
+        console.log(`   ✅ Hardware Safe: ${data.hardware_safe}`);
 
         // Pad jersey number if it's a single digit (1-9)
         let updatedJersey = player.jersey_number;
@@ -108,7 +108,7 @@ async function enrichPlayer(player: any, teamConfig: any): Promise<number> {
 
         // Update database
         const { error } = await supabase
-            .from('wnba_rosters')
+            .from('usl_rosters')
             .update({
                 phonetic_name: data.phonetic,
                 ipa_name: data.ipa,
@@ -139,11 +139,11 @@ async function enrichPlayer(player: any, teamConfig: any): Promise<number> {
 
 async function runEnrichment(teamId?: string, limit: number = 5) {
     // Fetch teams to get colors
-    const { data: teams } = await supabase.from('wnba_teams').select('*');
+    const { data: teams } = await supabase.from('usl_teams').select('*');
     const teamMap = new Map(teams?.map(t => [t.id, t]));
 
     let query = supabase
-        .from('wnba_rosters')
+        .from('usl_rosters')
         .select('*')
     //.is('phonetic_name', null); // Uncomment to strictly process missing
 

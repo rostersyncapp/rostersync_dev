@@ -1,6 +1,6 @@
 /**
  * NBA Player Data Enrichment (Gemini AI)
- * Enriches NBA player data with phonetics, IPA, and Chinese characters.
+ * Enriches NBA player data with phonetics, IPA, Chinese characters, and Hardware Safe Name.
  * Usage: npx tsx scripts/enrich_nba_gemini.ts [team_id] [--all] [--year=YYYY]
  */
 
@@ -63,7 +63,8 @@ async function enrichPlayer(player: Player) {
     {
         "phonetic": "The common phonetic spelling (e.g. LUKA DON-chich)",
         "ipa": "The International Phonetic Alphabet spelling (e.g. /ˈluːkə ˈdɒntʃɪtʃ/)",
-        "chinese": "The standard Chinese character translation (e.g. 卢卡·东契奇)"
+        "chinese": "The standard Chinese character translation (e.g. 卢卡·东契奇)",
+        "hardware_safe": "The player name in ALL CAPS (e.g. LUKA DONCIC)"
     }
     `;
 
@@ -81,7 +82,7 @@ async function enrichPlayer(player: Player) {
                 phonetic_name: String(data.phonetic),
                 ipa_name: String(data.ipa),
                 chinese_name: String(data.chinese),
-                hardware_safe_name: player.player_name.toUpperCase()
+                hardware_safe_name: data.hardware_safe?.toUpperCase() || player.player_name.toUpperCase()
             })
             .eq('id', player.id);
 

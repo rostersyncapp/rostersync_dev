@@ -1,6 +1,6 @@
 /**
  * NHL Player Data Enrichment (Gemini AI)
- * Enriches NHL player data with phonetics, IPA, and Chinese characters.
+ * Enriches NHL player data with phonetics, IPA, Chinese characters, and Hardware Safe Name.
  * Usage: npx tsx scripts/enrich_nhl_gemini.ts [team_id] [--all]
  */
 
@@ -64,7 +64,8 @@ async function enrichPlayer(player: Player) {
     {
         "phonetic": "The common phonetic spelling (e.g. CON-ner mah-DAY-vid)",
         "ipa": "The International Phonetic Alphabet spelling (e.g. /ˈkɒnər məkˈdeɪvɪd/)",
-        "chinese": "The standard Chinese character translation (e.g. 康纳·麦克戴维)"
+        "chinese": "The standard Chinese character translation (e.g. 康纳·麦克戴维)",
+        "hardware_safe": "The player name in ALL CAPS (e.g. CONNOR MCDAVID)"
     }
     `;
 
@@ -90,7 +91,7 @@ async function enrichPlayer(player: Player) {
                 phonetic_name: phonetic,
                 ipa_name: ipa,
                 chinese_name: chinese,
-                hardware_safe_name: player.player_name.toUpperCase()
+                hardware_safe_name: data.hardware_safe?.toUpperCase() || player.player_name.toUpperCase()
             })
             .eq('id', player.id);
 

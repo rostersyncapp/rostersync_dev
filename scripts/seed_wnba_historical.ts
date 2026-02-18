@@ -74,6 +74,7 @@ interface WNBARosterEntry {
     team_id: string; season_year: number; player_name: string; player_id: string | null;
     jersey_number: string | null; position: string | null; height: string | null; weight: string | null;
     birth_date: string | null; college: string | null; years_pro: number | null;
+    hardware_safe_name: string;
 }
 
 function cleanText(text: string): string {
@@ -177,6 +178,7 @@ async function fetchWikipediaRoster(teamId: string, teamWikiName: string, season
                 players.push({
                     team_id: teamId, season_year: seasonYear, player_name: playerName, player_id: null,
                     jersey_number: jerseyNum, position, height, weight, birth_date: birthDate, college, years_pro: yearsPro,
+                    hardware_safe_name: playerName.toUpperCase(),
                 });
             }
         });
