@@ -472,9 +472,12 @@ export default function RosterArchive({ onSave, userTier = 'BASIC' }: RosterArch
                     <select
                         value={selectedTeamId}
                         onChange={(e) => setSelectedTeamId(e.target.value)}
-                        className="w-full px-5 py-4 bg-gray-50 dark:bg-gray-800/50 border-none rounded-2xl focus:ring-2 focus:ring-[#5B5FFF] font-bold dark:text-white appearance-none"
+                        disabled={!selectedLeagueId || loading}
+                        className="w-full px-5 py-4 bg-gray-50 dark:bg-gray-800/50 border-none rounded-2xl focus:ring-2 focus:ring-[#5B5FFF] font-bold dark:text-white disabled:opacity-50 appearance-none"
                     >
-                        <option value="">{loading ? 'Loading teams...' : `Choose ${currentLeague.name} Team...`}</option>
+                        <option value="">
+                            {!selectedLeagueId ? 'Select a league first...' : (loading ? 'Loading teams...' : `Choose ${currentLeague.name} Team...`)}
+                        </option>
                         {teams.map(team => (
                             <option key={team.id} value={team.id}>
                                 {team.display_name}
