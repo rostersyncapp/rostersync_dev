@@ -1,4 +1,5 @@
 import flattenColorPalette from "tailwindcss/lib/util/flattenColorPalette";
+import tailwindAnimate from "tailwindcss-animate";
 
 /** @type {import('tailwindcss').Config} */
 export default {
@@ -96,10 +97,9 @@ export default {
 			}
 		}
 	},
-	plugins: [require("tailwindcss-animate"), addVariablesForColors],
+	plugins: [tailwindAnimate, addVariablesForColors],
 };
 
-// This plugin adds each Tailwind color as a global CSS variable, e.g. var(--gray-200).
 function addVariablesForColors({ addBase, theme }) {
 	let allColors = flattenColorPalette(theme("colors"));
 	let newVars = Object.fromEntries(
@@ -107,7 +107,13 @@ function addVariablesForColors({ addBase, theme }) {
 	);
 
 	addBase({
-		":root": newVars,
+		":root": {
+			...newVars,
+			"--white": "#ffffff",
+			"--black": "#000000",
+			"--transparent": "transparent"
+		},
 	});
 }
+
 
