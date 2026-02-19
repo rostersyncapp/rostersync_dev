@@ -221,7 +221,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
             <span className="bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-purple-600 text-transparent bg-clip-text inline-block py-1">Back to 2000.</span>
           </h1>
           <p className="text-lg md:text-xl text-gray-500 dark:text-gray-400 max-w-2xl mx-auto font-medium leading-relaxed mb-12">
-            AI-powered roster processing from current seasons to historical archives.
+            AI-powered roster processing from current seasons to historical archives. Export to all broadcast formats with direct MAM/DAM integration.
           </p>
         </div>
       </section>
