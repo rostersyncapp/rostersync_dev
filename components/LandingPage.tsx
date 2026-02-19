@@ -27,6 +27,7 @@ import { useClerk, SignUpButton } from '@clerk/clerk-react';
 import { WavyBackground } from './ui/wavy-background';
 import TerminalWorkflow from './TerminalWorkflow';
 import { Logos3 } from './blocks/logos3';
+import { AuroraBackground } from './ui/aurora-background';
 
 // --- Utility for Tailwind classes ---
 const cn = (...classes: any[]) => classes.filter(Boolean).join(' ');
@@ -181,17 +182,12 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
 
   return (
     <div className={`min-h-screen font-sans selection:bg-[#5B5FFF]/30 ${darkMode ? 'dark' : ''} bg-[#FAFAFA] dark:bg-[#111827] text-gray-900 dark:text-gray-100 transition-colors duration-300`}>
-      <div className="absolute top-0 left-0 w-full h-[800px] z-0 pointer-events-none overflow-hidden">
-        <WavyBackground
-          className="w-full h-full pb-0"
-          backgroundFill={darkMode ? "#111827" : "#FAFAFA"}
-          waveOpacity={darkMode ? 0.5 : 0.3}
-          containerClassName="h-full"
-          speed="slow"
-          waveWidth={50}
-          colors={['#5B5FFF', '#5BC5FF', '#8B5CF6']}
-        />
-      </div>
+      <AuroraBackground
+        className="absolute top-0 left-0 w-full h-[800px] z-0 pointer-events-none outline-none"
+        showRadialGradient={true}
+      >
+        <div className="w-full h-full" />
+      </AuroraBackground>
 
       <nav className="fixed top-0 w-full px-4 md:px-8 py-6 z-50 transition-all duration-300 bg-white/50 dark:bg-[#111827]/50 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-800/50">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
