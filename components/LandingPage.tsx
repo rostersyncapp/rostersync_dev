@@ -182,13 +182,6 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
 
   return (
     <div className={`min-h-screen font-sans selection:bg-[#5B5FFF]/30 ${darkMode ? 'dark' : ''} bg-[#FAFAFA] dark:bg-[#111827] text-gray-900 dark:text-gray-100 transition-colors duration-300`}>
-      <AuroraBackground
-        className="absolute top-0 left-0 w-full h-[800px] z-0 pointer-events-none outline-none"
-        showRadialGradient={true}
-      >
-        <div className="w-full h-full" />
-      </AuroraBackground>
-
       <nav className="fixed top-0 w-full px-4 md:px-8 py-6 z-50 transition-all duration-300 bg-white/50 dark:bg-[#111827]/50 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-800/50">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2 relative z-50">
@@ -208,7 +201,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
         </div>
       </nav>
 
-      <section className="relative pt-32 pb-64 md:pb-80 px-4 overflow-hidden z-10">
+      <AuroraBackground className="relative pt-32 pb-64 md:pb-80 px-4 overflow-hidden z-10 !h-auto bg-transparent dark:bg-transparent">
         <div className="max-w-7xl mx-auto text-center relative z-20">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#5B5FFF]/5 border border-[#5B5FFF]/10 text-[#5B5FFF] text-[10px] font-black uppercase tracking-widest mb-6">
             <Sparkles size={12} /> New: Gemini 2.0 Integration
@@ -224,7 +217,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
             <Logos3 onSeeList={() => setCurrentPage('directory')} />
           </div>
         </div>
-      </section>
+      </AuroraBackground>
 
       <section className="relative z-20 pt-32 pb-24 px-6 bg-[#FAFAFA] dark:bg-gray-900">
         <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-start">

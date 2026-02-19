@@ -2,8 +2,8 @@
 import { cn } from "@/lib/utils";
 import React, { ReactNode } from "react";
 
-interface AuroraBackgroundProps extends React.HTMLAttributes<HTMLDivElement> {
-    children?: ReactNode;
+interface AuroraBackgroundProps extends React.HTMLProps<HTMLDivElement> {
+    children: ReactNode;
     showRadialGradient?: boolean;
     className?: string;
 }
@@ -15,17 +15,18 @@ export const AuroraBackground = ({
     ...props
 }: AuroraBackgroundProps) => {
     return (
-        <div
-            className={cn(
-                "relative flex flex-col items-center justify-center transition-bg",
-                className
-            )}
-            {...props}
-        >
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div
-                    className={cn(
-                        `
+        <main>
+            <div
+                className={cn(
+                    "relative flex flex-col h-[100vh] items-center justify-center bg-zinc-50 dark:bg-zinc-900 text-slate-950 transition-bg",
+                    className
+                )}
+                {...props}
+            >
+                <div className="absolute inset-0 overflow-hidden">
+                    <div
+                        className={cn(
+                            `
             [--white-gradient:repeating-linear-gradient(100deg,var(--white)_0%,var(--white)_7%,var(--transparent)_10%,var(--transparent)_12%,var(--white)_16%)]
             [--dark-gradient:repeating-linear-gradient(100deg,var(--black)_0%,var(--black)_7%,var(--transparent)_10%,var(--transparent)_12%,var(--black)_16%)]
             [--aurora:repeating-linear-gradient(100deg,#5B5FFF_10%,#5BC5FF_15%,#8B5CF6_20%,#5B5FFF_25%,#5BC5FF_30%)]
@@ -41,12 +42,13 @@ export const AuroraBackground = ({
             pointer-events-none
             absolute -inset-[10px] opacity-50 will-change-transform`,
 
-                        showRadialGradient &&
-                        `[mask-image:radial-gradient(ellipse_at_100%_0%,black_10%,var(--transparent)_70%)]`
-                    )}
-                ></div>
+                            showRadialGradient &&
+                            `[mask-image:radial-gradient(ellipse_at_100%_0%,black_10%,var(--transparent)_70%)]`
+                        )}
+                    ></div>
+                </div>
+                {children}
             </div>
-            {children}
-        </div>
+        </main>
     );
 };
