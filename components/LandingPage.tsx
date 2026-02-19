@@ -223,6 +223,9 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
           <p className="text-lg md:text-xl text-gray-500 dark:text-gray-400 max-w-2xl mx-auto font-medium leading-relaxed mb-12">
             AI-powered roster processing from current seasons to historical archives. Export to all broadcast formats with direct MAM/DAM integration.
           </p>
+          <div className="mt-8 -mb-12">
+            <Logos3 onSeeList={() => setCurrentPage('directory')} />
+          </div>
         </div>
       </section>
 
@@ -287,7 +290,6 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
         </div>
       </section>
 
-      <Logos3 onSeeList={() => setCurrentPage('directory')} />
 
       <section className="py-16 px-6 relative overflow-hidden bg-white dark:bg-gray-900">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#5B5FFF]/5 rounded-full blur-[100px] -z-10"></div>
