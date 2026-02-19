@@ -98,6 +98,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
   const [demoForm, setDemoForm] = useState({ name: '', email: '', organization: '', useCase: '' });
   const [demoStatus, setDemoStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
   const [currentPage, setCurrentPage] = useState<'home' | 'about' | 'directory'>('home');
+  const [showImageModal, setShowImageModal] = useState(false);
 
   const handleDemoSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -270,13 +271,17 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
       <section className="relative z-20 pt-32 pb-24 px-6 bg-white dark:bg-gray-950 border-t border-gray-100 dark:border-gray-900">
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-24 items-center">
           <div className="lg:col-span-7 order-last lg:order-first relative">
-            <div className="rounded-2xl bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-800 shadow-2xl overflow-hidden group">
+            <div
+              className="rounded-2xl bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-800 shadow-2xl overflow-hidden group cursor-zoom-in active:scale-[0.99] transition-transform"
+              onClick={() => setShowImageModal(true)}
+            >
               <img
                 src="/library_screenshot.png"
                 alt="RosterSync Library"
                 className="w-full h-auto object-cover group-hover:scale-[1.02] transition-transform duration-700"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
+              <div className="absolute inset-0 bg-white/0 group-hover:bg-white/5 transition-colors duration-300" />
             </div>
             {/* Decorative elements */}
             <div className="absolute -top-6 -left-6 w-24 h-24 bg-[#5B5FFF]/10 rounded-full blur-2xl" />
@@ -528,6 +533,31 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
                 <button type="submit" disabled={demoStatus === 'sending'} className="w-full py-3.5 rounded-lg primary-gradient text-white font-bold shadow-lg flex items-center justify-center gap-2 text-sm">{demoStatus === 'sending' ? <Loader2 className="animate-spin" size={16} /> : <><Send size={16} /> Request Demo</>}</button>
               )}
             </form>
+          </div>
+        </div>
+      )}
+
+      {showImageModal && (
+        <div
+          className="fixed inset-0 z-[200] flex items-center justify-center p-4 md:p-12 bg-black/95 backdrop-blur-md animate-in fade-in duration-300 pointer-events-auto"
+          onClick={() => setShowImageModal(false)}
+        >
+          <button
+            onClick={() => setShowImageModal(false)}
+            className="absolute top-8 right-8 p-3 text-white bg-white/10 hover:bg-white/20 rounded-full transition-all z-[210] group"
+          >
+            <X size={24} className="group-hover:rotate-90 transition-transform duration-300" />
+          </button>
+
+          <div
+            className="relative w-full max-w-6xl animate-in zoom-in-95 duration-300 shadow-2xl overflow-hidden rounded-xl border border-white/10"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <img
+              src="/library_screenshot.png"
+              alt="RosterSync Library Full Scale"
+              className="w-full h-auto shadow-2xl"
+            />
           </div>
         </div>
       )}
