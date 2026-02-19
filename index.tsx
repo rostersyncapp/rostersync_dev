@@ -5,10 +5,10 @@
  */
 
 // Safari 26.2 compatibility polyfills
-(function() {
+(function () {
   // Add globalThis shim if missing
   if (typeof globalThis === 'undefined') {
-    var globalThis = (function() {
+    var globalThis = (function () {
       return this || (0, eval)('this');
     })();
     (globalThis as any).globalThis = globalThis;
@@ -52,6 +52,7 @@
 })();
 
 import React, { Component, ErrorInfo, ReactNode } from 'react';
+import './index.css';
 import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
 import { AlertCircle } from 'lucide-react';
@@ -136,7 +137,7 @@ const root = (window as any)._reactRoot;
 root.render(
   <React.StrictMode>
     <BrowserRouter>
-      <ClerkProvider 
+      <ClerkProvider
         publishableKey={PUBLISHABLE_KEY}
         fallbackRedirectUrl="/"
         navigate={(to) => window.location.href = to}
