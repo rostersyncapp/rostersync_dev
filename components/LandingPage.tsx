@@ -268,25 +268,21 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
       </section>
 
       <section className="relative z-20 pt-32 pb-24 px-6 bg-white dark:bg-gray-950 border-t border-gray-100 dark:border-gray-900">
-        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-start">
-          <div className="order-last lg:order-first relative">
-            <div className="aspect-video rounded-2xl bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 border border-gray-200 dark:border-gray-800 shadow-2xl flex items-center justify-center overflow-hidden group">
-              <div className="absolute inset-0 bg-[#5B5FFF]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              <div className="relative z-10 flex flex-col items-center gap-4 text-center p-8">
-                <div className="w-16 h-16 rounded-2xl bg-white dark:bg-gray-800 shadow-xl flex items-center justify-center text-[#5B5FFF]">
-                  <Calendar size={32} />
-                </div>
-                <div>
-                  <h4 className="font-black text-gray-900 dark:text-white uppercase tracking-widest text-xs mb-1">Data Explorer</h4>
-                  <p className="text-xs text-gray-400 font-medium">Browse 25 years of sports history</p>
-                </div>
-              </div>
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-24 items-center">
+          <div className="lg:col-span-7 order-last lg:order-first relative">
+            <div className="rounded-2xl bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-800 shadow-2xl overflow-hidden group">
+              <img
+                src="/library_screenshot.png"
+                alt="RosterSync Library"
+                className="w-full h-auto object-cover group-hover:scale-[1.02] transition-transform duration-700"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
             </div>
-            {/* Decorative dots or elements */}
-            <div className="absolute -top-4 -left-4 w-12 h-12 bg-[#5B5FFF]/10 rounded-full blur-xl" />
-            <div className="absolute -bottom-8 -right-8 w-24 h-24 bg-purple-500/10 rounded-full blur-2xl" />
+            {/* Decorative elements */}
+            <div className="absolute -top-6 -left-6 w-24 h-24 bg-[#5B5FFF]/10 rounded-full blur-2xl" />
+            <div className="absolute -bottom-12 -right-12 w-32 h-32 bg-purple-500/10 rounded-full blur-3xl" />
           </div>
-          <div className="text-left">
+          <div className="lg:col-span-5 text-left">
             <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-[#5B5FFF] mb-3">Historical Archive</h2>
             <h3 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-6">
               <span className="bg-gradient-to-r from-blue-600 via-indigo-500 to-purple-500 text-transparent bg-clip-text inline-block py-1">Search. Save. Sync.</span>
