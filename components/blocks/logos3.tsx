@@ -60,7 +60,8 @@ const Logos3 = ({
                         {heading}
                     </h3>
                     <p className="text-gray-500 font-medium mt-4 max-w-2xl text-sm sm:text-base">
-                        Access verified rosters from North America&apos;s top sports leagues. International expansion coming soon.
+                        Access 25 years of verified rosters from North America&apos;s top sports leagues.<br />
+                        International expansion coming soon.
                     </p>
                     {onSeeList && (
                         <button
