@@ -8,7 +8,7 @@ export default {
 		"./components/**/*.{js,ts,jsx,tsx}",
 		"./App.tsx",
 	],
-	darkMode: ['class', "class"],
+	darkMode: ['class'],
 	theme: {
 		extend: {
 			colors: {
@@ -60,39 +60,22 @@ export default {
 				'progress': 'progress-fill 4s ease-in-out forwards',
 				'aurora': 'aurora 60s linear infinite',
 			},
-			borderRadius: {
-				lg: 'var(--radius)',
-				md: 'calc(var(--radius) - 2px)',
-				sm: 'calc(var(--radius) - 4px)'
-			},
 			keyframes: {
 				'accordion-down': {
-					from: {
-						height: '0'
-					},
-					to: {
-						height: 'var(--radix-accordion-content-height)'
-					}
+					from: { height: '0' },
+					to: { height: 'var(--radix-accordion-content-height)' }
 				},
 				'accordion-up': {
-					from: {
-						height: 'var(--radix-accordion-content-height)'
-					},
-					to: {
-						height: '0'
-					}
+					from: { height: 'var(--radix-accordion-content-height)' },
+					to: { height: '0' }
 				},
 				'progress-fill': {
 					'0%': { width: '0%' },
 					'100%': { width: '100%' }
 				},
 				'aurora': {
-					from: {
-						backgroundPosition: "50% 50%, 50% 50%",
-					},
-					to: {
-						backgroundPosition: "350% 50%, 350% 50%",
-					},
+					from: { backgroundPosition: "50% 50%, 50% 50%" },
+					to: { backgroundPosition: "350% 50%, 350% 50%" },
 				},
 			}
 		}
