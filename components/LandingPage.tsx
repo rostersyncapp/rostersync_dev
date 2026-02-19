@@ -217,11 +217,11 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
             <Sparkles size={12} /> New: Gemini 2.0 Integration
           </div>
           <h1 className="text-4xl md:text-6xl font-extrabold tracking-tighter leading-[1.2] text-gray-900 dark:text-white mb-8">
-            Athlete Rosters. <br />
-            <span className="bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-purple-600 text-transparent bg-clip-text inline-block py-1">Simplified for Production.</span>
+            Every Roster. Every Season. <br />
+            <span className="bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-purple-600 text-transparent bg-clip-text inline-block py-1">Back to 2000.</span>
           </h1>
           <p className="text-lg md:text-xl text-gray-500 dark:text-gray-400 max-w-2xl mx-auto font-medium leading-relaxed mb-12">
-            The high-performance middleware transforming messy rosters into production-ready metadata for Broadcast, MAM, and DAM systems.
+            AI-powered roster processing from current seasons to historical archives.
           </p>
         </div>
       </section>
