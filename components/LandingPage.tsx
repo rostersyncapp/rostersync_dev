@@ -270,17 +270,13 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
       <section className="relative z-20 pt-32 pb-24 px-6 bg-white dark:bg-gray-950 border-t border-gray-100 dark:border-gray-900">
         <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-start">
           <div className="order-last lg:order-first relative">
-            <div className="aspect-video rounded-2xl bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 border border-gray-200 dark:border-gray-800 shadow-2xl flex items-center justify-center overflow-hidden group">
-              <div className="absolute inset-0 bg-[#5B5FFF]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              <div className="relative z-10 flex flex-col items-center gap-4 text-center p-8">
-                <div className="w-16 h-16 rounded-2xl bg-white dark:bg-gray-800 shadow-xl flex items-center justify-center text-[#5B5FFF]">
-                  <Calendar size={32} />
-                </div>
-                <div>
-                  <h4 className="font-black text-gray-900 dark:text-white uppercase tracking-widest text-xs mb-1">Data Explorer</h4>
-                  <p className="text-xs text-gray-400 font-medium">Browse 25 years of sports history</p>
-                </div>
-              </div>
+            <div className="aspect-video rounded-2xl bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-800 shadow-2xl overflow-hidden group">
+              <img
+                src="/library_screenshot.png"
+                alt="RosterSync Library"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
             </div>
             {/* Decorative dots or elements */}
             <div className="absolute -top-4 -left-4 w-12 h-12 bg-[#5B5FFF]/10 rounded-full blur-xl" />
