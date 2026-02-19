@@ -267,6 +267,67 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
         </div>
       </section>
 
+      <section className="relative z-20 pt-32 pb-24 px-6 bg-white dark:bg-gray-950 border-t border-gray-100 dark:border-gray-900">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-start">
+          <div className="order-last lg:order-first relative">
+            <div className="aspect-video rounded-2xl bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 border border-gray-200 dark:border-gray-800 shadow-2xl flex items-center justify-center overflow-hidden group">
+              <div className="absolute inset-0 bg-[#5B5FFF]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="relative z-10 flex flex-col items-center gap-4 text-center p-8">
+                <div className="w-16 h-16 rounded-2xl bg-white dark:bg-gray-800 shadow-xl flex items-center justify-center text-[#5B5FFF]">
+                  <Calendar size={32} />
+                </div>
+                <div>
+                  <h4 className="font-black text-gray-900 dark:text-white uppercase tracking-widest text-xs mb-1">Data Explorer</h4>
+                  <p className="text-xs text-gray-400 font-medium">Browse 25 years of sports history</p>
+                </div>
+              </div>
+            </div>
+            {/* Decorative dots or elements */}
+            <div className="absolute -top-4 -left-4 w-12 h-12 bg-[#5B5FFF]/10 rounded-full blur-xl" />
+            <div className="absolute -bottom-8 -right-8 w-24 h-24 bg-purple-500/10 rounded-full blur-2xl" />
+          </div>
+          <div className="text-left">
+            <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-[#5B5FFF] mb-3">Historical Archive</h2>
+            <h3 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-6">
+              <span className="bg-gradient-to-r from-blue-600 via-indigo-500 to-purple-500 text-transparent bg-clip-text inline-block py-1">Search. Save. Sync.</span>
+            </h3>
+            <p className="text-base text-gray-600 dark:text-gray-300 font-medium leading-relaxed max-w-md mb-8">
+              Access 25 years of team history with our deep-data archive. Verified, corrected, and ready for production.
+            </p>
+            <ol className="space-y-4 max-w-md">
+              <li className="flex gap-4">
+                <span className="flex-shrink-0 w-8 h-8 rounded-full bg-[#5B5FFF]/10 text-[#5B5FFF] flex items-center justify-center font-bold text-sm">1</span>
+                <div>
+                  <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-1">Find</h4>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Browse the Roster Directory to find historical teams from 2000 to present.</p>
+                </div>
+              </li>
+              <li className="flex gap-4">
+                <span className="flex-shrink-0 w-8 h-8 rounded-full bg-[#5B5FFF]/10 text-[#5B5FFF] flex items-center justify-center font-bold text-sm">2</span>
+                <div>
+                  <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-1">Save</h4>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Add historical rosters directly to your shared project library with one click.</p>
+                </div>
+              </li>
+              <li className="flex gap-4">
+                <span className="flex-shrink-0 w-8 h-8 rounded-full bg-[#5B5FFF]/10 text-[#5B5FFF] flex items-center justify-center font-bold text-sm">3</span>
+                <div>
+                  <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-1">Export</h4>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Instantly sync archived data to your broadcast graphics or MAM system.</p>
+                </div>
+              </li>
+            </ol>
+            <button
+              onClick={() => setCurrentPage('directory')}
+              className="mt-8 px-6 py-3 rounded-lg bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-bold text-sm hover:scale-105 transition-all shadow-lg active:scale-95 flex items-center gap-2 group"
+            >
+              Open Directory
+              <span className="group-hover:translate-x-1 transition-transform">→</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
       <section className="py-24 px-6 bg-[#FAFAFA] dark:bg-gray-900">
         <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-12 lg:gap-24 items-start">
           <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6 order-last lg:order-first">
