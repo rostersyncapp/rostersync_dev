@@ -269,8 +269,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
       </section>
 
       <section className="relative z-20 pt-32 pb-24 px-6 bg-white dark:bg-gray-950 border-t border-gray-100 dark:border-gray-900">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-24 items-center">
-          <div className="lg:col-span-7 order-last lg:order-first relative">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-start">
+          <div className="order-last lg:order-first relative">
             <div
               className="rounded-2xl bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-800 shadow-2xl overflow-hidden group cursor-zoom-in active:scale-[0.99] transition-transform"
               onClick={() => setShowImageModal(true)}
@@ -287,7 +287,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
             <div className="absolute -top-6 -left-6 w-24 h-24 bg-[#5B5FFF]/10 rounded-full blur-2xl" />
             <div className="absolute -bottom-12 -right-12 w-32 h-32 bg-purple-500/10 rounded-full blur-3xl" />
           </div>
-          <div className="lg:col-span-5 text-left">
+          <div className="text-left">
             <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-[#5B5FFF] mb-3">Historical Archive</h2>
             <h3 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-6">
               <span className="bg-gradient-to-r from-blue-600 via-indigo-500 to-purple-500 text-transparent bg-clip-text inline-block py-1">Search. Save. Sync.</span>
@@ -318,13 +318,6 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
                 </div>
               </li>
             </ol>
-            <button
-              onClick={() => setCurrentPage('directory')}
-              className="mt-8 px-6 py-3 rounded-lg bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-bold text-sm hover:scale-105 transition-all shadow-lg active:scale-95 flex items-center gap-2 group"
-            >
-              Open Directory
-              <span className="group-hover:translate-x-1 transition-transform">→</span>
-            </button>
           </div>
         </div>
       </section>
