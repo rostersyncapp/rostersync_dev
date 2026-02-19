@@ -193,11 +193,11 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
             <button onClick={toggleDarkMode} className="p-2 text-gray-400 hover:text-[#5B5FFF] transition-colors rounded-full hover:bg-gray-100 dark:hover:bg-gray-800">
               {darkMode ? <Sun size={20} /> : <Moon size={20} />}
             </button>
-            <a href={signInUrl} className="hidden md:block text-xs font-bold text-gray-500 hover:text-[#5B5FFF] transition-colors cursor-pointer relative z-50">Sign In</a>
             <button onClick={() => setShowDemoModal(true)} className="hidden md:block relative z-50 px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80 text-gray-600 dark:text-gray-300 font-bold text-xs shadow-sm hover:scale-105 active:scale-95 transition-all">
               Book Demo
             </button>
             <a href={signUpUrl} className="relative z-50 px-4 py-2 rounded-lg bg-[#5B5FFF] text-white font-bold text-xs shadow-md shadow-[#5B5FFF]/20 hover:scale-105 active:scale-95 transition-all cursor-pointer">Get Started</a>
+            <a href={signInUrl} className="hidden md:block text-xs font-bold text-gray-500 hover:text-[#5B5FFF] transition-colors cursor-pointer relative z-50">Sign In</a>
           </div>
         </div>
       </nav>
