@@ -8,7 +8,7 @@ export default {
 		"./components/**/*.{js,ts,jsx,tsx}",
 		"./App.tsx",
 	],
-	darkMode: ['class'],
+	darkMode: ['class', "class"],
 	theme: {
 		extend: {
 			colors: {
@@ -57,27 +57,43 @@ export default {
 				'spin-slow': 'spin 3s linear infinite',
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
-				'progress': 'progress-fill 4s ease-in-out forwards',
-				'aurora': 'aurora 60s linear infinite',
+				progress: 'progress-fill 4s ease-in-out forwards',
+				aurora: 'aurora 60s linear infinite'
 			},
 			keyframes: {
 				'accordion-down': {
-					from: { height: '0' },
-					to: { height: 'var(--radix-accordion-content-height)' }
+					from: {
+						height: '0'
+					},
+					to: {
+						height: 'var(--radix-accordion-content-height)'
+					}
 				},
 				'accordion-up': {
-					from: { height: 'var(--radix-accordion-content-height)' },
-					to: { height: '0' }
+					from: {
+						height: 'var(--radix-accordion-content-height)'
+					},
+					to: {
+						height: '0'
+					}
 				},
 				'progress-fill': {
-					'0%': { width: '0%' },
-					'100%': { width: '100%' }
+					'0%': {
+						width: '0%'
+					},
+					'100%': {
+						width: '100%'
+					}
 				},
-				'aurora': {
-					from: { backgroundPosition: "50% 50%, 50% 50%" },
-					to: { backgroundPosition: "350% 50%, 350% 50%" },
-				},
-			}
+				aurora: {
+					from: {
+						backgroundPosition: '50% 50%, 50% 50%'
+					},
+					to: {
+						backgroundPosition: '350% 50%, 350% 50%'
+					}
+				}
+			},
 		}
 	},
 	plugins: [tailwindAnimate, addVariablesForColors],

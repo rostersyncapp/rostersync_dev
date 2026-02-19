@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { SiteConfig } from '../services/supabase.ts';
 import { PRICING_TIERS } from '../constants.tsx';
 import {
@@ -201,8 +202,17 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
         </div>
       </nav>
 
-      <AuroraBackground className="relative pt-32 pb-64 md:pb-80 px-4 overflow-hidden z-10 min-h-[800px]">
-        <div className="max-w-7xl mx-auto text-center relative z-20">
+      <AuroraBackground className="relative pt-32 pb-64 md:pb-80 px-4 overflow-hidden z-10 !h-auto">
+        <motion.div
+          initial={{ opacity: 0.0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{
+            delay: 0.3,
+            duration: 0.8,
+            ease: "easeInOut",
+          }}
+          className="max-w-7xl mx-auto text-center relative z-20"
+        >
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#5B5FFF]/5 border border-[#5B5FFF]/10 text-[#5B5FFF] text-[10px] font-black uppercase tracking-widest mb-6">
             <Sparkles size={12} /> New: Gemini 2.0 Integration
           </div>
@@ -216,7 +226,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onSignIn, onSignUp, darkMode,
           <div className="mt-8 -mb-12">
             <Logos3 onSeeList={() => setCurrentPage('directory')} />
           </div>
-        </div>
+        </motion.div>
       </AuroraBackground>
 
       <section className="relative z-20 pt-32 pb-24 px-6 bg-[#FAFAFA] dark:bg-gray-900">
