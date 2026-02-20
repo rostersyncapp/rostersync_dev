@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   full_name TEXT,
   organization_name TEXT,
   org_logo_url TEXT, -- Workspace custom branding
-  subscription_tier TEXT DEFAULT 'BASIC' CHECK (subscription_tier IN ('BASIC', 'PRO', 'NETWORK'))
+  subscription_tier TEXT DEFAULT 'FREE' CHECK (subscription_tier IN ('FREE', 'STARTER', 'PRO', 'ENTERPRISE'))
 );
 
 -- 1.5 Projects (Folders)

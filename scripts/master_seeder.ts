@@ -76,8 +76,10 @@ async function runStatmuse(leagueKey: string, config: LeagueConfig, years: numbe
 
                     let name = normalizeName(cells.eq(2).text().trim());
                     // Deduplicate StatMuse name format "Player NameP. Name"
-                    const match = name.match(/(.+?)([A-Z]\. .+)$/);
-                    if (match) name = match[1].trim();
+                    const match = name.match(/^(.+?)([A-Z]\. [A-Z].+)$/);
+                    if (match && match[1].includes(match[2].split('. ')[1])) {
+                        name = match[1].trim();
+                    }
 
                     const pos = cells.eq(3).text().trim();
                     const height = cells.eq(4).text().trim();

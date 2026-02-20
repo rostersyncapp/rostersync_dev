@@ -186,29 +186,45 @@ async function processBatch(names: string[], targetTable: string) {
 
         for (let idx = 0; idx < names.length; idx++) {
             const name = names[idx];
-            // Try name-based lookup first, then index-based (0, 1, 2...)
-            const enriched = data[name] || data[idx.toString()] || data[idx];
+
+            // Handle various possible response structures (Object with names, Array of objects, Object with indices)
+            let enriched = null;
+            if (Array.isArray(data)) {
+                // Try to find the object in the array that has the name as a key, or fall back to index
+                enriched = data.find(item => item[name])?.[name] || data[idx]?.[name] || data[idx];
+            } else {
+                enriched = data[name] || data[idx.toString()] || data[idx];
+            }
 
             if (!enriched) {
                 console.warn(`         ⚠️ No data returned for: ${name}`);
                 continue;
             }
 
+            // Ensure we have the data object if Gemini nested it
+            if (!enriched.phonetic && enriched[name]) enriched = enriched[name];
+
+            // Final safety check
+            if (!enriched.phonetic && !enriched.hardware_safe) {
+                console.warn(`         ⚠️ Incomplete data for: ${name}`);
+                continue;
+            }
+
             // Update Global Cache
             await supabase.from('global_player_enrichment').upsert({
                 player_name: name,
-                phonetic_name: enriched.phonetic,
-                ipa_name: enriched.ipa,
-                chinese_name: enriched.chinese,
-                hardware_safe_name: enriched.hardware_safe
+                phonetic_name: enriched.phonetic || null,
+                ipa_name: enriched.ipa || null,
+                chinese_name: enriched.chinese || null,
+                hardware_safe_name: enriched.hardware_safe || name.toUpperCase()
             });
 
             // Update Target League Table
             await supabase.from(targetTable).update({
-                phonetic_name: enriched.phonetic,
-                ipa_name: enriched.ipa,
-                chinese_name: enriched.chinese,
-                hardware_safe_name: enriched.hardware_safe
+                phonetic_name: enriched.phonetic || null,
+                ipa_name: enriched.ipa || null,
+                chinese_name: enriched.chinese || null,
+                hardware_safe_name: enriched.hardware_safe || name.toUpperCase()
             }).eq('player_name', name);
 
             console.log(`         ✅ Enriched: ${name}`);
