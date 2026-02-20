@@ -725,8 +725,8 @@ function getSchemaForTier(tier: SubscriptionTier, findBranding: boolean): any {
 
   const requiredFields = ["fullName", "jerseyNumber", "position"];
 
-  // BASIC TIER LIMITATION: Name, Jersey, Position only.
-  if (tier !== 'BASIC') {
+  // FREE TIER LIMITATION: Name, Jersey, Position only.
+  if (tier !== 'FREE') {
     baseAthleteProperties.displayNameSafe = { type: SchemaType.STRING, description: "Name sanitized for broadcast hardware (ALL CAPS, no accents, special characters removed)." };
     baseAthleteProperties.nilStatus = { type: SchemaType.STRING };
     requiredFields.push("displayNameSafe", "nilStatus");
@@ -735,7 +735,7 @@ function getSchemaForTier(tier: SubscriptionTier, findBranding: boolean): any {
     requiredFields.push("phoneticSimplified");
   }
 
-  if (tier === 'NETWORK') {
+  if (tier === 'ENTERPRISE') {
     baseAthleteProperties.phoneticIPA = { type: SchemaType.STRING, description: "International Phonetic Alphabet (IPA) notation (e.g. /fəˈnɛtɪk/). Use standard symbols and slashes." };
     requiredFields.push("phoneticIPA");
     baseAthleteProperties.nameSpanish = { type: SchemaType.STRING };
@@ -801,7 +801,7 @@ function formatJerseyNumber(num: any): string {
 
 export async function processRosterRawText(
   text: string,
-  tier: SubscriptionTier = 'BASIC',
+  tier: SubscriptionTier = 'FREE',
   overrideSeason: string = '',
   findBranding: boolean = false,
   userId?: string,
@@ -1480,7 +1480,7 @@ export async function processRosterRawText(
   const allPossibleAthletes = [...athletesWithJerseys, ...(missingAthletes || [])];
   const missingCount = allPossibleAthletes.filter(isPhoneticMissing).length;
 
-  const isPremium = tier === 'PRO' || tier === 'NETWORK' || tier === 'STUDIO';
+  const isPremium = tier !== 'FREE';
   const shouldBackfill = isPremium && missingCount > 0;
 
   console.log(`[Gemini] Backfill check - Tier: ${tier}, IsPremium: ${isPremium}, Missing: ${missingCount}/${allPossibleAthletes.length}`);
@@ -1550,7 +1550,7 @@ export async function processRosterRawText(
 export async function generateBatchPhonetics(
   names: string[],
   sport: string,
-  tier: SubscriptionTier = 'BASIC'
+  tier: SubscriptionTier = 'FREE'
 ): Promise<Record<string, { phoneticSimplified: string; phoneticIPA: string }>> {
   const apiKey = getApiKey();
   if (!apiKey || names.length === 0) return {};
@@ -1587,7 +1587,7 @@ export async function generateBatchPhonetics(
   Guidelines:
   1. Return one entry for EVERY name provided in the list. Do not skip any players.
   2. Use 'phoneticSimplified' for a readable, capitalized-stress guide (e.g. 'fuh-NET-ik').
-  ${tier === 'NETWORK' ? "3. Use 'phoneticIPA' for standard International Phonetic Alphabet symbols." : "3. Leave 'phoneticIPA' as an empty string (IPA is only for NETWORK tier)."}
+  ${tier === 'ENTERPRISE' ? "3. Use 'phoneticIPA' for standard International Phonetic Alphabet symbols." : "3. Leave 'phoneticIPA' as an empty string (IPA is only for ENTERPRISE tier)."}
   4. Accuracy is critical for ${sport} broadcast usage.
   5. Return a JSON object with a 'results' array.`;
 

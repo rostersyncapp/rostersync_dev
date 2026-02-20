@@ -302,7 +302,7 @@ const App: React.FC = () => {
 
   const [rosters, setRosters] = useState<Roster[]>([]);
   const [selectedRosterId, setSelectedRosterId] = useState<string | null>(null);
-  const [profile, setProfile] = useState<Profile>({ id: 'guest_user', fullName: 'Guest User', email: 'guest@rostersync.io', subscriptionTier: 'BASIC', organizationName: 'Demo Studio', creditsUsed: 0 });
+  const [profile, setProfile] = useState<Profile>({ id: 'guest_user', fullName: 'Guest User', email: 'guest@rostersync.io', subscriptionTier: 'FREE', organizationName: 'Demo Studio', creditsUsed: 0 });
   const [isProcessing, setIsProcessing] = useState(false);
   const [pendingRoster, setPendingRoster] = useState<ProcessedRoster | null>(null);
   const [confirmDeleteProject, setConfirmDeleteProject] = useState<Project | null>(null);
@@ -499,7 +499,7 @@ const App: React.FC = () => {
           id: userId,
           full_name: currentUser.fullName || 'User',
           organization_name: 'My Workspace',
-          subscription_tier: 'BASIC',
+          subscription_tier: 'FREE',
           is_admin: isTestEmail
         }).select().single();
 

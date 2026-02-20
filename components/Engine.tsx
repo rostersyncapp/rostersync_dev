@@ -1242,13 +1242,13 @@ export const Engine: React.FC<Props> = ({
                       <th className="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Full Name</th>
                       <th className="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-center">Jersey</th>
                       <th className="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-center">Position</th>
-                      {userTier !== 'BASIC' && (
+                      {userTier !== 'FREE' && (
                         <th className="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-center">Phonetic</th>
                       )}
-                      {userTier !== 'BASIC' && (
+                      {userTier !== 'FREE' && (
                         <th className="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-center">Colors</th>
                       )}
-                      {userTier !== 'BASIC' && (
+                      {userTier !== 'FREE' && (
                         <th className="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-right pr-12">Hardware Safe</th>
                       )}
                       {onDeletePlayer && <th className="w-16 h-full"></th>}
@@ -1277,14 +1277,14 @@ export const Engine: React.FC<Props> = ({
                             {a.position.toString().replace(/#/g, '')}
                           </span>
                         </td>
-                        {userTier !== 'BASIC' && (
+                        {userTier !== 'FREE' && (
                           <td className="px-6 py-6 text-center">
                             <span className="text-xs font-bold text-gray-500 italic">
                               {a.phoneticSimplified || '-'}
                             </span>
                           </td>
                         )}
-                        {userTier !== 'BASIC' && (
+                        {userTier !== 'FREE' && (
                           <td className="px-6 py-6 text-center">
                             <div className="flex items-center justify-center gap-1.5">
                               <div className="w-3.5 h-3.5 rounded-full border border-gray-200 shadow-sm" style={{ backgroundColor: a.metadata?.primaryColor || primaryColor || '#000' }}></div>
@@ -1292,7 +1292,7 @@ export const Engine: React.FC<Props> = ({
                             </div>
                           </td>
                         )}
-                        {userTier !== 'BASIC' && (
+                        {userTier !== 'FREE' && (
                           <td className="px-6 py-6 text-right pr-12">
                             <span className="inline-flex items-center gap-2 px-3 py-1.5 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 rounded-lg text-xs font-bold font-mono">
                               <Check size={12} />

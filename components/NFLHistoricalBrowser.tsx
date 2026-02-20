@@ -25,6 +25,10 @@ interface NFLPlayer {
     weight: string | null;
     college: string | null;
     birth_date: string | null;
+    phonetic_name: string | null;
+    ipa_name: string | null;
+    chinese_name: string | null;
+    hardware_safe_name: string | null;
 }
 
 interface NFLHistoricalBrowserProps {
@@ -32,7 +36,7 @@ interface NFLHistoricalBrowserProps {
     userTier?: string;
 }
 
-export default function NFLHistoricalBrowser({ onSave, userTier = 'BASIC' }: NFLHistoricalBrowserProps) {
+export default function NFLHistoricalBrowser({ onSave, userTier = 'FREE' }: NFLHistoricalBrowserProps) {
     const [teams, setTeams] = useState<NFLTeam[]>([]);
     const [selectedTeamId, setSelectedTeamId] = useState<string>('');
     const [availableSeasons, setAvailableSeasons] = useState<number[]>([]);
@@ -129,13 +133,18 @@ export default function NFLHistoricalBrowser({ onSave, userTier = 'BASIC' }: NFL
 
     function convertToAthletes(): Athlete[] {
         return roster.map((player, index) => ({
-            fullName: player.player_name,
+            id: `nfl-${selectedTeamId}-${selectedSeason}-${index}`,
+            originalName: player.player_name,
+            fullName: player.player_name.toUpperCase(),
+            displayNameSafe: player.hardware_safe_name || player.player_name.toUpperCase(),
             jerseyNumber: formatJersey(player.jersey_number),
             position: player.position || 'Player',
-            phoneticSimplified: '',
-            phoneticIPA: '',
+            phoneticSimplified: player.phonetic_name || '',
+            phoneticIPA: player.ipa_name || '',
+            nameMandarin: player.chinese_name || '',
+            nilStatus: 'Active',
+            seasonYear: selectedSeason?.toString() || '',
             headshot: '',
-            id: `nfl-${selectedTeamId}-${selectedSeason}-${index}`,
         }));
     }
 

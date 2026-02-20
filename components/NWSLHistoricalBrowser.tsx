@@ -32,7 +32,7 @@ interface NWSLHistoricalBrowserProps {
     userTier?: string;
 }
 
-export default function NWSLHistoricalBrowser({ onSave, userTier = 'BASIC' }: NWSLHistoricalBrowserProps) {
+export default function NWSLHistoricalBrowser({ onSave, userTier = 'FREE' }: NWSLHistoricalBrowserProps) {
     const [teams, setTeams] = useState<NWSLTeam[]>([]);
     const [selectedTeamId, setSelectedTeamId] = useState<string>('');
     const [availableSeasons, setAvailableSeasons] = useState<number[]>([]);

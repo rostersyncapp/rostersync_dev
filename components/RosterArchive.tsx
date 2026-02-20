@@ -228,6 +228,10 @@ interface Player {
     weight: string | null;
     class?: string | null;
     college?: string | null;
+    phonetic_name?: string | null;
+    ipa_name?: string | null;
+    chinese_name?: string | null;
+    hardware_safe_name?: string | null;
 }
 
 interface RosterArchiveProps {
@@ -235,7 +239,7 @@ interface RosterArchiveProps {
     userTier?: string;
 }
 
-export default function RosterArchive({ onSave, userTier = 'BASIC' }: RosterArchiveProps) {
+export default function RosterArchive({ onSave, userTier = 'FREE' }: RosterArchiveProps) {
     const [selectedLeagueId, setSelectedLeagueId] = useState<string>('');
     const [teams, setTeams] = useState<Team[]>([]);
     const [selectedTeamId, setSelectedTeamId] = useState<string>('');
@@ -351,15 +355,20 @@ export default function RosterArchive({ onSave, userTier = 'BASIC' }: RosterArch
 
     function convertToAthletes(): Athlete[] {
         return roster.map((player, index) => ({
-            fullName: player.player_name,
+            id: `${currentLeague.id}-${selectedTeamId}-${selectedSeason}-${index}`,
+            originalName: player.player_name,
+            fullName: player.player_name.toUpperCase(),
+            displayNameSafe: player.hardware_safe_name || player.player_name.toUpperCase(),
             jerseyNumber: formatJersey(player.jersey_number),
             position: player.position || 'Player',
-            phoneticSimplified: '',
-            phoneticIPA: '',
+            phoneticSimplified: player.phonetic_name || '',
+            phoneticIPA: player.ipa_name || '',
+            nameMandarin: player.chinese_name || '',
+            nilStatus: 'Active',
+            seasonYear: selectedSeason?.toString() || '',
             headshot: player.player_id && currentLeague.id.includes('ncaa')
                 ? `https://a.espncdn.com/i/headshots/ncaa/players/full/${player.player_id}.png`
                 : '',
-            id: `${currentLeague.id}-${selectedTeamId}-${selectedSeason}-${index}`,
         }));
     }
 
@@ -587,9 +596,16 @@ export default function RosterArchive({ onSave, userTier = 'BASIC' }: RosterArch
                                                             onError={(e) => e.currentTarget.style.display = 'none'}
                                                         />
                                                     )}
-                                                    <span className="font-bold text-gray-700 dark:text-gray-200 border-b-2 border-transparent group-hover:border-[#5B5FFF]/30 transition-all">
-                                                        {player.player_name}
-                                                    </span>
+                                                    <div className="flex flex-col">
+                                                        <span className="font-bold text-gray-700 dark:text-gray-200 border-b-2 border-transparent group-hover:border-[#5B5FFF]/30 transition-all">
+                                                            {player.player_name}
+                                                        </span>
+                                                        {userTier === 'ENTERPRISE' && (player.phonetic_name || player.ipa_name) && (
+                                                            <span className="text-[10px] text-[#5B5FFF] font-mono font-medium">
+                                                                {player.ipa_name || player.phonetic_name}
+                                                            </span>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </td>
                                             <td className="px-8 py-5">

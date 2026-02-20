@@ -13,7 +13,7 @@ interface WNBAPageProps {
  * into your application. Users can browse historical WNBA rosters
  * and export them in various formats.
  */
-export function WNBAPage({ subscriptionTier = 'BASIC' }: WNBAPageProps) {
+export function WNBAPage({ subscriptionTier = 'FREE' }: WNBAPageProps) {
   const [selectedRoster, setSelectedRoster] = useState<{
     athletes: Athlete[];
     teamName: string;
@@ -52,7 +52,7 @@ export function WNBAPage({ subscriptionTier = 'BASIC' }: WNBAPageProps) {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column - Roster Selector */}
           <div className="lg:col-span-2">
-            <WNBARosterSelector 
+            <WNBARosterSelector
               subscriptionTier={subscriptionTier}
               onRosterSelect={handleRosterSelect}
             />
@@ -97,7 +97,7 @@ export function WNBAPage({ subscriptionTier = 'BASIC' }: WNBAPageProps) {
               <div className="space-y-3">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-gray-600">CSV (Flat)</span>
-                  <span className="text-xs bg-gray-100 px-2 py-1 rounded">BASIC</span>
+                  <span className="text-xs bg-gray-100 px-2 py-1 rounded">FREE</span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-gray-600">Iconik JSON</span>
@@ -113,11 +113,11 @@ export function WNBAPage({ subscriptionTier = 'BASIC' }: WNBAPageProps) {
                 </div>
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-gray-600">Chyron CSV</span>
-                  <span className="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded">STUDIO</span>
+                  <span className="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded">PRO</span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-gray-600">Vizrt XML</span>
-                  <span className="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded">NETWORK</span>
+                  <span className="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded">ENTERPRISE</span>
                 </div>
               </div>
             </div>
@@ -151,8 +151,8 @@ export function WNBAPage({ subscriptionTier = 'BASIC' }: WNBAPageProps) {
                 Need Help?
               </h4>
               <p className="text-sm text-blue-800">
-                Historical data availability varies by team and season. 
-                Some early seasons may have incomplete rosters. Contact 
+                Historical data availability varies by team and season.
+                Some early seasons may have incomplete rosters. Contact
                 support if you need specific data added.
               </p>
             </div>

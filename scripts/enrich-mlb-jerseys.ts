@@ -155,31 +155,74 @@ async function enrichMLBRoster(teamId: string, year: number) {
 }
 
 async function main() {
-    // Priority targets from our audit
-    const targets = [
-        { team: 'texas-rangers', year: 2014 },
-        { team: 'texas-rangers', year: 2015 },
-        { team: 'seattle-mariners', year: 2017 },
-        { team: 'seattle-mariners', year: 2016 },
-        { team: 'atlanta-braves', year: 2016 },
-        { team: 'atlanta-braves', year: 2015 },
-        { team: 'toronto-blue-jays', year: 2017 },
-        { team: 'toronto-blue-jays', year: 2014 },
-        { team: 'san-diego-padres', year: 2016 },
-        { team: 'san-diego-padres', year: 2008 },
-        { team: 'cleveland-guardians', year: 2002 },
-        { team: 'new-york-yankees', year: 2014 },
-        { team: 'kansas-city-royals', year: 2004 },
-        { team: 'miami-marlins', year: 2010 },
-        { team: 'detroit-tigers', year: 2002 },
-        { team: 'cincinnati-reds', year: 2003 }
-    ];
+    console.log('📊 Querying database for MLB roster gaps...');
 
-    for (const target of targets) {
-        await enrichMLBRoster(target.team, target.year);
-        // Be nice to BRef
-        await new Promise(resolve => setTimeout(resolve, 2000));
+    // Find all team/year combinations where at least one player is missing a jersey number
+    // excluding '00' which is often a placeholder in current data
+    const { data: gaps, error } = await supabase.rpc('get_mlb_roster_gaps');
+
+    if (error) {
+        // Fallback: Query the table for distinct gaps using a more robust approach
+        console.warn('RPC not found, falling back to manual gap discovery...');
+
+        const { data: manualGaps, error: manualError } = await supabase
+            .from('mlb_rosters')
+            .select('team_id, season_year')
+            .or('jersey_number.is.null,jersey_number.eq."",jersey_number.eq.00');
+
+        if (manualError) {
+            console.error('❌ Error finding gaps:', manualError.message);
+            return;
+        }
+
+        // Deduplicate manually (since Postgrest doesn't support SELECT DISTINCT across many rows easily without RPC)
+        // But wait, if there are 23k rows, manualGaps will still be limited by 1000 unless we paginate or use a different approach.
+        // A better way is to iterate through all known team/year combinations or use a raw SQL query if possible via a new RPC.
+
+        // Let's create an RPC for this if possible, or just use a known list of years.
+        const years = Array.from({ length: 26 }, (_, i) => 2025 - i);
+        const teams = [
+            'arizona-diamondbacks', 'atlanta-braves', 'baltimore-orioles', 'boston-red-sox',
+            'chicago-cubs', 'chicago-white-sox', 'cincinnati-reds', 'cleveland-guardians',
+            'colorado-rockies', 'detroit-tigers', 'houston-astros', 'kansas-city-royals',
+            'los-angeles-angels', 'los-angeles-dodgers', 'miami-marlins', 'milwaukee-brewers',
+            'minnesota-twins', 'new-york-mets', 'new-york-yankees', 'oakland-athletics',
+            'philadelphia-phillies', 'pittsburgh-pirates', 'san-diego-padres', 'san-francisco-giants',
+            'seattle-mariners', 'st-louis-cardinals', 'tampa-bay-rays', 'texas-rangers',
+            'toronto-blue-jays', 'washington-nationals'
+        ];
+
+        const uniqueGaps = [];
+        for (const year of years) {
+            for (const team of teams) {
+                // Check if this specific gap exists
+                const { count, error: countError } = await supabase
+                    .from('mlb_rosters')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('team_id', team)
+                    .eq('season_year', year)
+                    .or('jersey_number.is.null,jersey_number.eq."",jersey_number.eq.00');
+
+                if (!countError && count && count > 0) {
+                    uniqueGaps.push({ team, year });
+                }
+            }
+        }
+
+        console.log(`📍 Found ${uniqueGaps.length} team-season combinations with missing jerseys.`);
+
+        for (const gap of uniqueGaps) {
+            await enrichMLBRoster(gap.team, gap.year);
+            await new Promise(resolve => setTimeout(resolve, 3000));
+        }
+    } else {
+        console.log(`📍 Found ${gaps.length} team-season combinations with missing jerseys.`);
+        for (const gap of gaps) {
+            await enrichMLBRoster(gap.team_id, gap.season_year);
+            await new Promise(resolve => setTimeout(resolve, 3000));
+        }
     }
+
     console.log('\n🏁 MLB Jersey Enrichment complete.');
 }
 

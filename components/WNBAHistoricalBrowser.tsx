@@ -32,7 +32,7 @@ interface WNBAHistoricalBrowserProps {
     userTier?: string;
 }
 
-export default function WNBAHistoricalBrowser({ onSave, userTier = 'BASIC' }: WNBAHistoricalBrowserProps) {
+export default function WNBAHistoricalBrowser({ onSave, userTier = 'FREE' }: WNBAHistoricalBrowserProps) {
     const [teams, setTeams] = useState<WNBATeam[]>([]);
     const [selectedTeamId, setSelectedTeamId] = useState<string>('');
     const [availableSeasons, setAvailableSeasons] = useState<number[]>([]);

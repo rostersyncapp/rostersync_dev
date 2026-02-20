@@ -6,7 +6,7 @@ export function generateExport(
   format: ExportFormat,
   teamName: string,
   language: string = 'EN',
-  tier: SubscriptionTier = 'BASIC',
+  tier: SubscriptionTier = 'FREE',
   primaryColor?: string,
   secondaryColor?: string
 ): { content: string; filename: string; mimeType: string } {
@@ -23,14 +23,14 @@ export function generateExport(
           jerseyNumber: padJersey(a.jerseyNumber),
           position: a.position,
           seasonYear: a.seasonYear,
-          teamPrimaryColor: tier !== 'BASIC' ? (primaryColor || '') : '',
-          teamSecondaryColor: tier !== 'BASIC' ? (secondaryColor || '') : '',
-          teamPrimaryRGB: (tier === 'STUDIO' || tier === 'NETWORK') ? hexToRgb(primaryColor) : '',
-          teamSecondaryRGB: (tier === 'STUDIO' || tier === 'NETWORK') ? hexToRgb(secondaryColor) : ''
+          teamPrimaryColor: tier !== 'FREE' ? (primaryColor || '') : '',
+          teamSecondaryColor: tier !== 'FREE' ? (secondaryColor || '') : '',
+          teamPrimaryRGB: (tier === 'PRO' || tier === 'ENTERPRISE') ? hexToRgb(primaryColor) : '',
+          teamSecondaryRGB: (tier === 'PRO' || tier === 'ENTERPRISE') ? hexToRgb(secondaryColor) : ''
         };
-        if (tier !== 'BASIC') {
+        if (tier !== 'FREE') {
           row.phonetic = a.phoneticSimplified;
-          if (tier === 'NETWORK') {
+          if (tier === 'ENTERPRISE') {
             row.phoneticIPA = a.phoneticIPA;
           }
         }
@@ -80,12 +80,12 @@ export function generateExport(
         "use_as_facet": true
       };
 
-      if (tier !== 'BASIC') {
+      if (tier !== 'FREE') {
         iconikMetadata.custom_metadata = {
           "primaryColor": primaryColor || "",
           "secondaryColor": secondaryColor || "",
-          "primaryRGB": (tier === 'STUDIO' || tier === 'NETWORK') ? hexToRgb(primaryColor) : "",
-          "secondaryRGB": (tier === 'STUDIO' || tier === 'NETWORK') ? hexToRgb(secondaryColor) : "",
+          "primaryRGB": (tier === 'PRO' || tier === 'ENTERPRISE') ? hexToRgb(primaryColor) : "",
+          "secondaryRGB": (tier === 'PRO' || tier === 'ENTERPRISE') ? hexToRgb(secondaryColor) : "",
           "seasonYear": athletes[0]?.seasonYear || ""
         };
       }
@@ -110,11 +110,11 @@ export function generateExport(
           padJersey(a.jerseyNumber),
           a.displayNameSafe.toUpperCase(),
           a.position.toUpperCase(),
-          tier === 'NETWORK' ? a.phoneticIPA : a.phoneticSimplified || "",
-          tier !== 'BASIC' ? (primaryColor || "") : "",
-          tier !== 'BASIC' ? (secondaryColor || "") : "",
-          (tier === 'STUDIO' || tier === 'NETWORK') ? hexToRgb(primaryColor) : "",
-          (tier === 'STUDIO' || tier === 'NETWORK') ? hexToRgb(secondaryColor) : "",
+          tier === 'ENTERPRISE' ? a.phoneticIPA : a.phoneticSimplified || "",
+          tier !== 'FREE' ? (primaryColor || "") : "",
+          tier !== 'FREE' ? (secondaryColor || "") : "",
+          (tier === 'PRO' || tier === 'ENTERPRISE') ? hexToRgb(primaryColor) : "",
+          (tier === 'PRO' || tier === 'ENTERPRISE') ? hexToRgb(secondaryColor) : "",
           JSON.stringify(bioData).replace(/"/g, '""')
         ].map(val => `"${val}"`).join(",");
       });
@@ -132,11 +132,11 @@ export function generateExport(
         vxml += `      <field name="ID">${padJersey(a.jerseyNumber)}</field>\n`;
         vxml += `      <field name="NAME_CAPS">${a.displayNameSafe.toUpperCase()}</field>\n`;
         vxml += `      <field name="POSITION">${a.position.toUpperCase()}</field>\n`;
-        vxml += `      <field name="PRONUNCIATION">${(tier === 'NETWORK' ? a.phoneticIPA : a.phoneticSimplified) || ''}</field>\n`;
-        vxml += `      <field name="PRIMARY_COLOR">${tier !== 'BASIC' ? (primaryColor || '') : ''}</field>\n`;
-        vxml += `      <field name="SECONDARY_COLOR">${tier !== 'BASIC' ? (secondaryColor || '') : ''}</field>\n`;
-        vxml += `      <field name="PRIMARY_RGB">${(tier === 'STUDIO' || tier === 'NETWORK') ? hexToRgb(primaryColor) : ''}</field>\n`;
-        vxml += `      <field name="SECONDARY_RGB">${(tier === 'STUDIO' || tier === 'NETWORK') ? hexToRgb(secondaryColor) : ''}</field>\n`;
+        vxml += `      <field name="PRONUNCIATION">${(tier === 'ENTERPRISE' ? a.phoneticIPA : a.phoneticSimplified) || ''}</field>\n`;
+        vxml += `      <field name="PRIMARY_COLOR">${tier !== 'FREE' ? (primaryColor || '') : ''}</field>\n`;
+        vxml += `      <field name="SECONDARY_COLOR">${tier !== 'FREE' ? (secondaryColor || '') : ''}</field>\n`;
+        vxml += `      <field name="PRIMARY_RGB">${(tier === 'PRO' || tier === 'ENTERPRISE') ? hexToRgb(primaryColor) : ''}</field>\n`;
+        vxml += `      <field name="SECONDARY_RGB">${(tier === 'PRO' || tier === 'ENTERPRISE') ? hexToRgb(secondaryColor) : ''}</field>\n`;
         vxml += `      <field name="SEASON_YEAR">${a.seasonYear || ''}</field>\n`;
         vxml += `      <field name="STAT_LINE">${a.bioStats || ''}</field>\n`;
         vxml += `      <field name="HEADSHOT_URL">C:\\RosterData\\Heads\\${padJersey(a.jerseyNumber)}.tga</field>\n`;
@@ -156,11 +156,11 @@ export function generateExport(
         a.fullName,
         padJersey(a.jerseyNumber),
         a.position.toUpperCase(),
-        tier !== 'BASIC' ? a.phoneticSimplified || "" : "",
-        tier !== 'BASIC' ? (primaryColor || "") : "",
-        tier !== 'BASIC' ? (secondaryColor || "") : "",
-        (tier === 'STUDIO' || tier === 'NETWORK') ? hexToRgb(primaryColor) : "",
-        (tier === 'STUDIO' || tier === 'NETWORK') ? hexToRgb(secondaryColor) : "",
+        tier !== 'FREE' ? a.phoneticSimplified || "" : "",
+        tier !== 'FREE' ? (primaryColor || "") : "",
+        tier !== 'FREE' ? (secondaryColor || "") : "",
+        (tier === 'PRO' || tier === 'ENTERPRISE') ? hexToRgb(primaryColor) : "",
+        (tier === 'PRO' || tier === 'ENTERPRISE') ? hexToRgb(secondaryColor) : "",
         a.seasonYear || "",
         a.bioStats || "Production ready bio summary pending.",
         a.socialHandle || `@${a.fullName.toLowerCase().replace(/\s+/g, '')}`
@@ -178,10 +178,10 @@ export function generateExport(
         a.fullName,
         `${a.position} | #${padJersey(a.jerseyNumber)}`,
         a.bioStats || `${a.fullName} is an ${a.nilStatus} athlete for ${teamName}.`,
-        tier !== 'BASIC' ? (primaryColor || "") : "",
-        tier !== 'BASIC' ? (secondaryColor || "") : "",
-        (tier === 'STUDIO' || tier === 'NETWORK') ? hexToRgb(primaryColor) : "",
-        (tier === 'STUDIO' || tier === 'NETWORK') ? hexToRgb(secondaryColor) : "",
+        tier !== 'FREE' ? (primaryColor || "") : "",
+        tier !== 'FREE' ? (secondaryColor || "") : "",
+        (tier === 'PRO' || tier === 'ENTERPRISE') ? hexToRgb(primaryColor) : "",
+        (tier === 'PRO' || tier === 'ENTERPRISE') ? hexToRgb(secondaryColor) : "",
         a.seasonYear || "",
         ""
       ].map(val => `"${val}"`).join(","));
@@ -212,11 +212,11 @@ export function generateExport(
         a.fullName,
         padJersey(a.jerseyNumber),
         a.position,
-        tier !== 'BASIC' ? a.phoneticSimplified || "" : "",
-        tier !== 'BASIC' ? (primaryColor || "") : "",
-        tier !== 'BASIC' ? (secondaryColor || "") : "",
-        (tier === 'STUDIO' || tier === 'NETWORK') ? hexToRgb(primaryColor) : "",
-        (tier === 'STUDIO' || tier === 'NETWORK') ? hexToRgb(secondaryColor) : "",
+        tier !== 'FREE' ? a.phoneticSimplified || "" : "",
+        tier !== 'FREE' ? (primaryColor || "") : "",
+        tier !== 'FREE' ? (secondaryColor || "") : "",
+        (tier === 'PRO' || tier === 'ENTERPRISE') ? hexToRgb(primaryColor) : "",
+        (tier === 'PRO' || tier === 'ENTERPRISE') ? hexToRgb(secondaryColor) : "",
         a.seasonYear || "",
         teamName,
         // TODO: Add headshot logic if readily available. 
@@ -258,9 +258,9 @@ export function generateExport(
 
     case 'ROSS_XML':
       let xml = `<?xml version="1.0" encoding="UTF-8"?>\n<ROSTER TEAM="${teamName.toUpperCase()}" LANGUAGE="${language.toUpperCase()}" SEASON="${(athletes[0]?.seasonYear || '').toUpperCase()}">\n`;
-      if (tier !== 'BASIC') {
-        const pRgb = (tier === 'STUDIO' || tier === 'NETWORK') ? hexToRgb(primaryColor) : "";
-        const sRgb = (tier === 'STUDIO' || tier === 'NETWORK') ? hexToRgb(secondaryColor) : "";
+      if (tier !== 'FREE') {
+        const pRgb = (tier === 'PRO' || tier === 'ENTERPRISE') ? hexToRgb(primaryColor) : "";
+        const sRgb = (tier === 'PRO' || tier === 'ENTERPRISE') ? hexToRgb(secondaryColor) : "";
         xml += `  <COLORS PRIMARY="${primaryColor || ''}" SECONDARY="${secondaryColor || ''}" PRIMARY_RGB="${pRgb}" SECONDARY_RGB="${sRgb}" />\n`;
       }
       athletes.forEach(a => {
@@ -269,12 +269,12 @@ export function generateExport(
         xml += `    <JERSEY>${padJersey(a.jerseyNumber)}</JERSEY>\n`;
         xml += `    <POSITION>${a.position.toUpperCase()}</POSITION>\n`;
         xml += `    <STATUS>${a.nilStatus.toUpperCase()}</STATUS>\n`;
-        if (tier !== 'BASIC') {
+        if (tier !== 'FREE') {
           xml += `    <PHONETIC>${a.phoneticSimplified || ''}</PHONETIC>\n`;
           xml += `    <COLOR_PRIMARY>${primaryColor || ''}</COLOR_PRIMARY>\n`;
           xml += `    <COLOR_SECONDARY>${secondaryColor || ''}</COLOR_SECONDARY>\n`;
-          xml += `    <RGB_PRIMARY>${(tier === 'STUDIO' || tier === 'NETWORK') ? hexToRgb(primaryColor) : ''}</RGB_PRIMARY>\n`;
-          xml += `    <RGB_SECONDARY>${(tier === 'STUDIO' || tier === 'NETWORK') ? hexToRgb(secondaryColor) : ''}</RGB_SECONDARY>\n`;
+          xml += `    <RGB_PRIMARY>${(tier === 'PRO' || tier === 'ENTERPRISE') ? hexToRgb(primaryColor) : ''}</RGB_PRIMARY>\n`;
+          xml += `    <RGB_SECONDARY>${(tier === 'PRO' || tier === 'ENTERPRISE') ? hexToRgb(secondaryColor) : ''}</RGB_SECONDARY>\n`;
           xml += `    <SEASON_YEAR>${a.seasonYear || ''}</SEASON_YEAR>\n`;
         }
         xml += `  </ATHLETE>\n`;
@@ -302,12 +302,12 @@ export function generateExport(
           };
         })
       };
-      if (tier !== 'BASIC') {
+      if (tier !== 'FREE') {
         vizrtData.colors = {
           primary: primaryColor || '',
           secondary: secondaryColor || '',
-          primaryRGB: (tier === 'STUDIO' || tier === 'NETWORK') ? hexToRgb(primaryColor) : '',
-          secondaryRGB: (tier === 'STUDIO' || tier === 'NETWORK') ? hexToRgb(secondaryColor) : ''
+          primaryRGB: (tier === 'PRO' || tier === 'ENTERPRISE') ? hexToRgb(primaryColor) : '',
+          secondaryRGB: (tier === 'PRO' || tier === 'ENTERPRISE') ? hexToRgb(secondaryColor) : ''
         };
       }
       return {

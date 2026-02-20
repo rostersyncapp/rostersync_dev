@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Download, Users, Calendar, ChevronDown, Loader2, Search } from 'lucide-react';
-import { 
-  getWNBATeams, 
-  getWNBATeamSeasons, 
+import {
+  getWNBATeams,
+  getWNBATeamSeasons,
   getWNBARosterData,
   convertWNBAPlayersToAthletes,
   getWNBATeamMetadata,
   WNBATeam,
-  WNBAPlayer 
+  WNBAPlayer
 } from '../services/wnbaData';
 import { generateExport, downloadFile } from '../services/export';
 import { ExportFormat, SubscriptionTier } from '../types';
@@ -18,21 +18,21 @@ interface WNBARosterSelectorProps {
 }
 
 const EXPORT_FORMATS: { value: ExportFormat; label: string; requiresTier: SubscriptionTier }[] = [
-  { value: 'CSV_FLAT', label: 'CSV (Flat)', requiresTier: 'BASIC' },
+  { value: 'CSV_FLAT', label: 'CSV (Flat)', requiresTier: 'FREE' },
   { value: 'ICONIK_JSON', label: 'Iconik JSON', requiresTier: 'PRO' },
   { value: 'CATDV_JSON', label: 'CatDV JSON', requiresTier: 'PRO' },
   { value: 'ROSS_XML', label: 'Ross XML', requiresTier: 'PRO' },
   { value: 'VIZRT_JSON', label: 'Vizrt JSON', requiresTier: 'PRO' },
-  { value: 'VIZRT_XML', label: 'Vizrt XML', requiresTier: 'NETWORK' },
-  { value: 'VIZRT_DATACENTER_CSV', label: 'Vizrt DataCenter CSV', requiresTier: 'NETWORK' },
-  { value: 'CHYRON_CSV', label: 'Chyron CSV', requiresTier: 'STUDIO' },
-  { value: 'NEWBLUE_CSV', label: 'NewBlue CSV', requiresTier: 'STUDIO' },
-  { value: 'TAGBOARD_CSV', label: 'Tagboard CSV', requiresTier: 'STUDIO' },
+  { value: 'VIZRT_XML', label: 'Vizrt XML', requiresTier: 'ENTERPRISE' },
+  { value: 'VIZRT_DATACENTER_CSV', label: 'Vizrt DataCenter CSV', requiresTier: 'ENTERPRISE' },
+  { value: 'CHYRON_CSV', label: 'Chyron CSV', requiresTier: 'PRO' },
+  { value: 'NEWBLUE_CSV', label: 'NewBlue CSV', requiresTier: 'PRO' },
+  { value: 'TAGBOARD_CSV', label: 'Tagboard CSV', requiresTier: 'PRO' },
 ];
 
-export function WNBARosterSelector({ 
-  subscriptionTier = 'BASIC',
-  onRosterSelect 
+export function WNBARosterSelector({
+  subscriptionTier = 'FREE',
+  onRosterSelect
 }: WNBARosterSelectorProps) {
   const [teams, setTeams] = useState<WNBATeam[]>([]);
   const [selectedTeam, setSelectedTeam] = useState<WNBATeam | null>(null);
@@ -101,7 +101,7 @@ export function WNBARosterSelector({
     try {
       const data = await getWNBARosterData(teamId, season);
       setPlayers(data.players);
-      
+
       // Notify parent component
       if (onRosterSelect) {
         const athletes = convertWNBAPlayersToAthletes(data.players, season);
@@ -136,7 +136,7 @@ export function WNBARosterSelector({
     setShowExportMenu(false);
   };
 
-  const filteredPlayers = players.filter(player => 
+  const filteredPlayers = players.filter(player =>
     player.player_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (player.jersey_number && player.jersey_number.includes(searchTerm)) ||
     (player.position && player.position.toLowerCase().includes(searchTerm.toLowerCase()))
@@ -147,7 +147,7 @@ export function WNBARosterSelector({
   );
 
   function isTierAllowed(required: SubscriptionTier, current: SubscriptionTier): boolean {
-    const tiers: SubscriptionTier[] = ['BASIC', 'PRO', 'STUDIO', 'NETWORK'];
+    const tiers: SubscriptionTier[] = ['FREE', 'STARTER', 'PRO', 'ENTERPRISE'];
     return tiers.indexOf(current) >= tiers.indexOf(required);
   }
 
@@ -220,8 +220,8 @@ export function WNBARosterSelector({
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
           >
             <option value="">
-              {!selectedTeam ? 'Select a team first' : 
-               availableSeasons.length === 0 ? 'No data available' : 'Choose season...'}
+              {!selectedTeam ? 'Select a team first' :
+                availableSeasons.length === 0 ? 'No data available' : 'Choose season...'}
             </option>
             {availableSeasons.map(year => (
               <option key={year} value={year}>
@@ -246,8 +246,8 @@ export function WNBARosterSelector({
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gray-50 p-4 rounded-lg">
             <div className="flex items-center gap-4">
               {selectedTeam.logo_url && (
-                <img 
-                  src={selectedTeam.logo_url} 
+                <img
+                  src={selectedTeam.logo_url}
                   alt={selectedTeam.display_name}
                   className="w-16 h-16 object-contain"
                 />

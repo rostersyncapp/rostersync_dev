@@ -36,29 +36,29 @@ interface UserStats {
 }
 
 const COLORS = {
-  NETWORK: '#5B5FFF',
-  STUDIO: '#8B5CF6',
-  PRO: '#10B981',
-  BASIC: '#6B7280'
+  ENTERPRISE: '#5B5FFF',
+  PRO: '#8B5CF6',
+  STARTER: '#10B981',
+  FREE: '#6B7280'
 };
 
 const UserAnalyticsTab: React.FC = () => {
   const [stats, setStats] = useState<UserStats | null>(null);
   const [loading, setLoading] = useState(true);
   const { getToken } = useAuth();
-  
+
   useEffect(() => {
     fetchUserData();
   }, []);
-  
+
   const fetchUserData = async () => {
     setLoading(true);
     try {
       const token = await getToken({ template: 'supabase' });
       await setSupabaseToken(token);
-      
+
       const { data, error } = await supabase.functions.invoke('admin-analytics/users');
-      
+
       if (error) throw error;
       setStats(data);
     } catch (err) {
@@ -67,19 +67,19 @@ const UserAnalyticsTab: React.FC = () => {
       setLoading(false);
     }
   };
-  
+
   const getRetentionRate = () => {
     if (!stats) return 0;
     return stats.totalUsers > 0 ? Math.round((stats.activeUsers / stats.totalUsers) * 100) : 0;
   };
-  
+
   const getPaidUsers = () => {
     if (!stats) return 0;
     return stats.tierDistribution
-      .filter(t => t.name !== 'BASIC')
+      .filter(t => t.name !== 'FREE')
       .reduce((sum, t) => sum + t.value, 0);
   };
-  
+
   const getPaidPercentage = () => {
     if (!stats || stats.totalUsers === 0) return 0;
     return Math.round((getPaidUsers() / stats.totalUsers) * 100);
@@ -88,7 +88,7 @@ const UserAnalyticsTab: React.FC = () => {
   const handleRefresh = async () => {
     await fetchUserData();
   };
-  
+
   return (
     <div className="space-y-6">
       {/* Header with Refresh Button */}
@@ -139,7 +139,7 @@ const UserAnalyticsTab: React.FC = () => {
           trend="up"
         />
       </div>
-      
+
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Tier Distribution */}
@@ -190,7 +190,7 @@ const UserAnalyticsTab: React.FC = () => {
             )}
           </div>
         </div>
-        
+
         {/* Top Users Table */}
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-6 shadow-sm">
           <h3 className="text-xl font-extrabold text-gray-900 dark:text-white mb-6">
@@ -236,12 +236,11 @@ const UserAnalyticsTab: React.FC = () => {
                         </div>
                       </td>
                       <td className="py-3 px-2">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${
-                          user.user?.subscription_tier === 'NETWORK' ? 'bg-[#5B5FFF]/10 text-[#5B5FFF]' :
-                          user.user?.subscription_tier === 'STUDIO' ? 'bg-purple-100 text-purple-700' :
-                          user.user?.subscription_tier === 'PRO' ? 'bg-emerald-100 text-emerald-700' :
-                          'bg-gray-100 text-gray-600'
-                        }`}>
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${user.user?.subscription_tier === 'NETWORK' ? 'bg-[#5B5FFF]/10 text-[#5B5FFF]' :
+                            user.user?.subscription_tier === 'STUDIO' ? 'bg-purple-100 text-purple-700' :
+                              user.user?.subscription_tier === 'PRO' ? 'bg-emerald-100 text-emerald-700' :
+                                'bg-gray-100 text-gray-600'
+                          }`}>
                           {user.user?.subscription_tier || 'BASIC'}
                         </span>
                       </td>

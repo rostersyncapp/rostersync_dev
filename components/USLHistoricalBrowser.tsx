@@ -32,7 +32,7 @@ interface USLHistoricalBrowserProps {
     userTier?: string;
 }
 
-export default function USLHistoricalBrowser({ onSave, userTier = 'BASIC' }: USLHistoricalBrowserProps) {
+export default function USLHistoricalBrowser({ onSave, userTier = 'FREE' }: USLHistoricalBrowserProps) {
     const [teams, setTeams] = useState<USLTeam[]>([]);
     const [selectedTeamId, setSelectedTeamId] = useState<string>('');
     const [availableSeasons, setAvailableSeasons] = useState<number[]>([]);

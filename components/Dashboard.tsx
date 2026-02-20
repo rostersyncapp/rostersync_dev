@@ -125,7 +125,7 @@ const TeamLogo: React.FC<{
   );
 };
 
-const TIER_ORDER: SubscriptionTier[] = ['BASIC', 'PRO', 'STUDIO', 'NETWORK'];
+const TIER_ORDER: SubscriptionTier[] = ['FREE', 'STARTER', 'PRO', 'ENTERPRISE'];
 
 const isTierLocked = (current: SubscriptionTier, required: SubscriptionTier): boolean => {
   return TIER_ORDER.indexOf(current) < TIER_ORDER.indexOf(required);
@@ -140,10 +140,10 @@ const ExportItem: React.FC<{
   requiredTier?: SubscriptionTier;
 }> = ({ icon, title, desc, onClick, disabled, requiredTier = 'PRO' }) => {
   const tierNameMap: Record<SubscriptionTier, string> = {
-    'BASIC': 'FREE',
-    'PRO': 'STARTER',
-    'STUDIO': 'PRO',
-    'NETWORK': 'ENTERPRISE'
+    'FREE': 'FREE',
+    'STARTER': 'STARTER',
+    'PRO': 'PRO',
+    'ENTERPRISE': 'ENTERPRISE'
   };
 
   return (
@@ -747,10 +747,16 @@ export const Dashboard: React.FC<Props> = ({
 
                       {userTier !== 'BASIC' && (
                         <td className="px-8 py-4 text-center">
-                          {console.log(`[Dashboard] Rendering phonetics for ${a.fullName}: IPA=${a.phoneticIPA}, Simplified=${a.phoneticSimplified}, Tier=${userTier}`)}
-                          <span className={`px-3 py-1 rounded-lg text-[10px] font-bold tracking-tight shadow-sm ${userTier === 'NETWORK' ? 'bg-indigo-600 dark:bg-indigo-700 text-white font-mono' : 'bg-amber-500 dark:bg-amber-600 text-white'}`}>
-                            {userTier === 'NETWORK' ? (a.phoneticIPA || a.phoneticSimplified || '-') : (a.phoneticSimplified || '-')}
-                          </span>
+                          <div className="flex flex-col items-center gap-1">
+                            <span className={`px-3 py-1 rounded-lg text-[10px] font-bold tracking-tight shadow-sm ${userTier === 'ENTERPRISE' ? 'bg-indigo-600 dark:bg-indigo-700 text-white font-mono' : 'bg-amber-500 dark:bg-amber-600 text-white'}`}>
+                              {userTier === 'ENTERPRISE' ? (a.phoneticIPA || a.phoneticSimplified || '-') : (a.phoneticSimplified || '-')}
+                            </span>
+                            {userTier === 'ENTERPRISE' && a.nameMandarin && (
+                              <span className="text-[10px] font-black text-[#5B5FFF] dark:text-[#7C7FFF] tracking-tighter">
+                                {a.nameMandarin}
+                              </span>
+                            )}
+                          </div>
                         </td>
                       )}
                       <td className="px-8 py-4 text-left"><div className="flex gap-2"><div className="w-3.5 h-3.5 rounded-full border border-gray-200 shadow-sm" style={{ backgroundColor: selectedRoster.teamMetadata?.primaryColor || '#000' }}></div><div className="w-3.5 h-3.5 rounded-full border border-gray-200 shadow-sm" style={{ backgroundColor: selectedRoster.teamMetadata?.secondaryColor || '#fff' }}></div></div></td>
@@ -879,8 +885,8 @@ export const Dashboard: React.FC<Props> = ({
                       <span className="px-2 py-0.5 bg-purple-500/10 text-purple-500 rounded text-[8px]">Cloud Graphics</span>
                     </h4>
                     <div className="grid grid-cols-1 gap-3">
-                      <ExportItem icon={<Palette size={20} />} title="Tagboard DDG CSV" desc="Direct import for Tagboard graphics." onClick={() => handleExport('TAGBOARD_CSV')} disabled={isTierLocked(userTier, 'STUDIO')} requiredTier="STUDIO" />
-                      <ExportItem icon={<Zap size={20} />} title="NewBlue Titler CSV" desc="Titler Live data source." onClick={() => handleExport('NEWBLUE_CSV')} disabled={isTierLocked(userTier, 'STUDIO')} requiredTier="STUDIO" />
+                      <ExportItem icon={<Palette size={20} />} title="Tagboard DDG CSV" desc="Direct import for Tagboard graphics." onClick={() => handleExport('TAGBOARD_CSV')} disabled={isTierLocked(userTier, 'PRO')} requiredTier="PRO" />
+                      <ExportItem icon={<Zap size={20} />} title="NewBlue Titler CSV" desc="Titler Live data source." onClick={() => handleExport('NEWBLUE_CSV')} disabled={isTierLocked(userTier, 'PRO')} requiredTier="PRO" />
                     </div>
                   </div>
 
@@ -891,11 +897,11 @@ export const Dashboard: React.FC<Props> = ({
                       <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-500 rounded text-[8px]">Broadcast Ready</span>
                     </h4>
                     <div className="grid grid-cols-1 gap-3">
-                      <ExportItem icon={<MonitorPlay size={20} />} title="Ross DataLinq XML" desc="XPression & Dashboard native." onClick={() => handleExport('ROSS_XML')} disabled={isTierLocked(userTier, 'NETWORK')} requiredTier="NETWORK" />
-                      <ExportItem icon={<Database size={20} />} title="Vizrt DataCenter" desc="Trio & Pilot Key-Value CSV." onClick={() => handleExport('VIZRT_DATACENTER_CSV')} disabled={isTierLocked(userTier, 'NETWORK')} requiredTier="NETWORK" />
+                      <ExportItem icon={<MonitorPlay size={20} />} title="Ross DataLinq XML" desc="XPression & Dashboard native." onClick={() => handleExport('ROSS_XML')} disabled={isTierLocked(userTier, 'ENTERPRISE')} requiredTier="ENTERPRISE" />
+                      <ExportItem icon={<Database size={20} />} title="Vizrt DataCenter" desc="Trio & Pilot Key-Value CSV." onClick={() => handleExport('VIZRT_DATACENTER_CSV')} disabled={isTierLocked(userTier, 'ENTERPRISE')} requiredTier="ENTERPRISE" />
 
-                      <ExportItem icon={<Zap size={20} />} title="Chyron Prime CSV" desc="Lyric & Prime automation." onClick={() => handleExport('CHYRON_CSV')} disabled={isTierLocked(userTier, 'NETWORK')} requiredTier="NETWORK" />
-                      <ExportItem icon={<FileJson size={20} />} title="JSON Blob" desc="Developer-friendly structured data." onClick={() => handleExport('VIZRT_JSON')} disabled={isTierLocked(userTier, 'NETWORK')} requiredTier="NETWORK" />
+                      <ExportItem icon={<Zap size={20} />} title="Chyron Prime CSV" desc="Lyric & Prime automation." onClick={() => handleExport('CHYRON_CSV')} disabled={isTierLocked(userTier, 'ENTERPRISE')} requiredTier="ENTERPRISE" />
+                      <ExportItem icon={<FileJson size={20} />} title="JSON Blob" desc="Developer-friendly structured data." onClick={() => handleExport('VIZRT_JSON')} disabled={isTierLocked(userTier, 'ENTERPRISE')} requiredTier="ENTERPRISE" />
                     </div>
                   </div>
                 </div>

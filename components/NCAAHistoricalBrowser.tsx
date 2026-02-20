@@ -32,7 +32,7 @@ interface NCAAHistoricalBrowserProps {
     userTier?: string;
 }
 
-export default function NCAAHistoricalBrowser({ onSave, userTier = 'BASIC' }: NCAAHistoricalBrowserProps) {
+export default function NCAAHistoricalBrowser({ onSave, userTier = 'FREE' }: NCAAHistoricalBrowserProps) {
     const [teams, setTeams] = useState<NCAATeam[]>([]);
     const [selectedTeamId, setSelectedTeamId] = useState<string>('');
     const [availableSeasons, setAvailableSeasons] = useState<number[]>([]);

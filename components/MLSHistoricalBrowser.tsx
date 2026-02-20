@@ -32,7 +32,7 @@ interface MLSHistoricalBrowserProps {
     userTier?: string;
 }
 
-export default function MLSHistoricalBrowser({ onSave, userTier = 'BASIC' }: MLSHistoricalBrowserProps) {
+export default function MLSHistoricalBrowser({ onSave, userTier = 'FREE' }: MLSHistoricalBrowserProps) {
     const [teams, setTeams] = useState<MLSTeam[]>([]);
     const [selectedTeamId, setSelectedTeamId] = useState<string>('');
     const [availableSeasons, setAvailableSeasons] = useState<number[]>([]);
