@@ -314,7 +314,10 @@ export default function NFLHistoricalBrowser({ onSave, userTier = 'FREE' }: NFLH
                                         Position
                                     </th>
                                     <th className="px-8 py-5 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                                        Height
+                                        HGT
+                                    </th>
+                                    <th className="px-8 py-5 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                                        WGT
                                     </th>
                                     <th className="px-8 py-5 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">
                                         College
@@ -337,6 +340,9 @@ export default function NFLHistoricalBrowser({ onSave, userTier = 'FREE' }: NFLH
                                         </td>
                                         <td className="px-8 py-5 whitespace-nowrap text-sm font-medium text-gray-500 dark:text-gray-400">
                                             {player.height || '--'}
+                                        </td>
+                                        <td className="px-8 py-5 whitespace-nowrap text-sm font-medium text-gray-500 dark:text-gray-400">
+                                            {player.weight || '--'}
                                         </td>
                                         <td className="px-8 py-5 whitespace-nowrap text-sm font-medium text-gray-500 dark:text-gray-400">
                                             {player.college || '--'}

@@ -713,10 +713,14 @@ export const Dashboard: React.FC<Props> = ({
                   <th className="px-8 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] text-center">Position</th>
                   <th className="px-8 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] text-center">Hardware Safe</th>
 
-                  {userTier !== 'BASIC' && (
-                    <th className="px-8 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] text-center">
-                      {userTier === 'PRO' ? 'Phonetic' : 'Advanced Phonetic'}
-                    </th>
+                  {userTier !== 'FREE' && (
+                    <th className="px-8 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] text-center">Phonetic</th>
+                  )}
+                  {userTier === 'ENTERPRISE' && (
+                    <>
+                      <th className="px-8 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] text-center">IPA</th>
+                      <th className="px-8 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] text-center">Mandarin</th>
+                    </>
                   )}
                   <th className="px-8 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] text-left">Colors</th>
                   <th className="px-4 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] text-center w-16"></th>
@@ -745,19 +749,26 @@ export const Dashboard: React.FC<Props> = ({
                       <td className="px-8 py-4 text-center"><span className="inline-block px-3 py-1 rounded-lg bg-purple-600 dark:bg-purple-700 text-white text-[10px] font-black uppercase tracking-widest shadow-sm">{a.position}</span></td>
                       <td className="px-8 py-4 text-center"><span className="bg-emerald-600 dark:bg-emerald-700 px-3 py-1 rounded-lg text-[10px] font-black text-white tracking-widest font-mono shadow-sm">{a.displayNameSafe}</span></td>
 
-                      {userTier !== 'BASIC' && (
+                      {userTier !== 'FREE' && (
                         <td className="px-8 py-4 text-center">
-                          <div className="flex flex-col items-center gap-1">
-                            <span className={`px-3 py-1 rounded-lg text-[10px] font-bold tracking-tight shadow-sm ${userTier === 'ENTERPRISE' ? 'bg-indigo-600 dark:bg-indigo-700 text-white font-mono' : 'bg-amber-500 dark:bg-amber-600 text-white'}`}>
-                              {userTier === 'ENTERPRISE' ? (a.phoneticIPA || a.phoneticSimplified || '-') : (a.phoneticSimplified || '-')}
-                            </span>
-                            {userTier === 'ENTERPRISE' && a.nameMandarin && (
-                              <span className="text-[10px] font-black text-[#5B5FFF] dark:text-[#7C7FFF] tracking-tighter">
-                                {a.nameMandarin}
-                              </span>
-                            )}
-                          </div>
+                          <span className="px-3 py-1 rounded-lg text-[10px] font-bold tracking-tight shadow-sm bg-amber-500 dark:bg-amber-600 text-white">
+                            {a.phoneticSimplified || '-'}
+                          </span>
                         </td>
+                      )}
+                      {userTier === 'ENTERPRISE' && (
+                        <>
+                          <td className="px-8 py-4 text-center">
+                            <span className="px-3 py-1 rounded-lg text-[10px] font-bold tracking-tight shadow-sm bg-indigo-600 dark:bg-indigo-700 text-white font-mono">
+                              {a.phoneticIPA || '-'}
+                            </span>
+                          </td>
+                          <td className="px-8 py-4 text-center">
+                            <span className="text-[10px] font-black text-[#5B5FFF] dark:text-[#7C7FFF] tracking-tighter">
+                              {a.nameMandarin || '-'}
+                            </span>
+                          </td>
+                        </>
                       )}
                       <td className="px-8 py-4 text-left"><div className="flex gap-2"><div className="w-3.5 h-3.5 rounded-full border border-gray-200 shadow-sm" style={{ backgroundColor: selectedRoster.teamMetadata?.primaryColor || '#000' }}></div><div className="w-3.5 h-3.5 rounded-full border border-gray-200 shadow-sm" style={{ backgroundColor: selectedRoster.teamMetadata?.secondaryColor || '#fff' }}></div></div></td>
                       <td className="px-4 py-4 text-center">

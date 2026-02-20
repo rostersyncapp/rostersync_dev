@@ -308,7 +308,10 @@ export default function NCAAHistoricalBrowser({ onSave, userTier = 'FREE' }: NCA
                                         Class
                                     </th>
                                     <th className="px-8 py-5 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                                        HT/WT
+                                        HGT
+                                    </th>
+                                    <th className="px-8 py-5 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                                        WGT
                                     </th>
                                 </tr>
                             </thead>
@@ -338,7 +341,10 @@ export default function NCAAHistoricalBrowser({ onSave, userTier = 'FREE' }: NCA
                                             {player.class || '--'}
                                         </td>
                                         <td className="px-8 py-5 whitespace-nowrap text-sm font-medium text-gray-500 dark:text-gray-400">
-                                            {player.height} / {player.weight}
+                                            {player.height || '--'}
+                                        </td>
+                                        <td className="px-8 py-5 whitespace-nowrap text-sm font-medium text-gray-500 dark:text-gray-400">
+                                            {player.weight || '--'}
                                         </td>
                                     </tr>
                                 ))}

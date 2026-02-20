@@ -577,10 +577,14 @@ export default function RosterArchive({ onSave, userTier = 'FREE' }: RosterArchi
                                 <thead className="bg-gray-50 dark:bg-gray-800/30 border-b border-gray-50 dark:border-gray-800">
                                     <tr>
                                         <th className="px-8 py-6 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">#</th>
-                                        <th className="px-8 py-6 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Athlete</th>
-                                        <th className="px-8 py-6 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Pos</th>
-                                        <th className="px-8 py-6 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Size</th>
-                                        <th className="px-8 py-6 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Details</th>
+                                        <th className="px-8 py-6 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Name</th>
+                                        <th className="px-8 py-6 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Phonetic</th>
+                                        <th className="px-8 py-6 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">IPA</th>
+                                        <th className="px-8 py-6 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Pos</th>
+                                        <th className="px-8 py-6 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">HGT</th>
+                                        <th className="px-8 py-6 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">WGT</th>
+                                        <th className="px-8 py-6 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Class</th>
+                                        <th className="px-8 py-6 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">College/HS</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
@@ -596,28 +600,37 @@ export default function RosterArchive({ onSave, userTier = 'FREE' }: RosterArchi
                                                             onError={(e) => e.currentTarget.style.display = 'none'}
                                                         />
                                                     )}
-                                                    <div className="flex flex-col">
-                                                        <span className="font-bold text-gray-700 dark:text-gray-200 border-b-2 border-transparent group-hover:border-[#5B5FFF]/30 transition-all">
-                                                            {player.player_name}
-                                                        </span>
-                                                        {userTier === 'ENTERPRISE' && (player.phonetic_name || player.ipa_name) && (
-                                                            <span className="text-[10px] text-[#5B5FFF] font-mono font-medium">
-                                                                {player.ipa_name || player.phonetic_name}
-                                                            </span>
-                                                        )}
-                                                    </div>
+                                                    <span className="font-bold text-gray-700 dark:text-gray-200 border-b-2 border-transparent group-hover:border-[#5B5FFF]/30 transition-all whitespace-nowrap">
+                                                        {player.player_name}
+                                                    </span>
                                                 </div>
                                             </td>
-                                            <td className="px-8 py-5">
+                                            <td className="px-8 py-5 text-center">
+                                                <span className="text-xs font-bold text-gray-400 italic">
+                                                    {player.phonetic_name || '--'}
+                                                </span>
+                                            </td>
+                                            <td className="px-8 py-5 text-center">
+                                                <span className="text-[10px] text-[#5B5FFF] font-mono font-medium">
+                                                    {player.ipa_name || '--'}
+                                                </span>
+                                            </td>
+                                            <td className="px-8 py-5 text-center">
                                                 <span className="px-3 py-1 bg-[#5B5FFF]/10 dark:bg-[#5B5FFF]/20 rounded-lg text-[10px] font-black uppercase text-[#5B5FFF] tracking-wider">
                                                     {player.position || 'UNK'}
                                                 </span>
                                             </td>
-                                            <td className="px-8 py-5 text-sm font-medium text-gray-500 dark:text-gray-400">
-                                                {player.height ? `${player.height}` : ''} {player.weight ? ` / ${player.weight}` : '--'}
+                                            <td className="px-8 py-5 text-center text-sm font-medium text-gray-500 dark:text-gray-400">
+                                                {player.height || '--'}
                                             </td>
-                                            <td className="px-8 py-5 text-sm font-medium text-gray-400 italic">
-                                                {player.class || player.college || '--'}
+                                            <td className="px-8 py-5 text-center text-sm font-medium text-gray-500 dark:text-gray-400">
+                                                {player.weight || '--'}
+                                            </td>
+                                            <td className="px-8 py-5 text-sm font-bold text-gray-900 dark:text-white uppercase tracking-tighter">
+                                                {player.class || '--'}
+                                            </td>
+                                            <td className="px-8 py-5 text-sm font-medium text-gray-400 truncate max-w-[150px]">
+                                                {player.college || '--'}
                                             </td>
                                         </tr>
                                     ))}

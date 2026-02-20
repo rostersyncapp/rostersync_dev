@@ -1245,6 +1245,9 @@ export const Engine: React.FC<Props> = ({
                       {userTier !== 'FREE' && (
                         <th className="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-center">Phonetic</th>
                       )}
+                      {userTier === 'ENTERPRISE' && (
+                        <th className="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-center">IPA</th>
+                      )}
                       {userTier !== 'FREE' && (
                         <th className="px-6 py-5 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-center">Colors</th>
                       )}
@@ -1281,6 +1284,13 @@ export const Engine: React.FC<Props> = ({
                           <td className="px-6 py-6 text-center">
                             <span className="text-xs font-bold text-gray-500 italic">
                               {a.phoneticSimplified || '-'}
+                            </span>
+                          </td>
+                        )}
+                        {userTier === 'ENTERPRISE' && (
+                          <td className="px-6 py-6 text-center">
+                            <span className="text-xs font-bold text-indigo-500 font-mono">
+                              {a.phoneticIPA || '-'}
                             </span>
                           </td>
                         )}
